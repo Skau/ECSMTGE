@@ -26,6 +26,7 @@ HEADERS += \
     texture.h \
     billboard.h \
     vertex.h \
+    world.h \
     xyz.h \
     visualobject.h \
     octahedronball.h \
@@ -63,6 +64,7 @@ SOURCES += main.cpp \
     visualobject.cpp \
     camera.cpp \
     octahedronball.cpp \
+    world.cpp \
     xyz.cpp \
     trianglesurface.cpp \
     input.cpp \
@@ -86,3 +88,11 @@ DISTFILES += \
     GSL/README.md \
     README.md \
     Shaders/textureshader.vert
+
+
+QMAKE_LFLAGS += -static
+
+# Bullet
+INCLUDEPATH += ./vendor/include/bullet
+debug:LIBS += -L$$PWD/vendor/libs/bullet/debug -llibBulletDynamics_Debug -llibBulletCollision_Debug -llibLinearMath_Debug
+else:LIBS += -L$$PWD/vendor/libs/bullet/release -llibBulletDynamics -llibBulletCollision -llibLinearMath

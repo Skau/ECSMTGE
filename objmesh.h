@@ -3,6 +3,7 @@
 #include "visualobject.h"
 
 
+
 class ObjMesh : public VisualObject
 {
 public:
@@ -14,6 +15,8 @@ public:
     virtual void init() override;
 
     void readFile(std::string filename);
+
+
 };
 
 #endif // OBJMESH_H

@@ -8,6 +8,12 @@
 #include "material.h"
 #include "shader.h"
 
+#include "LinearMath/btTransform.h"
+#include "LinearMath/btVector3.h"
+
+class btCollisionShape;
+class btRigidBody;
+
 class RenderWindow;
 
 class VisualObject : public QOpenGLFunctions_4_1_Core {
@@ -26,6 +32,15 @@ public:
     RenderWindow *mRenderWindow; //Just to be able to call checkForGLerrors()
 
     Material mMaterial;
+
+    void update();
+    void initializeRigidBody(float mass);
+    btTransform mTransform;
+    btCollisionShape* mCollision;
+    btRigidBody* mRigidBody;
+    btVector3 mLocalInertia{0, 0, 0};
+    float mMass;
+
 
 protected:
     std::vector<Vertex> mVertices;   //This is usually not needed after object is made

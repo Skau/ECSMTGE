@@ -21,6 +21,8 @@
 #include "textureshader.h"
 #include "phongshader.h"
 
+#include "World.h"
+
 RenderWindow::RenderWindow(const QSurfaceFormat &format, MainWindow *mainWindow)
     : mContext(nullptr), mInitialized(false), mMainWindow(mainWindow)
 {
@@ -169,13 +171,27 @@ void RenderWindow::init()
     mVisualObjects.push_back(temp);
 
     //one monkey
-    temp = new ObjMesh("monkey.obj");
-    temp->setShader(mShaderProgram[2]);
-    temp->init();
-    temp->mName = "Monkey";
-    temp->mMatrix.scale(0.5f);
-    temp->mMatrix.translate(3.f, 2.f, -2.f);
-    mVisualObjects.push_back(temp);
+    mesh1 = new ObjMesh("monkey.obj");
+    mesh1->setShader(mShaderProgram[2]);
+    mesh1->init();
+    mesh1->mName = "Monkey";
+    mesh1->mMatrix.scale(0.5f);
+    mesh1->mMatrix.translate(3.f, 2.f, -2.f);
+    mesh1->mTransform.setOrigin({3, 2, -2});
+    mesh1->initializeRigidBody(1.f);
+    mVisualObjects.push_back(mesh1);
+
+    //floor
+    mesh2 = new TriangleSurface("box2.txt");
+    mesh2->setShader(mShaderProgram[0]);
+    mesh2->init();
+    mesh2->mName = "Floor";
+    mesh2->mMatrix.translate(0, -10, 0);
+    mesh2->mMatrix.scale(10, 1, 10);
+    mesh2->mTransform.setOrigin({0, -10, 0});
+    mesh2->initializeRigidBody(0);
+    mesh2->mCollision->setLocalScaling({10, 1,  10});
+    mVisualObjects.push_back(mesh2);
 
 //     testing objmesh class - many of them!
     // here we see the need for resource management!
@@ -200,7 +216,7 @@ void RenderWindow::init()
 
     //********************** Set up camera **********************
     mCurrentCamera = new Camera();
-    mCurrentCamera->setPosition(gsl::Vector3D(1.f, 1.f, 4.4f));
+    mCurrentCamera->setPosition(gsl::Vector3D(0.f, -3.f, 15.4f));
 //    mCurrentCamera->yaw(45.f);
 //    mCurrentCamera->pitch(5.f);
 
@@ -215,22 +231,25 @@ void RenderWindow::render()
 {
     //calculate the time since last render-call
     //this should be the same as xxx in the mRenderTimer->start(xxx) set in RenderWindow::exposeEvent(...)
-//    auto now = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<float> duration = now - mLastTime;
-//    std::cout << "Chrono deltaTime " << duration.count()*1000 << " ms" << std::endl;
-//    mLastTime = now;
+    auto now = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration = now - mLastTime;
+    //std::cout << "Chrono deltaTime " << duration.count()*1000 << " ms" << std::endl;
+    mLastTime = now;
 
     //input
     handleInput();
 
     mCurrentCamera->update();
 
+    World::instance()->step(1.f / 60.f/*duration.count()*1000*/);
+    mesh1->update();
+
+
     mTimeStart.restart(); //restart FPS clock
     mContext->makeCurrent(this); //must be called every frame (every time mContext->swapBuffers is called)
 
     //to clear the screen for each redraw
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
     for (auto visObject: mVisualObjects)
     {

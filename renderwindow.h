@@ -14,8 +14,6 @@ class QOpenGLContext;
 class Shader;
 class MainWindow;
 class Light;
-class World;
-class ObjMesh;
 
 /// This inherits from QWindow to get access to the Qt functionality and
 /// OpenGL surface.
@@ -90,11 +88,6 @@ private:
     void handleInput();
 
     std::chrono::high_resolution_clock::time_point mLastTime;
-
-    ObjMesh* mesh1;
-    VisualObject* mesh2;
-
-    long long timeSinceLastFrame = 0;
 
 protected:
     //The QWindow that we inherit from has these functions to capture

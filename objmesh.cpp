@@ -1,8 +1,6 @@
 #include "innpch.h"
 #include "objmesh.h"
 
-
-
 ObjMesh::ObjMesh() : VisualObject ()
 {
 
@@ -20,8 +18,6 @@ ObjMesh::~ObjMesh()
 
 void ObjMesh::init()
 {
-
-
     //must call this to use OpenGL functions
     initializeOpenGLFunctions();
 
@@ -53,15 +49,6 @@ void ObjMesh::init()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(GLuint), mIndices.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
-}
-
-void ObjMesh::draw()
-{
-    glUseProgram(mMaterial.mShader->getProgram());
-    glBindVertexArray( mVAO );
-    mMaterial.mShader->transmitUniformData(&mMatrix, &mMaterial);
-    glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr);
-//    glBindVertexArray(0);
 }
 
 void ObjMesh::readFile(std::string filename)
@@ -211,4 +198,13 @@ void ObjMesh::readFile(std::string filename)
     //beeing a nice boy and closing the file after use
     fileIn.close();
     qDebug() << "Obj file read: " << QString::fromStdString(filename);
+}
+
+void ObjMesh::draw()
+{
+    glUseProgram(mMaterial.mShader->getProgram());
+    glBindVertexArray( mVAO );
+    mMaterial.mShader->transmitUniformData(&mMatrix, &mMaterial);
+    glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr);
+//    glBindVertexArray(0);
 }

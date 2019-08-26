@@ -12,7 +12,7 @@ public:
     void yaw(float degrees);
     void updateRightVector();
     void updateForwardVector();
-    void update();
+    void update(double deltaTime);
 
     gsl::Matrix4x4 mViewMatrix;
     gsl::Matrix4x4 mProjectionMatrix;
@@ -21,6 +21,7 @@ public:
 
     void setSpeed(float speed);
     void updateHeigth(float deltaHeigth);
+
     void moveRight(float delta);
 
     gsl::Vector3D position() const;

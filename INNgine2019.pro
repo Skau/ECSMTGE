@@ -10,6 +10,13 @@ PRECOMPILED_HEADER = innpch.h
 INCLUDEPATH +=  ./GSL
 
 HEADERS += \
+    app.h \
+    mainwindow.h \
+    constants.h \
+    renderwindow.h \
+    input.h \
+    gltypes.h \
+    camera.h \
     GSL/matrix2x2.h \
     GSL/matrix3x3.h \
     GSL/matrix4x4.h \
@@ -18,34 +25,33 @@ HEADERS += \
     GSL/vector4d.h \
     GSL/gsl_math.h \
     GSL/math_constants.h \
-    constants.h \
-    renderwindow.h \
-    shader.h \
-    mainwindow.h \
-    triangle.h \
+    Shaders/shader.h \
+    Shaders/colorshader.h \
+    Shaders/textureshader.h \
+    Shaders/phongshader.h \
+    Renderables/triangle.h \
+    Renderables/billboard.h \
+    Renderables/vertex.h \
+    Renderables/xyz.h \
+    Renderables/visualobject.h \
+    Renderables/octahedronball.h \
+    Renderables/billboard.h \
+    Renderables/light.h \
+    Renderables/objmesh.h \
+    Renderables/skybox.h \
+    Renderables/octahedronball.h \
+    Renderables/trianglesurface.h \
     texture.h \
-    billboard.h \
-    vertex.h \
-    xyz.h \
-    visualobject.h \
-    octahedronball.h \
-    billboard.h \
-    camera.h \
-    octahedronball.h \
-    gltypes.h \
-    trianglesurface.h \
-    input.h \
-    material.h \
-    light.h \
-    objmesh.h \
-#    innpch.h \
-    colorshader.h \
-    textureshader.h \
-    skybox.h \
-    phongshader.h \
+    material.h
 
 
-SOURCES += main.cpp \
+SOURCES += \
+    app.cpp \
+    main.cpp \
+    renderwindow.cpp \
+    mainwindow.cpp \
+    camera.cpp \
+    input.cpp \
     GSL/matrix2x2.cpp \
     GSL/matrix3x3.cpp \
     GSL/matrix4x4.cpp \
@@ -53,29 +59,27 @@ SOURCES += main.cpp \
     GSL/vector3d.cpp \
     GSL/vector4d.cpp \
     GSL/gsl_math.cpp \
-    renderwindow.cpp \
-    mainwindow.cpp \
-    shader.cpp \
-    triangle.cpp \
+    Shaders/colorshader.cpp \
+    Shaders/textureshader.cpp \
+    Shaders/phongshader.cpp \
+    Shaders/shader.cpp \
+    Renderables/billboard.cpp \
+    Renderables/vertex.cpp \
+    Renderables/visualobject.cpp \
+    Renderables/octahedronball.cpp \
+    Renderables/xyz.cpp \
+    Renderables/trianglesurface.cpp \
+    Renderables/light.cpp \
+    Renderables/objmesh.cpp \
+    Renderables/skybox.cpp \
+    Renderables/triangle.cpp \
     texture.cpp \
-    billboard.cpp \
-    vertex.cpp \
-    visualobject.cpp \
-    camera.cpp \
-    octahedronball.cpp \
-    xyz.cpp \
-    trianglesurface.cpp \
-    input.cpp \
-    material.cpp \
-    light.cpp \
-    objmesh.cpp \
-    colorshader.cpp \
-    textureshader.cpp \
-    skybox.cpp \
-    phongshader.cpp
+    material.cpp
+
 
 FORMS += \
     mainwindow.ui
+
 
 DISTFILES += \
     Shaders/phongshader.frag \
@@ -83,6 +87,6 @@ DISTFILES += \
     Shaders/plainshader.frag \
     Shaders/plainshader.vert \
     Shaders/textureshader.frag \
+    Shaders/textureshader.vert \
     GSL/README.md \
-    README.md \
-    Shaders/textureshader.vert
+    README.md

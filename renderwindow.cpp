@@ -7,29 +7,40 @@
 #include <QKeyEvent>
 #include <QStatusBar>
 #include <chrono>
+#include <QTime>
+#include <QCoreApplication>
+#include <QThread>
 
 #include "mainwindow.h"
 
-#include "xyz.h"
-#include "octahedronball.h"
-#include "skybox.h"
-#include "billboard.h"
-#include "trianglesurface.h"
-#include "objmesh.h"
-#include "light.h"
-#include "colorshader.h"
-#include "textureshader.h"
-#include "phongshader.h"
+#include "Renderables/xyz.h"
+#include "Renderables/octahedronball.h"
+#include "Renderables/skybox.h"
+#include "Renderables/billboard.h"
+#include "Renderables/trianglesurface.h"
+#include "Renderables/objmesh.h"
+#include "Renderables/light.h"
+#include "Shaders/colorshader.h"
+#include "Shaders/textureshader.h"
+#include "Shaders/phongshader.h"
 
-RenderWindow::RenderWindow(const QSurfaceFormat &format, MainWindow *mainWindow)
+RenderWindow::RenderWindow(MainWindow *mainWindow)
     : mContext(nullptr), mInitialized(false), mMainWindow(mainWindow)
 {
-    //This is sent to QWindow:
+    QSurfaceFormat format;
+    format.setVersion(4, 1);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    format.setOption(QSurfaceFormat::DebugContext);
+    format.setDepthBufferSize(24);
+    format.setSamples(8);
+    format.setSwapInterval(0);
+
+    qDebug() << "Requesting surface format: " << format;
+
     setSurfaceType(QWindow::OpenGLSurface);
     setFormat(format);
-    //Make the OpenGL context
     mContext = new QOpenGLContext(this);
-    //Give the context the wanted OpenGL format (v4.1 Core)
     mContext->setFormat(requestedFormat());
     if (!mContext->create()) {
         delete mContext;
@@ -37,8 +48,7 @@ RenderWindow::RenderWindow(const QSurfaceFormat &format, MainWindow *mainWindow)
         qDebug() << "Context could not be made - quitting this application";
     }
 
-    //Make the gameloop timer:
-    mRenderTimer = new QTimer(this);
+    mTimeStart.start();
 }
 
 RenderWindow::~RenderWindow()
@@ -53,7 +63,7 @@ RenderWindow::~RenderWindow()
 void RenderWindow::init()
 {
     //Connect the gameloop timer to the render function:
-    connect(mRenderTimer, SIGNAL(timeout()), this, SLOT(render()));
+    //connect(mRenderTimer, SIGNAL(timeout()), this, SLOT(render()));
 
     //********************** General OpenGL stuff **********************
 
@@ -159,14 +169,14 @@ void RenderWindow::init()
     temp->mMaterial.mObjectColor = gsl::Vector3D(0.1f, 0.1f, 0.8f);
     mVisualObjects.push_back(temp);
 
-    static_cast<PhongShader*>(mShaderProgram[2])->setLight(mLight);
-
     //testing triangle surface class
     temp = new TriangleSurface("box2.txt");
     temp->init();
     temp->mMatrix.rotateY(180.f);
     temp->setShader(mShaderProgram[0]);
     mVisualObjects.push_back(temp);
+
+    static_cast<PhongShader*>(mShaderProgram[2])->setLight(mLight);
 
     //one monkey
     temp = new ObjMesh("monkey.obj");
@@ -211,51 +221,33 @@ void RenderWindow::init()
 }
 
 ///Called each frame - doing the rendering
-void RenderWindow::render()
+void RenderWindow::render(double deltaTime)
 {
-    //calculate the time since last render-call
-    //this should be the same as xxx in the mRenderTimer->start(xxx) set in RenderWindow::exposeEvent(...)
-//    auto now = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<float> duration = now - mLastTime;
-//    std::cout << "Chrono deltaTime " << duration.count()*1000 << " ms" << std::endl;
-//    mLastTime = now;
-
-    //input
-    handleInput();
-
-    mCurrentCamera->update();
-
-    mTimeStart.restart(); //restart FPS clock
-    mContext->makeCurrent(this); //must be called every frame (every time mContext->swapBuffers is called)
-
-    //to clear the screen for each redraw
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-    for (auto visObject: mVisualObjects)
+    if(isExposed())
     {
-        visObject->draw();
-//        checkForGLerrors();
+        mCurrentCamera->update(deltaTime);
+
+    //    auto now = std::chrono::high_resolution_clock::now();
+    //    std::chrono::duration<float> duration = now - mLastTime;
+    //    std::cout << "Chrono deltaTime " << duration.count()*1000 << " ms" << std::endl;
+    //    mLastTime = now;
+        mTimeStart.restart();
+
+        mContext->makeCurrent(this);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        for (auto visObject: mVisualObjects)
+        {
+            visObject->draw();
+    //        checkForGLerrors();
+        }
+
+        checkForGLerrors();
+
+        mContext->swapBuffers(this);
+
+        calculateFramerate();
     }
-
-    //Calculate framerate before
-    // checkForGLerrors() because that takes a long time
-    // and before swapBuffers(), else it will show the vsync time
-    calculateFramerate();
-
-    //using our expanded OpenGL debugger to check if everything is OK.
-//    checkForGLerrors();
-
-    //Qt require us to call this swapBuffers() -function.
-    // swapInterval is 1 by default which means that swapBuffers() will (hopefully) block
-    // and wait for vsync.
-//    auto start = std::chrono::high_resolution_clock::now();
-    mContext->swapBuffers(this);
-//    auto end = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<float> duration = end - start;
-//    std::cout << "Chrono deltaTime " << duration.count()*1000 << " ms" << std::endl;
-
-//    calculateFramerate();
 }
 
 void RenderWindow::setupPlainShader(int shaderIndex)
@@ -273,31 +265,13 @@ void RenderWindow::setupTextureShader(int shaderIndex)
     mTextureUniform = glGetUniformLocation(mShaderProgram[shaderIndex]->getProgram(), "textureSampler");
 }
 
-//This function is called from Qt when window is exposed (shown)
-//and when it is resized
-//exposeEvent is a overridden function from QWindow that we inherit from
+
 void RenderWindow::exposeEvent(QExposeEvent *)
 {
-    if (!mInitialized)
-        init();
-
-    //This is just to support modern screens with "double" pixels
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, static_cast<GLint>(width() * retinaScale), static_cast<GLint>(height() * retinaScale));
-
-    //If the window actually is exposed to the screen we start the main loop
-    //isExposed() is a function in QWindow
-    if (isExposed())
-    {
-        //This timer runs the actual MainLoop
-        //16 means 16ms = 60 Frames pr second (should be 16.6666666 to be exact..)
-        mRenderTimer->start(1);
-        mTimeStart.start();
-    }
     mAspectratio = static_cast<float>(width()) / height();
-    //    qDebug() << mAspectratio;
     mCurrentCamera->mProjectionMatrix.perspective(45.f, mAspectratio, 1.f, 100.f);
-    //    qDebug() << mCamera.mProjectionMatrix;
 }
 
 //Simple way to turn on/off wireframe mode
@@ -334,7 +308,7 @@ void RenderWindow::calculateFramerate()
         {
             //showing some statistics in status bar
             mMainWindow->statusBar()->showMessage(" Time pr FrameDraw: " +
-                                                  QString::number(nsecElapsed/1000000., 'g', 4) + " ms  |  " +
+                                                  QString::number(nsecElapsed / 1000000., 'g', 4) + " ms  |  " +
                                                   "FPS (approximated): " + QString::number(1E9 / nsecElapsed, 'g', 7));
             frameCount = 0;     //reset to show a new message in 60 frames
         }
@@ -395,7 +369,7 @@ void RenderWindow::setCameraSpeed(float value)
         mCameraSpeed = 0.3f;
 }
 
-void RenderWindow::handleInput()
+void RenderWindow::handleInput(double deltaTime)
 {
     //Camera
     mCurrentCamera->setSpeed(0.f);  //cancel last frame movement

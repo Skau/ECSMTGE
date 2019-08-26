@@ -6,7 +6,7 @@
 #include "vertex.h"
 #include "matrix4x4.h"
 #include "material.h"
-#include "shader.h"
+#include "Shaders/shader.h"
 
 class RenderWindow;
 

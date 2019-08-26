@@ -1,6 +1,6 @@
 #include "innpch.h"
 #include "visualobject.h"
-#include "shader.h"
+
 
 VisualObject::VisualObject()
 {

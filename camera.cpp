@@ -44,7 +44,7 @@ void Camera::updateForwardVector()
     updateRightVector();
 }
 
-void Camera::update()
+void Camera::update(double deltaTime)
 {
     mYawMatrix.setToIdentity();
     mPitchMatrix.setToIdentity();

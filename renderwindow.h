@@ -7,13 +7,14 @@
 #include <chrono>
 #include "texture.h"
 #include "camera.h"
-#include "visualobject.h"
+#include "Renderables/visualobject.h"
 #include "input.h"
 
 class QOpenGLContext;
 class Shader;
 class MainWindow;
 class Light;
+class QTime;
 
 /// This inherits from QWindow to get access to the Qt functionality and
 /// OpenGL surface.
@@ -23,8 +24,10 @@ class RenderWindow : public QWindow, protected QOpenGLFunctions_4_1_Core
 {
     Q_OBJECT
 public:
-    RenderWindow(const QSurfaceFormat &format, MainWindow *mainWindow);
+    RenderWindow(MainWindow *mainWindow);
     ~RenderWindow() override;
+
+    void init();
 
     QOpenGLContext *context() { return mContext; }
 
@@ -33,11 +36,15 @@ public:
 
     void checkForGLerrors();
 
-private slots:
-    void render();
+    void handleInput(double deltaTime);
+
+signals:
+    void finished();
+
+public slots:
+    void render(double deltaTime);
 
 private:
-    void init();
     void setCameraSpeed(float value);
 
     QOpenGLContext *mContext{nullptr};
@@ -72,9 +79,6 @@ private:
     int mMouseXlast{0};
     int mMouseYlast{0};
 
-    QTimer *mRenderTimer{nullptr};  //timer that drives the gameloop
-    QElapsedTimer mTimeStart;       //time variable that reads the actual FPS
-
     float mAspectratio{1.f};
 
     MainWindow *mMainWindow{nullptr};    //points back to MainWindow to be able to put info in StatusBar
@@ -85,7 +89,7 @@ private:
 
     void startOpenGLDebugger();
 
-    void handleInput();
+    QElapsedTimer mTimeStart;
 
     std::chrono::high_resolution_clock::time_point mLastTime;
 

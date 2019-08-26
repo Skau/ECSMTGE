@@ -18,11 +18,12 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    RenderWindow* getRenderWindow() { return mRenderWindow; }
+
 private slots:
     void on_pushButton_clicked();
 
 private:
-    void init();
     Ui::MainWindow *ui;
 
     QWidget *mRenderWindowContainer;

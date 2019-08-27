@@ -13,7 +13,6 @@ HEADERS += \
     app.h \
     mainwindow.h \
     constants.h \
-    renderwindow.h \
     input.h \
     gltypes.h \
     camera.h \
@@ -41,6 +40,7 @@ HEADERS += \
     Renderables/skybox.h \
     Renderables/octahedronball.h \
     Renderables/trianglesurface.h \
+    renderer.h \
     texture.h \
     material.h
 
@@ -48,7 +48,6 @@ HEADERS += \
 SOURCES += \
     app.cpp \
     main.cpp \
-    renderwindow.cpp \
     mainwindow.cpp \
     camera.cpp \
     input.cpp \
@@ -73,6 +72,7 @@ SOURCES += \
     Renderables/objmesh.cpp \
     Renderables/skybox.cpp \
     Renderables/triangle.cpp \
+    renderer.cpp \
     texture.cpp \
     material.cpp
 

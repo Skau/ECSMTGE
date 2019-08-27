@@ -1,5 +1,5 @@
 #include "innpch.h"
-#include "renderwindow.h"
+#include "renderer.h"
 #include <QTimer>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
@@ -24,8 +24,7 @@
 #include "Shaders/textureshader.h"
 #include "Shaders/phongshader.h"
 
-RenderWindow::RenderWindow(MainWindow *mainWindow)
-    : mContext(nullptr), mInitialized(false), mMainWindow(mainWindow)
+Renderer::Renderer() : mInitialized(false)
 {
     QSurfaceFormat format;
     format.setVersion(4, 1);
@@ -47,11 +46,10 @@ RenderWindow::RenderWindow(MainWindow *mainWindow)
         mContext = nullptr;
         qDebug() << "Context could not be made - quitting this application";
     }
-
-    mTimeStart.start();
+    create();
 }
 
-RenderWindow::~RenderWindow()
+Renderer::~Renderer()
 {
     for (int i = 0; i < 4; ++i) {
         if (mShaderProgram[i])
@@ -60,11 +58,8 @@ RenderWindow::~RenderWindow()
 }
 
 /// Sets up the general OpenGL stuff and the buffers needed to render a triangle
-void RenderWindow::init()
+void Renderer::init()
 {
-    //Connect the gameloop timer to the render function:
-    //connect(mRenderTimer, SIGNAL(timeout()), this, SLOT(render()));
-
     //********************** General OpenGL stuff **********************
 
     //The OpenGL context has to be set.
@@ -221,17 +216,11 @@ void RenderWindow::init()
 }
 
 ///Called each frame - doing the rendering
-void RenderWindow::render(double deltaTime)
+void Renderer::render(double deltaTime)
 {
     if(isExposed())
     {
         mCurrentCamera->update(deltaTime);
-
-    //    auto now = std::chrono::high_resolution_clock::now();
-    //    std::chrono::duration<float> duration = now - mLastTime;
-    //    std::cout << "Chrono deltaTime " << duration.count()*1000 << " ms" << std::endl;
-    //    mLastTime = now;
-        mTimeStart.restart();
 
         mContext->makeCurrent(this);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -245,19 +234,17 @@ void RenderWindow::render(double deltaTime)
         checkForGLerrors();
 
         mContext->swapBuffers(this);
-
-        calculateFramerate();
     }
 }
 
-void RenderWindow::setupPlainShader(int shaderIndex)
+void Renderer::setupPlainShader(int shaderIndex)
 {
     mMatrixUniform0 = glGetUniformLocation( mShaderProgram[shaderIndex]->getProgram(), "mMatrix" );
     vMatrixUniform0 = glGetUniformLocation( mShaderProgram[shaderIndex]->getProgram(), "vMatrix" );
     pMatrixUniform0 = glGetUniformLocation( mShaderProgram[shaderIndex]->getProgram(), "pMatrix" );
 }
 
-void RenderWindow::setupTextureShader(int shaderIndex)
+void Renderer::setupTextureShader(int shaderIndex)
 {
     mMatrixUniform1 = glGetUniformLocation( mShaderProgram[shaderIndex]->getProgram(), "mMatrix" );
     vMatrixUniform1 = glGetUniformLocation( mShaderProgram[shaderIndex]->getProgram(), "vMatrix" );
@@ -266,7 +253,7 @@ void RenderWindow::setupTextureShader(int shaderIndex)
 }
 
 
-void RenderWindow::exposeEvent(QExposeEvent *)
+void Renderer::exposeEvent(QExposeEvent *)
 {
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, static_cast<GLint>(width() * retinaScale), static_cast<GLint>(height() * retinaScale));
@@ -277,7 +264,7 @@ void RenderWindow::exposeEvent(QExposeEvent *)
 //Simple way to turn on/off wireframe mode
 //Not totally accurate, but draws the objects with
 //lines instead of filled polygons
-void RenderWindow::toggleWireframe()
+void Renderer::toggleWireframe()
 {
     mWireframe = !mWireframe;
     if (mWireframe)
@@ -292,32 +279,9 @@ void RenderWindow::toggleWireframe()
     }
 }
 
-//The way this is set up is that we start the clock before doing the draw call,
-//and check the time right after it is finished (done in the render function)
-//This will approximate what framerate we COULD have.
-//The actual frame rate on your monitor is limited by the vsync and is probably 60Hz
-void RenderWindow::calculateFramerate()
-{
-    long long nsecElapsed = mTimeStart.nsecsElapsed();
-    static int frameCount{0};                       //counting actual frames for a quick "timer" for the statusbar
-
-    if (mMainWindow)    //if no mainWindow, something is really wrong...
-    {
-        ++frameCount;
-        if (frameCount > 30) //once pr 30 frames = update the message twice pr second (on a 60Hz monitor)
-        {
-            //showing some statistics in status bar
-            mMainWindow->statusBar()->showMessage(" Time pr FrameDraw: " +
-                                                  QString::number(nsecElapsed / 1000000., 'g', 4) + " ms  |  " +
-                                                  "FPS (approximated): " + QString::number(1E9 / nsecElapsed, 'g', 7));
-            frameCount = 0;     //reset to show a new message in 60 frames
-        }
-    }
-}
-
 /// Uses QOpenGLDebugLogger if this is present
 /// Reverts to glGetError() if not
-void RenderWindow::checkForGLerrors()
+void Renderer::checkForGLerrors()
 {
     if(mOpenGLDebugLogger)
     {
@@ -336,9 +300,9 @@ void RenderWindow::checkForGLerrors()
 }
 
 /// Tries to start the extended OpenGL debugger that comes with Qt
-void RenderWindow::startOpenGLDebugger()
+void Renderer::startOpenGLDebugger()
 {
-    QOpenGLContext * temp = this->context();
+    QOpenGLContext * temp = this->getContext();
     if (temp)
     {
         QSurfaceFormat format = temp->format();
@@ -358,7 +322,7 @@ void RenderWindow::startOpenGLDebugger()
     }
 }
 
-void RenderWindow::setCameraSpeed(float value)
+void Renderer::setCameraSpeed(float value)
 {
     mCameraSpeed += value;
 
@@ -369,7 +333,7 @@ void RenderWindow::setCameraSpeed(float value)
         mCameraSpeed = 0.3f;
 }
 
-void RenderWindow::handleInput(double deltaTime)
+void Renderer::handleInput(double deltaTime)
 {
     //Camera
     mCurrentCamera->setSpeed(0.f);  //cancel last frame movement
@@ -405,11 +369,11 @@ void RenderWindow::handleInput(double deltaTime)
     }
 }
 
-void RenderWindow::keyPressEvent(QKeyEvent *event)
+void Renderer::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) //Shuts down whole program
     {
-        mMainWindow->close();
+        escapeKeyPressed();
     }
 
     //    You get the keyboard input like this
@@ -467,7 +431,7 @@ void RenderWindow::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void RenderWindow::keyReleaseEvent(QKeyEvent *event)
+void Renderer::keyReleaseEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_W)
     {
@@ -523,7 +487,7 @@ void RenderWindow::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
-void RenderWindow::mousePressEvent(QMouseEvent *event)
+void Renderer::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::RightButton)
         mInput.RMB = true;
@@ -533,7 +497,7 @@ void RenderWindow::mousePressEvent(QMouseEvent *event)
         mInput.MMB = true;
 }
 
-void RenderWindow::mouseReleaseEvent(QMouseEvent *event)
+void Renderer::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::RightButton)
         mInput.RMB = false;
@@ -543,7 +507,7 @@ void RenderWindow::mouseReleaseEvent(QMouseEvent *event)
         mInput.MMB = false;
 }
 
-void RenderWindow::wheelEvent(QWheelEvent *event)
+void Renderer::wheelEvent(QWheelEvent *event)
 {
     QPoint numDegrees = event->angleDelta() / 8;
 
@@ -558,7 +522,7 @@ void RenderWindow::wheelEvent(QWheelEvent *event)
     event->accept();
 }
 
-void RenderWindow::mouseMoveEvent(QMouseEvent *event)
+void Renderer::mouseMoveEvent(QMouseEvent *event)
 {
     if (mInput.RMB)
     {

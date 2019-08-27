@@ -1,5 +1,5 @@
-#ifndef RENDERWINDOW_H
-#define RENDERWINDOW_H
+#ifndef RENDERER_H
+#define RENDERER_H
 
 #include <QWindow>
 #include <QTimer>
@@ -20,35 +20,34 @@ class QTime;
 /// OpenGL surface.
 /// We also inherit from QOpenGLFunctions, to get access to the OpenGL functions
 /// This is the same as using glad and glw from general OpenGL tutorials
-class RenderWindow : public QWindow, protected QOpenGLFunctions_4_1_Core
+class Renderer : public QWindow, protected QOpenGLFunctions_4_1_Core
 {
     Q_OBJECT
 public:
-    RenderWindow(MainWindow *mainWindow);
-    ~RenderWindow() override;
+    Renderer();
+    ~Renderer() override;
 
-    void init();
-
-    QOpenGLContext *context() { return mContext; }
+    QOpenGLContext* getContext() { return mContext; }
 
     void exposeEvent(QExposeEvent *) override;
     void toggleWireframe();
 
     void checkForGLerrors();
 
+    bool mInitialized{false};
+
+    void init();
     void handleInput(double deltaTime);
+    void render(double deltaTime);
 
 signals:
-    void finished();
+    void escapeKeyPressed();
 
-public slots:
-    void render(double deltaTime);
 
 private:
     void setCameraSpeed(float value);
 
     QOpenGLContext *mContext{nullptr};
-    bool mInitialized{false};
 
     Texture *mTexture[4]{nullptr}; //We can hold 4 textures
     Shader *mShaderProgram[4]{nullptr}; //We can hold 4 shaders
@@ -81,17 +80,11 @@ private:
 
     float mAspectratio{1.f};
 
-    MainWindow *mMainWindow{nullptr};    //points back to MainWindow to be able to put info in StatusBar
+   // MainWindow *mMainWindow{nullptr};    //points back to MainWindow to be able to put info in StatusBar
 
     class QOpenGLDebugLogger *mOpenGLDebugLogger{nullptr};
 
-    void calculateFramerate();
-
     void startOpenGLDebugger();
-
-    QElapsedTimer mTimeStart;
-
-    std::chrono::high_resolution_clock::time_point mLastTime;
 
 protected:
     //The QWindow that we inherit from has these functions to capture
@@ -105,4 +98,4 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
 };
 
-#endif // RENDERWINDOW_H
+#endif // RENDERER_H

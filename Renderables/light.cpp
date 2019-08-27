@@ -1,6 +1,6 @@
 #include "innpch.h"
 #include "light.h"
-#include "renderwindow.h"
+#include "renderer.h"
 
 Light::Light()
 {

@@ -1,13 +1,18 @@
 #ifndef APP_H
 #define APP_H
 
+#include <memory>
+
 #include <QObject>
 #include <QElapsedTimer>
 #include <QTimer>
 
-class MainWindow;
-class RenderWindow;
+#include "mainwindow.h"
+#include "renderer.h"
 
+/**
+ * @brief The creator of all things.
+ */
 class App : public QObject
 {
     Q_OBJECT
@@ -15,26 +20,31 @@ class App : public QObject
 public:
     App();
 
-    void init();
 
 private slots:
     void update();
+    void quit();
 
 private:
-    void processInput();
-    void render();
 
-    MainWindow* mMainWindow;
-    RenderWindow* mRenderWindow;
+    void calculateFrames();
 
-    QElapsedTimer mElapsedTime;
-    QTimer mTimer;
+    std::unique_ptr<MainWindow> mMainWindow;
+    std::unique_ptr<Renderer> mRenderer;
 
-    double previous = 0;
-    double lag = 0;
-    double MS_PER_UPDATE = 1.0 / 120.0;
+    QTimer mUpdateTimer; // Calls update
 
-    double deltaTime = 1.0 / 60.0;
+    double mDeltaTime;
+    double mTotalDeltaTime;
+
+    QElapsedTimer mDeltaTimer;
+
+    QElapsedTimer mFPSTimer;
+    int mFrameCounter = 0;
+
+    bool currentlyUpdating = false;
+
+    char padding[3]; // to get rid of annoying alignment boundary issue (and because I'm too lazy to remove the warning)
 };
 
 #endif // APP_H

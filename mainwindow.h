@@ -4,7 +4,7 @@
 #include <QMainWindow>
 
 class QWidget;
-class RenderWindow;
+class Renderer;
 
 namespace Ui {
 class MainWindow;
@@ -18,7 +18,12 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    RenderWindow* getRenderWindow() { return mRenderWindow; }
+    void addViewport(Renderer* renderWindow);
+
+    void showFPS(double deltaTime, double frameCounter);
+
+signals:
+    void toggledWireframe();
 
 private slots:
     void on_pushButton_clicked();
@@ -27,7 +32,6 @@ private:
     Ui::MainWindow *ui;
 
     QWidget *mRenderWindowContainer;
-    RenderWindow *mRenderWindow;
 };
 
 #endif // MAINWINDOW_H

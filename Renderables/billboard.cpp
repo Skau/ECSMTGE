@@ -1,6 +1,6 @@
 #include "innpch.h"
 #include "billboard.h"
-#include "renderwindow.h"
+#include "renderer.h"
 
 BillBoard::BillBoard()
 {

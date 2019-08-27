@@ -8,7 +8,7 @@
 #include "material.h"
 #include "Shaders/shader.h"
 
-class RenderWindow;
+class Renderer;
 
 class VisualObject : public QOpenGLFunctions_4_1_Core {
 public:
@@ -23,7 +23,7 @@ public:
 
     std::string mName;
 
-    RenderWindow *mRenderWindow; //Just to be able to call checkForGLerrors()
+    Renderer *mRenderWindow; //Just to be able to call checkForGLerrors()
 
     Material mMaterial;
 

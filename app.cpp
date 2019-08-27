@@ -1,53 +1,63 @@
 #include "app.h"
 
-#include "mainwindow.h"
-#include "renderwindow.h"
 #include <QDebug>
 
 App::App()
 {
-    mMainWindow = new MainWindow();
-    mRenderWindow = mMainWindow->getRenderWindow();
+    mMainWindow = std::make_unique<MainWindow>();
+    mRenderer = std::make_unique<Renderer>();
+    mMainWindow->addViewport(mRenderer.get());
+    mRenderer->init();
+
+    connect(mRenderer.get(), &Renderer::escapeKeyPressed, this, &App::quit);
+
+    connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);
+
+    mUpdateTimer.start(16); // Simulates 60ish fps
+
+    mDeltaTimer.start();
+    mFPSTimer.start();
 }
 
-void App::init()
-{
-    mMainWindow->show();
-    mRenderWindow->init();
-    mElapsedTime.start();
-
-//    QObject::connect(mRenderWindow, &RenderWindow::finished, this, &App::update);
-//    update();
-
-    mTimer.start(0);
-    QObject::connect(&mTimer, &QTimer::timeout, this, &App::update);
-}
 
 void App::update()
 {
-    deltaTime = lag / MS_PER_UPDATE;
+    // Not exactly needed now, but maybe this should be here? Timer does call this function every 16 ms.
+    if(currentlyUpdating)
+        return;
+    currentlyUpdating = true;
 
-    processInput();
 
-    double current = mElapsedTime.elapsed();
-    double elapsed = current - previous;
-    previous = current;
-    lag += elapsed;
+    mDeltaTime = mDeltaTimer.restart();
 
-    while(lag >= MS_PER_UPDATE)
+
+    calculateFrames();
+
+
+    mRenderer->handleInput(mDeltaTime);
+
+
+    mRenderer->render(mDeltaTime);
+
+
+    currentlyUpdating = false;
+}
+
+void App::quit()
+{
+    mMainWindow->close();
+}
+
+void App::calculateFrames()
+{
+    ++mFrameCounter;
+    mTotalDeltaTime += mDeltaTime;
+    double elapsed = mFPSTimer.elapsed();
+    if(elapsed >= 100)
     {
-        lag -= MS_PER_UPDATE;
+        mMainWindow->showFPS(mTotalDeltaTime / mFrameCounter, mFrameCounter / mTotalDeltaTime * 1000);
+        mFrameCounter = 0;
+        mTotalDeltaTime = 0;
+        mFPSTimer.restart();
     }
-
-    render();
-}
-
-void App::processInput()
-{
-    mRenderWindow->handleInput(deltaTime);
-}
-
-void App::render()
-{
-    mRenderWindow->render(deltaTime);
 }

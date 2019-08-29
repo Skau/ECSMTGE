@@ -43,4 +43,5 @@ protected:
 
 };
 
-#endif
+#endif // SHADER_H
+

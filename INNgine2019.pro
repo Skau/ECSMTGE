@@ -11,6 +11,7 @@ INCLUDEPATH +=  ./GSL
 
 HEADERS += \
     app.h \
+    componentdata.h \
     mainwindow.h \
     constants.h \
     input.h \
@@ -41,8 +42,11 @@ HEADERS += \
     Renderables/octahedronball.h \
     Renderables/trianglesurface.h \
     renderer.h \
+    resourcemanager.h \
+    scene.h \
     texture.h \
-    material.h
+    material.h \
+    world.h
 
 
 SOURCES += \
@@ -73,8 +77,11 @@ SOURCES += \
     Renderables/skybox.cpp \
     Renderables/triangle.cpp \
     renderer.cpp \
+    resourcemanager.cpp \
+    scene.cpp \
     texture.cpp \
-    material.cpp
+    material.cpp \
+    world.cpp
 
 
 FORMS += \

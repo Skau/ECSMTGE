@@ -75,6 +75,9 @@ void Renderer::init()
     //must call this to use OpenGL functions
     initializeOpenGLFunctions();
 
+    glEnable(GL_DEPTH_TEST);    //enables depth sorting - must use GL_DEPTH_BUFFER_BIT in glClear
+    glEnable(GL_CULL_FACE);     //draws only front side of models - usually what you want
+
     //Print render version info:
     std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
     std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;

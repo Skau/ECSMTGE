@@ -1,16 +1,25 @@
 #ifndef GSL_MATH_H
 #define GSL_MATH_H
 
-#include "vector2d.h"
-#include "vector3d.h"
-#include "vector4d.h"
-#include "math_constants.h"
+#include "mathfwd.h"
 #include "gltypes.h"
-#include "matrix3x3.h"
 #include <vector>
 
 namespace gsl
 {
+// Typedefs
+#ifndef MATH_TYPEDEF
+#define MATH_TYPEDEF
+    typedef Vector2D vec2;
+    typedef Vector3D vec3;
+    typedef Vector4D vec4;
+    typedef Vector4D vec;
+    typedef Matrix2x2 mat2;
+    typedef Matrix3x3 mat3;
+    typedef Matrix4x4 mat4;
+    typedef Matrix4x4 mat;
+#endif
+
     //Functions
     GLdouble rad2deg(GLdouble rad);
     GLdouble deg2rad(GLdouble deg);

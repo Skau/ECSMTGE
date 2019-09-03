@@ -5,7 +5,8 @@
 #include <cmath>
 #include <iostream>
 #include <QDebug>
-#include <QVector3D>
+
+class QVector3D;
 
 namespace gsl
 {
@@ -68,10 +69,7 @@ public:
         return  out;
     }        //    QVector3D getQVector() const;   //for use with qDebug()
 
-    QVector3D getQVector() const
-    {
-        return QVector3D(x, y, z);
-    }   //for use with qDebug()
+    QVector3D getQVector() const;   //for use with qDebug()
 
     //private:  //Making these public to avoid having to do things like setY(getY()+3) etc.
     GLfloat x;

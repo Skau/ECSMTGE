@@ -1,7 +1,8 @@
 #include "vector3d.h"
 #include "math_constants.h"
-#include "gsl_math.h"
+#include "math.h"
 #include <cmath>
+#include <QVector3D>
 
 namespace gsl
 {
@@ -188,6 +189,11 @@ namespace gsl
     GLfloat *Vector3D::zP()
     {
         return &z;
+    }
+
+    QVector3D Vector3D::getQVector() const
+    {
+        return QVector3D(x, y, z);
     }
 
 

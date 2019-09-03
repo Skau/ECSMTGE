@@ -10,6 +10,7 @@ PRECOMPILED_HEADER = innpch.h
 INCLUDEPATH +=  ./GSL
 
 HEADERS += \
+    GSL/math.h \
     app.h \
     componentdata.h \
     mainwindow.h \
@@ -23,8 +24,8 @@ HEADERS += \
     GSL/vector2d.h \
     GSL/vector3d.h \
     GSL/vector4d.h \
-    GSL/gsl_math.h \
     GSL/math_constants.h \
+    GSL/mathfwd.h \
     Shaders/shader.h \
     Shaders/colorshader.h \
     Shaders/textureshader.h \
@@ -50,6 +51,7 @@ HEADERS += \
 
 
 SOURCES += \
+    GSL/math.cpp \
     app.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -61,7 +63,6 @@ SOURCES += \
     GSL/vector2d.cpp \
     GSL/vector3d.cpp \
     GSL/vector4d.cpp \
-    GSL/gsl_math.cpp \
     Shaders/colorshader.cpp \
     Shaders/textureshader.cpp \
     Shaders/phongshader.cpp \

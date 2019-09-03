@@ -1,7 +1,7 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
-#include "gsl_math.h"
+#include "math.h"
 
 // Something like this?
 

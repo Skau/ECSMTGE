@@ -23,7 +23,7 @@
 #include "Renderables/vertex.h"
 #include "Shaders/shader.h"
 #include "gltypes.h"
-#include "gsl_math.h"
+#include "math.h"
 #include "math_constants.h"
 #include "constants.h"
 

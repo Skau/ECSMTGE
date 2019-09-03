@@ -1,6 +1,7 @@
 #ifndef MATRIX4X4_H
 #define MATRIX4X4_H
 
+#include "mathfwd.h"
 #include "vector3d.h"
 #include "vector4d.h"
 #include "gltypes.h"
@@ -9,8 +10,6 @@
 
 namespace gsl
 {
-class Matrix2x2;
-class Matrix3x3;
 
 class Matrix4x4
 {

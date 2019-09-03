@@ -24,6 +24,8 @@
 #include "Shaders/textureshader.h"
 #include "Shaders/phongshader.h"
 
+#include "resourcemanager.h"
+
 Renderer::Renderer() : mInitialized(false)
 {
     QSurfaceFormat format;
@@ -51,10 +53,6 @@ Renderer::Renderer() : mInitialized(false)
 
 Renderer::~Renderer()
 {
-    for (int i = 0; i < 4; ++i) {
-        if (mShaderProgram[i])
-            delete mShaderProgram[i];
-    }
 }
 
 /// Sets up the general OpenGL stuff and the buffers needed to render a triangle
@@ -77,146 +75,19 @@ void Renderer::init()
     //must call this to use OpenGL functions
     initializeOpenGLFunctions();
 
+    glEnable(GL_DEPTH_TEST);    //enables depth sorting - must use GL_DEPTH_BUFFER_BIT in glClear
+    glEnable(GL_CULL_FACE);     //draws only front side of models - usually what you want
+
     //Print render version info:
     std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
     std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
     std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
 
-    //Start the Qt OpenGL debugger
-    //Really helpfull when doing OpenGL
-    //Supported on most Windows machines
-    //reverts to plain glGetError() on Mac and other unsupported PCs
-    // - can be deleted
     startOpenGLDebugger();
-
-    //general OpenGL stuff:
-    glEnable(GL_DEPTH_TEST);    //enables depth sorting - must use GL_DEPTH_BUFFER_BIT in glClear
-    glEnable(GL_CULL_FACE);     //draws only front side of models - usually what you want -
-    glClearColor(0.4f, 0.4f, 0.4f, 1.0f);    //color used in glClear GL_COLOR_BUFFER_BIT
-
-    //Compile shaders:
-    mShaderProgram[0] = new ColorShader("plainshader");
-    qDebug() << "Plain shader program id: " << mShaderProgram[0]->getProgram();
-    mShaderProgram[1]= new TextureShader("textureshader");
-
-    qDebug() << "Texture shader program id: " << mShaderProgram[1]->getProgram();
-    mShaderProgram[2]= new PhongShader("phongshader");
-    qDebug() << "Phong shader program id: " << mShaderProgram[2]->getProgram();
-
-    //**********************  Texture stuff: **********************
-
-    mTexture[0] = new Texture("white.bmp");
-    mTexture[1] = new Texture("hund.bmp", 1);
-    mTexture[2] = new Texture("skybox.bmp", 2);
-
-    //Set the textures loaded to a texture unit
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, mTexture[0]->id());
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, mTexture[1]->id());
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, mTexture[2]->id());
-
-    //********************** Making the objects to be drawn **********************
-    VisualObject * temp{nullptr};
-
-    temp = new XYZ();
-    temp->init();
-    temp->setShader(mShaderProgram[0]);
-    mVisualObjects.push_back(temp);
-
-//    temp = new OctahedronBall(2);
-//    temp->init();
-//    temp->setShader(mShaderProgram[0]);
-//    temp->mMatrix.scale(0.5f, 0.5f, 0.5f);
-//    temp->mName = "Ball";
-//    mVisualObjects.push_back(temp);
-//    mPlayer = temp;
-
-    temp = new SkyBox();
-    temp->init();
-    temp->setShader(mShaderProgram[1]);
-    temp->mMaterial.setTextureUnit(2);
-    temp->mMatrix.scale(15.f);
-    temp->mName = "Cube";
-    mVisualObjects.push_back(temp);
-
-    temp = new BillBoard();
-    temp->init();
-    temp->setShader(mShaderProgram[1]);
-    temp->mMatrix.translate(4.f, 0.f, -3.5f);
-    temp->mName = "Billboard";
-    temp->mRenderWindow = this;
-    temp->mMaterial.setTextureUnit(1);
-    temp->mMaterial.mObjectColor = gsl::Vector3D(0.7f, 0.6f, 0.1f);
-    dynamic_cast<BillBoard*>(temp)->setConstantYUp(true);
-    mVisualObjects.push_back(temp);
-
-    mLight = new Light();
-    temp = mLight;
-    temp->init();
-    temp->setShader(mShaderProgram[1]);
-    temp->mMatrix.translate(2.5f, 3.f, 0.f);
-    //    temp->mMatrix.rotateY(180.f);
-    temp->mName = "light";
-    temp->mRenderWindow = this;
-    temp->mMaterial.setTextureUnit(0);
-    temp->mMaterial.mObjectColor = gsl::Vector3D(0.1f, 0.1f, 0.8f);
-    mVisualObjects.push_back(temp);
-
-    //testing triangle surface class
-    temp = new TriangleSurface("box2.txt");
-    temp->init();
-    temp->mMatrix.rotateY(180.f);
-    temp->setShader(mShaderProgram[0]);
-    mVisualObjects.push_back(temp);
-
-    static_cast<PhongShader*>(mShaderProgram[2])->setLight(mLight);
-
-    //one monkey
-    temp = new ObjMesh("monkey.obj");
-    temp->setShader(mShaderProgram[2]);
-    temp->init();
-    temp->mName = "Monkey";
-    temp->mMatrix.scale(0.5f);
-    temp->mMatrix.translate(3.f, 2.f, -2.f);
-    mVisualObjects.push_back(temp);
-
-//     testing objmesh class - many of them!
-    // here we see the need for resource management!
-//    int x{0};
-//    int y{0};
-//    int numberOfObjs{100};
-//    for (int i{0}; i < numberOfObjs; i++)
-//    {
-//        temp = new ObjMesh("../INNgine2019/Assets/monkey.obj");
-//        temp->setShader(mShaderProgram[0]);
-//        temp->init();
-//        x++;
-//        temp->mMatrix.translate(0.f + x, 0.f, -2.f - y);
-//        temp->mMatrix.scale(0.5f);
-//        mVisualObjects.push_back(temp);
-//        if(x%10 == 0)
-//        {
-//            x = 0;
-//            y++;
-//        }
-//    }
-
-    //********************** Set up camera **********************
-    mCurrentCamera = new Camera();
-    mCurrentCamera->setPosition(gsl::Vector3D(1.f, 1.f, 4.4f));
-//    mCurrentCamera->yaw(45.f);
-//    mCurrentCamera->pitch(5.f);
-
-    //new system - shader sends uniforms so needs to get the view and projection matrixes from camera
-    mShaderProgram[0]->setCurrentCamera(mCurrentCamera);
-    mShaderProgram[1]->setCurrentCamera(mCurrentCamera);
-    mShaderProgram[2]->setCurrentCamera(mCurrentCamera);
 }
 
 ///Called each frame - doing the rendering
-void Renderer::render(double deltaTime)
+void Renderer::render(const std::vector<VisualObject*>& objects, double deltaTime)
 {
     if(isExposed())
     {
@@ -225,7 +96,7 @@ void Renderer::render(double deltaTime)
         mContext->makeCurrent(this);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (auto visObject: mVisualObjects)
+        for (auto visObject: objects)
         {
             visObject->draw();
     //        checkForGLerrors();
@@ -237,19 +108,13 @@ void Renderer::render(double deltaTime)
     }
 }
 
-void Renderer::setupPlainShader(int shaderIndex)
+void Renderer::setupCamera()
 {
-    mMatrixUniform0 = glGetUniformLocation( mShaderProgram[shaderIndex]->getProgram(), "mMatrix" );
-    vMatrixUniform0 = glGetUniformLocation( mShaderProgram[shaderIndex]->getProgram(), "vMatrix" );
-    pMatrixUniform0 = glGetUniformLocation( mShaderProgram[shaderIndex]->getProgram(), "pMatrix" );
-}
-
-void Renderer::setupTextureShader(int shaderIndex)
-{
-    mMatrixUniform1 = glGetUniformLocation( mShaderProgram[shaderIndex]->getProgram(), "mMatrix" );
-    vMatrixUniform1 = glGetUniformLocation( mShaderProgram[shaderIndex]->getProgram(), "vMatrix" );
-    pMatrixUniform1 = glGetUniformLocation( mShaderProgram[shaderIndex]->getProgram(), "pMatrix" );
-    mTextureUniform = glGetUniformLocation(mShaderProgram[shaderIndex]->getProgram(), "textureSampler");
+    mCurrentCamera = new Camera();
+    mCurrentCamera->setPosition(gsl::Vector3D(1.f, 1.f, 4.4f));
+    ResourceManager::instance()->getShader("plain")->setCurrentCamera(mCurrentCamera);
+    ResourceManager::instance()->getShader("texture")->setCurrentCamera(mCurrentCamera);
+    ResourceManager::instance()->getShader("phong")->setCurrentCamera(mCurrentCamera);
 }
 
 

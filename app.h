@@ -9,6 +9,7 @@
 
 #include "mainwindow.h"
 #include "renderer.h"
+#include "world.h"
 
 /**
  * @brief The creator of all things.
@@ -20,7 +21,6 @@ class App : public QObject
 public:
     App();
 
-
 private slots:
     void update();
     void quit();
@@ -31,6 +31,7 @@ private:
 
     std::unique_ptr<MainWindow> mMainWindow;
     std::unique_ptr<Renderer> mRenderer;
+    std::unique_ptr<World> mWorld;
 
     QTimer mUpdateTimer; // Calls update
 

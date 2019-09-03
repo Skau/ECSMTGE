@@ -2,12 +2,18 @@
 
 #include <QDebug>
 
+#include "scene.h"
+
 App::App()
 {
     mMainWindow = std::make_unique<MainWindow>();
     mRenderer = std::make_unique<Renderer>();
     mMainWindow->addViewport(mRenderer.get());
     mRenderer->init();
+
+    mWorld = std::make_unique<World>();
+
+    mRenderer->setupCamera(); // Because World initializes the resource manager this has to be here. Just temp, we will rework camera setup later anyways
 
     connect(mRenderer.get(), &Renderer::escapeKeyPressed, this, &App::quit);
 
@@ -37,7 +43,7 @@ void App::update()
     mRenderer->handleInput(mDeltaTime);
 
 
-    mRenderer->render(mDeltaTime);
+    mRenderer->render(mWorld->getCurrentScene()->getVisualObjects(), mDeltaTime);
 
 
     currentlyUpdating = false;

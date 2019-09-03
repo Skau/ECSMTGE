@@ -5,14 +5,20 @@
 
 // Something like this?
 
-struct Transform
+struct Component
+{
+    unsigned int entityId;
+    bool valid{false};
+};
+
+struct Transform : public Component
 {
     gsl::Vector3D position;
     gsl::Vector3D scale;
     gsl::Vector3D rotation;
 };
 
-struct Render
+struct Render : public Component
 {
 
 };

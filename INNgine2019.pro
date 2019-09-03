@@ -13,6 +13,7 @@ HEADERS += \
     GSL/math.h \
     app.h \
     componentdata.h \
+    componentmanager.h \
     mainwindow.h \
     constants.h \
     input.h \
@@ -53,6 +54,7 @@ HEADERS += \
 SOURCES += \
     GSL/math.cpp \
     app.cpp \
+    componentmanager.cpp \
     main.cpp \
     mainwindow.cpp \
     camera.cpp \

@@ -2,22 +2,22 @@
 #include "material.h"
 #include "Shaders/textureshader.h"
 
-Material::Material()
+MaterialClass::MaterialClass()
 {
 
 }
 
-void Material::setColor(const gsl::Vector3D &color)
+void MaterialClass::setColor(const gsl::Vector3D &color)
 {
     mObjectColor = color;
 }
 
-void Material::setTextureUnit(const GLuint &textureUnit)
+void MaterialClass::setTextureUnit(const GLuint &textureUnit)
 {
     mTextureUnit = textureUnit;
 }
 
-void Material::setShader(Shader *shader)
+void MaterialClass::setShader(Shader *shader)
 {
     mShader = shader;
 }

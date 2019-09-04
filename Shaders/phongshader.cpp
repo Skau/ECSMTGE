@@ -27,7 +27,7 @@ PhongShader::~PhongShader()
     qDebug() << "Deleting PhongShader";
 }
 
-void PhongShader::transmitUniformData(gsl::Matrix4x4 *modelMatrix, Material *material)
+void PhongShader::transmitUniformData(gsl::Matrix4x4 *modelMatrix, MaterialClass *material)
 {
     Shader::transmitUniformData(modelMatrix);
 

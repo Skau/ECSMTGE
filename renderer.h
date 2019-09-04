@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "Renderables/visualobject.h"
 #include "input.h"
+#include "componentdata.h"
 
 class QOpenGLContext;
 class Shader;
@@ -39,6 +40,9 @@ public:
     void init();
     void handleInput(double deltaTime);
     void render(const std::vector<VisualObject*>& objects, double deltaTime);
+
+    // Should only need renders, materials and transforms
+    void render(Render* renders, Material* materials, Transform* transforms, unsigned int components);
 
     void setupCamera();
 

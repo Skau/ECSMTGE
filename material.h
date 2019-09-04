@@ -3,10 +3,10 @@
 
 #include "vector3d.h"
 
-class Material
+class MaterialClass
 {
 public:
-    Material();
+    MaterialClass();
 
     void setShader(class Shader *shader);
     void setTextureUnit(const GLuint &textureUnit);

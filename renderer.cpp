@@ -108,6 +108,38 @@ void Renderer::render(const std::vector<VisualObject*>& objects, double deltaTim
     }
 }
 
+void Renderer::render(Render* renders, Material *materials, Transform* transforms, unsigned int components)
+{
+    /* Note: For å gjøre dette enda raskere kunne det vært
+     * mulig å gjøre at dataArraysene alltid resizer til nærmeste
+     * tall delelig på 8, også kan man unwrappe denne loopen til å
+     * gjøre 8 parallelle handlinger. Kan mulig gjøre prosessen raskere.
+     */
+
+    Material defaultMaterial{};
+
+    mContext->makeCurrent(this);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+    for (unsigned int i{0}; i < components; ++i) {
+        if (renders[i].valid && transforms[i].valid) {
+            // Entity can be drawn. Draw.
+            glBindVertexArray(renders[i].VAO);
+
+            auto shader = materials[i].valid ? materials[i].mShader->getProgram() : defaultMaterial.mShader->getProgram();
+            glUseProgram(shader);
+
+            glUniformMatrix4fv(glGetUniformLocation(shader, "mMatrix"), transforms[i].modelMatrix)
+
+        }
+    }
+
+    checkForGLerrors();
+
+    mContext->swapBuffers(this);
+}
+
 void Renderer::setupCamera()
 {
     mCurrentCamera = new Camera();

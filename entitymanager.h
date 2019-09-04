@@ -110,13 +110,14 @@ private:
     // ------------------------------ Member Variables ------------------------------
     // Amount of component arrays.
     // Compile time static as arrays also are compile time statics.
-    static constexpr unsigned int componentCount{2};
+    static constexpr unsigned int componentCount{3};
 
     // Component arrays. Remember to update componentCount if adding more.
     // Transform *mTransforms{nullptr};
     // Render *mRenders{nullptr};
     DataArray<Transform> mTransforms;
     DataArray<Render> mRenders;
+    DataArray<Material> mMaterials;
 
     // Length of all component arrays.
     unsigned int arrayLength{0};
@@ -218,12 +219,42 @@ public:
         }
     }
 
+    template<class T,
+             typename std::enable_if<(std::is_same<Material, T>::value)>::type* = nullptr>
+    T& addComponents(unsigned int entity)
+    {
+        qDebug() << "Adding Material component for entityID " << entity;
+        auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
+        if (-1 < internalIndex) {
+            if(mMaterials[static_cast<unsigned>(internalIndex)].valid) {
+                return mMaterials[static_cast<unsigned>(internalIndex)];
+            }
+            else {
+                Material& component = mMaterials[internalIndex] = T{};
+                component.entityId = entity;
+                component.valid = true;
+                return component;
+            }
+        } else {
+            if (emptyRow < 0)
+                resizeArrays(arrayLength + 1);
+
+           Material& component = mMaterials.at((emptyRow < 0) ? arrayLength - 1 : emptyRow) = T{};
+           component.entityId = entity;
+           component.valid = true;
+           return component;
+        }
+    }
+
     void print() {
         std::cout << "transforms: ";
         for (auto comp : mTransforms)
             std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
         std::cout << std::endl << "renders: ";
-        for (auto comp : mTransforms)
+        for (auto comp : mRenders)
+            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
+        std::cout << std::endl << "materials: ";
+        for (auto comp : mMaterials)
             std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
         std::cout << std::endl;
     }

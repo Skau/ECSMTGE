@@ -158,20 +158,28 @@ public:
 
     unsigned int createEntity() { return idCounter++; }
 
+    template<typename... componentTypes>
+    std::tuple<componentTypes...> createEntiy()
+    {
+        unsigned int id = createEntity();
+        return {addComponent<componentTypes>(id)...};
+    }
+
     template<class T,
              typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
-    void addComponent(unsigned int entity)
+    T& addComponent(unsigned int entity)
     {
         qDebug() << "Adding Transform component for entityID " << entity;
         auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
         if (-1 < internalIndex) {
             if(mTransforms[static_cast<unsigned>(internalIndex)].valid) {
-                return;
+                return mTransforms[static_cast<unsigned>(internalIndex)];
             }
             else {
                 Transform& component = mTransforms[internalIndex] = T{};
                 component.entityId = entity;
                 component.valid = true;
+                return component;
             }
         } else {
             if (emptyRow < 0)
@@ -180,23 +188,25 @@ public:
             Transform& component = mTransforms.at((emptyRow < 0) ? arrayLength - 1 : emptyRow) = T{};
             component.entityId = entity;
             component.valid = true;
+            return component;
         }
     }
 
     template<class T,
              typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
-    void addComponent(unsigned int entity)
+    T& addComponent(unsigned int entity)
     {
         qDebug() << "Adding Render component for entityID " << entity;
         auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
         if (-1 < internalIndex) {
             if(mRenders[static_cast<unsigned>(internalIndex)].valid) {
-                return;
+                return mRenders[static_cast<unsigned>(internalIndex)];
             }
             else {
                 Render& component = mRenders[internalIndex] = T{};
                 component.entityId = entity;
                 component.valid = true;
+                return component;
             }
         } else {
             if (emptyRow < 0)
@@ -205,8 +215,11 @@ public:
            Render& component = mRenders.at((emptyRow < 0) ? arrayLength - 1 : emptyRow) = T{};
            component.entityId = entity;
            component.valid = true;
+           return component;
         }
     }
+
+
 };
 
 

@@ -132,7 +132,7 @@ private:
     std::pair<long int, long int> getInternalIndexAndEmptyRow(unsigned int entity)
     {
         long int internalIndex{-1}, emptyRow{-1};
-        for (unsigned int i{0}; i < arrayLength && internalIndex != -1; ++i)
+        for (unsigned int i{0}; i < arrayLength; ++i)
         {
             bool rowIsEmpty{true};
             for (auto comp : loopHorizontal(i)) {
@@ -217,6 +217,17 @@ public:
            return component;
         }
     }
+
+    void print() {
+        std::cout << "transforms: ";
+        for (auto comp : mTransforms)
+            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
+        std::cout << std::endl << "renders: ";
+        for (auto comp : mTransforms)
+            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
+        std::cout << std::endl;
+    }
+
 };
 
 
@@ -225,6 +236,3 @@ public:
 #include "entitymanager.inl"
 
 #endif // COMPONENTMANAGER_H
-
-
-

@@ -4,6 +4,7 @@
 #include <QObject>
 
 class Scene;
+class EntityManager;
 
 class World : public QObject
 {
@@ -14,10 +15,14 @@ public:
 
     Scene* getCurrentScene() { return mCurrentScene; }
 
+    EntityManager* getEntityManager() { return entityManager; }
+
 private:
     std::vector<Scene*> mScenes;
 
     Scene* mCurrentScene;
+
+    EntityManager* entityManager;
 };
 
 #endif // WORLD_H

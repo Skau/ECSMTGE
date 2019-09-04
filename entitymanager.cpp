@@ -3,10 +3,13 @@
 template <typename T>
 unsigned int EntityManager::DataArray<T>::mLength = 0;
 
+unsigned int EntityManager::idCounter = 0;
+
 EntityManager::EntityManager()
 {
 
 }
+
 
 EntityManager::HorizontalIteratorWrapper EntityManager::loopHorizontal(unsigned int index)
 {
@@ -18,7 +21,6 @@ void EntityManager::resizeArrays(unsigned int newSize)
     mTransforms.resize(newSize);
     mRenders.resize(newSize);
 
-    mTransforms.mLength = newSize;
     arrayLength = newSize;
 }
 

@@ -4,6 +4,8 @@
 #include "componentdata.h"
 #include <typeinfo>
 
+#include <QDebug>
+
 /** A component data manager class
  * Constructs entities and manages
  * component data for each entity.
@@ -33,7 +35,7 @@ private:
 
         // internalLength should always be the same as length
         // (only used when resizing)
-        unsigned int mInternalLength;
+        unsigned int mInternalLength{0};
 
     public:
         DataArray();
@@ -119,10 +121,7 @@ private:
     // Length of all component arrays.
     unsigned int arrayLength{0};
 
-
-
-
-
+    static unsigned int idCounter;
 
 
     // ------------------------- Member functions ---------------
@@ -130,16 +129,7 @@ private:
     HorizontalIteratorWrapper loopHorizontal(unsigned int index);
     void resizeArrays(unsigned int newSize);
 
-
-
-public:
-
-    EntityManager();
-
-    unsigned int createEntity();
-
-    template <typename T>
-    void addComponent(unsigned int entity)
+    std::pair<long int, long int> getInternalIndexAndEmptyRow(unsigned int entity)
     {
         long int internalIndex{-1}, emptyRow{-1};
         for (unsigned int i{0}; i < arrayLength && internalIndex != -1; ++i)
@@ -160,56 +150,61 @@ public:
                 emptyRow = i;
         }
 
-        // If internalIndex isn't -1, we have found other components
-        // that belong to the same entity
-        if (-1 < internalIndex)
-        {
-            if (typeid (T) == typeid(Transform)) {
-                if (mTransforms[internalIndex].valid) {
-                    // Adding component on already excisting component
-                    /* In the scenario that we try to add a component to an
-                     * already excisting component for the same entity, we
-                     * should just return out.
-                     * All components on a row (should) belongs to the same entity,
-                     * so we won't need to check that the component is
-                     * of the same entity aswell.
-                     */
-                    return;
-                } else {
-                    // Object isn't used, you are free to place a component there
-                    mTransforms[internalIndex] = T{};
-                }
-            } else if (typeid (T) == typeid(Render)) {
-                if (mRenders[internalIndex].valid) {
-                    // Adding component on already excisting component
-                    /* In the scenario that we try to add a component to an
-                     * already excisting component for the same entity, we
-                     * should just return out.
-                     * All components on a row (should) belongs to the same entity,
-                     * so we won't need to check that the component is
-                     * of the same entity aswell.
-                     */
-                    return;
-                } else {
-                    // Object isn't used, you are free to place a component there
-                    mRenders[internalIndex] = T{};
-                }
+        return std::make_pair(internalIndex, emptyRow);
+    }
+
+public:
+    EntityManager();
+
+    unsigned int createEntity() { return idCounter++; }
+
+    template<class T,
+             typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
+    void addComponent(unsigned int entity)
+    {
+        qDebug() << "Adding Transform component for entityID " << entity;
+        auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
+        if (-1 < internalIndex) {
+            if(mTransforms[static_cast<unsigned>(internalIndex)].valid) {
+                return;
             }
-        }
-        // If internalIndex is -1, we didn't find any other components
-        // that belongs to entity. A.k.a., this is a new entity.
-        else
-        {
-            // If no empty rows were found, add a new row and add components to
-            // that row
+            else {
+                Transform& component = mTransforms[internalIndex] = T{};
+                component.entityId = entity;
+                component.valid = true;
+            }
+        } else {
             if (emptyRow < 0)
                 resizeArrays(arrayLength + 1);
 
-            if (typeid(T) == typeid(Transform)) {
-                mTransforms.at((emptyRow < 0) ? arrayLength : emptyRow) = T{};
-            } else if (typeid(T) == typeid(Render)) {
-                mRenders.at((emptyRow < 0) ? arrayLength : emptyRow) = T{};
+            Transform& component = mTransforms.at((emptyRow < 0) ? arrayLength - 1 : emptyRow) = T{};
+            component.entityId = entity;
+            component.valid = true;
+        }
+    }
+
+    template<class T,
+             typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
+    void addComponent(unsigned int entity)
+    {
+        qDebug() << "Adding Render component for entityID " << entity;
+        auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
+        if (-1 < internalIndex) {
+            if(mRenders[static_cast<unsigned>(internalIndex)].valid) {
+                return;
             }
+            else {
+                Render& component = mRenders[internalIndex] = T{};
+                component.entityId = entity;
+                component.valid = true;
+            }
+        } else {
+            if (emptyRow < 0)
+                resizeArrays(arrayLength + 1);
+
+           Render& component = mRenders.at((emptyRow < 0) ? arrayLength - 1 : emptyRow) = T{};
+           component.entityId = entity;
+           component.valid = true;
         }
     }
 };

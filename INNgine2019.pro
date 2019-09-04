@@ -84,7 +84,8 @@ SOURCES += \
     scene.cpp \
     texture.cpp \
     material.cpp \
-    world.cpp
+    world.cpp \
+    entitymanager.inl
 
 
 FORMS += \

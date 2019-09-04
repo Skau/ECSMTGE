@@ -1,5 +1,7 @@
 #include <cassert>
 
+#include "entitymanager.h"
+
 // -.---------------------------- DataArray -------------------------------------
 template<class T>
 EntityManager::DataArray<T>::DataArray()
@@ -55,6 +57,8 @@ void EntityManager::DataArray<T>::resize(unsigned int newLength)
         // Default constructs objects outside of array
         mData[i] = (i < mInternalLength) ? temp[i] : T{};
     }
+
+    mLength = newLength;
 
     // Cleanup
     delete[] temp;

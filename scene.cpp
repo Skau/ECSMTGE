@@ -10,8 +10,11 @@
 
 #include "resourcemanager.h"
 
+#include "world.h"
+#include "entitymanager.h"
+
 // Just hardcoded scene for now
-Scene::Scene()
+Scene::Scene(World *world) : mWorld(world)
 {
     VisualObject * temp{nullptr};
 
@@ -81,4 +84,23 @@ Scene::Scene()
     temp->mMatrix.scale(0.5f);
     temp->mMatrix.translate(3.f, 2.f, -2.f);
     mVisualObjects.push_back(temp);
+
+    auto entityManager = world->getEntityManager();
+
+    auto entity = entityManager->createEntity();
+    entityManager->addComponent<Transform>(entity);
+    entityManager->addComponent<Render>(entity);
+
+    auto entity1 = entityManager->createEntity();
+    entityManager->addComponent<Transform>(entity1);
+    entityManager->addComponent<Render>(entity1);
+
+    auto entity2 = entityManager->createEntity();
+    entityManager->addComponent<Transform>(entity2);
+    entityManager->addComponent<Render>(entity2);
+
+    auto entity3 = entityManager->createEntity();
+    entityManager->addComponent<Transform>(entity3);
+    entityManager->addComponent<Render>(entity3);
+
 }

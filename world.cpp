@@ -1,7 +1,9 @@
 #include "world.h"
 
 #include "resourcemanager.h"
+#include "entitymanager.h"
 #include "scene.h"
+
 
 World::World()
 {
@@ -13,5 +15,8 @@ World::World()
     ResourceManager::instance()->loadTexture("hund", "hund.bmp");
     ResourceManager::instance()->loadTexture("skybox", "skybox.bmp");
 
-    mCurrentScene = new Scene();
+    entityManager = new EntityManager();
+
+    mCurrentScene = new Scene(this);
+
 }

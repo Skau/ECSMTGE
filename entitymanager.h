@@ -3,7 +3,6 @@
 
 #include "componentdata.h"
 #include <typeinfo>
-#include <cassert>
 
 /** A component data manager class
  * Constructs entities and manages
@@ -12,10 +11,16 @@
  * @author andesyv
  */
 
-class ComponentManager
+class EntityManager
 {
 private:
-    // Data info for each array type
+    // ------------------------------- Internal Data Types --------------------------
+    /**
+     * A data wrapper class for objects of type T
+     * that uses normal C-style arrays to store
+     * data and with some more functionality.
+     * @brief dataWrapper class for components
+     */
     template <class T>
     class DataArray
     {
@@ -30,33 +35,13 @@ private:
         // (only used when resizing)
         unsigned int mInternalLength;
 
-        void resize(unsigned int newLength)
-        {
-            // Copy content to temp array
-            T *temp = new T[mInternalLength];
-            for (unsigned int i{0}; i < mInternalLength; ++i)
-                temp[i] = mData[i];
-
-            // Make new array
-            delete[] mData;
-            mData = new T[newLength];
-
-            // Fill array again
-            for (unsigned int i{0}; i < newLength; ++i) {
-                // Default constructs objects outside of array
-                mData[i] = (i < mInternalLength) ? temp[i] : T{};
-            }
-
-            // Cleanup
-            delete[] temp;
-            mInternalLength = newLength;
-        }
-
     public:
-        T* get() { return mData; }
-        T* operator* () { return mData; }
-        T& operator[] (unsigned int i) {return *(mData + i); }
-        T& at (unsigned int i) { assert(i < mLength); return *(mData + i); }
+        DataArray();
+
+        T* get();
+        T* operator* ();
+        T& operator[] (unsigned int i);
+        T& at (unsigned int i);
 
         class DataArrayIterator
         {
@@ -65,19 +50,62 @@ private:
             DataArray<T> &ref;
 
         public:
-            DataArrayIterator(DataArray<T> &_ref, unsigned int _index)
-                : ref{_ref}, index{_index} {}
-            DataArrayIterator& operator++() { ++index; return *this; }
-            bool operator!= (const DataArrayIterator& it) { return index != it.index; }
-            T& operator* () { return *(ref.get() + index); }
+            DataArrayIterator(DataArray<T> &_ref, unsigned int _index);
+            DataArrayIterator& operator++();
+            bool operator!= (const DataArrayIterator& it);
+            T& operator* ();
         };
 
-        DataArrayIterator begin() { return DataArrayIterator{*this, 0}; }
-        DataArrayIterator end() { return DataArrayIterator{*this, mLength}; }
+        DataArrayIterator begin();
+        DataArrayIterator end();
+
+        void resize(unsigned int newLength);
     };
 
 
 
+    /**
+     * A wrapper class for a horizontal iterator
+     * To be used by the loopHorizontal function so
+     * that you can use a range-based for loop to loop
+     * through each row of the components arrays.
+     *
+     * @brief HorizontalIterator wrapper
+     */
+    class HorizontalIteratorWrapper {
+    private:
+        EntityManager* compManRef;
+        unsigned int index;
+
+    public:
+        HorizontalIteratorWrapper(EntityManager* _compManRef, unsigned int _index);
+
+        class HorizontalIterator
+        {
+        private:
+            EntityManager* compManRef;
+            unsigned int index;
+            unsigned int hIndex;
+
+        public:
+            HorizontalIterator(EntityManager* _compManRef, unsigned int _index, unsigned int _hIndex);
+            HorizontalIterator& operator++();
+            bool operator!= (const HorizontalIterator& it);
+            // Kind of a "look up table"
+            Component* operator*();
+        };
+
+        HorizontalIterator begin();
+        HorizontalIterator end();
+    };
+
+
+
+
+
+
+private:
+    // ------------------------------ Member Variables ------------------------------
     // Amount of component arrays.
     // Compile time static as arrays also are compile time statics.
     static constexpr unsigned int componentCount{2};
@@ -94,67 +122,19 @@ private:
 
 
 
-    class HorizontalIteratorWrapper {
-    private:
-        ComponentManager* compManRef;
-        unsigned int index;
-
-    public:
-        HorizontalIteratorWrapper(ComponentManager* _compManRef, unsigned int _index)
-            : compManRef{_compManRef}, index{_index} {}
-
-        class HorizontalIterator
-        {
-        private:
-            ComponentManager* compManRef;
-            unsigned int index;
-            unsigned int hIndex;
-
-        public:
-            HorizontalIterator(ComponentManager* _compManRef, unsigned int _index, unsigned int _hIndex)
-                : compManRef{_compManRef}, index{_index}, hIndex{_hIndex} {}
-            HorizontalIterator& operator++()
-            {
-                ++hIndex;
-                return *this;
-            }
-            bool operator!= (const HorizontalIterator& it)
-            {
-                return !(index == it.index && hIndex == it.hIndex);
-            }
-            // Kind of a "look up table"
-            Component* operator*() {
-                switch (hIndex) {
-                    case 0:
-                        return &compManRef->mTransforms[index];
-                    case 1:
-                        return &compManRef->mRenders[index];
-                    default:
-                        return nullptr;
-                }
-            }
-        };
-
-        HorizontalIterator begin() {
-            return HorizontalIterator{compManRef, index, 0};
-        }
-
-        HorizontalIterator end() {
-            return HorizontalIterator{compManRef, index, ComponentManager::componentCount};
-        }
-    };
 
 
 
-
-    HorizontalIteratorWrapper loopHorizontal(unsigned int index) {
-        return HorizontalIteratorWrapper{this, index};
-    }
-
+    // ------------------------- Member functions ---------------
+private:
+    HorizontalIteratorWrapper loopHorizontal(unsigned int index);
     void resizeArrays(unsigned int newSize);
 
+
+
 public:
-    ComponentManager();
+
+    EntityManager();
 
     unsigned int createEntity();
 
@@ -234,4 +214,12 @@ public:
     }
 };
 
+
+
+// Inline include of entitymanager.inl
+#include "entitymanager.inl"
+
 #endif // COMPONENTMANAGER_H
+
+
+

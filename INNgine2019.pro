@@ -13,7 +13,7 @@ HEADERS += \
     GSL/math.h \
     app.h \
     componentdata.h \
-    componentmanager.h \
+    entitymanager.h \
     mainwindow.h \
     constants.h \
     input.h \
@@ -54,7 +54,7 @@ HEADERS += \
 SOURCES += \
     GSL/math.cpp \
     app.cpp \
-    componentmanager.cpp \
+    entitymanager.cpp \
     main.cpp \
     mainwindow.cpp \
     camera.cpp \
@@ -99,4 +99,5 @@ DISTFILES += \
     Shaders/textureshader.frag \
     Shaders/textureshader.vert \
     GSL/README.md \
-    README.md
+    README.md \
+    entitymanager

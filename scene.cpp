@@ -103,6 +103,6 @@ Scene::Scene(World *world) : mWorld(world)
     entityManager->addComponent<Transform>(entity3);
     entityManager->addComponent<Render>(entity3);
 
-    auto [TransformComponent, RenderComponent] = entityManager->createEntiy<Transform, Render>();
-
+    auto entity4 = entityManager->createEntity();
+    entityManager->addComponent<Transform, Render>(entity4);
 }

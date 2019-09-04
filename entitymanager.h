@@ -159,15 +159,14 @@ public:
     unsigned int createEntity() { return idCounter++; }
 
     template<typename... componentTypes>
-    std::tuple<componentTypes...> createEntiy()
+    std::tuple<componentTypes...> addComponent(unsigned int entity)
     {
-        unsigned int id = createEntity();
-        return {addComponent<componentTypes>(id)...};
+        return {addComponents<componentTypes>(entity)...};
     }
 
     template<class T,
              typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
-    T& addComponent(unsigned int entity)
+    T& addComponents(unsigned int entity)
     {
         qDebug() << "Adding Transform component for entityID " << entity;
         auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
@@ -194,7 +193,7 @@ public:
 
     template<class T,
              typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
-    T& addComponent(unsigned int entity)
+    T& addComponents(unsigned int entity)
     {
         qDebug() << "Adding Render component for entityID " << entity;
         auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
@@ -218,8 +217,6 @@ public:
            return component;
         }
     }
-
-
 };
 
 

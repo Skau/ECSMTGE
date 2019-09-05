@@ -15,13 +15,13 @@ struct Component
 struct Transform : public Component
 {
     gsl::Vector3D position{};
-    gsl::Vector3D scale{};
+    gsl::Vector3D scale{1,1,1};
     gsl::Vector3D rotation{};
 };
 
 struct Render : public Component
 {
-    MeshData meshData{};
+    std::shared_ptr<MeshData> meshData{nullptr};
 };
 
 // .. etc

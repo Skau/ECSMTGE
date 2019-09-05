@@ -49,14 +49,14 @@ void ResourceManager::loadTexture(const std::string &name, const std::string &pa
     }
 }
 
-Texture* ResourceManager::getTexture(const std::string &name)
+int ResourceManager::getTexture(const std::string &name)
 {
     if(mTextures.find(name) != mTextures.end())
     {
-        return mTextures[name];
+        return static_cast<int>(mTextures[name]->id());
     }
 
-    return nullptr;
+    return -1;
 }
 
 void ResourceManager::addMesh(const std::string& name, const std::string& path, GLenum renderType)
@@ -64,7 +64,10 @@ void ResourceManager::addMesh(const std::string& name, const std::string& path, 
     if(mMeshes.find(name) == mMeshes.end())
     {
         if(!openglInitialized)
+        {
             initializeOpenGLFunctions();
+            openglInitialized = true;
+        }
 
         std::pair<std::vector<Vertex>, std::vector<GLuint>> data;
         if(QString::fromStdString(path).contains(".obj"))
@@ -78,11 +81,11 @@ void ResourceManager::addMesh(const std::string& name, const std::string& path, 
 
         MeshData meshData;
 
-        meshData.renderType = renderType;
+        meshData.mRenderType = renderType;
 
         //Vertex Array Object - VAO
-        glGenVertexArrays( 1, &meshData.VAO );
-        glBindVertexArray(meshData.VAO);
+        glGenVertexArrays( 1, &meshData.mVAO );
+        glBindVertexArray(meshData.mVAO);
 
         //Vertex Buffer Object to hold vertices - VBO
         GLuint vbo;
@@ -103,32 +106,31 @@ void ResourceManager::addMesh(const std::string& name, const std::string& path, 
         glVertexAttribPointer(2, 2,  GL_FLOAT, GL_FALSE, sizeof( Vertex ), (GLvoid*)( 6 * sizeof( GLfloat ) ));
         glEnableVertexAttribArray(2);
 
-        meshData.indicesCount = data.second.size();
+        meshData.mVerticesCount = data.first.size();
+        meshData.mIndicesCount = data.second.size();
 
-        if(meshData.indicesCount)
+        if(meshData.mIndicesCount)
         {
             //Second buffer - holds the indices (Element Array Buffer - EAB):
             GLuint eab;
             glGenBuffers(1, &eab);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eab);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indicesCount * sizeof(GLuint), data.second.data(), GL_STATIC_DRAW);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.mIndicesCount * sizeof(GLuint), data.second.data(), GL_STATIC_DRAW);
         }
 
 
-        mMeshes[name] = meshData;
+        mMeshes[name] = std::make_shared<MeshData>(meshData);
         glBindVertexArray(0);
     }
 }
 
-std::optional<MeshData> ResourceManager::getMesh(const std::string& name)
+std::shared_ptr<MeshData> ResourceManager::getMesh(const std::string& name)
 {
-    std::optional<MeshData> returnValue;
     if(mMeshes.find(name) != mMeshes.end())
     {
-        returnValue.value() = mMeshes[name];
+        return mMeshes[name];
     }
-
-    return returnValue;
+    return nullptr;
 }
 
 std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readObjFile(std::string filename)

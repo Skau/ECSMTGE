@@ -20,7 +20,6 @@ void EntityManager::resizeArrays(unsigned int newSize)
 {
     mTransforms.resize(newSize);
     mRenders.resize(newSize);
-    mMaterials.resize(newSize);
 
     arrayLength = newSize;
 }
@@ -75,8 +74,6 @@ Component *EntityManager::HorizontalIteratorWrapper::HorizontalIterator::operato
         return &compManRef->mTransforms[index];
     case 1:
         return &compManRef->mRenders[index];
-    case 2:
-        return &compManRef->mMaterials[index];
     default:
         return nullptr;
     }

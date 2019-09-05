@@ -6,7 +6,6 @@
 #include <memory>
 #include "vertex.h"
 #include "matrix4x4.h"
-#include "material.h"
 #include "Shaders/shader.h"
 
 class Renderer;
@@ -26,7 +25,7 @@ public:
 
     Renderer *mRenderWindow; //Just to be able to call checkForGLerrors()
 
-    MaterialClass mMaterial;
+ //   MaterialClass mMaterial;
 
 protected:
     std::vector<Vertex> mVertices;   //This is usually not needed after object is made

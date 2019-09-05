@@ -18,6 +18,18 @@ World::World()
     ResourceManager::instance()->addMesh("box", "box2.txt");
     ResourceManager::instance()->addMesh("monkey", "monkey.obj");
 
+    auto mesh = ResourceManager::instance()->getMesh("box");
+    if(mesh)
+    {
+        mesh->mMaterial.mShader = ResourceManager::instance()->getShader("plain");
+    }
+
+    mesh = ResourceManager::instance()->getMesh("monkey");
+    if(mesh)
+    {
+        mesh->mMaterial.mShader = ResourceManager::instance()->getShader("phong");
+    }
+
     entityManager = new EntityManager();
 
     mCurrentScene = new Scene(this);

@@ -68,27 +68,28 @@ void BillBoard::draw()
     gsl::Vector3D direction{};
     if(mNormalVersion)
     {
-        gsl::Vector3D camPosition = mMaterial.mShader->getCurrentCamera()->position();
+        //gsl::Vector3D camPosition = mMaterial.mShader->getCurrentCamera()->position();
         //cancel heigth info so billboard is allways upright:
-        if(mConstantYUp)
-            camPosition.setY(mMatrix.getPosition().y);
-        direction = camPosition - gsl::Vector3D(mMatrix.getPosition());
+   //     if(mConstantYUp)
+   //         camPosition.setY(mMatrix.getPosition().y);
+ //      direction = camPosition - gsl::Vector3D(mMatrix.getPosition());
     }
-    else {
-        gsl::Vector3D camDirection = mMaterial.mShader->getCurrentCamera()->forward();
+    else
+    {
+    //    gsl::Vector3D camDirection = mMaterial.mShader->getCurrentCamera()->forward();
         //cancel heigth info so billboard is allways upright:
-        if(mConstantYUp)
-            camDirection.setY(mMatrix.getPosition().y);
-        direction = camDirection * -1;
+  //      if(mConstantYUp)
+   //         camDirection.setY(mMatrix.getPosition().y);
+   //     direction = camDirection * -1;
     }
 
     direction.normalize();
     //set rotation to this direction
     mMatrix.setRotationToVector(direction);
 
-    glUseProgram(mMaterial.mShader->getProgram());
+   // glUseProgram(mMaterial.mShader->getProgram());
     glBindVertexArray( mVAO );
-    mMaterial.mShader->transmitUniformData(&mMatrix, &mMaterial);
+  //  mMaterial.mShader->transmitUniformData(&mMatrix, &mMaterial);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }

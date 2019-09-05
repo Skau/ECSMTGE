@@ -3,7 +3,7 @@
 
 #include "componentdata.h"
 #include <typeinfo>
-
+#include <vector>
 #include <QDebug>
 
 /** A component data manager class
@@ -110,14 +110,13 @@ private:
     // ------------------------------ Member Variables ------------------------------
     // Amount of component arrays.
     // Compile time static as arrays also are compile time statics.
-    static constexpr unsigned int componentCount{3};
+    static constexpr unsigned int componentCount{2};
 
     // Component arrays. Remember to update componentCount if adding more.
     // Transform *mTransforms{nullptr};
     // Render *mRenders{nullptr};
-    DataArray<Transform> mTransforms;
-    DataArray<Render> mRenders;
-    DataArray<Material> mMaterials;
+    std::vector<Transform> mTransforms;
+    std::vector<Render> mRenders;
 
     // Length of all component arrays.
     unsigned int arrayLength{0};
@@ -157,12 +156,15 @@ private:
 public:
     EntityManager();
 
+    std::vector<Transform> getTransforms() { return mTransforms; }
+    std::vector<Render> getRenders() { return mRenders; }
+
     unsigned int createEntity() { return idCounter++; }
 
     template<typename... componentTypes>
-    std::tuple<componentTypes...> addComponent(unsigned int entity)
+    void addComponent(unsigned int entity)
     {
-        return {addComponents<componentTypes>(entity)...};
+        std::tuple<componentTypes...> l = {addComponents<componentTypes>(entity)...};
     }
 
     template<class T,
@@ -171,6 +173,7 @@ public:
     {
         qDebug() << "Adding Transform component for entityID " << entity;
         auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
+
         if (-1 < internalIndex) {
             if(mTransforms[static_cast<unsigned>(internalIndex)].valid) {
                 return mTransforms[static_cast<unsigned>(internalIndex)];
@@ -182,10 +185,8 @@ public:
                 return component;
             }
         } else {
-            if (emptyRow < 0)
-                resizeArrays(arrayLength + 1);
-
-            Transform& component = mTransforms.at((emptyRow < 0) ? arrayLength - 1 : emptyRow) = T{};
+            mTransforms.emplace_back(T{});
+            Transform& component = mTransforms.back();
             component.entityId = entity;
             component.valid = true;
             return component;
@@ -209,40 +210,40 @@ public:
                 return component;
             }
         } else {
-            if (emptyRow < 0)
-                resizeArrays(arrayLength + 1);
 
-           Render& component = mRenders.at((emptyRow < 0) ? arrayLength - 1 : emptyRow) = T{};
-           component.entityId = entity;
-           component.valid = true;
-           return component;
+                mRenders.emplace_back(T{});
+                Render& component = mRenders.back();
+                component.entityId = entity;
+                component.valid = true;
+                return component;
         }
     }
 
     template<class T,
-             typename std::enable_if<(std::is_same<Material, T>::value)>::type* = nullptr>
-    T& addComponents(unsigned int entity)
+             typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
+    T* getComponent(unsigned int entity)
     {
-        qDebug() << "Adding Material component for entityID " << entity;
-        auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
-        if (-1 < internalIndex) {
-            if(mMaterials[static_cast<unsigned>(internalIndex)].valid) {
-                return mMaterials[static_cast<unsigned>(internalIndex)];
+        for(unsigned i = 0; i < mTransforms.size(); ++i)
+        {
+            if(mTransforms[i].valid && mTransforms[i].entityId == entity)
+            {
+                return &mTransforms[i];
             }
-            else {
-                Material& component = mMaterials[internalIndex] = T{};
-                component.entityId = entity;
-                component.valid = true;
-                return component;
-            }
-        } else {
-            if (emptyRow < 0)
-                resizeArrays(arrayLength + 1);
+            return nullptr;
+        }
+    }
 
-           Material& component = mMaterials.at((emptyRow < 0) ? arrayLength - 1 : emptyRow) = T{};
-           component.entityId = entity;
-           component.valid = true;
-           return component;
+    template<class T,
+             typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
+    T* getComponent(unsigned int entity)
+    {
+        for(unsigned i = 0; i < mRenders.size(); ++i)
+        {
+            if(mRenders[i].valid && mRenders[i].entityId == entity)
+            {
+                return &mRenders[i];
+            }
+            return nullptr;
         }
     }
 
@@ -252,9 +253,6 @@ public:
             std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
         std::cout << std::endl << "renders: ";
         for (auto comp : mRenders)
-            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
-        std::cout << std::endl << "materials: ";
-        for (auto comp : mMaterials)
             std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
         std::cout << std::endl;
     }

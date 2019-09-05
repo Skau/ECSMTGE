@@ -3,6 +3,7 @@
 #include <QDebug>
 
 #include "scene.h"
+#include "entitymanager.h"
 
 App::App()
 {
@@ -43,8 +44,12 @@ void App::update()
     mRenderer->handleInput(mDeltaTime);
 
 
-    mRenderer->render(mWorld->getCurrentScene()->getVisualObjects(), mDeltaTime);
+ //   mRenderer->render(mWorld->getCurrentScene()->getVisualObjects(), mDeltaTime);
 
+    auto transforms = mWorld->getEntityManager()->getTransforms();
+    auto renders = mWorld->getEntityManager()->getRenders();
+
+    mRenderer->render(renders, transforms, 1, mDeltaTime);
 
     currentlyUpdating = false;
 }

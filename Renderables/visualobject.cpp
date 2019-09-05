@@ -18,5 +18,5 @@ void VisualObject::init()
 
 void VisualObject::setShader(std::shared_ptr<Shader> shader)
 {
-    mMaterial.mShader = shader;
+ //   mMaterial.mShader = shader;
 }

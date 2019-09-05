@@ -47,7 +47,6 @@ HEADERS += \
     resourcemanager.h \
     scene.h \
     texture.h \
-    material.h \
     world.h \
     meshdata.h
 
@@ -84,7 +83,6 @@ SOURCES += \
     resourcemanager.cpp \
     scene.cpp \
     texture.cpp \
-    material.cpp \
     world.cpp \
     entitymanager.inl
 

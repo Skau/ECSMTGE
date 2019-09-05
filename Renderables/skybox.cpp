@@ -88,8 +88,8 @@ void SkyBox::init()
 
 void SkyBox::draw()
 {
-    glUseProgram(mMaterial.mShader->getProgram());
+//    glUseProgram(mMaterial.mShader->getProgram());
     glBindVertexArray( mVAO );
-    mMaterial.mShader->transmitUniformData(&mMatrix, &mMaterial);
+//    mMaterial.mShader->transmitUniformData(&mMatrix, &mMaterial);
     glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr);
 }

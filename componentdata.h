@@ -16,6 +16,7 @@ struct Component
 
 struct Transform : public Component
 {
+    bool updated{false};
     gsl::Vector3D position{};
     gsl::Vector3D scale{1,1,1};
     gsl::Vector3D rotation{};
@@ -27,6 +28,13 @@ struct Render : public Component
     bool isVisible : 1;
 
     Render() : isVisible(false) {}
+};
+
+struct Camera : public Component
+{
+    GLuint framebufferTarget;
+    gsl::Matrix4x4 viewMatrix;
+    gsl::Matrix4x4 projectionMatrix;
 };
 
 // .. etc

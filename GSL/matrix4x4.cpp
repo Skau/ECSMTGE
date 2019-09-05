@@ -12,32 +12,38 @@
 namespace gsl
 {
 
-Matrix4x4::Matrix4x4(bool isIdentity)
+Matrix4x4::Matrix4x4(const Vector4D &diagonal)
+    : data{
+          diagonal.x, 0.f, 0.f, 0.f,
+          0.f, diagonal.y, 0.f, 0.f,
+          0.f, 0.f, diagonal.z, 0.f,
+          0.f, 0.f, 0.f, diagonal.w
+        }
 {
-    if(isIdentity)
-    {
-        identity();
-    }
-    else
-    {
-        for(int i = 0; i < 16; i++)
-            matrix[i] = 0.f;
-    }
+
 }
 
 Matrix4x4::Matrix4x4(std::initializer_list<GLfloat> values)
 {
     //Initializing the matrix class the same way as a 2d array
     int i = 0;
-    for(auto value : values)
-        matrix[i++] = value;
+    for(auto it{values.begin()}; it != values.end() && i < 16; ++it, ++i)
+        data[i] = *it;
 }
 
-Matrix4x4 Matrix4x4::identity()
+Matrix4x4::Matrix4x4(const std::array<Vector4D, 4> &vectors)
 {
-    setToIdentity();
+    // Not sure whether this gets transposed or not. It is supposed to be row-wise.
+    for (unsigned int outer{0}; outer < 4; ++outer) {
+        for (unsigned int inner{0}; inner < 4; ++inner) {
+            data[outer * 4 + inner] = vectors.at(outer)[static_cast<int>(inner)];
+        }
+    }
+}
 
-    return *this;
+Matrix4x4 Matrix4x4::identity() const
+{
+    return gsl::Matrix4x4{};
 }
 
 void Matrix4x4::setToIdentity()
@@ -58,119 +64,119 @@ bool Matrix4x4::inverse()
 
     int i;
 
-    inv[0] = matrix[5]  * matrix[10] * matrix[15] -
-            matrix[5]  * matrix[11] * matrix[14] -
-            matrix[9]  * matrix[6]  * matrix[15] +
-            matrix[9]  * matrix[7]  * matrix[14] +
-            matrix[13] * matrix[6]  * matrix[11] -
-            matrix[13] * matrix[7]  * matrix[10];
+    inv[0] = data[5]  * data[10] * data[15] -
+            data[5]  * data[11] * data[14] -
+            data[9]  * data[6]  * data[15] +
+            data[9]  * data[7]  * data[14] +
+            data[13] * data[6]  * data[11] -
+            data[13] * data[7]  * data[10];
 
-    inv[4] = -matrix[4]  * matrix[10] * matrix[15] +
-            matrix[4]  * matrix[11] * matrix[14] +
-            matrix[8]  * matrix[6]  * matrix[15] -
-            matrix[8]  * matrix[7]  * matrix[14] -
-            matrix[12] * matrix[6]  * matrix[11] +
-            matrix[12] * matrix[7]  * matrix[10];
+    inv[4] = -data[4]  * data[10] * data[15] +
+            data[4]  * data[11] * data[14] +
+            data[8]  * data[6]  * data[15] -
+            data[8]  * data[7]  * data[14] -
+            data[12] * data[6]  * data[11] +
+            data[12] * data[7]  * data[10];
 
-    inv[8] = matrix[4]  * matrix[9] * matrix[15] -
-            matrix[4]  * matrix[11] * matrix[13] -
-            matrix[8]  * matrix[5] * matrix[15] +
-            matrix[8]  * matrix[7] * matrix[13] +
-            matrix[12] * matrix[5] * matrix[11] -
-            matrix[12] * matrix[7] * matrix[9];
+    inv[8] = data[4]  * data[9] * data[15] -
+            data[4]  * data[11] * data[13] -
+            data[8]  * data[5] * data[15] +
+            data[8]  * data[7] * data[13] +
+            data[12] * data[5] * data[11] -
+            data[12] * data[7] * data[9];
 
-    inv[12] = -matrix[4]  * matrix[9] * matrix[14] +
-            matrix[4]  * matrix[10] * matrix[13] +
-            matrix[8]  * matrix[5] * matrix[14] -
-            matrix[8]  * matrix[6] * matrix[13] -
-            matrix[12] * matrix[5] * matrix[10] +
-            matrix[12] * matrix[6] * matrix[9];
+    inv[12] = -data[4]  * data[9] * data[14] +
+            data[4]  * data[10] * data[13] +
+            data[8]  * data[5] * data[14] -
+            data[8]  * data[6] * data[13] -
+            data[12] * data[5] * data[10] +
+            data[12] * data[6] * data[9];
 
-    inv[1] = -matrix[1]  * matrix[10] * matrix[15] +
-            matrix[1]  * matrix[11] * matrix[14] +
-            matrix[9]  * matrix[2] * matrix[15] -
-            matrix[9]  * matrix[3] * matrix[14] -
-            matrix[13] * matrix[2] * matrix[11] +
-            matrix[13] * matrix[3] * matrix[10];
+    inv[1] = -data[1]  * data[10] * data[15] +
+            data[1]  * data[11] * data[14] +
+            data[9]  * data[2] * data[15] -
+            data[9]  * data[3] * data[14] -
+            data[13] * data[2] * data[11] +
+            data[13] * data[3] * data[10];
 
-    inv[5] = matrix[0]  * matrix[10] * matrix[15] -
-            matrix[0]  * matrix[11] * matrix[14] -
-            matrix[8]  * matrix[2] * matrix[15] +
-            matrix[8]  * matrix[3] * matrix[14] +
-            matrix[12] * matrix[2] * matrix[11] -
-            matrix[12] * matrix[3] * matrix[10];
+    inv[5] = data[0]  * data[10] * data[15] -
+            data[0]  * data[11] * data[14] -
+            data[8]  * data[2] * data[15] +
+            data[8]  * data[3] * data[14] +
+            data[12] * data[2] * data[11] -
+            data[12] * data[3] * data[10];
 
-    inv[9] = -matrix[0]  * matrix[9] * matrix[15] +
-            matrix[0]  * matrix[11] * matrix[13] +
-            matrix[8]  * matrix[1] * matrix[15] -
-            matrix[8]  * matrix[3] * matrix[13] -
-            matrix[12] * matrix[1] * matrix[11] +
-            matrix[12] * matrix[3] * matrix[9];
+    inv[9] = -data[0]  * data[9] * data[15] +
+            data[0]  * data[11] * data[13] +
+            data[8]  * data[1] * data[15] -
+            data[8]  * data[3] * data[13] -
+            data[12] * data[1] * data[11] +
+            data[12] * data[3] * data[9];
 
-    inv[13] = matrix[0]  * matrix[9] * matrix[14] -
-            matrix[0]  * matrix[10] * matrix[13] -
-            matrix[8]  * matrix[1] * matrix[14] +
-            matrix[8]  * matrix[2] * matrix[13] +
-            matrix[12] * matrix[1] * matrix[10] -
-            matrix[12] * matrix[2] * matrix[9];
+    inv[13] = data[0]  * data[9] * data[14] -
+            data[0]  * data[10] * data[13] -
+            data[8]  * data[1] * data[14] +
+            data[8]  * data[2] * data[13] +
+            data[12] * data[1] * data[10] -
+            data[12] * data[2] * data[9];
 
-    inv[2] = matrix[1]  * matrix[6] * matrix[15] -
-            matrix[1]  * matrix[7] * matrix[14] -
-            matrix[5]  * matrix[2] * matrix[15] +
-            matrix[5]  * matrix[3] * matrix[14] +
-            matrix[13] * matrix[2] * matrix[7] -
-            matrix[13] * matrix[3] * matrix[6];
+    inv[2] = data[1]  * data[6] * data[15] -
+            data[1]  * data[7] * data[14] -
+            data[5]  * data[2] * data[15] +
+            data[5]  * data[3] * data[14] +
+            data[13] * data[2] * data[7] -
+            data[13] * data[3] * data[6];
 
-    inv[6] = -matrix[0]  * matrix[6] * matrix[15] +
-            matrix[0]  * matrix[7] * matrix[14] +
-            matrix[4]  * matrix[2] * matrix[15] -
-            matrix[4]  * matrix[3] * matrix[14] -
-            matrix[12] * matrix[2] * matrix[7] +
-            matrix[12] * matrix[3] * matrix[6];
+    inv[6] = -data[0]  * data[6] * data[15] +
+            data[0]  * data[7] * data[14] +
+            data[4]  * data[2] * data[15] -
+            data[4]  * data[3] * data[14] -
+            data[12] * data[2] * data[7] +
+            data[12] * data[3] * data[6];
 
-    inv[10] = matrix[0]  * matrix[5] * matrix[15] -
-            matrix[0]  * matrix[7] * matrix[13] -
-            matrix[4]  * matrix[1] * matrix[15] +
-            matrix[4]  * matrix[3] * matrix[13] +
-            matrix[12] * matrix[1] * matrix[7] -
-            matrix[12] * matrix[3] * matrix[5];
+    inv[10] = data[0]  * data[5] * data[15] -
+            data[0]  * data[7] * data[13] -
+            data[4]  * data[1] * data[15] +
+            data[4]  * data[3] * data[13] +
+            data[12] * data[1] * data[7] -
+            data[12] * data[3] * data[5];
 
-    inv[14] = -matrix[0]  * matrix[5] * matrix[14] +
-            matrix[0]  * matrix[6] * matrix[13] +
-            matrix[4]  * matrix[1] * matrix[14] -
-            matrix[4]  * matrix[2] * matrix[13] -
-            matrix[12] * matrix[1] * matrix[6] +
-            matrix[12] * matrix[2] * matrix[5];
+    inv[14] = -data[0]  * data[5] * data[14] +
+            data[0]  * data[6] * data[13] +
+            data[4]  * data[1] * data[14] -
+            data[4]  * data[2] * data[13] -
+            data[12] * data[1] * data[6] +
+            data[12] * data[2] * data[5];
 
-    inv[3] = -matrix[1] * matrix[6] * matrix[11] +
-            matrix[1] * matrix[7] * matrix[10] +
-            matrix[5] * matrix[2] * matrix[11] -
-            matrix[5] * matrix[3] * matrix[10] -
-            matrix[9] * matrix[2] * matrix[7] +
-            matrix[9] * matrix[3] * matrix[6];
+    inv[3] = -data[1] * data[6] * data[11] +
+            data[1] * data[7] * data[10] +
+            data[5] * data[2] * data[11] -
+            data[5] * data[3] * data[10] -
+            data[9] * data[2] * data[7] +
+            data[9] * data[3] * data[6];
 
-    inv[7] = matrix[0] * matrix[6] * matrix[11] -
-            matrix[0] * matrix[7] * matrix[10] -
-            matrix[4] * matrix[2] * matrix[11] +
-            matrix[4] * matrix[3] * matrix[10] +
-            matrix[8] * matrix[2] * matrix[7] -
-            matrix[8] * matrix[3] * matrix[6];
+    inv[7] = data[0] * data[6] * data[11] -
+            data[0] * data[7] * data[10] -
+            data[4] * data[2] * data[11] +
+            data[4] * data[3] * data[10] +
+            data[8] * data[2] * data[7] -
+            data[8] * data[3] * data[6];
 
-    inv[11] = -matrix[0] * matrix[5] * matrix[11] +
-            matrix[0] * matrix[7] * matrix[9] +
-            matrix[4] * matrix[1] * matrix[11] -
-            matrix[4] * matrix[3] * matrix[9] -
-            matrix[8] * matrix[1] * matrix[7] +
-            matrix[8] * matrix[3] * matrix[5];
+    inv[11] = -data[0] * data[5] * data[11] +
+            data[0] * data[7] * data[9] +
+            data[4] * data[1] * data[11] -
+            data[4] * data[3] * data[9] -
+            data[8] * data[1] * data[7] +
+            data[8] * data[3] * data[5];
 
-    inv[15] = matrix[0] * matrix[5] * matrix[10] -
-            matrix[0] * matrix[6] * matrix[9] -
-            matrix[4] * matrix[1] * matrix[10] +
-            matrix[4] * matrix[2] * matrix[9] +
-            matrix[8] * matrix[1] * matrix[6] -
-            matrix[8] * matrix[2] * matrix[5];
+    inv[15] = data[0] * data[5] * data[10] -
+            data[0] * data[6] * data[9] -
+            data[4] * data[1] * data[10] +
+            data[4] * data[2] * data[9] +
+            data[8] * data[1] * data[6] -
+            data[8] * data[2] * data[5];
 
-    det = matrix[0] * inv[0] + matrix[1] * inv[4] + matrix[2] * inv[8] + matrix[3] * inv[12];
+    det = data[0] * inv[0] + data[1] * inv[4] + data[2] * inv[8] + data[3] * inv[12];
 
     if (det == 0.f)
         return false;
@@ -180,7 +186,7 @@ bool Matrix4x4::inverse()
     for (i = 0; i < 16; i++)
         invOut[i] = inv[i] * det;
 
-    memcpy(matrix, invOut, 16*sizeof(GLfloat));
+    memcpy(data, invOut, 16*sizeof(GLfloat));
 
     return true;
 }
@@ -203,14 +209,14 @@ void Matrix4x4::translateZ(GLfloat z)
 
 void Matrix4x4::setPosition(GLfloat x, GLfloat y, GLfloat z)
 {
-    matrix[3] = x;
-    matrix[7] = y;
-    matrix[11] = z;
+    data[3] = x;
+    data[7] = y;
+    data[11] = z;
 }
 
 Vector3D Matrix4x4::getPosition()
 {
-    return gsl::Vector3D(matrix[3], matrix[7], matrix[11]);
+    return gsl::Vector3D(data[3], data[7], data[11]);
 }
 
 void Matrix4x4::rotateX(GLfloat degrees)
@@ -301,23 +307,32 @@ void Matrix4x4::scale(GLfloat scaleX, GLfloat scaleY, GLfloat scaleZ)
 
 GLfloat *Matrix4x4::constData()
 {
-    return &matrix[0];
+    return &data[0];
 }
 
 void Matrix4x4::transpose()
 {
-    std::swap(matrix[1], matrix[4]);
-    std::swap(matrix[2], matrix[8]);
-    std::swap(matrix[3], matrix[12]);
+    std::swap(data[1], data[4]);
+    std::swap(data[2], data[8]);
+    std::swap(data[3], data[12]);
 
-    std::swap(matrix[6], matrix[9]);
-    std::swap(matrix[7], matrix[13]);
-    std::swap(matrix[11], matrix[14]);
+    std::swap(data[6], data[9]);
+    std::swap(data[7], data[13]);
+    std::swap(data[11], data[14]);
 }
 
-void Matrix4x4::ortho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat nearPlane, GLfloat farPlane)
+Matrix4x4 Matrix4x4::transposed() const
 {
-    *this =
+    return gsl::Matrix4x4{
+        data[0], data[4], data[8], data[12],
+        data[1], data[5], data[9], data[13],
+        data[2], data[6], data[10], data[14],
+        data[3], data[7], data[11], data[15]};
+}
+
+Matrix4x4& Matrix4x4::setOrtho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat nearPlane, GLfloat farPlane)
+{
+    return *this =
     {
         2.f/(r-l), 0.f, 0.f, 0.f,
                 0.f, 2.f/(t-b), 0.f, 0.f,
@@ -327,9 +342,9 @@ void Matrix4x4::ortho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat nearPl
 }
 
 //From Interactive Computer Graphics ch. 5
-void Matrix4x4::frustum(float left, float right, float bottom, float top, float nearPlane, float farPlane)
+Matrix4x4& Matrix4x4::setFrustum(float left, float right, float bottom, float top, float nearPlane, float farPlane)
 {
-    *this =
+    return *this =
     {
         2*nearPlane/(right-left),    0.f,                    (right+left)/(right-left),                      0.f,
                 0.f,              2*nearPlane/(top-bottom),  (top+bottom)/(top-bottom),                      0.f,
@@ -338,7 +353,7 @@ void Matrix4x4::frustum(float left, float right, float bottom, float top, float 
     };
 }
 
-void Matrix4x4::perspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane)
+Matrix4x4& Matrix4x4::setPerspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane)
 {
     /* General form of the Projection Matrix
     //
@@ -364,7 +379,7 @@ void Matrix4x4::perspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat ne
     GLfloat uh = static_cast<float>(1/std::tan(gsl::deg2rad(static_cast<double>(fieldOfView)/2)));
     GLfloat uw = (1/aspectRatio) * uh;
 
-    *this =
+    return *this =
     {
         uw,     0.f,    0.f,                                        0.f,
         0.f,    uh,     0.f,                                        0.f,
@@ -392,7 +407,64 @@ void Matrix4x4::perspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat ne
     */
 }
 
-void Matrix4x4::lookAt(const Vector3D &eye, const Vector3D &center, const Vector3D &up_axis)
+Matrix4x4 Matrix4x4::ortho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat nearPlane, GLfloat farPlane)
+{
+    return
+    {
+        2.f/(r-l), 0.f, 0.f, 0.f,
+        0.f, 2.f/(t-b), 0.f, 0.f,
+        0.f, 0.f, -2.f/(farPlane-nearPlane), 0.f,
+        -(r+l)/(r-l), -(t+b)/(t-b), -(farPlane+nearPlane)/(farPlane-nearPlane), 1.f
+    };
+}
+
+Matrix4x4 Matrix4x4::frustum(float left, float right, float bottom, float top, float nearPlane, float farPlane)
+{
+    return
+    {
+        2*nearPlane/(right-left),   0.f,                            (right+left)/(right-left),                      0.f,
+        0.f,                        2*nearPlane/(top-bottom),       (top+bottom)/(top-bottom),                      0.f,
+        0.f,                        0.f,                            -(farPlane+nearPlane)/(farPlane-nearPlane),     -2*farPlane*nearPlane/(farPlane-nearPlane),
+        0.f,                        0.f,                            -1.0f,                                          0.0f
+    };
+}
+
+Matrix4x4 Matrix4x4::perspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane)
+{
+    /* General form of the Projection Matrix
+    //
+    // uh = Cot( fov/2 ) == 1/Tan(fov/2)
+    // uw / uh = 1/aspect
+    //
+    //   uw         0       0       0
+    //    0        uh       0       0
+    //    0         0      f/(f-n)  1
+    //    0         0    -fn/(f-n)  0 */
+
+    //Checking numbers for no division on zero:
+    if (fieldOfView <= 0.f)
+        fieldOfView = 30.f;
+    if (aspectRatio <= 0.f)
+        aspectRatio = 1.3f;
+    if (farPlane - nearPlane <= 0.f)
+    {
+        nearPlane = 1.f;
+        farPlane = 100.f;
+    }
+
+    GLfloat uh = static_cast<float>(1/std::tan(gsl::deg2rad(static_cast<double>(fieldOfView)/2)));
+    GLfloat uw = (1/aspectRatio) * uh;
+
+    return
+    {
+        uw,     0.f,    0.f,                                        0.f,
+        0.f,    uh,     0.f,                                        0.f,
+        0.f,    0.f,    -(farPlane)/(farPlane-nearPlane),    -2 * farPlane*nearPlane/(farPlane-nearPlane),
+        0.f,    0.f,    -1.f,                                        0.f
+    };
+}
+
+void Matrix4x4::setLookAt(const Vector3D &eye, const Vector3D &center, const Vector3D &up_axis)
 {
     Vector3D f = center-eye;    //forward
     f.normalize();
@@ -409,6 +481,21 @@ void Matrix4x4::lookAt(const Vector3D &eye, const Vector3D &center, const Vector
     };
 }
 
+Matrix4x4 Matrix4x4::lookAtRotation(const Vector3D &from, const Vector3D &to, const Vector3D &up_axis)
+{
+    Vector3D f = (to - from).normalized(); // Forward
+    Vector3D r = Vector3D::cross(f, up_axis).normalized(); // Right
+    Vector3D u = Vector3D::cross(r, f).normalized(); // Up
+
+    return gsl::Matrix4x4
+    {
+        r.x, r.y, r.z, 0.f,
+        u.x, u.y, u.z, 0.f,
+        f.x, f.y, f.z, 0.f,
+        0.f, 0.f, 0.f, 1.f
+    };
+}
+
 void Matrix4x4::setRotationToVector(const Vector3D &direction, Vector3D up)
 {
     Vector3D xaxis = Vector3D::cross(up, direction);
@@ -417,17 +504,17 @@ void Matrix4x4::setRotationToVector(const Vector3D &direction, Vector3D up)
     Vector3D yaxis = Vector3D::cross(direction, xaxis);
     yaxis.normalize();
 
-    matrix[0] = xaxis.x;
-    matrix[1] = yaxis.x;
-    matrix[2] = direction.x;
+    data[0] = xaxis.x;
+    data[1] = yaxis.x;
+    data[2] = direction.x;
 
-    matrix[4] = xaxis.y;
-    matrix[5] = yaxis.y;
-    matrix[6] = direction.y;
+    data[4] = xaxis.y;
+    data[5] = yaxis.y;
+    data[6] = direction.y;
 
-    matrix[8] = xaxis.z;
-    matrix[9] = yaxis.z;
-    matrix[10] = direction.z;
+    data[8] = xaxis.z;
+    data[9] = yaxis.z;
+    data[10] = direction.z;
 }
 
 void Matrix4x4::translate(GLfloat x, GLfloat y, GLfloat z)
@@ -460,8 +547,8 @@ Matrix2x2 Matrix4x4::toMatrix2()
 {
     return
     {
-        matrix[0], matrix[1],
-                matrix[4], matrix[5]
+        data[0], data[1],
+                data[4], data[5]
     };
 }
 
@@ -469,60 +556,60 @@ Matrix3x3 Matrix4x4::toMatrix3() const
 {
     return
     {
-        matrix[0], matrix[1], matrix[2],
-                matrix[4], matrix[5], matrix[6],
-                matrix[8], matrix[9], matrix[10]
+        data[0], data[1], data[2],
+                data[4], data[5], data[6],
+                data[8], data[9], data[10]
     };
 }
 
 
 GLfloat& Matrix4x4::operator()(const int &y, const int &x)
 {
-    return matrix[y * 4 + x];
+    return data[y * 4 + x];
 }
 
 GLfloat Matrix4x4::operator()(const int &y, const int &x) const
 {
-    return matrix[y * 4 + x];
+    return data[y * 4 + x];
 }
 
 Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &other)
 {
     return
     {
-        matrix[0]  * other.matrix[0] + matrix[1]  * other.matrix[4] + matrix[2]  * other.matrix[8]  + matrix[3]  * other.matrix[12],
-                matrix[0]  * other.matrix[1] + matrix[1]  * other.matrix[5] + matrix[2]  * other.matrix[9]  + matrix[3]  * other.matrix[13],
-                matrix[0]  * other.matrix[2] + matrix[1]  * other.matrix[6] + matrix[2]  * other.matrix[10] + matrix[3]  * other.matrix[14],
-                matrix[0]  * other.matrix[3] + matrix[1]  * other.matrix[7] + matrix[2]  * other.matrix[11] + matrix[3]  * other.matrix[15],
+        data[0]  * other.data[0] + data[1]  * other.data[4] + data[2]  * other.data[8]  + data[3]  * other.data[12],
+                data[0]  * other.data[1] + data[1]  * other.data[5] + data[2]  * other.data[9]  + data[3]  * other.data[13],
+                data[0]  * other.data[2] + data[1]  * other.data[6] + data[2]  * other.data[10] + data[3]  * other.data[14],
+                data[0]  * other.data[3] + data[1]  * other.data[7] + data[2]  * other.data[11] + data[3]  * other.data[15],
 
-                matrix[4]  * other.matrix[0] + matrix[5]  * other.matrix[4] + matrix[6]  * other.matrix[8]  + matrix[7]  * other.matrix[12],
-                matrix[4]  * other.matrix[1] + matrix[5]  * other.matrix[5] + matrix[6]  * other.matrix[9]  + matrix[7]  * other.matrix[13],
-                matrix[4]  * other.matrix[2] + matrix[5]  * other.matrix[6] + matrix[6]  * other.matrix[10] + matrix[7]  * other.matrix[14],
-                matrix[4]  * other.matrix[3] + matrix[5]  * other.matrix[7] + matrix[6]  * other.matrix[11] + matrix[7]  * other.matrix[15],
+                data[4]  * other.data[0] + data[5]  * other.data[4] + data[6]  * other.data[8]  + data[7]  * other.data[12],
+                data[4]  * other.data[1] + data[5]  * other.data[5] + data[6]  * other.data[9]  + data[7]  * other.data[13],
+                data[4]  * other.data[2] + data[5]  * other.data[6] + data[6]  * other.data[10] + data[7]  * other.data[14],
+                data[4]  * other.data[3] + data[5]  * other.data[7] + data[6]  * other.data[11] + data[7]  * other.data[15],
 
-                matrix[8]  * other.matrix[0] + matrix[9]  * other.matrix[4] + matrix[10] * other.matrix[8]  + matrix[11] * other.matrix[12],
-                matrix[8]  * other.matrix[1] + matrix[9]  * other.matrix[5] + matrix[10] * other.matrix[9]  + matrix[11] * other.matrix[13],
-                matrix[8]  * other.matrix[2] + matrix[9]  * other.matrix[6] + matrix[10] * other.matrix[10] + matrix[11] * other.matrix[14],
-                matrix[8]  * other.matrix[3] + matrix[9]  * other.matrix[7] + matrix[10] * other.matrix[11] + matrix[11] * other.matrix[15],
+                data[8]  * other.data[0] + data[9]  * other.data[4] + data[10] * other.data[8]  + data[11] * other.data[12],
+                data[8]  * other.data[1] + data[9]  * other.data[5] + data[10] * other.data[9]  + data[11] * other.data[13],
+                data[8]  * other.data[2] + data[9]  * other.data[6] + data[10] * other.data[10] + data[11] * other.data[14],
+                data[8]  * other.data[3] + data[9]  * other.data[7] + data[10] * other.data[11] + data[11] * other.data[15],
 
-                matrix[12] * other.matrix[0] + matrix[13] * other.matrix[4] + matrix[14] * other.matrix[8]  + matrix[15] * other.matrix[12],
-                matrix[12] * other.matrix[1] + matrix[13] * other.matrix[5] + matrix[14] * other.matrix[9]  + matrix[15] * other.matrix[13],
-                matrix[12] * other.matrix[2] + matrix[13] * other.matrix[6] + matrix[14] * other.matrix[10] + matrix[15] * other.matrix[14],
-                matrix[12] * other.matrix[3] + matrix[13] * other.matrix[7] + matrix[14] * other.matrix[11] + matrix[15] * other.matrix[15]
+                data[12] * other.data[0] + data[13] * other.data[4] + data[14] * other.data[8]  + data[15] * other.data[12],
+                data[12] * other.data[1] + data[13] * other.data[5] + data[14] * other.data[9]  + data[15] * other.data[13],
+                data[12] * other.data[2] + data[13] * other.data[6] + data[14] * other.data[10] + data[15] * other.data[14],
+                data[12] * other.data[3] + data[13] * other.data[7] + data[14] * other.data[11] + data[15] * other.data[15]
     };
 }
 
 GLfloat Matrix4x4::getFloat(int space)
 {
-    return matrix[space];
+    return data[space];
 }
 
 Vector4D Matrix4x4::operator*(const Vector4D &v)
 {
-    return Vector4D(matrix[0]*v.getX()  + matrix[1]*v.getY()  + matrix[2]*v.getZ()  + matrix[3] *v.getW(),
-            matrix[4]*v.getX()  + matrix[5]*v.getY()  + matrix[6]*v.getZ()  + matrix[7] *v.getW(),
-            matrix[8]*v.getX()  + matrix[9]*v.getY()  + matrix[10]*v.getZ() + matrix[11] *v.getW(),
-            matrix[12]*v.getX() + matrix[13]*v.getY() + matrix[14]*v.getZ() + matrix[15] *v.getW());
+    return Vector4D(data[0]*v.getX()  + data[1]*v.getY()  + data[2]*v.getZ()  + data[3] *v.getW(),
+            data[4]*v.getX()  + data[5]*v.getY()  + data[6]*v.getZ()  + data[7] *v.getW(),
+            data[8]*v.getX()  + data[9]*v.getY()  + data[10]*v.getZ() + data[11] *v.getW(),
+            data[12]*v.getX() + data[13]*v.getY() + data[14]*v.getZ() + data[15] *v.getW());
 }
 
 } //namespace

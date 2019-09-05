@@ -52,6 +52,12 @@ public:
         return x;   //to silence compiler warnings
     }
 
+    GLfloat operator[] (const int index) const
+    {
+        assert(index < 4 && index >= 0);
+        return *(&x + index);
+    }
+
     //Functions:
     GLfloat length();
     Vector3D toVector3D();
@@ -77,6 +83,22 @@ public:
     void setW(const GLfloat &value);
 
     Vector3D getXYZ() const;
+
+    // Iterator class
+    class Vector4DIterator {
+    private:
+        Vector4D& mRef;
+        unsigned int mIndex;
+
+    public:
+        Vector4DIterator(Vector4D& object, unsigned int index = 0);
+        Vector4D& operator*();
+        Vector4DIterator& operator++ ();
+        bool operator!= (const Vector4DIterator& it);
+    };
+
+    Vector4DIterator begin();
+    Vector4DIterator end();
 
     //Friend functions
     friend std::ostream& operator<<(std::ostream &output, const Vector4D &rhs )

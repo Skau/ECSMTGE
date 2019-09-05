@@ -32,7 +32,7 @@ public:
     //Functions
     GLfloat length() const;
     void normalize();
-    Vector3D normalized();
+    Vector3D normalized() const;
     static Vector3D cross(const Vector3D &v1, const Vector3D &v2);
     static GLfloat dot(const Vector3D &v1, const Vector3D &v2);
 

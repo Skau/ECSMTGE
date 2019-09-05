@@ -104,19 +104,10 @@ namespace gsl
     }
 
 
-    Vector3D Vector3D::normalized()
+    Vector3D Vector3D::normalized() const
     {
-        Vector3D normalized;
         GLfloat l = length();
-
-        if (l > 0.f)
-        {
-            normalized.setX(x / l);
-            normalized.setY(y / l);
-            normalized.setZ(z / l);
-        }
-
-        return normalized;
+        return (l > 0.f) ? Vector3D{x / l, y / l, z / l} : Vector3D{0.f, 0.f, 0.f};
     }
 
 

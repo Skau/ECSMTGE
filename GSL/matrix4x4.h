@@ -7,17 +7,24 @@
 #include "gltypes.h"
 #include <iostream>
 #include <iomanip>
+#include <array>
 
 namespace gsl
 {
 
 class Matrix4x4
 {
-public:
-    Matrix4x4(bool isIdentity = false);
-    Matrix4x4(std::initializer_list<GLfloat> values);
+private:
+    // TODO: Change structure so that matrices doesn't need to be transposed to send to OpenGL.
+    GLfloat data[16];
 
-    Matrix4x4 identity();
+public:
+    // Default constructor. Initializes the matrix with a diagonal at the identity axis.
+    Matrix4x4(const gsl::Vector4D& diagonal = gsl::Vector4D{1.f, 1.f, 1.f, 1.f});
+    Matrix4x4(std::initializer_list<GLfloat> values);
+    explicit Matrix4x4(const std::array<gsl::Vector4D, 4>& vectors);
+
+    Matrix4x4 identity() const;
     void setToIdentity();
 
     bool inverse();
@@ -43,12 +50,18 @@ public:
     GLfloat* constData();
 
     void transpose();
+    Matrix4x4 transposed() const;
 
-    void ortho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat nearPlane, GLfloat farPlane);
-    void frustum(float left, float right, float bottom, float top, float nearPlane, float farPlane);
-    void perspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane);
+    Matrix4x4& setOrtho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat nearPlane, GLfloat farPlane);
+    Matrix4x4& setFrustum(float left, float right, float bottom, float top, float nearPlane, float farPlane);
+    Matrix4x4& setPerspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane);
 
-    void lookAt(const Vector3D &eye, const Vector3D &center, const Vector3D &up_axis);
+    static Matrix4x4 ortho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat nearPlane, GLfloat farPlane);
+    static Matrix4x4 frustum(float left, float right, float bottom, float top, float nearPlane, float farPlane);
+    static Matrix4x4 perspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane);
+
+    void setLookAt(const Vector3D &eye, const Vector3D &center, const Vector3D &up_axis);
+    static Matrix4x4 lookAtRotation(const Vector3D &from, const Vector3D &to, const Vector3D &up_axis);
 
     void setRotationToVector(const Vector3D &direction, Vector3D up = Vector3D(0.f,1.f,0.f));
 
@@ -68,16 +81,13 @@ public:
     friend std::ostream& operator<<(std::ostream &output, const Matrix4x4 &mIn)
     {
         output << std::setprecision(4) <<
-                  "{" << mIn.matrix[0] << "\t, " << mIn.matrix[4] << "\t, " << mIn.matrix[8] << "\t, " << mIn.matrix[12] << "}\n" <<
-                  "{" << mIn.matrix[1] << "\t, " << mIn.matrix[5] << "\t, " << mIn.matrix[9] << "\t, " << mIn.matrix[13] << "}\n" <<
-                  "{" << mIn.matrix[2] << "\t, " << mIn.matrix[6] << "\t, " << mIn.matrix[10] << "\t, " << mIn.matrix[14] << "}\n" <<
-                  "{" << mIn.matrix[3] << "\t, " << mIn.matrix[7] << "\t, " << mIn.matrix[11] << "\t, " << mIn.matrix[15] << "}\n";
+                  "{" << mIn.data[0] << "\t, " << mIn.data[4] << "\t, " << mIn.data[8] << "\t, " << mIn.data[12] << "}\n" <<
+                  "{" << mIn.data[1] << "\t, " << mIn.data[5] << "\t, " << mIn.data[9] << "\t, " << mIn.data[13] << "}\n" <<
+                  "{" << mIn.data[2] << "\t, " << mIn.data[6] << "\t, " << mIn.data[10] << "\t, " << mIn.data[14] << "}\n" <<
+                  "{" << mIn.data[3] << "\t, " << mIn.data[7] << "\t, " << mIn.data[11] << "\t, " << mIn.data[15] << "}\n";
         return output;
     }
     GLfloat getFloat(int space);
-private:
-    // TODO: Change structure so that matrices doesn't need to be transposed to send to OpenGL.
-    GLfloat matrix[16];
 };
 
 } //namespace

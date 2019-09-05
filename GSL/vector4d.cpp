@@ -248,4 +248,38 @@ namespace gsl
         return Vector3D(x, y, z);
     }
 
+    Vector4D::Vector4DIterator::Vector4DIterator(Vector4D &object, unsigned int index)
+        : mRef{object}, mIndex{index}
+    {
+
+    }
+
+    Vector4D &Vector4D::Vector4DIterator::operator*()
+    {
+        return *(&mRef + mIndex);
+    }
+
+    Vector4D::Vector4DIterator &Vector4D::Vector4DIterator::operator++()
+    {
+        ++mIndex;
+        return *this;
+    }
+
+    bool Vector4D::Vector4DIterator::operator!=(const Vector4D::Vector4DIterator &it)
+    {
+        return !(mIndex == it.mIndex && &mRef == &it.mRef);
+    }
+
+    Vector4D::Vector4DIterator Vector4D::begin()
+    {
+        return Vector4DIterator{*this, 0};
+    }
+
+    Vector4D::Vector4DIterator Vector4D::end()
+    {
+        return Vector4DIterator{*this, 4};
+    }
+
+
+
 } //namespace

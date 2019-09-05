@@ -18,14 +18,12 @@ World::World()
     ResourceManager::instance()->addMesh("box", "box2.txt");
     ResourceManager::instance()->addMesh("monkey", "monkey.obj");
 
-    auto mesh = ResourceManager::instance()->getMesh("box");
-    if(mesh)
+    if(auto mesh =  ResourceManager::instance()->getMesh("box"))
     {
         mesh->mMaterial.mShader = ResourceManager::instance()->getShader("plain");
     }
 
-    mesh = ResourceManager::instance()->getMesh("monkey");
-    if(mesh)
+    if(auto mesh = ResourceManager::instance()->getMesh("monkey"))
     {
         mesh->mMaterial.mShader = ResourceManager::instance()->getShader("phong");
     }

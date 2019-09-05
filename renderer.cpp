@@ -102,7 +102,7 @@ void Renderer::render(const std::vector<VisualObject*>& objects, double deltaTim
         for (auto visObject: objects)
         {
             visObject->draw();
-    //        checkForGLerrors();
+            //        checkForGLerrors();
         }
 
         checkForGLerrors();
@@ -124,40 +124,65 @@ void Renderer::render(std::vector<Render> renders, std::vector<Transform> transf
         mContext->makeCurrent(this);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        qDebug() << "Is exposed";
+        mCurrentCamera->update(deltaTime);
 
-         mCurrentCamera->update(deltaTime);
+        auto transIt = transforms.begin();
+        auto renderIt = renders.begin();
 
-        for (unsigned int i{0}; i < renders.size(); ++i)
+        bool transformShortest = transforms.size() < renders.size();
+
+        bool _{true};
+
+        // cause normal while (true) loops are so outdated
+        for ( ;_; )
         {
-            qDebug() << "i: " << i;
-            if (renders[i].valid && transforms[i].valid)
+            if (transformShortest)
             {
-                qDebug() << "Both are valid";
+                if (transIt == transforms.end())
+                    break;
+            }
+            else
+            {
+                if (renderIt == renders.end())
+                    break;
+            }
+
+            // Increment lowest index
+            if (!transIt->valid || transIt->entityId < renderIt->entityId)
+            {
+                ++transIt;
+            }
+            else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
+            {
+                ++renderIt;
+            }
+            else
+            {
+                // They are the same, draw.
+                if(!renderIt->isVisible)
+                {
+                    // Increment all
+                    ++transIt;
+                    ++renderIt;
+                    continue;
+                }
+
                 // Entity can be drawn. Draw.
 
-                auto meshData = renders[i].meshData;
-                if(!meshData) continue;
+                auto meshData = renderIt->meshData;
 
-                glBindVertexArray(meshData->mVAO);
+                glBindVertexArray(meshData.mVAO);
 
-                qDebug() << "VAO: " << meshData->mVAO;
-
-                auto shader = meshData->mMaterial.mShader;
+                auto shader = meshData.mMaterial.mShader;
                 if(!shader)
                 {
-                    qDebug() << "Using default shader";
                     shader = ResourceManager::instance()->getShader("plain");
-                }
-                else
-                {
-                    qDebug() << "Using material shader";
                 }
 
                 gsl::mat4 matrix;
                 matrix.setToIdentity();
-                matrix.translate(transforms[i].position);
-                matrix.scale(transforms[i].scale);
+                matrix.translate(transIt->position);
+                matrix.scale(transIt->scale);
 
                 glUseProgram(shader->getProgram());
 
@@ -165,25 +190,24 @@ void Renderer::render(std::vector<Render> renders, std::vector<Transform> transf
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, mCurrentCamera->mViewMatrix.constData());
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, mCurrentCamera->mProjectionMatrix.constData());
 
-                if(meshData->mIndicesCount > 0)
+                if(meshData.mIndicesCount > 0)
                 {
-                    qDebug() << "drawelements";
-                    glDrawElements(meshData->mRenderType, static_cast<GLsizei>(meshData->mIndicesCount), GL_UNSIGNED_INT, nullptr);
+                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
                 }
                 else
                 {
-                    qDebug() << "drawarrays";
-                    glDrawArrays(meshData->mRenderType, 0, static_cast<GLsizei>(meshData->mVerticesCount));
+                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
                 }
-
+                // Increment all
+                ++transIt;
+                ++renderIt;
             }
         }
-
-        checkForGLerrors();
-
-        mContext->swapBuffers(this);
     }
 
+    checkForGLerrors();
+
+    mContext->swapBuffers(this);
 }
 
 void Renderer::setupCamera()
@@ -297,18 +321,18 @@ void Renderer::handleInput(double deltaTime)
     }
     else
     {
-//        if(mInput.W)
-//            mLight->mMatrix.translateZ(-mCameraSpeed);
-//        if(mInput.S)
-//            mLight->mMatrix.translateZ(mCameraSpeed);
-//        if(mInput.D)
-//            mLight->mMatrix.translateX(mCameraSpeed);
-//        if(mInput.A)
-//            mLight->mMatrix.translateX(-mCameraSpeed);
-//        if(mInput.Q)
-//            mLight->mMatrix.translateY(mCameraSpeed);
-//        if(mInput.E)
-//            mLight->mMatrix.translateY(-mCameraSpeed);
+        //        if(mInput.W)
+        //            mLight->mMatrix.translateZ(-mCameraSpeed);
+        //        if(mInput.S)
+        //            mLight->mMatrix.translateZ(mCameraSpeed);
+        //        if(mInput.D)
+        //            mLight->mMatrix.translateX(mCameraSpeed);
+        //        if(mInput.A)
+        //            mLight->mMatrix.translateX(-mCameraSpeed);
+        //        if(mInput.Q)
+        //            mLight->mMatrix.translateY(mCameraSpeed);
+        //        if(mInput.E)
+        //            mLight->mMatrix.translateY(-mCameraSpeed);
     }
 }
 

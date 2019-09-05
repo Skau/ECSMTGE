@@ -92,12 +92,14 @@ Scene::Scene(World *world) : mWorld(world)
         auto entity = entityManager->createEntity();
         entityManager->addComponent<Transform, Render>(entity);
         auto render = entityManager->getComponent<Render>(entity);
-        render->meshData = ResourceManager::instance()->getMesh("phong");
+        if(auto meshData = ResourceManager::instance()->getMesh("box"))
+        {
+            render->meshData = *meshData;
+            render->isVisible = true;
+        }
         auto transform = entityManager->getComponent<Transform>(entity);
-        transform->position = gsl::vec3(i, 0, 0);
+        transform->position = gsl::vec3(i*2, 0, 0);
     }
-
-
 
     entityManager->print();
 }

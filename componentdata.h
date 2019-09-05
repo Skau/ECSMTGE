@@ -9,7 +9,9 @@
 struct Component
 {
     unsigned int entityId;
-    bool valid{false};
+    bool valid : 1;
+
+    Component() : valid(false) {}
 };
 
 struct Transform : public Component
@@ -21,7 +23,10 @@ struct Transform : public Component
 
 struct Render : public Component
 {
-    std::shared_ptr<MeshData> meshData{nullptr};
+    MeshData meshData{};
+    bool isVisible : 1;
+
+    Render() : isVisible(false) {}
 };
 
 // .. etc

@@ -20,9 +20,6 @@
 #include "Renderables/trianglesurface.h"
 #include "Renderables/objmesh.h"
 #include "Renderables/light.h"
-#include "Shaders/colorshader.h"
-#include "Shaders/textureshader.h"
-#include "Shaders/phongshader.h"
 
 #include "resourcemanager.h"
 

@@ -18,7 +18,8 @@ class Shader : protected QOpenGLFunctions_4_1_Core
 {
 public:
     // Constructor generates the shader on the fly
-    Shader(const std::string shaderName, const GLchar *geometryPath = nullptr );
+    Shader(const std::string shaderName);
+    Shader(const std::string vertexPath, const std::string fragmentPath, const std::string geometryPath = std::string{});
     virtual ~Shader();
 
     // Use the current shader

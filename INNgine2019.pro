@@ -28,9 +28,6 @@ HEADERS += \
     GSL/math_constants.h \
     GSL/mathfwd.h \
     Shaders/shader.h \
-    Shaders/colorshader.h \
-    Shaders/textureshader.h \
-    Shaders/phongshader.h \
     Renderables/triangle.h \
     Renderables/billboard.h \
     Renderables/vertex.h \
@@ -64,9 +61,6 @@ SOURCES += \
     GSL/vector2d.cpp \
     GSL/vector3d.cpp \
     GSL/vector4d.cpp \
-    Shaders/colorshader.cpp \
-    Shaders/textureshader.cpp \
-    Shaders/phongshader.cpp \
     Shaders/shader.cpp \
     Renderables/billboard.cpp \
     Renderables/vertex.cpp \

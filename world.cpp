@@ -7,9 +7,9 @@
 
 World::World()
 {
-    ResourceManager::instance()->addShader("plain",     std::make_shared<ColorShader>("plainshader"));
-    ResourceManager::instance()->addShader("texture",   std::make_shared<ColorShader>("textureshader"));
-    ResourceManager::instance()->addShader("phong",     std::make_shared<ColorShader>("phongshader"));
+    ResourceManager::instance()->addShader("plain",     std::make_shared<Shader>("plainshader"));
+    ResourceManager::instance()->addShader("texture",   std::make_shared<Shader>("textureshader"));
+    ResourceManager::instance()->addShader("phong",     std::make_shared<Shader>("phongshader"));
 
     ResourceManager::instance()->loadTexture("white",   "white.bmp");
     ResourceManager::instance()->loadTexture("hund",    "hund.bmp");
@@ -32,4 +32,9 @@ World::World()
 
     mCurrentScene = new Scene(this);
 
+}
+
+World::~World()
+{
+    delete entityManager;
 }

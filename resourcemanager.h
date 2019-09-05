@@ -5,10 +5,6 @@
 #include <string>
 #include <memory>
 
-#include "Shaders/colorshader.h"
-#include "Shaders/textureshader.h"
-#include "Shaders/phongshader.h"
-
 #include "texture.h"
 
 #include "Renderables/vertex.h"

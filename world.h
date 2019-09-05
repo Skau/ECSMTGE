@@ -17,6 +17,8 @@ public:
 
     EntityManager* getEntityManager() { return entityManager; }
 
+    ~World();
+
 private:
     std::vector<Scene*> mScenes;
 

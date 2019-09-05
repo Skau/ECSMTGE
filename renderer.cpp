@@ -26,6 +26,7 @@
 
 #include "resourcemanager.h"
 
+
 Renderer::Renderer() : mInitialized(false)
 {
     QSurfaceFormat format;
@@ -78,6 +79,8 @@ void Renderer::init()
     glEnable(GL_DEPTH_TEST);    //enables depth sorting - must use GL_DEPTH_BUFFER_BIT in glClear
     glEnable(GL_CULL_FACE);     //draws only front side of models - usually what you want
 
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+
     //Print render version info:
     std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
     std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
@@ -108,7 +111,7 @@ void Renderer::render(const std::vector<VisualObject*>& objects, double deltaTim
     }
 }
 
-void Renderer::render(Render* renders, Material *materials, Transform* transforms, unsigned int components)
+void Renderer::render(std::vector<Render> renders, std::vector<Transform> transforms, unsigned int components, double deltaTime)
 {
     /* Note: For å gjøre dette enda raskere kunne det vært
      * mulig å gjøre at dataArraysene alltid resizer til nærmeste
@@ -116,28 +119,71 @@ void Renderer::render(Render* renders, Material *materials, Transform* transform
      * gjøre 8 parallelle handlinger. Kan mulig gjøre prosessen raskere.
      */
 
-    Material defaultMaterial{};
+    if(isExposed())
+    {
+        mContext->makeCurrent(this);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    mContext->makeCurrent(this);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        qDebug() << "Is exposed";
 
+         mCurrentCamera->update(deltaTime);
 
-    for (unsigned int i{0}; i < components; ++i) {
-        if (renders[i].valid && transforms[i].valid) {
-            // Entity can be drawn. Draw.
-            glBindVertexArray(renders[i].VAO);
+        for (unsigned int i{0}; i < components; ++i)
+        {
+            qDebug() << "i: " << i;
+            if (renders[i].valid && transforms[i].valid)
+            {
+                qDebug() << "Both are valid";
+                // Entity can be drawn. Draw.
 
-            auto shader = materials[i].valid ? materials[i].mShader->getProgram() : defaultMaterial.mShader->getProgram();
-            glUseProgram(shader);
+                auto meshData = renders[i].meshData;
+                if(!meshData) continue;
 
-            glUniformMatrix4fv(glGetUniformLocation(shader, "mMatrix"), transforms[i].modelMatrix)
+                glBindVertexArray(meshData->mVAO);
 
+                qDebug() << "VAO: " << meshData->mVAO;
+
+                auto shader = meshData->mMaterial.mShader;
+                if(!shader)
+                {
+                    qDebug() << "Using default shader";
+                    shader = ResourceManager::instance()->getShader("plain");
+                }
+                else
+                {
+                    qDebug() << "Using material shader";
+                }
+
+                gsl::mat4 matrix;
+                matrix.setToIdentity();
+                matrix.translate(transforms[i].position);
+                matrix.scale(transforms[i].scale);
+
+                glUseProgram(shader->getProgram());
+
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, matrix.constData());
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, mCurrentCamera->mViewMatrix.constData());
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, mCurrentCamera->mProjectionMatrix.constData());
+
+                if(meshData->mIndicesCount > 0)
+                {
+                    qDebug() << "drawelements";
+                    glDrawElements(meshData->mRenderType, static_cast<GLsizei>(meshData->mIndicesCount), GL_UNSIGNED_INT, nullptr);
+                }
+                else
+                {
+                    qDebug() << "drawarrays";
+                    glDrawArrays(meshData->mRenderType, 0, static_cast<GLsizei>(meshData->mVerticesCount));
+                }
+
+            }
         }
+
+        checkForGLerrors();
+
+        mContext->swapBuffers(this);
     }
 
-    checkForGLerrors();
-
-    mContext->swapBuffers(this);
 }
 
 void Renderer::setupCamera()
@@ -251,18 +297,18 @@ void Renderer::handleInput(double deltaTime)
     }
     else
     {
-        if(mInput.W)
-            mLight->mMatrix.translateZ(-mCameraSpeed);
-        if(mInput.S)
-            mLight->mMatrix.translateZ(mCameraSpeed);
-        if(mInput.D)
-            mLight->mMatrix.translateX(mCameraSpeed);
-        if(mInput.A)
-            mLight->mMatrix.translateX(-mCameraSpeed);
-        if(mInput.Q)
-            mLight->mMatrix.translateY(mCameraSpeed);
-        if(mInput.E)
-            mLight->mMatrix.translateY(-mCameraSpeed);
+//        if(mInput.W)
+//            mLight->mMatrix.translateZ(-mCameraSpeed);
+//        if(mInput.S)
+//            mLight->mMatrix.translateZ(mCameraSpeed);
+//        if(mInput.D)
+//            mLight->mMatrix.translateX(mCameraSpeed);
+//        if(mInput.A)
+//            mLight->mMatrix.translateX(-mCameraSpeed);
+//        if(mInput.Q)
+//            mLight->mMatrix.translateY(mCameraSpeed);
+//        if(mInput.E)
+//            mLight->mMatrix.translateY(-mCameraSpeed);
     }
 }
 

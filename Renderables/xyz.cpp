@@ -49,8 +49,8 @@ void XYZ::init()
 
 void XYZ::draw()
 {
-    glUseProgram(mMaterial.mShader->getProgram());
+//    glUseProgram(mMaterial.mShader->getProgram());
     glBindVertexArray( mVAO );
-    mMaterial.mShader->transmitUniformData(&mMatrix);
+//    mMaterial.mShader->transmitUniformData(&mMatrix);
     glDrawArrays(GL_LINES, 0, mVertices.size());
 }

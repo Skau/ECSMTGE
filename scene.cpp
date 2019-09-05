@@ -16,12 +16,12 @@
 // Just hardcoded scene for now
 Scene::Scene(World *world) : mWorld(world)
 {
-    VisualObject * temp{nullptr};
+//    VisualObject * temp{nullptr};
 
-    temp = new XYZ();
-    temp->init();
-    temp->setShader(ResourceManager::instance()->getShader("plain"));
-    mVisualObjects.push_back(temp);
+//    temp = new XYZ();
+//    temp->init();
+//    temp->setShader(ResourceManager::instance()->getShader("plain"));
+//    mVisualObjects.push_back(temp);
 
     // *** Commented it out because it's not showing up? *** //
 //    temp = new OctahedronBall(2);
@@ -32,13 +32,13 @@ Scene::Scene(World *world) : mWorld(world)
 //    mVisualObjects.push_back(temp);
 //    mPlayer = temp;
 
-    temp = new SkyBox();
-    temp->init();
-    temp->setShader(ResourceManager::instance()->getShader("texture"));
-    temp->mMaterial.setTextureUnit(2);
-    temp->mMatrix.scale(15.f);
-    temp->mName = "Cube";
-    mVisualObjects.push_back(temp);
+//    temp = new SkyBox();
+//    temp->init();
+//    temp->setShader(ResourceManager::instance()->getShader("texture"));
+//    temp->mMaterial.setTextureUnit(2);
+//    temp->mMatrix.scale(15.f);
+//    temp->mName = "Cube";
+//    mVisualObjects.push_back(temp);
 
     // *** Not using because it needs the renderer (not setup yet) *** //
 //    temp = new BillBoard();
@@ -67,45 +67,37 @@ Scene::Scene(World *world) : mWorld(world)
 //    mVisualObjects.push_back(temp);
 
     // *** The mesh is weird on runtime now for some reason *** //
-    temp = new TriangleSurface("box2.txt");
-    temp->init();
-    temp->mMatrix.rotateY(180.f);
-    temp->setShader(ResourceManager::instance()->getShader("plain"));
-    mVisualObjects.push_back(temp);
+//    temp = new TriangleSurface("box2.txt");
+//    temp->init();
+//    temp->mMatrix.rotateY(180.f);
+//    temp->setShader(ResourceManager::instance()->getShader("plain"));
+//    mVisualObjects.push_back(temp);
 
     // *** No light so this is commented out *** //
 //    static_cast<PhongShader*>(mShaderProgram[2])->setLight(mLight);
 
     // *** Because of no light this is just black *** //
-    temp = new ObjMesh("monkey.obj");
-    temp->setShader(ResourceManager::instance()->getShader("phong"));
-    temp->init();
-    temp->mName = "Monkey";
-    temp->mMatrix.scale(0.5f);
-    temp->mMatrix.translate(3.f, 2.f, -2.f);
-    mVisualObjects.push_back(temp);
+//    temp = new ObjMesh("monkey.obj");
+//    temp->setShader(ResourceManager::instance()->getShader("phong"));
+//    temp->init();
+//    temp->mName = "Monkey";
+//    temp->mMatrix.scale(0.5f);
+//    temp->mMatrix.translate(3.f, 2.f, -2.f);
+//    mVisualObjects.push_back(temp);
 
     auto entityManager = world->getEntityManager();
 
-    auto entity = entityManager->createEntity();
-    entityManager->addComponent<Transform>(entity);
-    entityManager->addComponent<Render>(entity);
+    for(int i = 0; i < 10; ++i)
+    {
+        auto entity = entityManager->createEntity();
+        entityManager->addComponent<Transform, Render>(entity);
+        auto render = entityManager->getComponent<Render>(entity);
+        render->meshData = ResourceManager::instance()->getMesh("phong");
+        auto transform = entityManager->getComponent<Transform>(entity);
+        transform->position = gsl::vec3(i, 0, 0);
+    }
 
-    auto entity1 = entityManager->createEntity();
-    entityManager->addComponent<Transform>(entity1);
-    entityManager->addComponent<Render>(entity1);
 
 
-    auto entity2 = entityManager->createEntity();
-    entityManager->addComponent<Transform>(entity2);
-    entityManager->addComponent<Render>(entity2);
-
-    auto entity3 = entityManager->createEntity();
-    entityManager->addComponent<Transform>(entity3);
-    entityManager->addComponent<Render>(entity3);
-
-    auto entity4 = entityManager->createEntity();
-    entityManager->addComponent<Transform, Render>(entity4);
-entityManager->addComponent<Material>(entity1);
     entityManager->print();
 }

@@ -95,9 +95,9 @@ void OctahedronBall::init()
 
 void OctahedronBall::draw()
 {
-    glUseProgram(mMaterial.mShader->getProgram());
+//    glUseProgram(mMaterial.mShader->getProgram());
     glBindVertexArray( mVAO );
-    mMaterial.mShader->transmitUniformData(&mMatrix, &mMaterial);
+//    mMaterial.mShader->transmitUniformData(&mMatrix, &mMaterial);
     glDrawArrays(GL_TRIANGLES, 0, mVertices.size());//mVertices.size());
     glBindVertexArray(0);
 }

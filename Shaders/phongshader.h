@@ -9,7 +9,7 @@ public:
     PhongShader(const std::string shaderName, const GLchar *geometryPath = nullptr);
     virtual ~PhongShader() override;
 
-    void transmitUniformData(gsl::Matrix4x4 *modelMatrix, MaterialClass *material) override;
+    //void transmitUniformData(gsl::Matrix4x4 *modelMatrix, MaterialClass *material) override;
 
     void setLight(class Light *light);
 

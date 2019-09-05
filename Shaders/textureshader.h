@@ -2,7 +2,7 @@
 #define TEXTURESHADER_H
 
 #include "shader.h"
-#include "material.h"
+
 
 class TextureShader : public Shader
 {
@@ -10,7 +10,7 @@ public:
     TextureShader(const std::string shaderName, const GLchar *geometryPath = nullptr);
     virtual ~TextureShader() override;
 
-    void transmitUniformData(gsl::Matrix4x4 *modelMatrix, MaterialClass *material) override;
+    //void transmitUniformData(gsl::Matrix4x4 *modelMatrix, MaterialClass *material) override;
 
 private:
     GLint objectColorUniform{-1};

@@ -24,13 +24,7 @@ public:
     Renderer* getRenderer() { return mRenderer; }
     Ui::MainWindow *ui;
 
-
-private slots:
-    void on_pushButton_clicked();
-
 private:
-
-
     Renderer* mRenderer;
     QWidget *mRenderWindowContainer;
 };

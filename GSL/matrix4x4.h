@@ -76,6 +76,7 @@ public:
     }
     GLfloat getFloat(int space);
 private:
+    // TODO: Change structure so that matrices doesn't need to be transposed to send to OpenGL.
     GLfloat matrix[16];
 };
 

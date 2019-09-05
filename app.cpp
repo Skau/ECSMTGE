@@ -14,9 +14,9 @@ App::App()
 
     connect(mRenderer, &Renderer::initDone, this, &App::initTheRest);
 
-    connect(mMainWindow->ui->button_toggleWireframe, &QPushButton::clicked, mRenderer, &Renderer::toggleWireframe);
-
+    connect(mMainWindow->ui->actionToggle_wireframe, &QAction::triggered, mRenderer, &Renderer::toggleWireframe);
     connect(mRenderer, &Renderer::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
+    connect(mMainWindow->ui->actionExit, &QAction::triggered, mMainWindow.get(), &MainWindow::close);
 }
 
 void App::initTheRest()

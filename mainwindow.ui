@@ -32,13 +32,6 @@
          <enum>QLayout::SetMaximumSize</enum>
         </property>
         <item>
-         <widget class="QPushButton" name="button_toggleWireframe">
-          <property name="text">
-           <string>Toggle wireframe</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QVBoxLayout" name="OpenGLLayout">
           <property name="spacing">
            <number>0</number>
@@ -84,8 +77,15 @@
     </widget>
     <addaction name="menuCreate_object"/>
    </widget>
+   <widget class="QMenu" name="menuFun_stuff">
+    <property name="title">
+     <string>Fun stuff</string>
+    </property>
+    <addaction name="actionToggle_wireframe"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuFun_stuff"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -113,6 +113,9 @@
    <property name="text">
     <string>Exit</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
   </action>
   <action name="actionCube">
    <property name="text">
@@ -122,6 +125,20 @@
   <action name="actionMonkey">
    <property name="text">
     <string>Suzanne</string>
+   </property>
+  </action>
+  <action name="actionToggle_wireframe">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Wireframe</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
    </property>
   </action>
  </widget>

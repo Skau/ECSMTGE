@@ -17,7 +17,7 @@ TextureShader::~TextureShader()
     qDebug() << "Deleting TextureShader";
 }
 
-void TextureShader::transmitUniformData(gsl::Matrix4x4 *modelMatrix, Material *material)
+void TextureShader::transmitUniformData(gsl::Matrix4x4 *modelMatrix, MaterialClass *material)
 {
     Shader::transmitUniformData(modelMatrix);
 

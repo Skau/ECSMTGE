@@ -26,7 +26,7 @@ public:
 
     Renderer *mRenderWindow; //Just to be able to call checkForGLerrors()
 
-    Material mMaterial;
+    MaterialClass mMaterial;
 
 protected:
     std::vector<Vertex> mVertices;   //This is usually not needed after object is made

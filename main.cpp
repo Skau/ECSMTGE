@@ -10,7 +10,6 @@ int main(int argc, char *argv[])
     //Makes an Qt application
     QApplication a(argc, argv);
 
-
     // App is hub, app is life
     App app;
 

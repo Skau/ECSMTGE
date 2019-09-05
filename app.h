@@ -21,6 +21,10 @@ class App : public QObject
 public:
     App();
 
+
+public slots:
+    void initTheRest();
+
 private slots:
     void update();
     void quit();
@@ -30,7 +34,7 @@ private:
     void calculateFrames();
 
     std::unique_ptr<MainWindow> mMainWindow;
-    std::unique_ptr<Renderer> mRenderer;
+    Renderer* mRenderer;
     std::unique_ptr<World> mWorld;
 
     QTimer mUpdateTimer; // Calls update

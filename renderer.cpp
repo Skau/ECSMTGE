@@ -11,8 +11,6 @@
 #include <QCoreApplication>
 #include <QThread>
 
-#include "mainwindow.h"
-
 #include "Renderables/xyz.h"
 #include "Renderables/octahedronball.h"
 #include "Renderables/skybox.h"
@@ -27,7 +25,7 @@
 #include "resourcemanager.h"
 
 
-Renderer::Renderer() : mInitialized(false)
+Renderer::Renderer()
 {
     QSurfaceFormat format;
     format.setVersion(4, 1);
@@ -49,29 +47,20 @@ Renderer::Renderer() : mInitialized(false)
         mContext = nullptr;
         qDebug() << "Context could not be made - quitting this application";
     }
-    create();
 }
 
 Renderer::~Renderer()
 {
 }
 
-/// Sets up the general OpenGL stuff and the buffers needed to render a triangle
 void Renderer::init()
 {
-    //********************** General OpenGL stuff **********************
-
     //The OpenGL context has to be set.
     //The context belongs to the instanse of this class!
     if (!mContext->makeCurrent(this)) {
         qDebug() << "makeCurrent() failed";
         return;
     }
-
-    //just to make sure we don't init several times
-    //used in exposeEvent()
-    if (!mInitialized)
-        mInitialized = true;
 
     //must call this to use OpenGL functions
     initializeOpenGLFunctions();
@@ -87,6 +76,8 @@ void Renderer::init()
     std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
 
     startOpenGLDebugger();
+
+    initDone();
 }
 
 ///Called each frame - doing the rendering
@@ -222,6 +213,12 @@ void Renderer::setupCamera()
 
 void Renderer::exposeEvent(QExposeEvent *)
 {
+    if(!isInitialized)
+    {
+        init();
+        isInitialized = true;
+    }
+
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, static_cast<GLint>(width() * retinaScale), static_cast<GLint>(height() * retinaScale));
     mAspectratio = static_cast<float>(width()) / height();

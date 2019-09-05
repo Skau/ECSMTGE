@@ -13,7 +13,6 @@
 
 class QOpenGLContext;
 class Shader;
-class MainWindow;
 class Light;
 class QTime;
 
@@ -30,14 +29,13 @@ public:
 
     QOpenGLContext* getContext() { return mContext; }
 
+    void init();
+
     void exposeEvent(QExposeEvent *) override;
     void toggleWireframe();
 
     void checkForGLerrors();
 
-    bool mInitialized{false};
-
-    void init();
     void handleInput(double deltaTime);
     void render(const std::vector<VisualObject*>& objects, double deltaTime);
 
@@ -47,6 +45,7 @@ public:
     void setupCamera();
 
 signals:
+    void initDone();
     void escapeKeyPressed();
 
 
@@ -60,6 +59,8 @@ private:
     Camera *mCurrentCamera{nullptr};
 
     bool mWireframe{false};
+
+    bool isInitialized{false};
 
     Input mInput;
     float mCameraSpeed{0.01f};

@@ -5,18 +5,27 @@
 #include "scene.h"
 #include "entitymanager.h"
 
+#include "ui_mainwindow.h"
+
 App::App()
 {
-
     mMainWindow = std::make_unique<MainWindow>();
-    mRenderer = std::make_unique<Renderer>();
-    mMainWindow->addViewport(mRenderer.get());
-    mRenderer->init();
+    mRenderer = mMainWindow->getRenderer();
+
+    connect(mRenderer, &Renderer::initDone, this, &App::initTheRest);
+
+    connect(mMainWindow->ui->button_toggleWireframe, &QPushButton::clicked, mRenderer, &Renderer::toggleWireframe);
+
+    connect(mRenderer, &Renderer::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
+}
+
+void App::initTheRest()
+{
     mWorld = std::make_unique<World>();
 
     mRenderer->setupCamera();
 
-    connect(mRenderer.get(), &Renderer::escapeKeyPressed, this, &App::quit);
+    connect(mRenderer, &Renderer::escapeKeyPressed, this, &App::quit);
 
     connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);
 

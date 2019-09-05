@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <memory>
 
 class QWidget;
 class Renderer;
@@ -18,19 +19,19 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void addViewport(Renderer* renderWindow);
-
     void showFPS(double deltaTime, double frameCounter);
 
-signals:
-    void toggledWireframe();
+    Renderer* getRenderer() { return mRenderer; }
+    Ui::MainWindow *ui;
+
 
 private slots:
     void on_pushButton_clicked();
 
 private:
-    Ui::MainWindow *ui;
 
+
+    Renderer* mRenderer;
     QWidget *mRenderWindowContainer;
 };
 

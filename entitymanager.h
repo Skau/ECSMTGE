@@ -10,151 +10,27 @@
  * Constructs entities and manages
  * component data for each entity.
  *
- * @author andesyv
+ * @author andesyv, Skau
  */
-
 class EntityManager
 {
 private:
-    // ------------------------------- Internal Data Types --------------------------
-    /**
-     * A data wrapper class for objects of type T
-     * that uses normal C-style arrays to store
-     * data and with some more functionality.
-     * @brief dataWrapper class for components
-     */
-    template <class T>
-    class DataArray
-    {
-        // No need to make the member functions private, as they are only
-        // accessible from within ComponentManager
-    public:
-        // Data pointer to beginning of normal c-style array.
-        T* mData = nullptr;
-        static unsigned int mLength;
-
-        // internalLength should always be the same as length
-        // (only used when resizing)
-        unsigned int mInternalLength{0};
-
-    public:
-        DataArray();
-
-        T* get();
-        T* operator* ();
-        T& operator[] (unsigned int i);
-        T& at (unsigned int i);
-
-        class DataArrayIterator
-        {
-        private:
-            unsigned int index;
-            DataArray<T> &ref;
-
-        public:
-            DataArrayIterator(DataArray<T> &_ref, unsigned int _index);
-            DataArrayIterator& operator++();
-            bool operator!= (const DataArrayIterator& it);
-            T& operator* ();
-        };
-
-        DataArrayIterator begin();
-        DataArrayIterator end();
-
-        void resize(unsigned int newLength);
-    };
-
-
-
-    /**
-     * A wrapper class for a horizontal iterator
-     * To be used by the loopHorizontal function so
-     * that you can use a range-based for loop to loop
-     * through each row of the components arrays.
-     *
-     * @brief HorizontalIterator wrapper
-     */
-    class HorizontalIteratorWrapper {
-    private:
-        EntityManager* compManRef;
-        unsigned int index;
-
-    public:
-        HorizontalIteratorWrapper(EntityManager* _compManRef, unsigned int _index);
-
-        class HorizontalIterator
-        {
-        private:
-            EntityManager* compManRef;
-            unsigned int index;
-            unsigned int hIndex;
-
-        public:
-            HorizontalIterator(EntityManager* _compManRef, unsigned int _index, unsigned int _hIndex);
-            HorizontalIterator& operator++();
-            bool operator!= (const HorizontalIterator& it);
-            // Kind of a "look up table"
-            Component* operator*();
-        };
-
-        HorizontalIterator begin();
-        HorizontalIterator end();
-    };
-
-
-
-
-
-
-private:
     // ------------------------------ Member Variables ------------------------------
-    // Amount of component arrays.
-    // Compile time static as arrays also are compile time statics.
-    static constexpr unsigned int componentCount{2};
-
     // Component arrays. Remember to update componentCount if adding more.
-    // Transform *mTransforms{nullptr};
-    // Render *mRenders{nullptr};
     std::vector<Transform> mTransforms;
     std::vector<Render> mRenders;
 
-    // Length of all component arrays.
-    unsigned int arrayLength{0};
+    unsigned int idCounter{0};
 
-    static unsigned int idCounter;
+
 
 
     // ------------------------- Member functions ---------------
-private:
-    HorizontalIteratorWrapper loopHorizontal(unsigned int index);
-    void resizeArrays(unsigned int newSize);
-
-    std::pair<long int, long int> getInternalIndexAndEmptyRow(unsigned int entity)
-    {
-        long int internalIndex{-1}, emptyRow{-1};
-        for (unsigned int i{0}; i < arrayLength; ++i)
-        {
-            bool rowIsEmpty{true};
-            for (auto comp : loopHorizontal(i)) {
-                if (comp->valid) {
-                    if (comp->entityId == entity) {
-                        // This component is part of same entity
-                        internalIndex = i;
-                        // break;
-                    }
-
-                    rowIsEmpty = false;
-                }
-            }
-            if (rowIsEmpty)
-                emptyRow = i;
-        }
-
-        return std::make_pair(internalIndex, emptyRow);
-    }
-
 public:
-    EntityManager();
+    EntityManager()
+    {
+
+    }
 
     std::vector<Transform> getTransforms() { return mTransforms; }
     std::vector<Render> getRenders() { return mRenders; }
@@ -171,80 +47,78 @@ public:
              typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
     T& addComponents(unsigned int entity)
     {
-        qDebug() << "Adding Transform component for entityID " << entity;
-        auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
-
-        if (-1 < internalIndex) {
-            if(mTransforms[static_cast<unsigned>(internalIndex)].valid) {
-                return mTransforms[static_cast<unsigned>(internalIndex)];
+        for (auto& comp : mTransforms)
+        {
+            if (!comp.valid)
+            {
+                comp.valid = true;
+                if (comp.entityId != entity)
+                {
+                    comp.entityId = entity;
+                    std::sort(mTransforms.begin(), mTransforms.end(),[](const Transform& t1, const Transform& t2)
+                    {
+                        return t1.entityId < t2.entityId;
+                    });
+                }
+                return comp;
             }
-            else {
-                Transform& component = mTransforms[internalIndex] = T{};
-                component.entityId = entity;
-                component.valid = true;
-                return component;
-            }
-        } else {
-            mTransforms.emplace_back(T{});
-            Transform& component = mTransforms.back();
-            component.entityId = entity;
-            component.valid = true;
-            return component;
         }
+
+        // TODO: Make constructor
+        mTransforms.emplace_back(Transform{});
+        mTransforms.back().entityId = entity;
+        mTransforms.back().valid = true;
+        return mTransforms.back();
     }
 
     template<class T,
              typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
     T& addComponents(unsigned int entity)
     {
-        qDebug() << "Adding Render component for entityID " << entity;
-        auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
-        if (-1 < internalIndex) {
-            if(mRenders[static_cast<unsigned>(internalIndex)].valid) {
-                return mRenders[static_cast<unsigned>(internalIndex)];
+        for (auto& comp : mRenders)
+        {
+            if (!comp.valid)
+            {
+                comp.valid = true;
+                if (comp.entityId != entity)
+                {
+                    comp.entityId = entity;
+                    std::sort(mRenders.begin(), mRenders.end(),[](const Render& t1, const Render& t2)
+                    {
+                        return t1.entityId < t2.entityId;
+                    });
+                }
+                return comp;
             }
-            else {
-                Render& component = mRenders[internalIndex] = T{};
-                component.entityId = entity;
-                component.valid = true;
-                return component;
-            }
-        } else {
-
-                mRenders.emplace_back(T{});
-                Render& component = mRenders.back();
-                component.entityId = entity;
-                component.valid = true;
-                return component;
         }
+
+        // TODO: Make constructor
+        mRenders.emplace_back(Render{});
+        mRenders.back().entityId = entity;
+        mRenders.back().valid = true;
+        return mRenders.back();
     }
 
     template<class T,
              typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
     T* getComponent(unsigned int entity)
     {
-        for(unsigned i = 0; i < mTransforms.size(); ++i)
-        {
-            if(mTransforms[i].valid && mTransforms[i].entityId == entity)
-            {
-                return &mTransforms[i];
-            }
-            return nullptr;
-        }
+        for (auto& comp : mTransforms)
+            if (comp.valid && comp.entityId == entity)
+                return &comp;
+
+        return nullptr;
     }
 
     template<class T,
              typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
     T* getComponent(unsigned int entity)
     {
-        for(unsigned i = 0; i < mRenders.size(); ++i)
-        {
-            if(mRenders[i].valid && mRenders[i].entityId == entity)
-            {
-                return &mRenders[i];
-            }
-            return nullptr;
-        }
+        for (auto& comp : mRenders)
+            if (comp.valid && comp.entityId == entity)
+                return &comp;
+
+        return nullptr;
     }
 
     void print() {
@@ -258,10 +132,5 @@ public:
     }
 
 };
-
-
-
-// Inline include of entitymanager.inl
-#include "entitymanager.inl"
 
 #endif // COMPONENTMANAGER_H

@@ -54,7 +54,6 @@ HEADERS += \
 SOURCES += \
     GSL/math.cpp \
     app.cpp \
-    entitymanager.cpp \
     main.cpp \
     mainwindow.cpp \
     camera.cpp \
@@ -83,8 +82,7 @@ SOURCES += \
     resourcemanager.cpp \
     scene.cpp \
     texture.cpp \
-    world.cpp \
-    entitymanager.inl
+    world.cpp
 
 
 FORMS += \
@@ -99,5 +97,4 @@ DISTFILES += \
     Shaders/textureshader.frag \
     Shaders/textureshader.vert \
     GSL/README.md \
-    README.md \
-    entitymanager
+    README.md

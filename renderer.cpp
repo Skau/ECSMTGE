@@ -111,7 +111,7 @@ void Renderer::render(const std::vector<VisualObject*>& objects, double deltaTim
     }
 }
 
-void Renderer::render(std::vector<Render> renders, std::vector<Transform> transforms, unsigned int components, double deltaTime)
+void Renderer::render(std::vector<Render> renders, std::vector<Transform> transforms, double deltaTime)
 {
     /* Note: For å gjøre dette enda raskere kunne det vært
      * mulig å gjøre at dataArraysene alltid resizer til nærmeste
@@ -128,7 +128,7 @@ void Renderer::render(std::vector<Render> renders, std::vector<Transform> transf
 
          mCurrentCamera->update(deltaTime);
 
-        for (unsigned int i{0}; i < components; ++i)
+        for (unsigned int i{0}; i < renders.size(); ++i)
         {
             qDebug() << "i: " << i;
             if (renders[i].valid && transforms[i].valid)

@@ -42,7 +42,7 @@ public:
     void render(const std::vector<VisualObject*>& objects, double deltaTime);
 
     // Should only need renders, materials and transforms
-    void render(std::vector<Render> renders, std::vector<Transform> transforms, unsigned int components, double deltaTime);
+    void render(std::vector<Render> renders, std::vector<Transform> transforms, double deltaTime);
 
     void setupCamera();
 

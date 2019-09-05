@@ -49,7 +49,7 @@ void App::update()
     auto transforms = mWorld->getEntityManager()->getTransforms();
     auto renders = mWorld->getEntityManager()->getRenders();
 
-    mRenderer->render(renders, transforms, 1, mDeltaTime);
+    mRenderer->render(renders, transforms, mDeltaTime);
 
     currentlyUpdating = false;
 }

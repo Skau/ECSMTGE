@@ -1,7 +1,8 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
-#include "math.h"
+#include "innpch.h"
+#include "meshdata.h"
 
 // Something like this?
 
@@ -13,14 +14,14 @@ struct Component
 
 struct Transform : public Component
 {
-    gsl::Vector3D position;
-    gsl::Vector3D scale;
-    gsl::Vector3D rotation;
+    gsl::Vector3D position{};
+    gsl::Vector3D scale{};
+    gsl::Vector3D rotation{};
 };
 
 struct Render : public Component
 {
-
+    MeshData meshData{};
 };
 
 // .. etc

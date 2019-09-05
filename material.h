@@ -1,6 +1,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
+#include <memory>
 #include "vector3d.h"
 
 class Material
@@ -14,7 +15,7 @@ public:
 
     gsl::Vector3D mObjectColor{1.f, 1.f, 1.f};
     GLuint mTextureUnit{0};     //the actual texture to put into the uniform
-    Shader *mShader{nullptr};
+    std::shared_ptr<Shader> mShader{nullptr};
 };
 
 #endif // MATERIAL_H

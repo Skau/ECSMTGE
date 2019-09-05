@@ -48,7 +48,8 @@ HEADERS += \
     scene.h \
     texture.h \
     material.h \
-    world.h
+    world.h \
+    meshdata.h
 
 
 SOURCES += \

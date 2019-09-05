@@ -3,6 +3,7 @@
 
 #include <QOpenGLFunctions_4_1_Core>
 #include <vector>
+#include <memory>
 #include "vertex.h"
 #include "matrix4x4.h"
 #include "material.h"
@@ -19,7 +20,7 @@ public:
 
     gsl::Matrix4x4 mMatrix;
 
-    void setShader(Shader *shader);
+    void setShader(std::shared_ptr<Shader> shader);
 
     std::string mName;
 

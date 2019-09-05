@@ -15,7 +15,7 @@
 
 class EntityManager
 {
-private:
+public:
     // ------------------------------- Internal Data Types --------------------------
     /**
      * A data wrapper class for objects of type T
@@ -31,11 +31,7 @@ private:
     public:
         // Data pointer to beginning of normal c-style array.
         T* mData = nullptr;
-        static unsigned int mLength;
-
-        // internalLength should always be the same as length
-        // (only used when resizing)
-        unsigned int mInternalLength{0};
+        unsigned int mLength;
 
     public:
         DataArray();
@@ -44,6 +40,7 @@ private:
         T* operator* ();
         T& operator[] (unsigned int i);
         T& at (unsigned int i);
+        std::size_t size() const;
 
         class DataArrayIterator
         {
@@ -66,6 +63,9 @@ private:
 
 
 
+
+
+private:
     /**
      * A wrapper class for a horizontal iterator
      * To be used by the loopHorizontal function so
@@ -110,25 +110,20 @@ private:
     // ------------------------------ Member Variables ------------------------------
     // Amount of component arrays.
     // Compile time static as arrays also are compile time statics.
-    static constexpr unsigned int componentCount{3};
+    // static constexpr unsigned int componentCount{3};
 
     // Component arrays. Remember to update componentCount if adding more.
-    // Transform *mTransforms{nullptr};
-    // Render *mRenders{nullptr};
     DataArray<Transform> mTransforms;
     DataArray<Render> mRenders;
     DataArray<Material> mMaterials;
-
-    // Length of all component arrays.
-    unsigned int arrayLength{0};
 
     static unsigned int idCounter;
 
 
     // ------------------------- Member functions ---------------
 private:
-    HorizontalIteratorWrapper loopHorizontal(unsigned int index);
-    void resizeArrays(unsigned int newSize);
+//    HorizontalIteratorWrapper loopHorizontal(unsigned int index);
+//    void resizeArrays(unsigned int newSize);
 
     std::pair<long int, long int> getInternalIndexAndEmptyRow(unsigned int entity)
     {
@@ -169,26 +164,30 @@ public:
              typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
     T& addComponents(unsigned int entity)
     {
-        qDebug() << "Adding Transform component for entityID " << entity;
-        auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
-        if (-1 < internalIndex) {
-            if(mTransforms[static_cast<unsigned>(internalIndex)].valid) {
-                return mTransforms[static_cast<unsigned>(internalIndex)];
-            }
-            else {
-                Transform& component = mTransforms[internalIndex] = T{};
-                component.entityId = entity;
-                component.valid = true;
-                return component;
-            }
-        } else {
-            if (emptyRow < 0)
-                resizeArrays(arrayLength + 1);
+//        qDebug() << "Adding Transform component for entityID " << entity;
+//        auto[internalIndex, emptyRow] = getInternalIndexAndEmptyRow(entity);
+//        if (-1 < internalIndex) {
+//            if(mTransforms[static_cast<unsigned>(internalIndex)].valid) {
+//                return mTransforms[static_cast<unsigned>(internalIndex)];
+//            }
+//            else {
+//                Transform& component = mTransforms[internalIndex] = T{};
+//                component.entityId = entity;
+//                component.valid = true;
+//                return component;
+//            }
+//        } else {
+//            if (emptyRow < 0)
+//                resizeArrays(arrayLength + 1);
 
-            Transform& component = mTransforms.at((emptyRow < 0) ? arrayLength - 1 : emptyRow) = T{};
-            component.entityId = entity;
-            component.valid = true;
-            return component;
+//            Transform& component = mTransforms.at((emptyRow < 0) ? arrayLength - 1 : emptyRow) = T{};
+//            component.entityId = entity;
+//            component.valid = true;
+//            return component;
+//        }
+        for (auto comp : mTransforms)
+        {
+
         }
     }
 
@@ -263,7 +262,7 @@ public:
 
 
 
-// Inline include of entitymanager.inl
-#include "entitymanager.inl"
+//// Inline include of entitymanager.inl
+//#include "entitymanager.inl"
 
 #endif // COMPONENTMANAGER_H

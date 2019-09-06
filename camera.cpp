@@ -98,7 +98,7 @@ gsl::Vector3D CameraSystem::forward() const
     return mForward;
 }
 
-void CameraSystem::updateCameras(std::vector<Transform> transforms, std::vector<Camera> cameras)
+void CameraSystem::updateCameras(std::vector<Transform>& transforms, std::vector<Camera>& cameras)
 {
     auto transIt = transforms.begin();
     auto camIt = cameras.begin();
@@ -142,8 +142,18 @@ void CameraSystem::updateCameras(std::vector<Transform> transforms, std::vector<
                 continue;
             }
 
+            // Transforms rotation around x axis is pitch and rotation about y axis is yaw
+            auto rot = transIt->rotation;
+            gsl::vec3 lookAtPoint{
+                std::cos(gsl::deg2radf(rot.x)) * std::cos(gsl::deg2radf(rot.y)) * 1.f,
+                std::sin(gsl::deg2radf(rot.x))                                  * 1.f,
+                std::cos(gsl::deg2radf(rot.x)) * std::sin(gsl::deg2radf(rot.y)) * 1.f
+            };
+
             // If transform is updated, viewMatrix needs to be updated
-            camIt->viewMatrix = gsl::mat4::viewMatrix(transIt->position, gsl::vec3{0.f, 0.f, 0.f});
+            // camIt->viewMatrix = gsl::mat4::viewMatrix(transIt->position, gsl::vec3{0.f, 0.f, 0.f});
+            camIt->viewMatrix.setToIdentity();
+            camIt->viewMatrix.setLookAt(transIt->position, transIt->position + lookAtPoint, gsl::vec3{0.f, 1.f, 0.f});
 
 
             // Increment all
@@ -153,9 +163,9 @@ void CameraSystem::updateCameras(std::vector<Transform> transforms, std::vector<
     }
 }
 
-void CameraSystem::updateCameras(std::vector<Camera> cameras, const gsl::mat4 &projectionMatrix)
+void CameraSystem::updateCameras(std::vector<Camera>& cameras, const gsl::mat4 &projectionMatrix)
 {
-    for (auto comp : cameras)
+    for (auto& comp : cameras)
         comp.projectionMatrix = projectionMatrix;
 }
 

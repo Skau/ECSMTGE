@@ -44,6 +44,8 @@ public:
 
     void setupCamera();
 
+    CameraSystem *mCurrentCamera{nullptr};
+
 signals:
     void initDone();
     void escapeKeyPressed();
@@ -55,8 +57,6 @@ private:
     QOpenGLContext *mContext{nullptr};
 
     Light *mLight;
-
-    CameraSystem *mCurrentCamera{nullptr};
 
     bool mWireframe{false};
 

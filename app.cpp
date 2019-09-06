@@ -58,11 +58,11 @@ void App::update()
 
     mRenderer->handleInput(mDeltaTime);
 
-
- //   mRenderer->render(mWorld->getCurrentScene()->getVisualObjects(), mDeltaTime);
-
-    auto transforms = mWorld->getEntityManager()->getTransforms();
+    auto& transforms = mWorld->getEntityManager()->getTransforms();
     auto renders = mWorld->getEntityManager()->getRenders();
+    auto& cameras = mWorld->getEntityManager()->getCameras();
+
+    CameraSystem::updateCameras(transforms, cameras);
 
     mRenderer->render(renders, transforms, mDeltaTime);
 
@@ -72,6 +72,13 @@ void App::update()
 void App::quit()
 {
     mMainWindow->close();
+}
+
+void App::updatePerspective()
+{
+    auto& cameras = mWorld->getEntityManager()->getCameras();
+
+    CameraSystem::updateCameras(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 1.f, 100.f));
 }
 
 void App::calculateFrames()

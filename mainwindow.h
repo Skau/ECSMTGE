@@ -13,6 +13,8 @@ namespace Ui {
 class MainWindow;
 }
 
+class EntityManager;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -26,6 +28,14 @@ public:
     Renderer* getRenderer() { return mRenderer; }
 
     Ui::MainWindow *ui;
+
+    void setEntityManager(std::shared_ptr<EntityManager> entityManager);
+
+    std::shared_ptr<EntityManager> getEntityManager() { return mEntityManager; }
+
+    EntityData* currentEntitySelected{nullptr};
+
+
 
 signals:
     void createObject(int index);
@@ -45,7 +55,7 @@ private:
     Renderer* mRenderer;
     QWidget *mRenderWindowContainer;
 
-    EntityData* currentEntitySelected{nullptr};
+    std::shared_ptr<EntityManager> mEntityManager;
 
     std::vector<EntityData> mEntityDataCache;
 };

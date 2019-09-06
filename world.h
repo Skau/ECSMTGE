@@ -2,6 +2,7 @@
 #define WORLD_H
 
 #include <QObject>
+#include <memory>
 
 class Scene;
 class EntityManager;
@@ -15,7 +16,7 @@ public:
 
     Scene* getCurrentScene() { return mCurrentScene; }
 
-    EntityManager* getEntityManager() { return entityManager; }
+    std::shared_ptr<EntityManager> getEntityManager() { return entityManager; }
 
     ~World();
 
@@ -26,7 +27,7 @@ private:
 
     Scene* mCurrentScene;
 
-    EntityManager* entityManager;
+    std::shared_ptr<EntityManager> entityManager;
 };
 
 #endif // WORLD_H

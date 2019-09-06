@@ -1,15 +1,16 @@
 #include "transformwidget.h"
 #include "ui_transform.h"
+#include "mainwindow.h"
+#include "entitymanager.h"
 
-TransformWidget::TransformWidget(QWidget *parent)
-    : QWidget(parent), ui(new Ui::Transform)
+TransformWidget::TransformWidget(MainWindow* mainWindow, QWidget *parent)
+    : QWidget(parent), ui(new Ui::Transform), mMainWindow(mainWindow)
 {
     ui->setupUi(this);
 }
 
 TransformWidget::~TransformWidget()
 {
-
 }
 
 void TransformWidget::setPosition(const gsl::vec3 &pos)
@@ -58,4 +59,139 @@ gsl::vec3 TransformWidget::getScale()
     returnVec.y = ui->line_Scale_Y->text().toFloat();
     returnVec.z = ui->line_Scale_Z->text().toFloat();
     return returnVec;
+}
+
+void TransformWidget::on_line_Position_X_textEdited(const QString &arg1)
+{
+    auto entityData = mMainWindow->currentEntitySelected;
+    if(entityData)
+    {
+        auto entityManager = mMainWindow->getEntityManager();
+        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        if(transform)
+        {
+            transform->position = gsl::vec3(arg1.toFloat(), transform->position.y, transform->position.z);
+            transform->updated = true;
+        }
+    }
+}
+
+void TransformWidget::on_line_Position_Y_textEdited(const QString &arg1)
+{
+    auto entityData = mMainWindow->currentEntitySelected;
+    if(entityData)
+    {
+        auto entityManager = mMainWindow->getEntityManager();
+        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        if(transform)
+        {
+            transform->position = gsl::vec3(transform->position.x, arg1.toFloat(), transform->position.z);
+            transform->updated = true;
+        }
+    }
+}
+
+void TransformWidget::on_line_Position_Z_textEdited(const QString &arg1)
+{
+    auto entityData = mMainWindow->currentEntitySelected;
+    if(entityData)
+    {
+        auto entityManager = mMainWindow->getEntityManager();
+        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        if(transform)
+        {
+            transform->position = gsl::vec3(transform->position.x, transform->position.y, arg1.toFloat());
+            transform->updated = true;
+        }
+    }
+}
+
+void TransformWidget::on_line_Rotation_X_textEdited(const QString &arg1)
+{
+    auto entityData = mMainWindow->currentEntitySelected;
+    if(entityData)
+    {
+        auto entityManager = mMainWindow->getEntityManager();
+        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        if(transform)
+        {
+            transform->rotation = gsl::vec3(arg1.toFloat(), transform->rotation.y, transform->rotation.z);
+            transform->updated = true;
+        }
+    }
+}
+
+void TransformWidget::on_line_Rotation_Y_textEdited(const QString &arg1)
+{
+    auto entityData = mMainWindow->currentEntitySelected;
+    if(entityData)
+    {
+        auto entityManager = mMainWindow->getEntityManager();
+        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        if(transform)
+        {
+            transform->rotation = gsl::vec3(transform->rotation.x, arg1.toFloat(), transform->rotation.z);
+            transform->updated = true;
+        }
+    }
+}
+
+void TransformWidget::on_line_Rotation_Z_textEdited(const QString &arg1)
+{
+    auto entityData = mMainWindow->currentEntitySelected;
+    if(entityData)
+    {
+        auto entityManager = mMainWindow->getEntityManager();
+        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        if(transform)
+        {
+            transform->rotation = gsl::vec3(transform->rotation.x, transform->rotation.y, arg1.toFloat());
+            transform->updated = true;
+        }
+    }
+}
+
+void TransformWidget::on_line_Scale_X_textEdited(const QString &arg1)
+{
+    auto entityData = mMainWindow->currentEntitySelected;
+    if(entityData)
+    {
+        auto entityManager = mMainWindow->getEntityManager();
+        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        if(transform)
+        {
+            transform->scale = gsl::vec3(arg1.toFloat(), transform->scale.y, transform->scale.z);
+            transform->updated = true;
+        }
+    }
+}
+
+void TransformWidget::on_line_Scale_Y_textEdited(const QString &arg1)
+{
+    auto entityData = mMainWindow->currentEntitySelected;
+    if(entityData)
+    {
+        auto entityManager = mMainWindow->getEntityManager();
+        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        if(transform)
+        {
+            transform->scale = gsl::vec3(transform->scale.x, arg1.toFloat(), transform->scale.z);
+            transform->updated = true;
+        }
+    }
+}
+
+void TransformWidget::on_line_Scale_Z_textEdited(const QString &arg1)
+{
+    auto entityData = mMainWindow->currentEntitySelected;
+    if(entityData)
+    {
+        auto entityManager = mMainWindow->getEntityManager();
+        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        if(transform)
+        {
+            transform->scale = gsl::vec3(transform->scale.x, transform->scale.y, arg1.toFloat());
+            transform->updated = true;
+        }
+    }
 }

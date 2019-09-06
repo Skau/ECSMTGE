@@ -1,5 +1,4 @@
 #include "world.h"
-
 #include "resourcemanager.h"
 #include "entitymanager.h"
 #include "scene.h"
@@ -28,14 +27,13 @@ World::World()
         mesh->mMaterial.mShader = ResourceManager::instance()->getShader("phong");
     }
 
-    entityManager = new EntityManager();
+    entityManager = std::make_shared<EntityManager>();
 
     mCurrentScene = new TestScene();
 }
 
 World::~World()
 {
-    delete entityManager;
 }
 
 void World::initCurrentScene()

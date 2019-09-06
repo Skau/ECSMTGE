@@ -107,6 +107,24 @@ public:
         }
     }
 
+    /**
+     * @brief Updates the mesh on the given entity
+     * @param Entity ID
+     * @param Name of the mesh
+     */
+    void setMesh(unsigned int entity, const std::string& meshName)
+    {
+        auto render = getComponent<Render>(entity);
+        if(render)
+        {
+            auto mesh = ResourceManager::instance()->getMesh(meshName);
+            if(mesh)
+            {
+                render->meshData = *mesh;
+            }
+        }
+    }
+
     unsigned int createEntity(std::string name = "")
     {
         auto id = idCounter++;

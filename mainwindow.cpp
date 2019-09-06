@@ -40,6 +40,17 @@ void MainWindow::showFPS(double deltaTime, double frameCounter)
     statusBar()->showMessage(" Time pr FrameDraw: " + QString::number(deltaTime, 'g', 4) + " ms  |  " + "FPS: " + QString::number(frameCounter, 'g', 4));
 }
 
+void MainWindow::setEntityManager(std::shared_ptr<EntityManager> entityManager)
+{
+    mEntityManager = entityManager;
+
+    connect(this, &MainWindow::createObject, mEntityManager.get(), &EntityManager::createObject);
+    connect(this, &MainWindow::getAllComponentsForEntity, mEntityManager.get(), &EntityManager::getAllComponents);
+
+    connect(mEntityManager.get(), &EntityManager::updateUI, this, &MainWindow::updateUI);
+}
+
+
 
 // Called from entity manager when a new entity is added to the scene
 void MainWindow::updateUI(const std::vector<EntityData> &entityData)

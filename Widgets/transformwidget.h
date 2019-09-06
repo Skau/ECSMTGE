@@ -10,15 +10,15 @@ namespace Ui{
     class Transform;
 }
 
+class MainWindow;
 
 class TransformWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit TransformWidget(QWidget* parent = nullptr);
+    explicit TransformWidget(MainWindow *mainWindow, QWidget* parent = nullptr);
     ~TransformWidget();
-
 
     void setPosition(const gsl::vec3& pos);
     void setRotation(const gsl::vec3& rot);
@@ -30,5 +30,6 @@ public:
 
 private:
     Ui::Transform* ui;
+    MainWindow* mMainWindow;
 };
 #endif // TRANSFORMWIDGET_H

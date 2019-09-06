@@ -2,11 +2,12 @@
 #define CAMERA_H
 
 #include "innpch.h"
+#include "entitymanager.h"
 
-class Camera
+class CameraSystem
 {
 public:
-    Camera();
+    CameraSystem();
 
     void pitch(float degrees);
     void yaw(float degrees);
@@ -28,6 +29,10 @@ public:
     gsl::Vector3D up() const;
 
     gsl::Vector3D forward() const;
+
+    static void updateCameras(std::vector<Transform> transforms, std::vector<Camera> cameras);
+    static void updateCameras(std::vector<Camera> cameras, const gsl::mat4& projectionMatrix = gsl::mat4::persp(45.f, 3.f / 4.f, 1.f, 100.f));
+    static void updateCamera(Camera* camera, const gsl::mat4& projectionMatrix);
 
 private:
     gsl::Vector3D mForward{0.f, 0.f, -1.f};

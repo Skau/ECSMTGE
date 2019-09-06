@@ -200,7 +200,7 @@ void Renderer::render(std::vector<Render> renders, std::vector<Transform> transf
 
 void Renderer::setupCamera()
 {
-    mCurrentCamera = new Camera();
+    mCurrentCamera = new CameraSystem();
     mCurrentCamera->setPosition(gsl::Vector3D(1.f, 1.f, 4.4f));
     ResourceManager::instance()->getShader("plain")->setCurrentCamera(mCurrentCamera);
     ResourceManager::instance()->getShader("texture")->setCurrentCamera(mCurrentCamera);
@@ -219,7 +219,7 @@ void Renderer::exposeEvent(QExposeEvent *)
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, static_cast<GLint>(width() * retinaScale), static_cast<GLint>(height() * retinaScale));
     mAspectratio = static_cast<float>(width()) / height();
-    mCurrentCamera->mProjectionMatrix.persp(45.f, mAspectratio, 1.f, 100.f);
+    mCurrentCamera->mProjectionMatrix.setPersp(45.f, mAspectratio, 1.f, 100.f);
 }
 
 //Simple way to turn on/off wireframe mode

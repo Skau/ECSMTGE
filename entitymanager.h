@@ -64,11 +64,13 @@ public:
             }
         }
 
-        // TODO: Make constructor
-        mTransforms.emplace_back(Transform{});
-        mTransforms.back().entityId = entity;
-        mTransforms.back().valid = true;
-        return mTransforms.back();
+        mTransforms.emplace_back(Transform{entity, true});
+        auto &comp = mTransforms.back();
+        std::sort(mTransforms.begin(), mTransforms.end(),[](const Transform& t1, const Transform& t2)
+        {
+            return t1.entityId < t2.entityId;
+        });
+        return comp;
     }
 
     template<class T,
@@ -92,11 +94,13 @@ public:
             }
         }
 
-        // TODO: Make constructor
-        mRenders.emplace_back(Render{});
-        mRenders.back().entityId = entity;
-        mRenders.back().valid = true;
-        return mRenders.back();
+        mRenders.emplace_back(Render{entity, true});
+        auto &comp = mRenders.back();
+        std::sort(mRenders.begin(), mRenders.end(),[](const Render& t1, const Render& t2)
+        {
+            return t1.entityId < t2.entityId;
+        });
+        return comp;
     }
 
     template<class T,

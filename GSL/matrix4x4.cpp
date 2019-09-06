@@ -12,6 +12,17 @@
 namespace gsl
 {
 
+Matrix4x4::Matrix4x4(GLfloat identity)
+    : data{
+          identity, 0.f, 0.f, 0.f,
+          0.f, identity, 0.f, 0.f,
+          0.f, 0.f, identity, 0.f,
+          0.f, 0.f, 0.f, identity
+        }
+{
+
+}
+
 Matrix4x4::Matrix4x4(const Vector4D &diagonal)
     : data{
           diagonal.x, 0.f, 0.f, 0.f,
@@ -353,7 +364,7 @@ Matrix4x4& Matrix4x4::setFrustum(float left, float right, float bottom, float to
     };
 }
 
-Matrix4x4& Matrix4x4::setPerspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane)
+Matrix4x4& Matrix4x4::setPersp(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane)
 {
     /* General form of the Projection Matrix
     //
@@ -429,7 +440,7 @@ Matrix4x4 Matrix4x4::frustum(float left, float right, float bottom, float top, f
     };
 }
 
-Matrix4x4 Matrix4x4::perspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane)
+Matrix4x4 Matrix4x4::persp(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane)
 {
     /* General form of the Projection Matrix
     //
@@ -496,6 +507,11 @@ Matrix4x4 Matrix4x4::lookAtRotation(const Vector3D &from, const Vector3D &to, co
     };
 }
 
+Matrix4x4 Matrix4x4::viewMatrix(const Vector3D &from, const Vector3D &to, const Vector3D &up_axis)
+{
+    return lookAtRotation(from, to, up_axis) * translation(-from);
+}
+
 void Matrix4x4::setRotationToVector(const Vector3D &direction, Vector3D up)
 {
     Vector3D xaxis = Vector3D::cross(up, direction);
@@ -541,6 +557,17 @@ void Matrix4x4::translate(Vector3D positionIn)
     };
 
     *this = (*this)*mat;
+}
+
+Matrix4x4 Matrix4x4::translation(const Vector3D &trans)
+{
+    return gsl::Matrix4x4
+    {
+        1.f, 0.f, 0.f, trans.x,
+        0.f, 1.f, 0.f, trans.y,
+        0.f, 0.f, 1.f, trans.z,
+        0.f, 0.f, 0.f, 1.f
+    };
 }
 
 Matrix2x2 Matrix4x4::toMatrix2()

@@ -12,7 +12,7 @@
 
 //must inherit from QOpenGLFunctions_4_1_Core, since we use that instead of glfw/glew/glad
 
-class Camera;
+class CameraSystem;
 
 class Shader : protected QOpenGLFunctions_4_1_Core
 {
@@ -30,9 +30,9 @@ public:
 
    // virtual void transmitUniformData(gsl::Matrix4x4 *modelMatrix, MaterialClass *material = nullptr);
 
-    void setCurrentCamera(Camera *currentCamera);
+    void setCurrentCamera(CameraSystem *currentCamera);
 
-    Camera *getCurrentCamera() const;
+    CameraSystem *getCurrentCamera() const;
 
 protected:
     GLuint program{0};
@@ -40,7 +40,7 @@ protected:
     GLint vMatrixUniform{-1};
     GLint pMatrixUniform{-1};
 
-    Camera *mCurrentCamera{nullptr};
+    CameraSystem *mCurrentCamera{nullptr};
 
 };
 

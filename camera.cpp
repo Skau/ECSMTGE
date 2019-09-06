@@ -1,7 +1,7 @@
 #include "innpch.h"
 #include "camera.h"
 
-Camera::Camera()
+CameraSystem::CameraSystem()
 {
     mViewMatrix.setToIdentity();
     mProjectionMatrix.setToIdentity();
@@ -10,28 +10,28 @@ Camera::Camera()
     mPitchMatrix.setToIdentity();
 }
 
-void Camera::pitch(float degrees)
+void CameraSystem::pitch(float degrees)
 {
     //  rotate around mRight
     mPitch -= degrees;
     updateForwardVector();
 }
 
-void Camera::yaw(float degrees)
+void CameraSystem::yaw(float degrees)
 {
     // rotate around mUp
     mYaw -= degrees;
     updateForwardVector();
 }
 
-void Camera::updateRightVector()
+void CameraSystem::updateRightVector()
 {
     mRight = mForward^mUp;
     mRight.normalize();
 //    qDebug() << "Right " << mRight;
 }
 
-void Camera::updateForwardVector()
+void CameraSystem::updateForwardVector()
 {
     mRight = gsl::Vector3D(1.f, 0.f, 0.f);
     mRight.rotateY(mYaw);
@@ -44,7 +44,7 @@ void Camera::updateForwardVector()
     updateRightVector();
 }
 
-void Camera::update(double deltaTime)
+void CameraSystem::update(double deltaTime)
 {
     mYawMatrix.setToIdentity();
     mPitchMatrix.setToIdentity();
@@ -58,22 +58,22 @@ void Camera::update(double deltaTime)
     mViewMatrix.translate(-mPosition);
 }
 
-void Camera::setPosition(const gsl::Vector3D &position)
+void CameraSystem::setPosition(const gsl::Vector3D &position)
 {
     mPosition = position;
 }
 
-void Camera::setSpeed(float speed)
+void CameraSystem::setSpeed(float speed)
 {
     mSpeed = speed;
 }
 
-void Camera::updateHeigth(float deltaHeigth)
+void CameraSystem::updateHeigth(float deltaHeigth)
 {
     mPosition.y += deltaHeigth;
 }
 
-void Camera::moveRight(float delta)
+void CameraSystem::moveRight(float delta)
 {
     //This fixes a bug in the up and right calculations
     //so camera always holds its height when straifing
@@ -83,17 +83,84 @@ void Camera::moveRight(float delta)
     mPosition += right * delta;
 }
 
-gsl::Vector3D Camera::position() const
+gsl::Vector3D CameraSystem::position() const
 {
     return mPosition;
 }
 
-gsl::Vector3D Camera::up() const
+gsl::Vector3D CameraSystem::up() const
 {
     return mUp;
 }
 
-gsl::Vector3D Camera::forward() const
+gsl::Vector3D CameraSystem::forward() const
 {
     return mForward;
+}
+
+void CameraSystem::updateCameras(std::vector<Transform> transforms, std::vector<Camera> cameras)
+{
+    auto transIt = transforms.begin();
+    auto camIt = cameras.begin();
+
+    bool transformShortest = transforms.size() < cameras.size();
+
+    bool _{true};
+
+    // cause normal while (true) loops are so outdated
+    for ( ;_; )
+    {
+        if (transformShortest)
+        {
+            if (transIt == transforms.end())
+                break;
+        }
+        else
+        {
+            if (camIt == cameras.end())
+                break;
+        }
+
+        // Increment lowest index
+        if (!transIt->valid || transIt->entityId < camIt->entityId)
+        {
+            ++transIt;
+        }
+        else if (!camIt->valid || camIt->entityId < transIt->entityId)
+        {
+            ++camIt;
+        }
+        else
+        {
+            // If transform isn't updated,
+            // matrices doesn't need to be updated
+            if(!transIt->updated)
+            {
+                // Increment all
+                ++transIt;
+                ++camIt;
+                continue;
+            }
+
+            // If transform is updated, viewMatrix needs to be updated
+            camIt->viewMatrix = gsl::mat4::viewMatrix(transIt->position, gsl::vec3{0.f, 0.f, 0.f});
+
+
+            // Increment all
+            ++transIt;
+            ++camIt;
+        }
+    }
+}
+
+void CameraSystem::updateCameras(std::vector<Camera> cameras, const gsl::mat4 &projectionMatrix)
+{
+    for (auto comp : cameras)
+        comp.projectionMatrix = projectionMatrix;
+}
+
+void CameraSystem::updateCamera(Camera *camera, const gsl::mat4 &projectionMatrix)
+{
+    if (camera != nullptr)
+        camera->projectionMatrix = projectionMatrix;
 }

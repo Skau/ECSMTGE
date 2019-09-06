@@ -56,7 +56,7 @@ private:
 
     Light *mLight;
 
-    Camera *mCurrentCamera{nullptr};
+    CameraSystem *mCurrentCamera{nullptr};
 
     bool mWireframe{false};
 

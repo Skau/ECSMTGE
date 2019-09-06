@@ -20,6 +20,7 @@ private:
 
 public:
     // Default constructor. Initializes the matrix with a diagonal at the identity axis.
+    Matrix4x4(GLfloat identity);
     Matrix4x4(const gsl::Vector4D& diagonal = gsl::Vector4D{1.f, 1.f, 1.f, 1.f});
     Matrix4x4(std::initializer_list<GLfloat> values);
     explicit Matrix4x4(const std::array<gsl::Vector4D, 4>& vectors);
@@ -54,19 +55,29 @@ public:
 
     Matrix4x4& setOrtho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat nearPlane, GLfloat farPlane);
     Matrix4x4& setFrustum(float left, float right, float bottom, float top, float nearPlane, float farPlane);
-    Matrix4x4& setPerspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane);
+    Matrix4x4& setPersp(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane);
 
     static Matrix4x4 ortho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat nearPlane, GLfloat farPlane);
     static Matrix4x4 frustum(float left, float right, float bottom, float top, float nearPlane, float farPlane);
-    static Matrix4x4 perspective(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane);
+    static Matrix4x4 persp(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane);
 
     void setLookAt(const Vector3D &eye, const Vector3D &center, const Vector3D &up_axis);
-    static Matrix4x4 lookAtRotation(const Vector3D &from, const Vector3D &to, const Vector3D &up_axis);
+    static Matrix4x4 lookAtRotation(const Vector3D &from, const Vector3D &to, const Vector3D &up_axis = gsl::Vector3D{0.f, 1.f, 0.f});
+
+    /** Generates a View Matrix from the given vectors
+     * Combines the lookAtRotation matrix with a translation matrix translated by the from vector
+     * which combines to a viewMatrix to use by a camera.
+     * @param from - world position point to translate from and also where rotation starts
+     * @param to - world position point to rotate towards
+     * @param up_axis - the world up-axis. Defaults to [0, 1, 0]
+     */
+    static Matrix4x4 viewMatrix(const Vector3D &from, const Vector3D &to, const Vector3D &up_axis = gsl::Vector3D{0.f, 1.f, 0.f});
 
     void setRotationToVector(const Vector3D &direction, Vector3D up = Vector3D(0.f,1.f,0.f));
 
     void translate(GLfloat x = 0.f, GLfloat y = 0.f, GLfloat z = 0.f);
     void translate(Vector3D positionIn);
+    static Matrix4x4 translation(const Vector3D& trans);
 
     Matrix2x2 toMatrix2();
     Matrix3x3 toMatrix3() const;

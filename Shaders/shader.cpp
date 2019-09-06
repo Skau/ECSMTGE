@@ -243,12 +243,12 @@ GLuint Shader::getProgram() const
 //    glUniformMatrix4fv( mMatrixUniform, 1, GL_TRUE, modelMatrix->constData());
 //}
 
-void Shader::setCurrentCamera(Camera *currentCamera)
+void Shader::setCurrentCamera(CameraSystem *currentCamera)
 {
     mCurrentCamera = currentCamera;
 }
 
-Camera *Shader::getCurrentCamera() const
+CameraSystem *Shader::getCurrentCamera() const
 {
     return mCurrentCamera;
 }

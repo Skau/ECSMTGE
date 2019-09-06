@@ -81,6 +81,7 @@ void ResourceManager::addMesh(const std::string& name, const std::string& path, 
 
         MeshData meshData;
 
+        meshData.mName = name;
         meshData.mRenderType = renderType;
 
         //Vertex Array Object - VAO

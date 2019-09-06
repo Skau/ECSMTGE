@@ -100,9 +100,12 @@ void MainWindow::on_objectList_activated(const QModelIndex &index)
                 {
                 case ComponentType::Render:
                 {
+                    auto render = static_cast<Render*>(component);
                     auto widget = new RenderWidget(this);
 
                     // Set up render widget here
+
+                    widget->setName(render->meshData.mName);
 
                     layout->addWidget(widget);
                     break;

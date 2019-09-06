@@ -20,6 +20,9 @@ public:
 signals:
     void chooseMesh(unsigned int entity, const std::string& name);
 
+public slots:
+        void setName(const std::string& name);
+
 private slots:
     void on_button_ChangeMesh_clicked();
 

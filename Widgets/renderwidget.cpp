@@ -18,6 +18,11 @@ RenderWidget::~RenderWidget()
 
 }
 
+void RenderWidget::setName(const std::string &name)
+{
+    ui->label_Name->setText(QString::fromStdString(name));
+}
+
 void RenderWidget::on_button_ChangeMesh_clicked()
 {
     if(mMainWindow->currentEntitySelected)
@@ -26,7 +31,11 @@ void RenderWidget::on_button_ChangeMesh_clicked()
         auto splits = fileName.split('/');
         auto last = splits[splits.size()-1];
         splits = last.split('.');
-        mMainWindow->getEntityManager()->setMesh(mMainWindow->currentEntitySelected->entityId, splits[0].toStdString());
+        auto name = splits[0];
+        if(name.length())
+        {
+            mMainWindow->getEntityManager()->setMesh(mMainWindow->currentEntitySelected->entityId, name.toStdString());
+            ui->label_Name->setText(name);
+        }
     }
-
 }

@@ -39,7 +39,7 @@
    <item>
     <layout class="QHBoxLayout" name="NameLayout">
      <item>
-      <widget class="QLabel" name="label_Name">
+      <widget class="QLabel" name="label_Name_Title">
        <property name="font">
         <font>
          <pointsize>16</pointsize>
@@ -51,14 +51,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_Name_Title">
+      <widget class="QLabel" name="label_Name">
        <property name="font">
         <font>
          <pointsize>16</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>Monkey</string>
+        <string/>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

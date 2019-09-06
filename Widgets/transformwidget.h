@@ -29,23 +29,23 @@ public:
     gsl::vec3 getScale();
 
 private slots:
-    void on_line_Position_X_textEdited(const QString &arg1);
+    void on_spinBox_Position_X_valueChanged(double arg1);
 
-    void on_line_Position_Y_textEdited(const QString &arg1);
+    void on_spinBox_Position_Y_valueChanged(double arg1);
 
-    void on_line_Position_Z_textEdited(const QString &arg1);
+    void on_spinBox_Position_Z_valueChanged(double arg1);
 
-    void on_line_Rotation_X_textEdited(const QString &arg1);
+    void on_spinBox_Rotation_X_valueChanged(double arg1);
 
-    void on_line_Rotation_Y_textEdited(const QString &arg1);
+    void on_spinBox_Rotation_Y_valueChanged(double arg1);
 
-    void on_line_Rotation_Z_textEdited(const QString &arg1);
+    void on_spinBox_Rotation_Z_valueChanged(double arg1);
 
-    void on_line_Scale_X_textEdited(const QString &arg1);
+    void on_spinBox_Scale_X_valueChanged(double arg1);
 
-    void on_line_Scale_Y_textEdited(const QString &arg1);
+    void on_spinBox_Scale_Y_valueChanged(double arg1);
 
-    void on_line_Scale_Z_textEdited(const QString &arg1);
+    void on_spinBox_Scale_Z_valueChanged(double arg1);
 
 private:
     Ui::Transform* ui;

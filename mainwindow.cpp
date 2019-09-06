@@ -75,8 +75,9 @@ void MainWindow::on_objectList_activated(const QModelIndex &index)
     auto i = static_cast<unsigned>(index.row());
     if(i < mEntityDataCache.size())
     {
+        currentEntitySelected = &mEntityDataCache[i];
         // Update the selected object name
-        ui->label_SelectedObject->setText(QString::fromStdString(mEntityDataCache[i].name));
+        ui->label_SelectedObject->setText(QString::fromStdString(currentEntitySelected->name));
 
         // Delete any previous component widgets
         if(ui->scrollArea->widget())
@@ -84,7 +85,7 @@ void MainWindow::on_objectList_activated(const QModelIndex &index)
 
         // Get the components for this entity
         std::vector<Component*> components;
-        if(getAllComponentsForEntity(mEntityDataCache[i].entityId, components))
+        if(getAllComponentsForEntity(currentEntitySelected->entityId, components))
         {
             // Components were found, add them
 

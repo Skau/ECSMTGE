@@ -18,10 +18,6 @@ class App : public QObject
 {
     Q_OBJECT
 
-private:
-    // Settings
-    float FOV = 45.f;
-
 public:
     App();
 
@@ -35,7 +31,6 @@ public slots:
 private slots:
     void update();
     void quit();
-    void updatePerspective();
 
 private:
 

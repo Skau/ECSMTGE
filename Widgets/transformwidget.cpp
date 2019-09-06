@@ -15,53 +15,53 @@ TransformWidget::~TransformWidget()
 
 void TransformWidget::setPosition(const gsl::vec3 &pos)
 {
-    ui->line_Position_X->setText(QString::number(static_cast<double>(pos.x)));
-    ui->line_Position_Y->setText(QString::number(static_cast<double>(pos.y)));
-    ui->line_Position_Z->setText(QString::number(static_cast<double>(pos.z)));
+    ui->spinBox_Position_X->setValue(static_cast<double>(pos.x));
+    ui->spinBox_Position_Y->setValue(static_cast<double>(pos.y));
+    ui->spinBox_Position_Z->setValue(static_cast<double>(pos.z));
 }
 
 void TransformWidget::setRotation(const gsl::vec3 &rot)
 {
-    ui->line_Rotation_X->setText(QString::number(static_cast<double>(rot.x)));
-    ui->line_Rotation_Y->setText(QString::number(static_cast<double>(rot.y)));
-    ui->line_Rotation_Z->setText(QString::number(static_cast<double>(rot.z)));
+    ui->spinBox_Rotation_X->setValue(static_cast<double>(rot.x));
+    ui->spinBox_Rotation_Y->setValue(static_cast<double>(rot.y));
+    ui->spinBox_Rotation_Z->setValue(static_cast<double>(rot.z));
 }
 
 void TransformWidget::setScale(const gsl::vec3 &scale)
 {
-    ui->line_Scale_X->setText(QString::number(static_cast<double>(scale.x)));
-    ui->line_Scale_Y->setText(QString::number(static_cast<double>(scale.y)));
-    ui->line_Scale_Z->setText(QString::number(static_cast<double>(scale.z)));
+    ui->spinBox_Scale_X->setValue(static_cast<double>(scale.x));
+    ui->spinBox_Scale_Y->setValue(static_cast<double>(scale.y));
+    ui->spinBox_Scale_Z->setValue(static_cast<double>(scale.z));
 }
 
 gsl::vec3 TransformWidget::getPosition()
 {
     gsl::vec3 returnVec;
-    returnVec.x = ui->line_Position_X->text().toFloat();
-    returnVec.y = ui->line_Position_Y->text().toFloat();
-    returnVec.z = ui->line_Position_Z->text().toFloat();
+    returnVec.x = static_cast<float>(ui->spinBox_Position_X->value());
+    returnVec.y = static_cast<float>(ui->spinBox_Position_Y->value());
+    returnVec.z = static_cast<float>(ui->spinBox_Position_Z->value());
     return returnVec;
 }
 
 gsl::vec3 TransformWidget::getRotation()
 {
     gsl::vec3 returnVec;
-    returnVec.x = ui->line_Rotation_X->text().toFloat();
-    returnVec.y = ui->line_Rotation_Y->text().toFloat();
-    returnVec.z = ui->line_Rotation_Z->text().toFloat();
+    returnVec.x = static_cast<float>(ui->spinBox_Rotation_X->value());
+    returnVec.y = static_cast<float>(ui->spinBox_Rotation_Y->value());
+    returnVec.z = static_cast<float>(ui->spinBox_Rotation_Z->value());
     return returnVec;
 }
 
 gsl::vec3 TransformWidget::getScale()
 {
     gsl::vec3 returnVec;
-    returnVec.x = ui->line_Scale_X->text().toFloat();
-    returnVec.y = ui->line_Scale_Y->text().toFloat();
-    returnVec.z = ui->line_Scale_Z->text().toFloat();
+    returnVec.x = static_cast<float>(ui->spinBox_Scale_X->value());
+    returnVec.y = static_cast<float>(ui->spinBox_Scale_Y->value());
+    returnVec.z = static_cast<float>(ui->spinBox_Scale_Z->value());
     return returnVec;
 }
 
-void TransformWidget::on_line_Position_X_textEdited(const QString &arg1)
+void TransformWidget::on_spinBox_Position_X_valueChanged(double arg1)
 {
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
@@ -70,13 +70,13 @@ void TransformWidget::on_line_Position_X_textEdited(const QString &arg1)
         auto transform = entityManager->getComponent<Transform>(entityData->entityId);
         if(transform)
         {
-            transform->position = gsl::vec3(arg1.toFloat(), transform->position.y, transform->position.z);
+            transform->position = gsl::vec3(static_cast<float>(arg1), transform->position.y, transform->position.z);
             transform->updated = true;
         }
     }
 }
 
-void TransformWidget::on_line_Position_Y_textEdited(const QString &arg1)
+void TransformWidget::on_spinBox_Position_Y_valueChanged(double arg1)
 {
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
@@ -85,13 +85,13 @@ void TransformWidget::on_line_Position_Y_textEdited(const QString &arg1)
         auto transform = entityManager->getComponent<Transform>(entityData->entityId);
         if(transform)
         {
-            transform->position = gsl::vec3(transform->position.x, arg1.toFloat(), transform->position.z);
+            transform->position = gsl::vec3(transform->position.x, static_cast<float>(arg1), transform->position.z);
             transform->updated = true;
         }
     }
 }
 
-void TransformWidget::on_line_Position_Z_textEdited(const QString &arg1)
+void TransformWidget::on_spinBox_Position_Z_valueChanged(double arg1)
 {
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
@@ -100,13 +100,13 @@ void TransformWidget::on_line_Position_Z_textEdited(const QString &arg1)
         auto transform = entityManager->getComponent<Transform>(entityData->entityId);
         if(transform)
         {
-            transform->position = gsl::vec3(transform->position.x, transform->position.y, arg1.toFloat());
+            transform->position = gsl::vec3(transform->position.x, transform->position.y, static_cast<float>(arg1));
             transform->updated = true;
         }
     }
 }
 
-void TransformWidget::on_line_Rotation_X_textEdited(const QString &arg1)
+void TransformWidget::on_spinBox_Rotation_X_valueChanged(double arg1)
 {
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
@@ -115,13 +115,13 @@ void TransformWidget::on_line_Rotation_X_textEdited(const QString &arg1)
         auto transform = entityManager->getComponent<Transform>(entityData->entityId);
         if(transform)
         {
-            transform->rotation = gsl::vec3(arg1.toFloat(), transform->rotation.y, transform->rotation.z);
+            transform->rotation = gsl::vec3(static_cast<float>(arg1), transform->rotation.y, transform->rotation.z);
             transform->updated = true;
         }
     }
 }
 
-void TransformWidget::on_line_Rotation_Y_textEdited(const QString &arg1)
+void TransformWidget::on_spinBox_Rotation_Y_valueChanged(double arg1)
 {
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
@@ -130,13 +130,13 @@ void TransformWidget::on_line_Rotation_Y_textEdited(const QString &arg1)
         auto transform = entityManager->getComponent<Transform>(entityData->entityId);
         if(transform)
         {
-            transform->rotation = gsl::vec3(transform->rotation.x, arg1.toFloat(), transform->rotation.z);
+            transform->rotation = gsl::vec3(transform->rotation.x, static_cast<float>(arg1), transform->rotation.z);
             transform->updated = true;
         }
     }
 }
 
-void TransformWidget::on_line_Rotation_Z_textEdited(const QString &arg1)
+void TransformWidget::on_spinBox_Rotation_Z_valueChanged(double arg1)
 {
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
@@ -145,13 +145,13 @@ void TransformWidget::on_line_Rotation_Z_textEdited(const QString &arg1)
         auto transform = entityManager->getComponent<Transform>(entityData->entityId);
         if(transform)
         {
-            transform->rotation = gsl::vec3(transform->rotation.x, transform->rotation.y, arg1.toFloat());
+            transform->rotation = gsl::vec3(transform->rotation.x, transform->rotation.y, static_cast<float>(arg1));
             transform->updated = true;
         }
     }
 }
 
-void TransformWidget::on_line_Scale_X_textEdited(const QString &arg1)
+void TransformWidget::on_spinBox_Scale_X_valueChanged(double arg1)
 {
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
@@ -160,13 +160,13 @@ void TransformWidget::on_line_Scale_X_textEdited(const QString &arg1)
         auto transform = entityManager->getComponent<Transform>(entityData->entityId);
         if(transform)
         {
-            transform->scale = gsl::vec3(arg1.toFloat(), transform->scale.y, transform->scale.z);
+            transform->scale = gsl::vec3(static_cast<float>(arg1), transform->scale.y, transform->scale.z);
             transform->updated = true;
         }
     }
 }
 
-void TransformWidget::on_line_Scale_Y_textEdited(const QString &arg1)
+void TransformWidget::on_spinBox_Scale_Y_valueChanged(double arg1)
 {
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
@@ -175,13 +175,13 @@ void TransformWidget::on_line_Scale_Y_textEdited(const QString &arg1)
         auto transform = entityManager->getComponent<Transform>(entityData->entityId);
         if(transform)
         {
-            transform->scale = gsl::vec3(transform->scale.x, arg1.toFloat(), transform->scale.z);
+            transform->scale = gsl::vec3(transform->scale.x, static_cast<float>(arg1), transform->scale.z);
             transform->updated = true;
         }
     }
 }
 
-void TransformWidget::on_line_Scale_Z_textEdited(const QString &arg1)
+void TransformWidget::on_spinBox_Scale_Z_valueChanged(double arg1)
 {
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
@@ -190,7 +190,7 @@ void TransformWidget::on_line_Scale_Z_textEdited(const QString &arg1)
         auto transform = entityManager->getComponent<Transform>(entityData->entityId);
         if(transform)
         {
-            transform->scale = gsl::vec3(transform->scale.x, transform->scale.y, arg1.toFloat());
+            transform->scale = gsl::vec3(transform->scale.x, transform->scale.y, static_cast<float>(arg1));
             transform->updated = true;
         }
     }

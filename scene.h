@@ -36,18 +36,6 @@ public:
             auto transform = entityManager->getComponent<Transform>(entity);
             transform->position = gsl::vec3(i*2, 0, 0);
         }
-
-        // Camera:
-        auto camera = entityManager->createEntity("mainCam");
-        entityManager->addComponent<Transform, Camera>(camera);
-        auto trans = entityManager->getComponent<Transform>(camera);
-        if (trans) {
-            trans->position = gsl::vec3{0.f, 0.f, -5.f};
-            trans->updated = true;
-        } else {
-            qDebug() << "Camera has no transform!";
-        }
-
     }
 };
 

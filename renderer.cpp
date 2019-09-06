@@ -101,7 +101,7 @@ void Renderer::render(const std::vector<VisualObject*>& objects, double deltaTim
     }
 }
 
-void Renderer::render(std::vector<Render> renders, std::vector<Transform> transforms, Camera camera)
+void Renderer::render(std::vector<Render> renders, std::vector<Transform> transforms, double deltaTime)
 {
     /* Note: For å gjøre dette enda raskere kunne det vært
      * mulig å gjøre at dataArraysene alltid resizer til nærmeste
@@ -114,7 +114,7 @@ void Renderer::render(std::vector<Render> renders, std::vector<Transform> transf
         mContext->makeCurrent(this);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // mCurrentCamera->update(deltaTime);
+        mCurrentCamera->update(deltaTime);
 
         auto transIt = transforms.begin();
         auto renderIt = renders.begin();
@@ -177,8 +177,8 @@ void Renderer::render(std::vector<Render> renders, std::vector<Transform> transf
                 glUseProgram(shader->getProgram());
 
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, matrix.constData());
-                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
-                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, mCurrentCamera->mViewMatrix.constData());
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, mCurrentCamera->mProjectionMatrix.constData());
 
                 if(meshData.mIndicesCount > 0)
                 {
@@ -222,8 +222,6 @@ void Renderer::exposeEvent(QExposeEvent *)
     glViewport(0, 0, static_cast<GLint>(width() * retinaScale), static_cast<GLint>(height() * retinaScale));
     mAspectratio = static_cast<float>(width()) / height();
     mCurrentCamera->mProjectionMatrix.setPersp(45.f, mAspectratio, 1.f, 100.f);
-
-    windowUpdated();
 }
 
 //Simple way to turn on/off wireframe mode

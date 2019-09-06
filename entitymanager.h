@@ -250,50 +250,6 @@ private:
         });
         return comp;
     }
-
-    template<class T,
-             typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
-    T* getComponent(unsigned int entity)
-    {
-        for (auto& comp : mTransforms)
-            if (comp.valid && comp.entityId == entity)
-                return &comp;
-
-        return nullptr;
-    }
-
-    template<class T,
-             typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
-    T* getComponent(unsigned int entity)
-    {
-        for (auto& comp : mRenders)
-            if (comp.valid && comp.entityId == entity)
-                return &comp;
-
-        return nullptr;
-    }
-
-    template<class T,
-             typename std::enable_if<(std::is_same<Camera, T>::value)>::type* = nullptr>
-    T* getComponent(unsigned int entity)
-    {
-        for (auto& comp : mCameras)
-            if (comp.valid && comp.entityId == entity)
-                return &comp;
-
-        return nullptr;
-    }
-
-    void print() {
-        std::cout << "transforms: ";
-        for (auto comp : mTransforms)
-            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
-        std::cout << std::endl << "renders: ";
-        for (auto comp : mRenders)
-            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
-        std::cout << std::endl;
-    }
-
 };
 
 #endif // COMPONENTMANAGER_H

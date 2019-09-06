@@ -23,6 +23,7 @@ private:
     std::vector<Transform> mTransforms;
     std::vector<Render> mRenders;
     std::vector<EntityData> mEntityData;
+    std::vector<Camera> mCameras;
 
     unsigned int idCounter{0};
 
@@ -167,6 +168,17 @@ public:
         return nullptr;
     }
 
+    template<class T,
+             typename std::enable_if<(std::is_same<Camera, T>::value)>::type* = nullptr>
+    T* getComponent(unsigned int entity)
+    {
+        for (auto& comp : mCameras)
+            if (comp.valid && comp.entityId == entity)
+                return &comp;
+
+        return nullptr;
+    }
+
     void print() {
         std::cout << "transforms: ";
         for (auto comp : mTransforms)
@@ -232,6 +244,36 @@ private:
         mRenders.emplace_back(Render{entity, true});
         auto &comp = mRenders.back();
         std::sort(mRenders.begin(), mRenders.end(),[](const Render& t1, const Render& t2)
+        {
+            return t1.entityId < t2.entityId;
+        });
+        return comp;
+    }
+
+    template<class T,
+             typename std::enable_if<(std::is_same<Camera, T>::value)>::type* = nullptr>
+    T& addComponents(unsigned int entity)
+    {
+        for (auto& comp : mCameras)
+        {
+            if (!comp.valid)
+            {
+                comp.valid = true;
+                if (comp.entityId != entity)
+                {
+                    comp.entityId = entity;
+                    std::sort(mCameras.begin(), mCameras.end(),[](const Camera& t1, const Camera& t2)
+                    {
+                        return t1.entityId < t2.entityId;
+                    });
+                }
+                return comp;
+            }
+        }
+
+        mCameras.emplace_back(Camera{entity, true});
+        auto &comp = mCameras.back();
+        std::sort(mCameras.begin(), mCameras.end(),[](const Camera& t1, const Camera& t2)
         {
             return t1.entityId < t2.entityId;
         });

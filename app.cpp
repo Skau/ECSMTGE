@@ -17,7 +17,7 @@ App::App()
     connect(mMainWindow->ui->actionToggle_wireframe, &QAction::triggered, mRenderer, &Renderer::toggleWireframe);
     connect(mRenderer, &Renderer::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
     connect(mMainWindow->ui->actionExit, &QAction::triggered, mMainWindow.get(), &MainWindow::close);
-
+    connect(mRenderer, &Renderer::windowUpdated, this, &App::updatePerspective);
 }
 
 // Slot called from Renderer when its done with initialization
@@ -60,11 +60,13 @@ void App::update()
 
     auto& transforms = mWorld->getEntityManager()->getTransforms();
     auto renders = mWorld->getEntityManager()->getRenders();
-    auto& cameras = mWorld->getEntityManager()->getCameras();
+    auto cameras = mWorld->getEntityManager()->getCameras();
 
     CameraSystem::updateCameras(transforms, cameras);
 
-    mRenderer->render(renders, transforms, mDeltaTime);
+    for (const auto& camera : cameras) {
+        mRenderer->render(renders, transforms, camera);
+    }
 
     currentlyUpdating = false;
 }

@@ -6,6 +6,7 @@
 
 class QWidget;
 class Renderer;
+class EntityData;
 
 namespace Ui {
 class MainWindow;
@@ -22,11 +23,29 @@ public:
     void showFPS(double deltaTime, double frameCounter);
 
     Renderer* getRenderer() { return mRenderer; }
+
     Ui::MainWindow *ui;
+
+signals:
+    void createObject(int index);
+
+public slots:
+    void updateUI(const std::vector<EntityData>& entityData);
+
+private slots:
+    void on_objectList_activated(const QModelIndex &index);
+
+    void on_actionCube_triggered();
+
+    void on_actionMonkey_triggered();
 
 private:
     Renderer* mRenderer;
     QWidget *mRenderWindowContainer;
+
+    EntityData* currentEntitySelected{nullptr};
+
+    std::vector<EntityData> mEntityDataCache;
 };
 
 #endif // MAINWINDOW_H

@@ -17,6 +17,11 @@ struct Component
     {}
 };
 
+struct EntityData : public Component
+{
+    std::string name{};
+};
+
 struct Transform : public Component
 {
     bool updated{true};

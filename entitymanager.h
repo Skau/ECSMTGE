@@ -4,6 +4,8 @@
 #include "componentdata.h"
 #include <typeinfo>
 #include <vector>
+#include "resourcemanager.h"
+#include <QObject>
 #include <QDebug>
 
 /** A component data manager class
@@ -12,18 +14,39 @@
  *
  * @author andesyv, Skau
  */
-class EntityManager
+class EntityManager : public QObject
 {
+    Q_OBJECT
 private:
     // ------------------------------ Member Variables ------------------------------
     // Component arrays. Remember to update componentCount if adding more.
     std::vector<Transform> mTransforms;
     std::vector<Render> mRenders;
+    std::vector<EntityData> mEntityData;
 
     unsigned int idCounter{0};
 
 
+signals:
+    void updateUI(const std::vector<EntityData>& entityData);
 
+public slots:
+    void createObject(int index)
+    {
+        switch (index)
+        {
+        case 0:
+        {
+            createCube();
+            break;
+        }
+        case 1:
+        {
+            createMonkey();
+            break;
+        }
+        }
+    }
 
     // ------------------------- Member functions ---------------
 public:
@@ -34,8 +57,46 @@ public:
 
     std::vector<Transform> getTransforms() { return mTransforms; }
     std::vector<Render> getRenders() { return mRenders; }
+    std::vector<EntityData> getEntityData() { return mEntityData; }
 
-    unsigned int createEntity() { return idCounter++; }
+    void createCube()
+    {
+        auto id = createEntity();
+        addComponent<Render, Transform>(id);
+        auto render = getComponent<Render>(id);
+        if(auto mesh = ResourceManager::instance()->getMesh("box"))
+        {
+            render->meshData = *mesh;
+            render->isVisible = true;
+        }
+    }
+
+    void createMonkey()
+    {
+        auto id = createEntity();
+        addComponent<Render, Transform>(id);
+        auto render = getComponent<Render>(id);
+        if(auto mesh = ResourceManager::instance()->getMesh("monkey"))
+        {
+            render->meshData = *mesh;
+            render->isVisible = true;
+        }
+    }
+
+    unsigned int createEntity(std::string name = "")
+    {
+        auto id = idCounter++;
+        EntityData entityData;
+        entityData.entityId = id;
+        if(!name.size())
+        {
+            name = "Entity" + std::to_string(id);
+        }
+        entityData.name = name;
+        mEntityData.push_back(entityData);
+        updateUI(mEntityData);
+        return id;
+    }
 
     template<typename... componentTypes>
     void addComponent(unsigned int entity)

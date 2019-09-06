@@ -19,6 +19,8 @@ public:
 
     ~World();
 
+    void initCurrentScene();
+
 private:
     std::vector<Scene*> mScenes;
 

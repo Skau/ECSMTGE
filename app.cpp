@@ -17,17 +17,24 @@ App::App()
     connect(mMainWindow->ui->actionToggle_wireframe, &QAction::triggered, mRenderer, &Renderer::toggleWireframe);
     connect(mRenderer, &Renderer::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
     connect(mMainWindow->ui->actionExit, &QAction::triggered, mMainWindow.get(), &MainWindow::close);
+
 }
 
+// Slot called from Renderer when its done with initialization
 void App::initTheRest()
 {
     mWorld = std::make_unique<World>();
 
+    connect(mMainWindow.get(), &MainWindow::createObject, mWorld->getEntityManager(), &EntityManager::createObject);
+    connect(mWorld->getEntityManager(), &EntityManager::updateUI, mMainWindow.get(), &MainWindow::updateUI);
+
+    mWorld->initCurrentScene();
+
     mRenderer->setupCamera();
 
     connect(mRenderer, &Renderer::escapeKeyPressed, this, &App::quit);
-
     connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);
+
 
     mUpdateTimer.start(16); // Simulates 60ish fps
 

@@ -30,11 +30,15 @@ World::World()
 
     entityManager = new EntityManager();
 
-    mCurrentScene = new Scene(this);
-
+    mCurrentScene = new TestScene();
 }
 
 World::~World()
 {
     delete entityManager;
+}
+
+void World::initCurrentScene()
+{
+    mCurrentScene->initObjects(this);
 }

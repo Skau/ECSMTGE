@@ -48,6 +48,28 @@ public slots:
         }
     }
 
+    /**
+     * @brief Adds all components for a given entity to the given vector. Returns true if any was found.
+     * @param The entity ID.
+     * @param The vector that will be filled with found components.
+     * @return If any components were found and added to the vector.
+     */
+    bool getAllComponents(unsigned int entity, std::vector<Component*>& outComponents)
+    {
+        bool addedAnyComponents = false;
+        if(auto comp = getComponent<Transform>(entity))
+        {
+            outComponents.push_back(comp);
+            addedAnyComponents = true;
+        }
+        if(auto comp = getComponent<Render>(entity))
+        {
+            outComponents.push_back(comp);
+            addedAnyComponents = true;
+        }
+        return addedAnyComponents;
+    }
+
     // ------------------------- Member functions ---------------
 public:
     EntityManager()
@@ -106,6 +128,39 @@ public:
 
     template<class T,
              typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
+    T* getComponent(unsigned int entity)
+    {
+        for (auto& comp : mTransforms)
+            if (comp.valid && comp.entityId == entity)
+                return &comp;
+
+        return nullptr;
+    }
+
+    template<class T,
+             typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
+    T* getComponent(unsigned int entity)
+    {
+        for (auto& comp : mRenders)
+            if (comp.valid && comp.entityId == entity)
+                return &comp;
+
+        return nullptr;
+    }
+
+    void print() {
+        std::cout << "transforms: ";
+        for (auto comp : mTransforms)
+            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
+        std::cout << std::endl << "renders: ";
+        for (auto comp : mRenders)
+            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
+        std::cout << std::endl;
+    }
+
+private:
+    template<class T,
+             typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
     T& addComponents(unsigned int entity)
     {
         for (auto& comp : mTransforms)
@@ -162,38 +217,6 @@ public:
             return t1.entityId < t2.entityId;
         });
         return comp;
-    }
-
-    template<class T,
-             typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
-    T* getComponent(unsigned int entity)
-    {
-        for (auto& comp : mTransforms)
-            if (comp.valid && comp.entityId == entity)
-                return &comp;
-
-        return nullptr;
-    }
-
-    template<class T,
-             typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
-    T* getComponent(unsigned int entity)
-    {
-        for (auto& comp : mRenders)
-            if (comp.valid && comp.entityId == entity)
-                return &comp;
-
-        return nullptr;
-    }
-
-    void print() {
-        std::cout << "transforms: ";
-        for (auto comp : mTransforms)
-            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
-        std::cout << std::endl << "renders: ";
-        for (auto comp : mRenders)
-            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
-        std::cout << std::endl;
     }
 
 };

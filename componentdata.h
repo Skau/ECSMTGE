@@ -6,14 +6,21 @@
 
 // Something like this?
 
+enum class ComponentType
+{
+    Transform,
+    Render,
+    Other
+};
+
 struct Component
 {
     unsigned int entityId;
     bool valid : 1;
+    ComponentType type;
 
-
-    Component(unsigned int _eID = 0, bool _valid = false)
-        : entityId{_eID}, valid(_valid)
+    Component(unsigned int _eID = 0, bool _valid = false, ComponentType typeIn = ComponentType::Other)
+        : entityId{_eID}, valid(_valid), type(typeIn)
     {}
 };
 
@@ -34,7 +41,7 @@ struct Transform : public Component
               const gsl::vec3& _pos = gsl::vec3{},
               const gsl::vec3& _scale = gsl::vec3{1.f, 1.f, 1.f},
               const gsl::vec3& _rot = gsl::vec3{})
-        : Component (_eID, _valid), updated{true}, position{_pos},
+        : Component (_eID, _valid, ComponentType::Transform), updated{true}, position{_pos},
           scale{_scale}, rotation{_rot}
     {}
 };
@@ -47,7 +54,7 @@ struct Render : public Component
 
     Render(unsigned int _eID = 0, bool _valid = false,
            const MeshData& _meshData = MeshData{}, bool _visible = false)
-        : Component (_eID, _valid), meshData{_meshData}, isVisible{_visible}
+        : Component (_eID, _valid, ComponentType::Render), meshData{_meshData}, isVisible{_visible}
     {}
 };
 

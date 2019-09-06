@@ -26,6 +26,7 @@ void App::initTheRest()
     mWorld = std::make_unique<World>();
 
     connect(mMainWindow.get(), &MainWindow::createObject, mWorld->getEntityManager(), &EntityManager::createObject);
+    connect(mMainWindow.get(), &MainWindow::getAllComponentsForEntity, mWorld->getEntityManager(), &EntityManager::getAllComponents);
     connect(mWorld->getEntityManager(), &EntityManager::updateUI, mMainWindow.get(), &MainWindow::updateUI);
 
     mWorld->initCurrentScene();

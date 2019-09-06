@@ -8,6 +8,7 @@
 #include "renderer.h"
 #include "Widgets/transformwidget.h"
 #include "Widgets/renderwidget.h"
+#include "componentdata.h"
 
 #include <QSplitter>
 
@@ -23,69 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     resize(QDesktopWidget().availableGeometry(this).size() * 0.7);
 
-//    {
-//        QWidget * containment = new QWidget(this);
-//        containment->setLayout( new QVBoxLayout(this) );
-//        QWidget * currentStructures = new QWidget(this);
-//        currentStructures->setLayout( new QVBoxLayout(this) );
-//        currentStructures->layout()->setAlignment( Qt::AlignTop );
-//        currentStructures->layout()->addWidget(new TransformWidget(this));
-//        QScrollArea * scroll = new QScrollArea(this);
-//        scroll->setWidget( currentStructures );
-//        scroll->setWidgetResizable( true );
-//        containment->layout()->addWidget(scroll);
-//        ui->scrollAreaWidgetContents->layout()->addWidget( containment );
-//    }
-
-
-//    {
-//        QWidget * containment = new QWidget(this);
-//        containment->setLayout( new QVBoxLayout(this) );
-//        QWidget * currentStructures = new QWidget(this);
-//        currentStructures->setLayout( new QVBoxLayout(this) );
-//        currentStructures->layout()->setAlignment( Qt::AlignTop );
-//        currentStructures->layout()->addWidget(new RenderWidget(this));
-//        QScrollArea * scroll = new QScrollArea(this);
-//        scroll->setWidget( currentStructures );
-//        scroll->setWidgetResizable( true );
-//        containment->layout()->addWidget(scroll);
-//        ui->scrollAreaWidgetContents->layout()->addWidget( containment );
-
-//    }
-
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     ui->scrollArea->setWidgetResizable(true);
-
-//    QWidget* widget = new QWidget();
-//    ui->scrollArea->setWidget(widget);
-
-//    QVBoxLayout* layout = new QVBoxLayout();
-//    widget->setLayout(layout);
-//    for(int i = 0; i < 8; ++i)
-//    {
-//        layout->addWidget(new TransformWidget(this));
-//    }
-//    for(int i = 0; i < 3; ++i)
-//    {
-//        layout->addWidget(new RenderWidget(this));
-//    }
-
-
-//    for(int i = 0; i < 10; ++i)
-//    {
-//        QWidget * containment = new QWidget(this);
-//        containment->setLayout( new QVBoxLayout(this) );
-//        QWidget * currentStructures = new QWidget(this);
-//        currentStructures->setLayout( new QVBoxLayout(this) );
-//        currentStructures->layout()->setAlignment( Qt::AlignTop );
-//        currentStructures->layout()->addWidget(new TransformWidget(this));
-//        QScrollArea * scroll = new QScrollArea(this);
-//        scroll->setWidget( currentStructures );
-//        scroll->setWidgetResizable( true );
-//        containment->layout()->addWidget(scroll);
-//        ui->scrollAreaWidgetContents->layout()->addWidget( containment );
-//    }
-
 
     show();
 }
@@ -100,6 +40,8 @@ void MainWindow::showFPS(double deltaTime, double frameCounter)
     statusBar()->showMessage(" Time pr FrameDraw: " + QString::number(deltaTime, 'g', 4) + " ms  |  " + "FPS: " + QString::number(frameCounter, 'g', 4));
 }
 
+
+// Called from entity manager when a new entity is added to the scene
 void MainWindow::updateUI(const std::vector<EntityData> &entityData)
 {
     if(ui->objectList->count())
@@ -115,24 +57,64 @@ void MainWindow::updateUI(const std::vector<EntityData> &entityData)
     mEntityDataCache = entityData;
 }
 
+// When an object is selected via the hierarchy
 void MainWindow::on_objectList_activated(const QModelIndex &index)
 {
+    // get the index and check the cache
     auto i = static_cast<unsigned>(index.row());
     if(i < mEntityDataCache.size())
     {
+        // Update the selected object name
         ui->label_SelectedObject->setText(QString::fromStdString(mEntityDataCache[i].name));
 
+        // Delete any previous component widgets
         if(ui->scrollArea->widget())
             delete ui->scrollArea->widget();
 
-        QWidget* widget = new QWidget();
-        ui->scrollArea->setWidget(widget);
+        // Get the components for this entity
+        std::vector<Component*> components;
+        if(getAllComponentsForEntity(mEntityDataCache[i].entityId, components))
+        {
+            // Components were found, add them
 
-        QVBoxLayout* layout = new QVBoxLayout();
-        widget->setLayout(layout);
+            QWidget* widget = new QWidget();
+            ui->scrollArea->setWidget(widget);
+            QVBoxLayout* layout = new QVBoxLayout();
+            widget->setLayout(layout);
 
-        layout->addWidget(new TransformWidget(this));
-        layout->addWidget(new RenderWidget(this));
+            for(auto& component: components)
+            {
+                switch (component->type)
+                {
+                case ComponentType::Render:
+                {
+                    auto widget = new RenderWidget(this);
+
+                    // Set up render widget here
+
+                    layout->addWidget(widget);
+                    break;
+                }
+                case ComponentType::Transform:
+                {
+
+                    auto transform = static_cast<Transform*>(component);
+                    auto widget = new TransformWidget(this);
+
+                    // Set up transform widget here
+
+                    widget->setPosition(transform->position);
+                    widget->setRotation(transform->rotation);
+                    widget->setScale(transform->scale);
+
+                    layout->addWidget(widget);
+                    break;
+                }
+                default:
+                    break;
+                }
+            }
+        }
     }
 }
 

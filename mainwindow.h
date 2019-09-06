@@ -7,6 +7,7 @@
 class QWidget;
 class Renderer;
 class EntityData;
+class Component;
 
 namespace Ui {
 class MainWindow;
@@ -28,6 +29,7 @@ public:
 
 signals:
     void createObject(int index);
+    bool getAllComponentsForEntity(unsigned int entity, std::vector<Component*>& outComponents);
 
 public slots:
     void updateUI(const std::vector<EntityData>& entityData);

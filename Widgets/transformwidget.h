@@ -3,6 +3,9 @@
 
 #include <QWidget>
 
+#include "GSL/math.h"
+#include "GSL/vector3d.h"
+
 namespace Ui{
     class Transform;
 }
@@ -16,8 +19,16 @@ public:
     explicit TransformWidget(QWidget* parent = nullptr);
     ~TransformWidget();
 
+
+    void setPosition(const gsl::vec3& pos);
+    void setRotation(const gsl::vec3& rot);
+    void setScale(const gsl::vec3& scale);
+
+    gsl::vec3 getPosition();
+    gsl::vec3 getRotation();
+    gsl::vec3 getScale();
+
 private:
     Ui::Transform* ui;
 };
-
 #endif // TRANSFORMWIDGET_H

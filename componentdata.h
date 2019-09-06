@@ -14,6 +14,11 @@ struct Component
     Component() : valid(false) {}
 };
 
+struct EntityData : public Component
+{
+    std::string name{};
+};
+
 struct Transform : public Component
 {
     gsl::Vector3D position{};

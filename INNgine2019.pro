@@ -11,6 +11,8 @@ INCLUDEPATH +=  ./GSL
 
 HEADERS += \
     GSL/math.h \
+    Widgets/renderwidget.h \
+    Widgets/transformwidget.h \
     app.h \
     componentdata.h \
     entitymanager.h \
@@ -50,6 +52,8 @@ HEADERS += \
 
 SOURCES += \
     GSL/math.cpp \
+    Widgets/renderwidget.cpp \
+    Widgets/transformwidget.cpp \
     app.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -80,7 +84,9 @@ SOURCES += \
 
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    render.ui \
+    transform.ui
 
 
 DISTFILES += \

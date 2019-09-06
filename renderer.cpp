@@ -50,6 +50,7 @@ Renderer::~Renderer()
 {
 }
 
+// Called when first exposed
 void Renderer::init()
 {
     //The OpenGL context has to be set.
@@ -74,10 +75,11 @@ void Renderer::init()
 
     startOpenGLDebugger();
 
+    // Called to tell App that it can continue initializing
     initDone();
 }
 
-///Called each frame - doing the rendering
+//Called each frame - doing the rendering
 void Renderer::render(const std::vector<VisualObject*>& objects, double deltaTime)
 {
     if(isExposed())

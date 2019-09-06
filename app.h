@@ -22,6 +22,9 @@ public:
     App();
 
 
+signals:
+    void initScene();
+
 public slots:
     void initTheRest();
 

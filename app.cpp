@@ -66,9 +66,6 @@ void App::update()
     CameraSystem::updateCameras(transforms, cameras);
 
     for (const auto& camera : cameras) {
-        auto trans = mWorld->getEntityManager()->getComponent<Transform>(camera.entityId);
-        trans->position += gsl::vec3{1.f, 0.f, 0.f} * mDeltaTime * 0.01f;
-        trans->updated = true;
         mRenderer->render(renders, transforms, camera);
     }
 

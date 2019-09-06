@@ -30,8 +30,8 @@ public:
 
     gsl::Vector3D forward() const;
 
-    static void updateCameras(std::vector<Transform> transforms, std::vector<Camera> cameras);
-    static void updateCameras(std::vector<Camera> cameras, const gsl::mat4& projectionMatrix = gsl::mat4::persp(45.f, 3.f / 4.f, 1.f, 100.f));
+    static void updateCameras(std::vector<Transform> &transforms, std::vector<Camera> &cameras);
+    static void updateCameras(std::vector<Camera> &cameras, const gsl::mat4& projectionMatrix = gsl::mat4::persp(45.f, 3.f / 4.f, 1.f, 100.f));
     static void updateCamera(Camera* camera, const gsl::mat4& projectionMatrix);
 
 private:

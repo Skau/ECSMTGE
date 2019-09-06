@@ -56,10 +56,10 @@ public:
 
     }
 
-    std::vector<Transform> getTransforms() { return mTransforms; }
+    std::vector<Transform>& getTransforms() { return mTransforms; }
     std::vector<Render> getRenders() { return mRenders; }
     std::vector<EntityData> getEntityData() { return mEntityData; }
-    std::vector<Camera> getCameras() { return mCameras; }
+    std::vector<Camera>& getCameras() { return mCameras; }
 
     void createCube()
     {

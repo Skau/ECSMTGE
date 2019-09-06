@@ -59,16 +59,16 @@ void App::update()
 
     mRenderer->handleInput(mDeltaTime);
 
-
- //   mRenderer->render(mWorld->getCurrentScene()->getVisualObjects(), mDeltaTime);
-
-    auto transforms = mWorld->getEntityManager()->getTransforms();
+    auto& transforms = mWorld->getEntityManager()->getTransforms();
     auto renders = mWorld->getEntityManager()->getRenders();
-    auto cameras = mWorld->getEntityManager()->getCameras();
+    auto& cameras = mWorld->getEntityManager()->getCameras();
 
     CameraSystem::updateCameras(transforms, cameras);
 
     for (const auto& camera : cameras) {
+        auto trans = mWorld->getEntityManager()->getComponent<Transform>(camera.entityId);
+        trans->position += gsl::vec3{1.f, 0.f, 0.f} * mDeltaTime * 0.01f;
+        trans->updated = true;
         mRenderer->render(renders, transforms, camera);
     }
 
@@ -82,7 +82,7 @@ void App::quit()
 
 void App::updatePerspective()
 {
-    auto cameras = mWorld->getEntityManager()->getCameras();
+    auto& cameras = mWorld->getEntityManager()->getCameras();
 
     CameraSystem::updateCameras(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 1.f, 100.f));
 }

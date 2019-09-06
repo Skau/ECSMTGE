@@ -42,7 +42,7 @@ public:
         entityManager->addComponent<Transform, Camera>(camera);
         auto trans = entityManager->getComponent<Transform>(camera);
         if (trans) {
-            trans->position = gsl::vec3{0.f, 0.f, -5.f};
+            trans->position = gsl::vec3{-5.f, 0.f, 5.f};
             trans->updated = true;
         } else {
             qDebug() << "Camera has no transform!";

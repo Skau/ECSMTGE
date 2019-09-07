@@ -4,12 +4,7 @@
 
 ResourceManager::~ResourceManager()
 {
-    mShaders.clear();
 
-    for(auto& texture : mTextures)
-    {
-        delete texture.second;
-    }
 }
 
 void ResourceManager::addShader(const std::string &name, std::shared_ptr<Shader> shader)
@@ -42,7 +37,7 @@ void ResourceManager::loadTexture(const std::string &name, const std::string &pa
             mIsInitialized = true;
         }
 
-        mTextures[name] = new Texture(path);
+        mTextures[name] = std::make_shared<Texture>(path);
 
         glActiveTexture(static_cast<GLuint>(GL_TEXTURE0 + mTextures.size() - 1));
         glBindTexture(GL_TEXTURE_2D, mTextures[name]->id());
@@ -59,14 +54,14 @@ int ResourceManager::getTexture(const std::string &name)
     return -1;
 }
 
-void ResourceManager::addMesh(const std::string& name, const std::string& path, GLenum renderType)
+std::shared_ptr<MeshData> ResourceManager::addMesh(const std::string& name, const std::string& path, GLenum renderType)
 {
     if(mMeshes.find(name) == mMeshes.end())
     {
-        if(!openglInitialized)
+        if(!mIsInitialized)
         {
             initializeOpenGLFunctions();
-            openglInitialized = true;
+            mIsInitialized = true;
         }
 
         std::pair<std::vector<Vertex>, std::vector<GLuint>> data;
@@ -119,10 +114,14 @@ void ResourceManager::addMesh(const std::string& name, const std::string& path, 
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.mIndicesCount * sizeof(GLuint), data.second.data(), GL_STATIC_DRAW);
         }
 
-
-        mMeshes[name] = std::make_shared<MeshData>(meshData);
+        auto mesh = std::make_shared<MeshData>(meshData);
+        mMeshes[name] = mesh;
         glBindVertexArray(0);
+
+        return mesh;
     }
+
+    return nullptr;
 }
 
 std::shared_ptr<MeshData> ResourceManager::getMesh(const std::string& name)
@@ -131,6 +130,7 @@ std::shared_ptr<MeshData> ResourceManager::getMesh(const std::string& name)
     {
         return mMeshes[name];
     }
+    qDebug() << "No mesh named " << QString::fromStdString(name) << " could be found";
     return nullptr;
 }
 

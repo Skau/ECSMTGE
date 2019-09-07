@@ -8,6 +8,7 @@ namespace Ui{
 }
 
 class MainWindow;
+class Render;
 
 class RenderWidget : public QWidget
 {
@@ -19,14 +20,23 @@ public:
 
 signals:
     void chooseMesh(unsigned int entity, const std::string& name);
+    void widgetRemoved();
 
 public slots:
-        void setName(const std::string& name);
+    void update(const std::string& name);
 
 private slots:
     void on_button_ChangeMesh_clicked();
 
+    void on_checkBox_Visible_toggled(bool checked);
+
+    void ProvideContextMenu(const QPoint& point);
+
+    void Remove();
+
 private:
+    Render* getRenderComponent(unsigned int entity);
+
     Ui::Render* ui;
     MainWindow* mMainWindow;
 };

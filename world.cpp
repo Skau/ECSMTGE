@@ -14,7 +14,7 @@ World::World()
     ResourceManager::instance()->loadTexture("hund",    "hund.bmp");
     ResourceManager::instance()->loadTexture("skybox",  "skybox.bmp");
 
-    ResourceManager::instance()->addMesh("box", "box2.txt");
+    ResourceManager::instance()->addMesh("box2", "box2.txt");
     ResourceManager::instance()->addMesh("monkey", "monkey.obj");
 
     if(auto mesh =  ResourceManager::instance()->getMesh("box"))
@@ -30,6 +30,7 @@ World::World()
     entityManager = std::make_shared<EntityManager>();
 
     mCurrentScene = new TestScene();
+    //mCurrentScene = new EmptyScene();
 }
 
 World::~World()

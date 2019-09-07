@@ -29,21 +29,19 @@ public:
     void loadTexture(const std::string& name, const std::string& path);
     int getTexture(const std::string& name);
 
-    void addMesh(const std::string& name, const std::string& path, GLenum renderType = GL_TRIANGLES);
+    std::shared_ptr<MeshData> addMesh(const std::string& name, const std::string& path, GLenum renderType = GL_TRIANGLES);
     std::shared_ptr<MeshData> getMesh(const std::string& name);
 
 
 private:
     ResourceManager();
 
-    std::pair<std::vector<Vertex>, std::vector<GLuint> > readObjFile(std::string filename);
+    std::pair<std::vector<Vertex>, std::vector<GLuint>> readObjFile(std::string filename);
     std::pair<std::vector<Vertex>, std::vector<GLuint>> readTxtFile(std::string filename);
 
     std::map<std::string, std::shared_ptr<Shader>> mShaders;
-    std::map<std::string, Texture*> mTextures;
+    std::map<std::string, std::shared_ptr<Texture>> mTextures;
     std::map<std::string, std::shared_ptr<MeshData>> mMeshes;
-
-    bool openglInitialized{false};
 
     bool mIsInitialized = false;
 };

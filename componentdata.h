@@ -6,12 +6,17 @@
 
 // Something like this?
 
+
 enum class ComponentType
 {
     Transform,
     Render,
     Other
 };
+
+// Used by UI so it knows what components are available to add if the entity doesnt have one.
+const std::vector<ComponentType> ComponentTypes = {ComponentType::Render, ComponentType::Transform};
+
 
 struct Component
 {

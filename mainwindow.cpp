@@ -27,6 +27,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     ui->scrollArea->setWidgetResizable(true);
 
+    ui->button_AddComponent->setEnabled(false);
+    ui->comboBox_Components->setEnabled(false);
+
     show();
 }
 
@@ -65,82 +68,207 @@ void MainWindow::updateUI(const std::vector<EntityData> &entityData)
         ui->objectList->addItem(QString::fromStdString(entity.name));
     }
 
+    for(int i = 0; i < ui->objectList->count(); ++i)
+    {
+        auto item = ui->objectList->item(i);
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+    }
+
+    ui->objectList->setEditTriggers(QAbstractItemView::DoubleClicked);
+
     mEntityDataCache = entityData;
 }
 
+void MainWindow::onWidgetRemoved()
+{
+    updateComponentArea(currentEntitySelected->entityId);
+}
+
 // When an object is selected via the hierarchy
-void MainWindow::on_objectList_activated(const QModelIndex &index)
+void MainWindow::on_objectList_clicked(const QModelIndex &index)
 {
     // get the index and check the cache
     auto i = static_cast<unsigned>(index.row());
     if(i < mEntityDataCache.size())
     {
+        // Cache currently selected entity
         currentEntitySelected = &mEntityDataCache[i];
+
         // Update the selected object name
-        ui->label_SelectedObject->setText(QString::fromStdString(currentEntitySelected->name));
+        ui->lineEdit_SelectedObject->setText(QString::fromStdString(currentEntitySelected->name));
 
-        // Delete any previous component widgets
-        if(ui->scrollArea->widget())
-            delete ui->scrollArea->widget();
+        // Update widgets
+        updateComponentArea(currentEntitySelected->entityId);
+    }
+}
 
-        // Get the components for this entity
-        std::vector<Component*> components;
-        if(getAllComponentsForEntity(currentEntitySelected->entityId, components))
+void MainWindow::on_actionEmpty_Object_triggered()
+{
+    createObject(0);
+}
+
+void MainWindow::on_actionCube_triggered()
+{
+     createObject(1);
+}
+
+void MainWindow::on_actionMonkey_triggered()
+{
+    createObject(2);
+}
+
+void MainWindow::on_button_AddComponent_clicked()
+{
+    int index = ui->comboBox_Components->currentIndex();
+    if(static_cast<size_t>(index) < mAvailableComponentsToAddCache.size() && currentEntitySelected)
+    {
+        auto id = currentEntitySelected->entityId;
+        auto type = mAvailableComponentsToAddCache[static_cast<size_t>(index)];
+
+        mEntityManager->addComponent(id, type);
+        updateComponentArea(id);
+
+        mAvailableComponentsToAddCache.erase(std::remove(mAvailableComponentsToAddCache.begin(), mAvailableComponentsToAddCache.end(), type), mAvailableComponentsToAddCache.end());
+        updateAvailableComponents(mAvailableComponentsToAddCache);
+    }
+}
+
+void MainWindow::updateComponentArea(unsigned int entityID)
+{
+    // Delete any previous component widgets
+    if(ui->scrollArea->widget())
+        delete ui->scrollArea->widget();
+
+    // Get all available components
+    mAvailableComponentsToAddCache = ComponentTypes;
+
+    // Get the components for this entity
+    std::vector<Component*> components;
+    if(getAllComponentsForEntity(entityID, components))
+    {
+        // Components were found, add them
+
+        QWidget* widget = new QWidget();
+        ui->scrollArea->setWidget(widget);
+        QVBoxLayout* layout = new QVBoxLayout();
+        widget->setLayout(layout);
+
+        for(auto& component: components)
         {
-            // Components were found, add them
+            mAvailableComponentsToAddCache.erase(std::remove(mAvailableComponentsToAddCache.begin(), mAvailableComponentsToAddCache.end(), component->type), mAvailableComponentsToAddCache.end());
 
-            QWidget* widget = new QWidget();
-            ui->scrollArea->setWidget(widget);
-            QVBoxLayout* layout = new QVBoxLayout();
-            widget->setLayout(layout);
-
-            for(auto& component: components)
+            switch (component->type)
             {
-                switch (component->type)
+            case ComponentType::Render:
+            {
+                auto render = static_cast<Render*>(component);
+                auto widget = new RenderWidget(this);
+
+                // Set up render widget here
+
+                connect(widget, &RenderWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
+
+                widget->update(render->meshData.mName);
+
+                layout->addWidget(widget);
+                break;
+            }
+            case ComponentType::Transform:
+            {
+                auto transform = static_cast<Transform*>(component);
+                auto widget = new TransformWidget(this);
+
+                // Set up transform widget here
+
+                connect(widget, &TransformWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
+
+                widget->update(transform->position, transform->rotation, transform->scale);
+
+                layout->addWidget(widget);
+                break;
+            }
+            default:
+                break;
+            }
+        }
+    }
+    updateAvailableComponents(mAvailableComponentsToAddCache);
+}
+
+void MainWindow::updateAvailableComponents(std::vector<ComponentType> types)
+{
+    ui->comboBox_Components->clear();
+    if(!types.size())
+    {
+        ui->button_AddComponent->setEnabled(false);
+        ui->comboBox_Components->setEnabled(false);
+        return;
+    }
+
+    ui->comboBox_Components->setEnabled(true);
+    ui->button_AddComponent->setEnabled(true);
+
+    for(auto& type : types)
+    {
+        switch (type)
+        {
+        case ComponentType::Render:
+        {
+            ui->comboBox_Components->addItem("Render");
+            break;
+        }
+        case ComponentType::Transform:
+        {
+            ui->comboBox_Components->addItem("Transform");
+            break;
+        }
+        default:
+            break;
+        }
+    }
+}
+
+void MainWindow::on_lineEdit_SelectedObject_editingFinished()
+{
+    auto text = ui->lineEdit_SelectedObject->text();
+    if(text.length())
+    {
+        if(currentEntitySelected)
+        {
+            currentEntitySelected->name = text.toStdString();
+            for(unsigned i = 0; i < mEntityDataCache.size(); ++i)
+            {
+                if(mEntityDataCache[i].entityId == currentEntitySelected->entityId)
                 {
-                case ComponentType::Render:
-                {
-                    auto render = static_cast<Render*>(component);
-                    auto widget = new RenderWidget(this);
-
-                    // Set up render widget here
-
-                    widget->setName(render->meshData.mName);
-
-                    layout->addWidget(widget);
-                    break;
-                }
-                case ComponentType::Transform:
-                {
-
-                    auto transform = static_cast<Transform*>(component);
-                    auto widget = new TransformWidget(this);
-
-                    // Set up transform widget here
-
-                    widget->setPosition(transform->position);
-                    widget->setRotation(transform->rotation);
-                    widget->setScale(transform->scale);
-
-                    layout->addWidget(widget);
-                    break;
-                }
-                default:
-                    break;
+                    if(i < static_cast<unsigned>(ui->objectList->count()))
+                    {
+                        ui->objectList->item(static_cast<int>(i))->setText(text);
+                    }
                 }
             }
         }
     }
 }
 
-void MainWindow::on_actionCube_triggered()
+void MainWindow::on_objectList_itemChanged(QListWidgetItem *item)
 {
-     createObject(0);
+    for(int i = 0; i < ui->objectList->count(); ++i)
+    {
+        if(ui->objectList->item(i) == item)
+        {
+            if(static_cast<unsigned>(i) < mEntityDataCache.size())
+            {
+                auto entity = mEntityDataCache[static_cast<unsigned>(i)];
+                entity.name = item->text().toStdString();
+                if(currentEntitySelected)
+                {
+                    if(entity.entityId == currentEntitySelected->entityId)
+                    {
+                        ui->lineEdit_SelectedObject->setText(item->text());
+                    }
+                }
+            }
+        }
+    }
 }
-
-void MainWindow::on_actionMonkey_triggered()
-{
-    createObject(1);
-}
-
-

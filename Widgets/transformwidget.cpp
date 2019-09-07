@@ -2,11 +2,15 @@
 #include "ui_transform.h"
 #include "mainwindow.h"
 #include "entitymanager.h"
+#include <QMenu>
 
 TransformWidget::TransformWidget(MainWindow* mainWindow, QWidget *parent)
     : QWidget(parent), ui(new Ui::Transform), mMainWindow(mainWindow)
 {
     ui->setupUi(this);
+
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &QWidget::customContextMenuRequested, this, &TransformWidget::ProvideContextMenu);
 }
 
 TransformWidget::~TransformWidget()
@@ -59,6 +63,13 @@ gsl::vec3 TransformWidget::getScale()
     returnVec.y = static_cast<float>(ui->spinBox_Scale_Y->value());
     returnVec.z = static_cast<float>(ui->spinBox_Scale_Z->value());
     return returnVec;
+}
+
+void TransformWidget::update(const gsl::vec3 &pos, const gsl::vec3 &rot, const gsl::vec3 &scale)
+{
+    setPosition(pos);
+    setRotation(rot);
+    setScale(scale);
 }
 
 void TransformWidget::on_spinBox_Position_X_valueChanged(double arg1)
@@ -192,6 +203,28 @@ void TransformWidget::on_spinBox_Scale_Z_valueChanged(double arg1)
         {
             transform->scale = gsl::vec3(transform->scale.x, transform->scale.y, static_cast<float>(arg1));
             transform->updated = true;
+        }
+    }
+}
+
+void TransformWidget::ProvideContextMenu(const QPoint& point)
+{
+    QMenu subMenu;
+    subMenu.addAction("Remove", this, &TransformWidget::Remove);
+
+    QPoint globalPos = mapToGlobal(point);
+
+    subMenu.exec(globalPos);
+}
+
+void TransformWidget::Remove()
+{
+    auto entity = mMainWindow->currentEntitySelected;
+    if(entity)
+    {
+        if(mMainWindow->getEntityManager()->removeComponent<Transform>(entity->entityId))
+        {
+            widgetRemoved();
         }
     }
 }

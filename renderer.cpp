@@ -148,7 +148,7 @@ void Renderer::render(std::vector<Render> renders, std::vector<Transform> transf
             }
             else
             {
-                // They are the same, draw.
+                // They are the same
                 if(!renderIt->isVisible)
                 {
                     // Increment all
@@ -157,9 +157,17 @@ void Renderer::render(std::vector<Render> renders, std::vector<Transform> transf
                     continue;
                 }
 
-                // Entity can be drawn. Draw.
-
+                // Mesh data available
                 auto meshData = renderIt->meshData;
+                if(!meshData.mVerticesCount)
+                {
+                    // Increment all
+                    ++transIt;
+                    ++renderIt;
+                    continue;
+                }
+
+                // Entity can be drawn. Draw.
 
                 glBindVertexArray(meshData.mVAO);
 
@@ -193,11 +201,11 @@ void Renderer::render(std::vector<Render> renders, std::vector<Transform> transf
                 ++renderIt;
             }
         }
+
+        checkForGLerrors();
+
+        mContext->swapBuffers(this);
     }
-
-    checkForGLerrors();
-
-    mContext->swapBuffers(this);
 }
 
 void Renderer::setupCamera()

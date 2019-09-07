@@ -38,10 +38,15 @@ public slots:
         {
         case 0:
         {
-            createCube();
+            createEntity();
             break;
         }
         case 1:
+        {
+            createCube();
+            break;
+        }
+        case 2:
         {
             createMonkey();
             break;
@@ -60,13 +65,19 @@ public slots:
         bool addedAnyComponents = false;
         if(auto comp = getComponent<Transform>(entity))
         {
-            outComponents.push_back(comp);
-            addedAnyComponents = true;
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
         }
         if(auto comp = getComponent<Render>(entity))
         {
-            outComponents.push_back(comp);
-            addedAnyComponents = true;
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
         }
         return addedAnyComponents;
     }
@@ -88,7 +99,7 @@ public:
         auto id = createEntity();
         addComponent<Render, Transform>(id);
         auto render = getComponent<Render>(id);
-        if(auto mesh = ResourceManager::instance()->getMesh("box"))
+        if(auto mesh = ResourceManager::instance()->getMesh("box2"))
         {
             render->meshData = *mesh;
             render->isVisible = true;
@@ -146,6 +157,25 @@ public:
         std::tuple<componentTypes...> l = {addComponents<componentTypes>(entity)...};
     }
 
+    void addComponent(unsigned int entity, ComponentType type)
+    {
+        switch (type)
+        {
+        case ComponentType::Render:
+        {
+            addComponent<Render>(entity);
+            break;
+        }
+        case ComponentType::Transform:
+        {
+            addComponent<Transform>(entity);
+            break;
+        }
+        default:
+            break;
+        }
+    }
+
     template<class T,
              typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
     T* getComponent(unsigned int entity)
@@ -177,6 +207,44 @@ public:
                 return &comp;
 
         return nullptr;
+    }
+
+    template<class T,
+             typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
+    bool removeComponent(unsigned int entity)
+    {
+        for(auto& comp : mTransforms)
+        {
+            if(comp.entityId == entity)
+            {
+                if(comp.valid)
+                {
+                    comp = Transform();
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    template<class T,
+             typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
+    bool removeComponent(unsigned int entity)
+    {
+        for(auto& comp : mRenders)
+        {
+            if(comp.entityId == entity)
+            {
+                if(comp.valid)
+                {
+                    comp = Render();
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     void print() {

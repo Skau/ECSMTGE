@@ -13,6 +13,8 @@ namespace Ui {
 class MainWindow;
 }
 
+enum class ComponentType;
+
 class EntityManager;
 
 class MainWindow : public QMainWindow
@@ -35,29 +37,44 @@ public:
 
     EntityData* currentEntitySelected{nullptr};
 
-
-
 signals:
     void createObject(int index);
     bool getAllComponentsForEntity(unsigned int entity, std::vector<Component*>& outComponents);
 
 public slots:
     void updateUI(const std::vector<EntityData>& entityData);
+    void onWidgetRemoved();
 
 private slots:
-    void on_objectList_activated(const QModelIndex &index);
+    void on_objectList_clicked(const QModelIndex &index);
+
+    void on_actionEmpty_Object_triggered();
 
     void on_actionCube_triggered();
 
     void on_actionMonkey_triggered();
 
+    void on_button_AddComponent_clicked();
+
+    void on_lineEdit_SelectedObject_editingFinished();
+
+    void on_objectList_itemChanged(class QListWidgetItem* item);
+
 private:
+    void updateComponentArea(unsigned int entityID);
+
+    /**
+     * @brief Updates the add component button and combobox with the types given
+     */
+    void updateAvailableComponents(std::vector<ComponentType> types);
+
     Renderer* mRenderer;
     QWidget *mRenderWindowContainer;
 
     std::shared_ptr<EntityManager> mEntityManager;
 
     std::vector<EntityData> mEntityDataCache;
+    std::vector<ComponentType> mAvailableComponentsToAddCache;
 };
 
 #endif // MAINWINDOW_H

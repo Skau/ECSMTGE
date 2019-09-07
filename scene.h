@@ -17,6 +17,26 @@ public:
     void SaveToFile(const std::string& path);
 };
 
+class EmptyScene : public Scene
+{
+public:
+    void initObjects(World* mWorld) override
+    {
+        auto entityManager = mWorld->getEntityManager();
+        // Camera:
+        auto camera = entityManager->createEntity("mainCam");
+        entityManager->addComponent<Transform, Camera>(camera);
+        auto trans = entityManager->getComponent<Transform>(camera);
+        if (trans) {
+            trans->position = gsl::vec3{0.f, 0.f, 5.f};
+            trans->rotation = gsl::vec3{0.f, -90.f, 0.f};
+            trans->updated = true;
+        } else {
+            qDebug() << "Camera has no transform!";
+        }
+    }
+};
+
 class TestScene : public Scene
 {
 public:
@@ -28,7 +48,7 @@ public:
             auto entity = entityManager->createEntity();
             entityManager->addComponent<Transform, Render>(entity);
             auto render = entityManager->getComponent<Render>(entity);
-            if(auto meshData = ResourceManager::instance()->getMesh("box"))
+            if(auto meshData = ResourceManager::instance()->getMesh("box2"))
             {
                 render->meshData = *meshData;
                 render->isVisible = true;

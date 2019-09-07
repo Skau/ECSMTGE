@@ -2,6 +2,8 @@
 
 #include <QDebug>
 
+#include "eventhandler.h"
+
 #include "scene.h"
 #include "entitymanager.h"
 
@@ -12,10 +14,14 @@ App::App()
     mMainWindow = std::make_unique<MainWindow>();
     mRenderer = mMainWindow->getRenderer();
 
+    mEventHandler = std::make_shared<EventHandler>();
+
+    mRenderer->installEventFilter(mEventHandler.get());
+
     connect(mRenderer, &Renderer::initDone, this, &App::initTheRest);
 
     connect(mMainWindow->ui->actionToggle_wireframe, &QAction::triggered, mRenderer, &Renderer::toggleWireframe);
-    connect(mRenderer, &Renderer::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
+    connect(mEventHandler.get(), &EventHandler::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
     connect(mMainWindow->ui->actionExit, &QAction::triggered, mMainWindow.get(), &MainWindow::close);
     connect(mRenderer, &Renderer::windowUpdated, this, &App::updatePerspective);
 }
@@ -31,7 +37,6 @@ void App::initTheRest()
 
     mRenderer->setupCamera();
 
-    connect(mRenderer, &Renderer::escapeKeyPressed, this, &App::quit);
     connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);
 
 

@@ -17,7 +17,7 @@ World::World()
     ResourceManager::instance()->addMesh("box2", "box2.txt");
     ResourceManager::instance()->addMesh("monkey", "monkey.obj");
 
-    if(auto mesh =  ResourceManager::instance()->getMesh("box"))
+    if(auto mesh =  ResourceManager::instance()->getMesh("box2"))
     {
         mesh->mMaterial.mShader = ResourceManager::instance()->getShader("plain");
     }

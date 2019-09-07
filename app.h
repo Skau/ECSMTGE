@@ -11,6 +11,8 @@
 #include "renderer.h"
 #include "world.h"
 
+class EventHandler;
+
 /**
  * @brief The creator of all things.
  */
@@ -42,7 +44,11 @@ private:
     void calculateFrames();
 
     std::unique_ptr<MainWindow> mMainWindow;
+
     Renderer* mRenderer;
+
+    // Handles input events in Renderer
+    std::shared_ptr<EventHandler> mEventHandler;
     std::unique_ptr<World> mWorld;
 
     QTimer mUpdateTimer; // Calls update

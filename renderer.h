@@ -11,6 +11,7 @@
 #include "input.h"
 #include "componentdata.h"
 
+
 class QOpenGLContext;
 class Shader;
 class Light;
@@ -48,7 +49,6 @@ public:
 
 signals:
     void initDone();
-    void escapeKeyPressed();
     void windowUpdated();
 
 
@@ -63,12 +63,6 @@ private:
 
     bool isInitialized{false};
 
-    Input mInput;
-    float mCameraSpeed{0.01f};
-    float mCameraRotateSpeed{0.1f};
-    int mMouseXlast{0};
-    int mMouseYlast{0};
-
     float mAspectratio{1.f};
 
    // MainWindow *mMainWindow{nullptr};    //points back to MainWindow to be able to put info in StatusBar
@@ -76,17 +70,6 @@ private:
     class QOpenGLDebugLogger *mOpenGLDebugLogger{nullptr};
 
     void startOpenGLDebugger();
-
-protected:
-    //The QWindow that we inherit from has these functions to capture
-    // mouse and keyboard. Uncomment to use
-    //
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void keyPressEvent(QKeyEvent *event) override;
-    void keyReleaseEvent(QKeyEvent *event) override;
-    void wheelEvent(QWheelEvent *event) override;
 };
 
 #endif // RENDERER_H

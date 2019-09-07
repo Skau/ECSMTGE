@@ -16,6 +16,7 @@ HEADERS += \
     app.h \
     componentdata.h \
     entitymanager.h \
+    eventhandler.h \
     mainwindow.h \
     constants.h \
     input.h \
@@ -55,6 +56,7 @@ SOURCES += \
     Widgets/renderwidget.cpp \
     Widgets/transformwidget.cpp \
     app.cpp \
+    eventhandler.cpp \
     main.cpp \
     mainwindow.cpp \
     camera.cpp \

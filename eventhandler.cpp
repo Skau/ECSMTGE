@@ -11,7 +11,7 @@ EventHandler::EventHandler()
 
 // Overrided function that taps into RenderWindow and receieves all events before QT does.
 // To keep events from being propagated further into QT return true to mark event as handled.
-bool EventHandler::eventFilter(QObject *obj, QEvent *event)
+bool EventHandler::eventFilter(QObject* /*obj*/, QEvent* event)
 {
     switch(event->type())
     {
@@ -59,141 +59,28 @@ bool EventHandler::eventFilter(QObject *obj, QEvent *event)
 
 void EventHandler::keyPressEvent(QKeyEvent* event)
 {
-    if (event->key() == Qt::Key_Escape) //Shuts down whole program
+    if (event->key() == Qt::Key_Escape)
     {
         escapeKeyPressed();
     }
 
-    //    You get the keyboard input like this
-    if(event->key() == Qt::Key_W)
-    {
-        mInput.W = true;
-    }
-    if(event->key() == Qt::Key_S)
-    {
-        mInput.S = true;
-    }
-    if(event->key() == Qt::Key_D)
-    {
-        mInput.D = true;
-    }
-    if(event->key() == Qt::Key_A)
-    {
-        mInput.A = true;
-    }
-    if(event->key() == Qt::Key_Q)
-    {
-        mInput.Q = true;
-    }
-    if(event->key() == Qt::Key_E)
-    {
-        mInput.E = true;
-    }
-    if(event->key() == Qt::Key_Z)
-    {
-    }
-    if(event->key() == Qt::Key_X)
-    {
-    }
-    if(event->key() == Qt::Key_Up)
-    {
-        mInput.UP = true;
-    }
-    if(event->key() == Qt::Key_Down)
-    {
-        mInput.DOWN = true;
-    }
-    if(event->key() == Qt::Key_Left)
-    {
-        mInput.LEFT = true;
-    }
-    if(event->key() == Qt::Key_Right)
-    {
-        mInput.RIGHT = true;
-    }
-    if(event->key() == Qt::Key_U)
-    {
-    }
-    if(event->key() == Qt::Key_O)
-    {
+    keys[event->key()] = true;
 
-    }
 }
 
 void EventHandler::keyReleaseEvent(QKeyEvent *event)
 {
-    if(event->key() == Qt::Key_W)
-    {
-        mInput.W = false;
-    }
-    if(event->key() == Qt::Key_S)
-    {
-        mInput.S = false;
-    }
-    if(event->key() == Qt::Key_D)
-    {
-        mInput.D = false;
-    }
-    if(event->key() == Qt::Key_A)
-    {
-        mInput.A = false;
-    }
-    if(event->key() == Qt::Key_Q)
-    {
-        mInput.Q = false;
-    }
-    if(event->key() == Qt::Key_E)
-    {
-        mInput.E = false;
-    }
-    if(event->key() == Qt::Key_Z)
-    {
-    }
-    if(event->key() == Qt::Key_X)
-    {
-    }
-    if(event->key() == Qt::Key_Up)
-    {
-        mInput.UP = false;
-    }
-    if(event->key() == Qt::Key_Down)
-    {
-        mInput.DOWN = false;
-    }
-    if(event->key() == Qt::Key_Left)
-    {
-        mInput.LEFT = false;
-    }
-    if(event->key() == Qt::Key_Right)
-    {
-        mInput.RIGHT = false;
-    }
-    if(event->key() == Qt::Key_U)
-    {
-    }
-    if(event->key() == Qt::Key_O)
-    {
-    }
+    keys[event->key()] = false;
 }
 
 void EventHandler::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::RightButton)
-        mInput.RMB = true;
-    if (event->button() == Qt::LeftButton)
-        mInput.LMB = true;
-    if (event->button() == Qt::MiddleButton)
-        mInput.MMB = true;
+    keys[static_cast<int>(event->button())] = true;
 }
 
 void EventHandler::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::RightButton)
-        mInput.RMB = false;
-    if (event->button() == Qt::LeftButton)
-        mInput.LMB = false;
-    if (event->button() == Qt::MiddleButton)
-        mInput.MMB = false;
+    keys[static_cast<int>(event->button())] = false;
 }
 
 void EventHandler::mouseMoveEvent(QMouseEvent *event)

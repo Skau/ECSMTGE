@@ -32,6 +32,8 @@ private:
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
 
+    std::map<int, bool> keys;
+
     Input mInput;
 };
 

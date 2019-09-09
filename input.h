@@ -1,6 +1,9 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include <QEvent>
+#include <QKeyEvent>
+
 //This class just defines the keys we want to use for now
 //You have to set the state of this table manually!
 class Input

@@ -1,22 +1,22 @@
-#ifndef RENDERWIDGET_H
-#define RENDERWIDGET_H
+#ifndef MESHWIDGET_H
+#define MESHWIDGET_H
 
 #include <QWidget>
 
 namespace Ui{
-    class Render;
+    class Mesh;
 }
 
 class MainWindow;
-class Render;
+class MeshComponent;
 
-class RenderWidget : public QWidget
+class MeshWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit RenderWidget(MainWindow* mainWindow, QWidget* parent = nullptr);
-    ~RenderWidget();
+    explicit MeshWidget(MainWindow* mainWindow, QWidget* parent = nullptr);
+    ~MeshWidget();
 
 signals:
     void chooseMesh(unsigned int entity, const std::string& name);
@@ -35,10 +35,10 @@ private slots:
     void Remove();
 
 private:
-    Render* getRenderComponent(unsigned int entity);
+    MeshComponent* getRenderComponent(unsigned int entity);
 
-    Ui::Render* ui;
+    Ui::Mesh* ui;
     MainWindow* mMainWindow;
 };
 
-#endif // RENDERWIDGET_H
+#endif // MESHWIDGET_H

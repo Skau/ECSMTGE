@@ -1,5 +1,5 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#ifndef CAMERASYSTEM_H
+#define CAMERASYSTEM_H
 
 #include "innpch.h"
 #include "entitymanager.h"
@@ -30,9 +30,9 @@ public:
 
     gsl::Vector3D forward() const;
 
-    static void updateCameras(std::vector<Transform> &transforms, std::vector<Camera> &cameras);
-    static void updateCameras(std::vector<Camera> &cameras, const gsl::mat4& projectionMatrix = gsl::mat4::persp(45.f, 3.f / 4.f, 1.f, 100.f));
-    static void updateCamera(Camera* camera, const gsl::mat4& projectionMatrix);
+    static void updateCameras(const std::vector<TransformComponent> &transforms, std::vector<CameraComponent> &cameras);
+    static void updateCameras(std::vector<CameraComponent> &cameras, const gsl::mat4& projectionMatrix = gsl::mat4::persp(45.f, 3.f / 4.f, 1.f, 100.f));
+    static void updateCamera(CameraComponent* camera, const gsl::mat4& projectionMatrix);
 
 private:
     gsl::Vector3D mForward{0.f, 0.f, -1.f};
@@ -49,4 +49,4 @@ private:
     float mSpeed{0.f}; //camera will move by this speed along the mForward vector
 };
 
-#endif // CAMERA_H
+#endif // CAMERASYSTEM_H

@@ -1,5 +1,5 @@
 #include "innpch.h"
-#include "camera.h"
+#include "camerasystem.h"
 
 CameraSystem::CameraSystem()
 {
@@ -98,7 +98,7 @@ gsl::Vector3D CameraSystem::forward() const
     return mForward;
 }
 
-void CameraSystem::updateCameras(std::vector<Transform>& transforms, std::vector<Camera>& cameras)
+void CameraSystem::updateCameras(const std::vector<TransformComponent>& transforms, std::vector<CameraComponent>& cameras)
 {
     auto transIt = transforms.begin();
     auto camIt = cameras.begin();
@@ -163,13 +163,13 @@ void CameraSystem::updateCameras(std::vector<Transform>& transforms, std::vector
     }
 }
 
-void CameraSystem::updateCameras(std::vector<Camera>& cameras, const gsl::mat4 &projectionMatrix)
+void CameraSystem::updateCameras(std::vector<CameraComponent>& cameras, const gsl::mat4 &projectionMatrix)
 {
     for (auto& comp : cameras)
         comp.projectionMatrix = projectionMatrix;
 }
 
-void CameraSystem::updateCamera(Camera *camera, const gsl::mat4 &projectionMatrix)
+void CameraSystem::updateCamera(CameraComponent *camera, const gsl::mat4 &projectionMatrix)
 {
     if (camera != nullptr)
         camera->projectionMatrix = projectionMatrix;

@@ -11,7 +11,8 @@
 #include "renderer.h"
 #include "world.h"
 
-class EventHandler;
+class InputHandler;
+class InputSystem;
 
 /**
  * @brief The creator of all things.
@@ -46,15 +47,16 @@ private:
     std::unique_ptr<MainWindow> mMainWindow;
 
     Renderer* mRenderer;
+    InputSystem* mInputSystem;
 
     // Handles input events in Renderer
-    std::shared_ptr<EventHandler> mEventHandler;
+    std::shared_ptr<InputHandler> mEventHandler;
     std::unique_ptr<World> mWorld;
 
     QTimer mUpdateTimer; // Calls update
 
-    double mDeltaTime;
-    double mTotalDeltaTime;
+    float mDeltaTime;
+    float mTotalDeltaTime;
 
     QElapsedTimer mDeltaTimer;
 

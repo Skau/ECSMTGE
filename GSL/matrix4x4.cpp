@@ -316,7 +316,7 @@ void Matrix4x4::scale(GLfloat scaleX, GLfloat scaleY, GLfloat scaleZ)
 }
 
 
-GLfloat *Matrix4x4::constData()
+const GLfloat *Matrix4x4::constData() const
 {
     return &data[0];
 }

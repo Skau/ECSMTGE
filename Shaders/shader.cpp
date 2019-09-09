@@ -3,7 +3,7 @@
 
 //#include "GL/glew.h" - using QOpenGLFunctions instead
 
-#include "camera.h"
+#include "camerasystem.h"
 #include "matrix4x4.h"
 
 Shader::Shader(const std::string shaderName)

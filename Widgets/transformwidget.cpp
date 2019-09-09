@@ -78,7 +78,7 @@ void TransformWidget::on_spinBox_Position_X_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
         if(transform)
         {
             transform->position = gsl::vec3(static_cast<float>(arg1), transform->position.y, transform->position.z);
@@ -93,7 +93,7 @@ void TransformWidget::on_spinBox_Position_Y_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
         if(transform)
         {
             transform->position = gsl::vec3(transform->position.x, static_cast<float>(arg1), transform->position.z);
@@ -108,7 +108,7 @@ void TransformWidget::on_spinBox_Position_Z_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
         if(transform)
         {
             transform->position = gsl::vec3(transform->position.x, transform->position.y, static_cast<float>(arg1));
@@ -123,7 +123,7 @@ void TransformWidget::on_spinBox_Rotation_X_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
         if(transform)
         {
             transform->rotation = gsl::vec3(static_cast<float>(arg1), transform->rotation.y, transform->rotation.z);
@@ -138,7 +138,7 @@ void TransformWidget::on_spinBox_Rotation_Y_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
         if(transform)
         {
             transform->rotation = gsl::vec3(transform->rotation.x, static_cast<float>(arg1), transform->rotation.z);
@@ -153,7 +153,7 @@ void TransformWidget::on_spinBox_Rotation_Z_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
         if(transform)
         {
             transform->rotation = gsl::vec3(transform->rotation.x, transform->rotation.y, static_cast<float>(arg1));
@@ -168,7 +168,7 @@ void TransformWidget::on_spinBox_Scale_X_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
         if(transform)
         {
             transform->scale = gsl::vec3(static_cast<float>(arg1), transform->scale.y, transform->scale.z);
@@ -183,7 +183,7 @@ void TransformWidget::on_spinBox_Scale_Y_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
         if(transform)
         {
             transform->scale = gsl::vec3(transform->scale.x, static_cast<float>(arg1), transform->scale.z);
@@ -198,7 +198,7 @@ void TransformWidget::on_spinBox_Scale_Z_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<Transform>(entityData->entityId);
+        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
         if(transform)
         {
             transform->scale = gsl::vec3(transform->scale.x, transform->scale.y, static_cast<float>(arg1));
@@ -222,7 +222,7 @@ void TransformWidget::Remove()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(mMainWindow->getEntityManager()->removeComponent<Transform>(entity->entityId))
+        if(mMainWindow->getEntityManager()->removeComponent<TransformComponent>(entity->entityId))
         {
             widgetRemoved();
         }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Render</class>
- <widget class="QWidget" name="Render">
+ <class>Mesh</class>
+ <widget class="QWidget" name="Mesh">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,13 +23,19 @@
    </item>
    <item>
     <widget class="QLabel" name="label">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>50</height>
+      </size>
+     </property>
      <property name="font">
       <font>
        <pointsize>20</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Render</string>
+      <string>Mesh</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

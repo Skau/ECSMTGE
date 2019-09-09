@@ -11,7 +11,7 @@
 #include <QCoreApplication>
 #include <QThread>
 
-#include "eventhandler.h"
+#include "inputhandler.h"
 
 #include "Renderables/xyz.h"
 #include "Renderables/octahedronball.h"
@@ -81,29 +81,7 @@ void Renderer::init()
     initDone();
 }
 
-//Called each frame - doing the rendering
-void Renderer::render(const std::vector<VisualObject*>& objects, double deltaTime)
-{
-    if(isExposed())
-    {
-        mCurrentCamera->update(deltaTime);
-
-        mContext->makeCurrent(this);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        for (auto visObject: objects)
-        {
-            visObject->draw();
-            //        checkForGLerrors();
-        }
-
-        checkForGLerrors();
-
-        mContext->swapBuffers(this);
-    }
-}
-
-void Renderer::render(std::vector<Render> renders, std::vector<Transform> transforms, Camera camera)
+void Renderer::render(const std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera)
 {
     /* Note: For å gjøre dette enda raskere kunne det vært
      * mulig å gjøre at dataArraysene alltid resizer til nærmeste

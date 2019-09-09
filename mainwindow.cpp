@@ -7,7 +7,8 @@
 
 #include "renderer.h"
 #include "Widgets/transformwidget.h"
-#include "Widgets/renderwidget.h"
+#include "Widgets/meshwidget.h"
+#include "Widgets/inputwidget.h"
 #include "componentdata.h"
 
 #include <QSplitter>
@@ -38,7 +39,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::showFPS(double deltaTime, double frameCounter)
+void MainWindow::showFPS(float deltaTime, float frameCounter)
 {
     statusBar()->showMessage(" Time pr FrameDraw: " + QString::number(deltaTime, 'g', 4) + " ms  |  " + "FPS: " + QString::number(frameCounter, 'g', 4));
 }
@@ -151,7 +152,7 @@ void MainWindow::updateComponentArea(unsigned int entityID)
 
         QWidget* widget = new QWidget();
         ui->scrollArea->setWidget(widget);
-        QVBoxLayout* layout = new QVBoxLayout();
+        QVBoxLayout* layout = new QVBoxLayout(widget);
         widget->setLayout(layout);
 
         for(auto& component: components)
@@ -160,14 +161,14 @@ void MainWindow::updateComponentArea(unsigned int entityID)
 
             switch (component->type)
             {
-            case ComponentType::Render:
+            case ComponentType::Mesh:
             {
-                auto render = static_cast<Render*>(component);
-                auto widget = new RenderWidget(this);
+                auto render = static_cast<MeshComponent*>(component);
+                auto widget = new MeshWidget(this);
 
                 // Set up render widget here
 
-                connect(widget, &RenderWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
+                connect(widget, &MeshWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
 
                 widget->update(render->meshData.mName);
 
@@ -176,7 +177,7 @@ void MainWindow::updateComponentArea(unsigned int entityID)
             }
             case ComponentType::Transform:
             {
-                auto transform = static_cast<Transform*>(component);
+                auto transform = static_cast<TransformComponent*>(component);
                 auto widget = new TransformWidget(this);
 
                 // Set up transform widget here
@@ -184,6 +185,20 @@ void MainWindow::updateComponentArea(unsigned int entityID)
                 connect(widget, &TransformWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
 
                 widget->update(transform->position, transform->rotation, transform->scale);
+
+                layout->addWidget(widget);
+                break;
+            }
+            case ComponentType::Input:
+            {
+                auto input = static_cast<InputComponent*>(component);
+                auto widget = new InputWidget(this);
+
+                // Set up input widget here
+
+                connect(widget, &InputWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
+
+                widget->update(input->isCurrentlyControlled);
 
                 layout->addWidget(widget);
                 break;
@@ -213,7 +228,7 @@ void MainWindow::updateAvailableComponents(std::vector<ComponentType> types)
     {
         switch (type)
         {
-        case ComponentType::Render:
+        case ComponentType::Mesh:
         {
             ui->comboBox_Components->addItem("Render");
             break;
@@ -221,6 +236,11 @@ void MainWindow::updateAvailableComponents(std::vector<ComponentType> types)
         case ComponentType::Transform:
         {
             ui->comboBox_Components->addItem("Transform");
+            break;
+        }
+        case ComponentType::Input:
+        {
+            ui->comboBox_Components->addItem("Input");
             break;
         }
         default:

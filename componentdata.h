@@ -10,12 +10,13 @@
 enum class ComponentType
 {
     Transform,
-    Render,
+    Mesh,
+    Input,
     Other
 };
 
 // Used by UI so it knows what components are available to add if the entity doesnt have one.
-const std::vector<ComponentType> ComponentTypes = {ComponentType::Render, ComponentType::Transform};
+const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, ComponentType::Transform, ComponentType::Input};
 
 
 struct Component
@@ -34,7 +35,7 @@ struct EntityData : public Component
     std::string name{};
 };
 
-struct Transform : public Component
+struct TransformComponent : public Component
 {
     bool updated{true};
     gsl::Vector3D position{};
@@ -42,7 +43,7 @@ struct Transform : public Component
     gsl::Vector3D rotation{};
 
 
-    Transform(unsigned int _eID = 0, bool _valid = false,
+    TransformComponent(unsigned int _eID = 0, bool _valid = false,
               const gsl::vec3& _pos = gsl::vec3{},
               const gsl::vec3& _scale = gsl::vec3{1.f, 1.f, 1.f},
               const gsl::vec3& _rot = gsl::vec3{})
@@ -51,30 +52,39 @@ struct Transform : public Component
     {}
 };
 
-struct Render : public Component
+struct MeshComponent : public Component
 {
     MeshData meshData{};
     bool isVisible : 1;
 
 
-    Render(unsigned int _eID = 0, bool _valid = false,
+    MeshComponent(unsigned int _eID = 0, bool _valid = false,
            const MeshData& _meshData = MeshData{}, bool _visible = false)
-        : Component (_eID, _valid, ComponentType::Render), meshData{_meshData}, isVisible{_visible}
+        : Component (_eID, _valid, ComponentType::Mesh), meshData{_meshData}, isVisible{_visible}
     {}
 };
 
-struct Camera : public Component
+struct CameraComponent : public Component
 {
     GLuint framebufferTarget;
     gsl::Matrix4x4 viewMatrix;
     gsl::Matrix4x4 projectionMatrix;
 
 
-    Camera(unsigned int _eID = 0, bool _valid = false,
+    CameraComponent(unsigned int _eID = 0, bool _valid = false,
            GLuint fbTarget = 0, const gsl::mat4& vMat = gsl::mat4{},
            const gsl::mat4& pMat = gsl::mat4{})
         : Component (_eID, _valid), framebufferTarget{fbTarget},
           viewMatrix{vMat}, projectionMatrix{pMat}
+    {}
+};
+
+struct InputComponent : public Component
+{
+    bool isCurrentlyControlled{false};
+
+    InputComponent(unsigned int _eID = 0, bool _valid = false)
+        : Component(_eID, _valid, ComponentType::Input)
     {}
 };
 

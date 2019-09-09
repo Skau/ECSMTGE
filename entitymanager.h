@@ -20,10 +20,11 @@ class EntityManager : public QObject
 private:
     // ------------------------------ Member Variables ------------------------------
     // Component arrays. Remember to update componentCount if adding more.
-    std::vector<Transform> mTransforms;
-    std::vector<Render> mRenders;
+    std::vector<TransformComponent> mTransforms;
+    std::vector<MeshComponent> mMeshComponents;
     std::vector<EntityData> mEntityData;
-    std::vector<Camera> mCameras;
+    std::vector<CameraComponent> mCameraComponents;
+    std::vector<InputComponent> mInputComponents;
 
     unsigned int idCounter{0};
 
@@ -63,7 +64,7 @@ public slots:
     bool getAllComponents(unsigned int entity, std::vector<Component*>& outComponents)
     {
         bool addedAnyComponents = false;
-        if(auto comp = getComponent<Transform>(entity))
+        if(auto comp = getComponent<TransformComponent>(entity))
         {
             if(comp->valid)
             {
@@ -71,7 +72,15 @@ public slots:
                 addedAnyComponents = true;
             }
         }
-        if(auto comp = getComponent<Render>(entity))
+        if(auto comp = getComponent<MeshComponent>(entity))
+        {
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
+        }
+        if(auto comp = getComponent<InputComponent>(entity))
         {
             if(comp->valid)
             {
@@ -89,16 +98,17 @@ public:
 
     }
 
-    std::vector<Transform>& getTransforms() { return mTransforms; }
-    std::vector<Render> getRenders() { return mRenders; }
-    std::vector<EntityData> getEntityData() { return mEntityData; }
-    std::vector<Camera>& getCameras() { return mCameras; }
+    std::vector<TransformComponent>& getTransforms() { return mTransforms; }
+    std::vector<MeshComponent>& getMeshComponents() { return mMeshComponents; }
+    std::vector<EntityData>& getEntityData() { return mEntityData; }
+    std::vector<CameraComponent>& getCameraComponents() { return mCameraComponents; }
+    std::vector<InputComponent>& getInputComponents() { return mInputComponents; }
 
     void createCube()
     {
         auto id = createEntity();
-        addComponent<Render, Transform>(id);
-        auto render = getComponent<Render>(id);
+        addComponent<MeshComponent, TransformComponent>(id);
+        auto render = getComponent<MeshComponent>(id);
         if(auto mesh = ResourceManager::instance()->getMesh("box2"))
         {
             render->meshData = *mesh;
@@ -109,8 +119,8 @@ public:
     void createMonkey()
     {
         auto id = createEntity();
-        addComponent<Render, Transform>(id);
-        auto render = getComponent<Render>(id);
+        addComponent<MeshComponent, TransformComponent>(id);
+        auto render = getComponent<MeshComponent>(id);
         if(auto mesh = ResourceManager::instance()->getMesh("monkey"))
         {
             render->meshData = *mesh;
@@ -125,7 +135,7 @@ public:
      */
     void setMesh(unsigned int entity, const std::string& meshName)
     {
-        auto render = getComponent<Render>(entity);
+        auto render = getComponent<MeshComponent>(entity);
         if(render)
         {
             auto mesh = ResourceManager::instance()->getMesh(meshName);
@@ -161,14 +171,19 @@ public:
     {
         switch (type)
         {
-        case ComponentType::Render:
+        case ComponentType::Mesh:
         {
-            addComponent<Render>(entity);
+            addComponent<MeshComponent>(entity);
             break;
         }
         case ComponentType::Transform:
         {
-            addComponent<Transform>(entity);
+            addComponent<TransformComponent>(entity);
+            break;
+        }
+        case ComponentType::Input:
+        {
+            addComponent<InputComponent>(entity);
             break;
         }
         default:
@@ -177,7 +192,7 @@ public:
     }
 
     template<class T,
-             typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
+             typename std::enable_if<(std::is_same<TransformComponent, T>::value)>::type* = nullptr>
     T* getComponent(unsigned int entity)
     {
         for (auto& comp : mTransforms)
@@ -188,10 +203,10 @@ public:
     }
 
     template<class T,
-             typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
+             typename std::enable_if<(std::is_same<MeshComponent, T>::value)>::type* = nullptr>
     T* getComponent(unsigned int entity)
     {
-        for (auto& comp : mRenders)
+        for (auto& comp : mMeshComponents)
             if (comp.valid && comp.entityId == entity)
                 return &comp;
 
@@ -199,10 +214,10 @@ public:
     }
 
     template<class T,
-             typename std::enable_if<(std::is_same<Camera, T>::value)>::type* = nullptr>
+             typename std::enable_if<(std::is_same<CameraComponent, T>::value)>::type* = nullptr>
     T* getComponent(unsigned int entity)
     {
-        for (auto& comp : mCameras)
+        for (auto& comp : mCameraComponents)
             if (comp.valid && comp.entityId == entity)
                 return &comp;
 
@@ -210,7 +225,18 @@ public:
     }
 
     template<class T,
-             typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
+             typename std::enable_if<(std::is_same<InputComponent, T>::value)>::type* = nullptr>
+    T* getComponent(unsigned int entity)
+    {
+        for (auto& comp : mInputComponents)
+            if (comp.valid && comp.entityId == entity)
+                return &comp;
+
+        return nullptr;
+    }
+
+    template<class T,
+             typename std::enable_if<(std::is_same<TransformComponent, T>::value)>::type* = nullptr>
     bool removeComponent(unsigned int entity)
     {
         for(auto& comp : mTransforms)
@@ -219,7 +245,7 @@ public:
             {
                 if(comp.valid)
                 {
-                    comp = Transform();
+                    comp = TransformComponent();
                     return true;
                 }
             }
@@ -229,16 +255,35 @@ public:
     }
 
     template<class T,
-             typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
+             typename std::enable_if<(std::is_same<MeshComponent, T>::value)>::type* = nullptr>
     bool removeComponent(unsigned int entity)
     {
-        for(auto& comp : mRenders)
+        for(auto& comp : mMeshComponents)
         {
             if(comp.entityId == entity)
             {
                 if(comp.valid)
                 {
-                    comp = Render();
+                    comp = MeshComponent();
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    template<class T,
+             typename std::enable_if<(std::is_same<InputComponent, T>::value)>::type* = nullptr>
+    bool removeComponent(unsigned int entity)
+    {
+        for(auto& comp : mInputComponents)
+        {
+            if(comp.entityId == entity)
+            {
+                if(comp.valid)
+                {
+                    comp = InputComponent();
                     return true;
                 }
             }
@@ -252,13 +297,13 @@ public:
         for (auto comp : mTransforms)
             std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
         std::cout << std::endl << "renders: ";
-        for (auto comp : mRenders)
+        for (auto comp : mMeshComponents)
             std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
         std::cout << std::endl;
     }
 
 private:
-    template<class T, typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
+    template<class T, typename std::enable_if<(std::is_same<TransformComponent, T>::value)>::type* = nullptr>
     T& addComponents(unsigned int entity)
     {
         for (auto& comp : mTransforms)
@@ -269,7 +314,7 @@ private:
                 if (comp.entityId != entity)
                 {
                     comp.entityId = entity;
-                    std::sort(mTransforms.begin(), mTransforms.end(),[](const Transform& t1, const Transform& t2)
+                    std::sort(mTransforms.begin(), mTransforms.end(),[](const TransformComponent& t1, const TransformComponent& t2)
                     {
                         return t1.entityId < t2.entityId;
                     });
@@ -278,19 +323,19 @@ private:
             }
         }
 
-        mTransforms.emplace_back(Transform{entity, true});
+        mTransforms.emplace_back(TransformComponent{entity, true});
         auto &comp = mTransforms.back();
-        std::sort(mTransforms.begin(), mTransforms.end(),[](const Transform& t1, const Transform& t2)
+        std::sort(mTransforms.begin(), mTransforms.end(),[](const TransformComponent& t1, const TransformComponent& t2)
         {
             return t1.entityId < t2.entityId;
         });
         return comp;
     }
 
-    template<class T, typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
+    template<class T, typename std::enable_if<(std::is_same<MeshComponent, T>::value)>::type* = nullptr>
     T& addComponents(unsigned int entity)
     {
-        for (auto& comp : mRenders)
+        for (auto& comp : mMeshComponents)
         {
             if (!comp.valid)
             {
@@ -298,7 +343,7 @@ private:
                 if (comp.entityId != entity)
                 {
                     comp.entityId = entity;
-                    std::sort(mRenders.begin(), mRenders.end(),[](const Render& t1, const Render& t2)
+                    std::sort(mMeshComponents.begin(), mMeshComponents.end(),[](const MeshComponent& t1, const MeshComponent& t2)
                     {
                         return t1.entityId < t2.entityId;
                     });
@@ -307,19 +352,19 @@ private:
             }
         }
 
-        mRenders.emplace_back(Render{entity, true});
-        auto &comp = mRenders.back();
-        std::sort(mRenders.begin(), mRenders.end(),[](const Render& t1, const Render& t2)
+        mMeshComponents.emplace_back(MeshComponent{entity, true});
+        auto &comp = mMeshComponents.back();
+        std::sort(mMeshComponents.begin(), mMeshComponents.end(),[](const MeshComponent& t1, const MeshComponent& t2)
         {
             return t1.entityId < t2.entityId;
         });
         return comp;
     }
 
-    template<class T, typename std::enable_if<(std::is_same<Camera, T>::value)>::type* = nullptr>
+    template<class T, typename std::enable_if<(std::is_same<CameraComponent, T>::value)>::type* = nullptr>
     T& addComponents(unsigned int entity)
     {
-        for (auto& comp : mCameras)
+        for (auto& comp : mCameraComponents)
         {
             if (!comp.valid)
             {
@@ -327,8 +372,7 @@ private:
                 if (comp.entityId != entity)
                 {
                     comp.entityId = entity;
-                    //sortComponents(mCameras);
-                    std::sort(mCameras.begin(), mCameras.end(),[](const Camera& t1, const Camera& t2)
+                    std::sort(mCameraComponents.begin(), mCameraComponents.end(),[](const CameraComponent& t1, const CameraComponent& t2)
                     {
                         return t1.entityId < t2.entityId;
                     });
@@ -337,9 +381,38 @@ private:
             }
         }
 
-        mCameras.emplace_back(Camera{entity, true});
-        auto &comp = mCameras.back();
-        std::sort(mCameras.begin(), mCameras.end(),[](const Camera& t1, const Camera& t2)
+        mCameraComponents.emplace_back(CameraComponent{entity, true});
+        auto &comp = mCameraComponents.back();
+        std::sort(mCameraComponents.begin(), mCameraComponents.end(),[](const CameraComponent& t1, const CameraComponent& t2)
+        {
+            return t1.entityId < t2.entityId;
+        });
+        return comp;
+    }
+
+    template<class T, typename std::enable_if<(std::is_same<InputComponent, T>::value)>::type* = nullptr>
+    T& addComponents(unsigned int entity)
+    {
+        for (auto& comp : mInputComponents)
+        {
+            if (!comp.valid)
+            {
+                comp.valid = true;
+                if (comp.entityId != entity)
+                {
+                    comp.entityId = entity;
+                    std::sort(mInputComponents.begin(), mInputComponents.end(),[](const InputComponent& t1, const InputComponent& t2)
+                    {
+                        return t1.entityId < t2.entityId;
+                    });
+                }
+                return comp;
+            }
+        }
+
+        mInputComponents.emplace_back(InputComponent{entity, true});
+        auto &comp = mInputComponents.back();
+        std::sort(mInputComponents.begin(), mInputComponents.end(),[](const InputComponent& t1, const InputComponent& t2)
         {
             return t1.entityId < t2.entityId;
         });

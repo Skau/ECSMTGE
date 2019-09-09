@@ -11,17 +11,18 @@ INCLUDEPATH +=  ./GSL
 
 HEADERS += \
     GSL/math.h \
-    Widgets/renderwidget.h \
+    Widgets/inputwidget.h \
+    Widgets/meshwidget.h \
     Widgets/transformwidget.h \
     app.h \
+    camerasystem.h \
     componentdata.h \
     entitymanager.h \
-    eventhandler.h \
+    inputhandler.h \
+    inputsystem.h \
     mainwindow.h \
     constants.h \
-    input.h \
     gltypes.h \
-    camera.h \
     GSL/matrix2x2.h \
     GSL/matrix3x3.h \
     GSL/matrix4x4.h \
@@ -53,14 +54,15 @@ HEADERS += \
 
 SOURCES += \
     GSL/math.cpp \
-    Widgets/renderwidget.cpp \
+    Widgets/inputwidget.cpp \
+    Widgets/meshwidget.cpp \
     Widgets/transformwidget.cpp \
     app.cpp \
-    eventhandler.cpp \
+    camerasystem.cpp \
+    inputhandler.cpp \
+    inputsystem.cpp \
     main.cpp \
     mainwindow.cpp \
-    camera.cpp \
-    input.cpp \
     GSL/matrix2x2.cpp \
     GSL/matrix3x3.cpp \
     GSL/matrix4x4.cpp \
@@ -86,8 +88,9 @@ SOURCES += \
 
 
 FORMS += \
+    input.ui \
     mainwindow.ui \
-    render.ui \
+    mesh.ui \
     transform.ui
 
 

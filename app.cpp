@@ -2,10 +2,12 @@
 
 #include <QDebug>
 
-#include "eventhandler.h"
+#include "inputhandler.h"
 
 #include "scene.h"
 #include "entitymanager.h"
+
+#include "inputsystem.h"
 
 #include "ui_mainwindow.h"
 
@@ -14,14 +16,14 @@ App::App()
     mMainWindow = std::make_unique<MainWindow>();
     mRenderer = mMainWindow->getRenderer();
 
-    mEventHandler = std::make_shared<EventHandler>();
+    mEventHandler = std::make_shared<InputHandler>(mRenderer);
 
     mRenderer->installEventFilter(mEventHandler.get());
 
     connect(mRenderer, &Renderer::initDone, this, &App::initTheRest);
 
     connect(mMainWindow->ui->actionToggle_wireframe, &QAction::triggered, mRenderer, &Renderer::toggleWireframe);
-    connect(mEventHandler.get(), &EventHandler::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
+    connect(mEventHandler.get(), &InputHandler::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
     connect(mMainWindow->ui->actionExit, &QAction::triggered, mMainWindow.get(), &MainWindow::close);
     connect(mRenderer, &Renderer::windowUpdated, this, &App::updatePerspective);
 }
@@ -38,7 +40,6 @@ void App::initTheRest()
     mRenderer->setupCamera();
 
     connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);
-
 
     mUpdateTimer.start(16); // Simulates 60ish fps
 
@@ -60,12 +61,15 @@ void App::update()
 
     calculateFrames();
 
-
-    mRenderer->handleInput(mDeltaTime);
-
+    const auto& inputs = mWorld->getEntityManager()->getInputComponents();
     auto& transforms = mWorld->getEntityManager()->getTransforms();
-    auto renders = mWorld->getEntityManager()->getRenders();
-    auto cameras = mWorld->getEntityManager()->getCameras();
+
+    mEventHandler->updateMouse();
+
+    InputSystem::HandleInput(mDeltaTime, inputs, transforms);
+
+    const auto& renders = mWorld->getEntityManager()->getMeshComponents();
+    auto& cameras = mWorld->getEntityManager()->getCameraComponents();
 
     CameraSystem::updateCameras(transforms, cameras);
 
@@ -83,7 +87,7 @@ void App::quit()
 
 void App::updatePerspective()
 {
-    auto& cameras = mWorld->getEntityManager()->getCameras();
+    auto& cameras = mWorld->getEntityManager()->getCameraComponents();
 
     CameraSystem::updateCameras(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 1.f, 100.f));
 }

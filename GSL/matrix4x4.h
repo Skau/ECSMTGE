@@ -48,7 +48,7 @@ public:
     void scale(GLfloat uniformScale);
     void scale(GLfloat scaleX, GLfloat scaleY, GLfloat scaleZ);
 
-    GLfloat* constData();
+    const GLfloat* constData() const;
 
     void transpose();
     Matrix4x4 transposed() const;

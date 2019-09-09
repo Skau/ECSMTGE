@@ -1,5 +1,5 @@
-#include "renderwidget.h"
-#include "ui_render.h"
+#include "meshwidget.h"
+#include "ui_mesh.h"
 #include "QFileDialog"
 #include "constants.h"
 #include <QDebug>
@@ -8,20 +8,20 @@
 #include "entitymanager.h"
 #include "componentdata.h"
 
-RenderWidget::RenderWidget(MainWindow *mainWindow, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Render), mMainWindow(mainWindow)
+MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
+    : QWidget(parent), ui(new Ui::Mesh), mMainWindow(mainWindow)
 {
     ui->setupUi(this);
     setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &QWidget::customContextMenuRequested, this, &RenderWidget::ProvideContextMenu);
+    connect(this, &QWidget::customContextMenuRequested, this, &MeshWidget::ProvideContextMenu);
 }
 
-RenderWidget::~RenderWidget()
+MeshWidget::~MeshWidget()
 {
 
 }
 
-void RenderWidget::update(const std::string &name)
+void MeshWidget::update(const std::string &name)
 {
     ui->label_Name->setText(QString::fromStdString(name));
 
@@ -38,7 +38,7 @@ void RenderWidget::update(const std::string &name)
     }
 }
 
-void RenderWidget::on_button_ChangeMesh_clicked()
+void MeshWidget::on_button_ChangeMesh_clicked()
 {
     if(mMainWindow->currentEntitySelected)
     {
@@ -55,7 +55,7 @@ void RenderWidget::on_button_ChangeMesh_clicked()
     }
 }
 
-void RenderWidget::on_checkBox_Visible_toggled(bool checked)
+void MeshWidget::on_checkBox_Visible_toggled(bool checked)
 {
     if(mMainWindow->currentEntitySelected)
     {
@@ -66,29 +66,29 @@ void RenderWidget::on_checkBox_Visible_toggled(bool checked)
     }
 }
 
-void RenderWidget::ProvideContextMenu(const QPoint &point)
+void MeshWidget::ProvideContextMenu(const QPoint &point)
 {
     QMenu subMenu;
-    subMenu.addAction("Remove", this, &RenderWidget::Remove);
+    subMenu.addAction("Remove", this, &MeshWidget::Remove);
 
     QPoint globalPos = mapToGlobal(point);
 
     subMenu.exec(globalPos);
 }
 
-void RenderWidget::Remove()
+void MeshWidget::Remove()
 {
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(mMainWindow->getEntityManager()->removeComponent<Render>(entity->entityId))
+        if(mMainWindow->getEntityManager()->removeComponent<MeshComponent>(entity->entityId))
         {
             widgetRemoved();
         }
     }
 }
 
-Render *RenderWidget::getRenderComponent(unsigned int entity)
+MeshComponent *MeshWidget::getRenderComponent(unsigned int entity)
 {
-    return mMainWindow->getEntityManager()->getComponent<Render>(entity);
+    return mMainWindow->getEntityManager()->getComponent<MeshComponent>(entity);
 }

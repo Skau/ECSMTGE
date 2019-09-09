@@ -6,9 +6,8 @@
 #include <QElapsedTimer>
 #include <chrono>
 #include "texture.h"
-#include "camera.h"
+#include "camerasystem.h"
 #include "Renderables/visualobject.h"
-#include "input.h"
 #include "componentdata.h"
 
 
@@ -41,7 +40,7 @@ public:
     void render(const std::vector<VisualObject*>& objects, double deltaTime);
 
     // Should only need renders, materials and transforms
-    void render(std::vector<Render> renders, std::vector<Transform> transforms, Camera camera);
+    void render(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
 
     void setupCamera();
 

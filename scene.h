@@ -25,7 +25,7 @@ public:
         auto entityManager = mWorld->getEntityManager();
         // Camera:
         auto camera = entityManager->createEntity("mainCam");
-        auto [trans, cam] = entityManager->addComponent<Transform, Camera>(camera);
+        auto [trans, cam] = entityManager->addComponent<TransformComponent, CameraComponent>(camera);
         trans.position = gsl::vec3{0.f, 0.f, 5.f};
         trans.rotation = gsl::vec3{0.f, -90.f, 0.f};
         trans.updated = true;
@@ -41,7 +41,7 @@ public:
         for(int i = 0; i < 10; ++i)
         {
             auto entity = entityManager->createEntity();
-            auto [transform, render] = entityManager->addComponent<Transform, Render>(entity);
+            auto [transform, render] = entityManager->addComponent<TransformComponent, MeshComponent>(entity);
             if(auto meshData = ResourceManager::instance()->getMesh("box2"))
             {
                 render.meshData = *meshData;
@@ -52,7 +52,7 @@ public:
 
         // Camera:
         auto camera = entityManager->createEntity("mainCam");
-        auto [trans, cam] = entityManager->addComponent<Transform, Camera>(camera);
+        auto [trans, cam] = entityManager->addComponent<TransformComponent, CameraComponent>(camera);
         trans.position = gsl::vec3{0.f, 0.f, 5.f};
         trans.rotation = gsl::vec3{0.f, -90.f, 0.f};
         trans.updated = true;

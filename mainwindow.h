@@ -25,7 +25,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void showFPS(double deltaTime, double frameCounter);
+    void showFPS(float deltaTime, float frameCounter);
 
     Renderer* getRenderer() { return mRenderer; }
 

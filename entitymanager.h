@@ -152,9 +152,9 @@ public:
     }
 
     template<typename... componentTypes>
-    void addComponent(unsigned int entity)
+    std::tuple<componentTypes&...> addComponent(unsigned int entity)
     {
-        std::tuple<componentTypes...> l = {addComponents<componentTypes>(entity)...};
+        return {addComponents<componentTypes>(entity)...};
     }
 
     void addComponent(unsigned int entity, ComponentType type)
@@ -258,8 +258,7 @@ public:
     }
 
 private:
-    template<class T,
-             typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
+    template<class T, typename std::enable_if<(std::is_same<Transform, T>::value)>::type* = nullptr>
     T& addComponents(unsigned int entity)
     {
         for (auto& comp : mTransforms)
@@ -288,8 +287,7 @@ private:
         return comp;
     }
 
-    template<class T,
-             typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
+    template<class T, typename std::enable_if<(std::is_same<Render, T>::value)>::type* = nullptr>
     T& addComponents(unsigned int entity)
     {
         for (auto& comp : mRenders)
@@ -318,8 +316,7 @@ private:
         return comp;
     }
 
-    template<class T,
-             typename std::enable_if<(std::is_same<Camera, T>::value)>::type* = nullptr>
+    template<class T, typename std::enable_if<(std::is_same<Camera, T>::value)>::type* = nullptr>
     T& addComponents(unsigned int entity)
     {
         for (auto& comp : mCameras)
@@ -330,6 +327,7 @@ private:
                 if (comp.entityId != entity)
                 {
                     comp.entityId = entity;
+                    //sortComponents(mCameras);
                     std::sort(mCameras.begin(), mCameras.end(),[](const Camera& t1, const Camera& t2)
                     {
                         return t1.entityId < t2.entityId;
@@ -346,6 +344,15 @@ private:
             return t1.entityId < t2.entityId;
         });
         return comp;
+    }
+
+    template <class T>
+    void sortComponents(std::vector<T>& vector)
+    {
+        std::sort(vector.begin(), vector.end(), [](Component t1, Component t2)
+        {
+            return t1.entityId < t2.entityId;
+        });
     }
 };
 

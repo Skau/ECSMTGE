@@ -25,15 +25,10 @@ public:
         auto entityManager = mWorld->getEntityManager();
         // Camera:
         auto camera = entityManager->createEntity("mainCam");
-        entityManager->addComponent<Transform, Camera>(camera);
-        auto trans = entityManager->getComponent<Transform>(camera);
-        if (trans) {
-            trans->position = gsl::vec3{0.f, 0.f, 5.f};
-            trans->rotation = gsl::vec3{0.f, -90.f, 0.f};
-            trans->updated = true;
-        } else {
-            qDebug() << "Camera has no transform!";
-        }
+        auto [trans, cam] = entityManager->addComponent<Transform, Camera>(camera);
+        trans.position = gsl::vec3{0.f, 0.f, 5.f};
+        trans.rotation = gsl::vec3{0.f, -90.f, 0.f};
+        trans.updated = true;
     }
 };
 
@@ -46,29 +41,21 @@ public:
         for(int i = 0; i < 10; ++i)
         {
             auto entity = entityManager->createEntity();
-            entityManager->addComponent<Transform, Render>(entity);
-            auto render = entityManager->getComponent<Render>(entity);
+            auto [transform, render] = entityManager->addComponent<Transform, Render>(entity);
             if(auto meshData = ResourceManager::instance()->getMesh("box2"))
             {
-                render->meshData = *meshData;
-                render->isVisible = true;
+                render.meshData = *meshData;
+                render.isVisible = true;
             }
-            auto transform = entityManager->getComponent<Transform>(entity);
-            transform->position = gsl::vec3(i*2, 0, 0);
+            transform.position = gsl::vec3(i*2, 0, 0);
         }
 
         // Camera:
         auto camera = entityManager->createEntity("mainCam");
-        entityManager->addComponent<Transform, Camera>(camera);
-        auto trans = entityManager->getComponent<Transform>(camera);
-        if (trans) {
-            trans->position = gsl::vec3{0.f, 0.f, 5.f};
-            trans->rotation = gsl::vec3{0.f, -90.f, 0.f};
-            trans->updated = true;
-        } else {
-            qDebug() << "Camera has no transform!";
-        }
-
+        auto [trans, cam] = entityManager->addComponent<Transform, Camera>(camera);
+        trans.position = gsl::vec3{0.f, 0.f, 5.f};
+        trans.rotation = gsl::vec3{0.f, -90.f, 0.f};
+        trans.updated = true;
     }
 };
 

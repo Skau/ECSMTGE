@@ -14,7 +14,15 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
 
 void MeshWidget::update(const std::string &name)
 {
-    ui->label_Name->setText(QString::fromStdString(name));
+    if(name.size())
+    {
+        ui->label_Name->setText(QString::fromStdString(name));
+    }
+    else
+    {
+        ui->label_Name->setText("None");
+    }
+
 
     if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
     {
@@ -42,6 +50,11 @@ void MeshWidget::on_button_ChangeMesh_clicked()
         {
             mMainWindow->getEntityManager()->setMesh(mMainWindow->currentEntitySelected->entityId, name.toStdString());
             update(name.toStdString());
+            if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
+            {
+                render->isVisible = true;
+                ui->checkBox_Visible->setCheckState(Qt::CheckState::Checked);
+            }
         }
     }
 }

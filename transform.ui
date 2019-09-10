@@ -10,6 +10,12 @@
     <height>262</height>
    </rect>
   </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>329</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -17,21 +23,32 @@
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="mainLayout">
      <item>
-      <widget class="Line" name="line_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QFrame" name="frame">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
+        <enum>QFrame::Box</enum>
        </property>
        <property name="frameShadow">
         <enum>QFrame::Raised</enum>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="leftMargin">
+         <number>2</number>
+        </property>
+        <property name="topMargin">
+         <number>2</number>
+        </property>
+        <property name="rightMargin">
+         <number>2</number>
+        </property>
+        <property name="bottomMargin">
+         <number>2</number>
+        </property>
         <item>
          <widget class="QLabel" name="label">
           <property name="maximumSize">
@@ -81,6 +98,12 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="spinBox_Position_X">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum">
                <double>-10000.000000000000000</double>
               </property>
@@ -104,6 +127,12 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="spinBox_Position_Y">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum">
                <double>-10000.000000000000000</double>
               </property>
@@ -127,6 +156,12 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="spinBox_Position_Z">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum">
                <double>-10000.000000000000000</double>
               </property>
@@ -173,6 +208,12 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="spinBox_Rotation_X">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum">
                <double>-10000.000000000000000</double>
               </property>
@@ -196,6 +237,12 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="spinBox_Rotation_Y">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum">
                <double>-10000.000000000000000</double>
               </property>
@@ -219,6 +266,12 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="spinBox_Rotation_Z">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum">
                <double>-10000.000000000000000</double>
               </property>
@@ -265,6 +318,12 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="spinBox_Scale_X">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum">
                <double>-10000.000000000000000</double>
               </property>
@@ -288,6 +347,12 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="spinBox_Scale_Y">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum">
                <double>-10000.000000000000000</double>
               </property>
@@ -311,6 +376,12 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="spinBox_Scale_Z">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimum">
                <double>-10000.000000000000000</double>
               </property>
@@ -330,13 +401,6 @@
          </layout>
         </item>
        </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
       </widget>
      </item>
     </layout>

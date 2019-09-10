@@ -23,7 +23,12 @@ MainWindow::MainWindow(QWidget *parent) :
     mRenderer = new Renderer();
 
     mRenderWindowContainer = QWidget::createWindowContainer(mRenderer);
-    ui->OpenGLLayout->addWidget(mRenderWindowContainer);
+
+    QVBoxLayout* layout = new QVBoxLayout(ui->OpenGLLayout);
+    ui->OpenGLLayout->setLayout(layout);
+    ui->OpenGLLayout->layout()->addWidget(mRenderWindowContainer);
+
+    //ui->OpenGLLayout->addWidget(mRenderWindowContainer);
     mRenderWindowContainer->setFocus();
 
     resize(QDesktopWidget().availableGeometry(this).size() * 0.7);

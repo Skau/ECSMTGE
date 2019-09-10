@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1092</width>
-    <height>611</height>
+    <height>656</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,15 +36,21 @@
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Minimum">
+         <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="minimumSize">
          <size>
-          <width>223</width>
+          <width>385</width>
           <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
          </size>
         </property>
         <widget class="QWidget" name="stackedWidgetPage1">
@@ -55,19 +61,30 @@
              <enum>QLayout::SetDefaultConstraint</enum>
             </property>
             <item>
-             <widget class="QListWidget" name="objectList">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
+             <widget class="QTreeWidget" name="treeWidget_ObjectList">
               <property name="minimumSize">
                <size>
-                <width>360</width>
+                <width>0</width>
                 <height>0</height>
                </size>
               </property>
+              <property name="dragEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="rootIsDecorated">
+               <bool>true</bool>
+              </property>
+              <property name="columnCount">
+               <number>1</number>
+              </property>
+              <attribute name="headerVisible">
+               <bool>false</bool>
+              </attribute>
+              <column>
+               <property name="text">
+                <string notr="true">1</string>
+               </property>
+              </column>
              </widget>
             </item>
             <item>
@@ -97,7 +114,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Monkey</string>
+                 <string/>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -108,10 +125,22 @@
             </item>
             <item>
              <widget class="QScrollArea" name="scrollArea">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>215</height>
+                <height>230</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>400</width>
+                <height>262</height>
                </size>
               </property>
               <property name="widgetResizable">
@@ -122,8 +151,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>358</width>
-                 <height>213</height>
+                 <width>363</width>
+                 <height>228</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -138,6 +167,12 @@
                  <height>0</height>
                 </size>
                </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <layout class="QVBoxLayout" name="verticalLayout_5"/>
               </widget>
              </widget>
@@ -145,29 +180,33 @@
            </layout>
           </item>
           <item>
-           <widget class="QLabel" name="label">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Available components to add</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="comboBox_Components"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="button_AddComponent">
-            <property name="text">
-             <string>Add component</string>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Available components to add</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="comboBox_Components"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="button_AddComponent">
+              <property name="text">
+               <string>Add component</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>

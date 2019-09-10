@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <memory>
+#include <map>
 
 class QWidget;
 class Renderer;
@@ -16,6 +17,7 @@ class MainWindow;
 enum class ComponentType;
 
 class EntityManager;
+class QTreeWidgetItem;
 
 class MainWindow : public QMainWindow
 {
@@ -42,8 +44,6 @@ public slots:
     void onWidgetRemoved();
 
 private slots:
-    void on_objectList_clicked(const QModelIndex &index);
-
     void on_actionEmpty_Object_triggered();
 
     void on_actionCube_triggered();
@@ -54,7 +54,9 @@ private slots:
 
     void on_lineEdit_SelectedObject_editingFinished();
 
-    void on_objectList_itemChanged(class QListWidgetItem* item);
+    void on_treeWidget_ObjectList_itemChanged(QTreeWidgetItem *item, int);
+
+    void on_treeWidget_ObjectList_itemClicked(QTreeWidgetItem *item, int);
 
 private:
     void updateComponentArea(unsigned int entityID);
@@ -71,6 +73,8 @@ private:
 
     std::vector<EntityData> mEntityDataCache;
     std::vector<ComponentType> mAvailableComponentsToAddCache;
+
+    std::map<QTreeWidgetItem*, EntityData> mTreeDataCache;
 };
 
 #endif // MAINWINDOW_H

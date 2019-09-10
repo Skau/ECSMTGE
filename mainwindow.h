@@ -37,10 +37,6 @@ public:
 
     EntityData* currentEntitySelected{nullptr};
 
-signals:
-    void createObject(int index);
-    bool getAllComponentsForEntity(unsigned int entity, std::vector<Component*>& outComponents);
-
 public slots:
     void updateUI(const std::vector<EntityData>& entityData);
     void onWidgetRemoved();

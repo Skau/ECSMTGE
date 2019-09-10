@@ -20,7 +20,6 @@ protected slots:
 private slots:
     void ProvideContextMenu(const QPoint& point);
 
-
 protected:
     MainWindow* mMainWindow;
 };

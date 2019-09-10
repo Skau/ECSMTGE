@@ -48,9 +48,6 @@ void MainWindow::setEntityManager(std::shared_ptr<EntityManager> entityManager)
 {
     mEntityManager = entityManager;
 
-    connect(this, &MainWindow::createObject, mEntityManager.get(), &EntityManager::createObject);
-    connect(this, &MainWindow::getAllComponentsForEntity, mEntityManager.get(), &EntityManager::getAllComponents);
-
     connect(mEntityManager.get(), &EntityManager::updateUI, this, &MainWindow::updateUI);
 }
 
@@ -81,6 +78,7 @@ void MainWindow::updateUI(const std::vector<EntityData> &entityData)
     mEntityDataCache = entityData;
 }
 
+// If a widget is removed we need to recreate the components
 void MainWindow::onWidgetRemoved()
 {
     updateComponentArea(currentEntitySelected->entityId);
@@ -106,17 +104,17 @@ void MainWindow::on_objectList_clicked(const QModelIndex &index)
 
 void MainWindow::on_actionEmpty_Object_triggered()
 {
-    createObject(0);
+    mEntityManager->createObject(0);
 }
 
 void MainWindow::on_actionCube_triggered()
 {
-     createObject(1);
+     mEntityManager->createObject(1);
 }
 
 void MainWindow::on_actionMonkey_triggered()
 {
-    createObject(2);
+    mEntityManager->createObject(2);
 }
 
 void MainWindow::on_button_AddComponent_clicked()
@@ -146,7 +144,7 @@ void MainWindow::updateComponentArea(unsigned int entityID)
 
     // Get the components for this entity
     std::vector<Component*> components;
-    if(getAllComponentsForEntity(entityID, components))
+    if(mEntityManager->getAllComponents(entityID, components))
     {
         // Components were found, add them
 
@@ -165,12 +163,12 @@ void MainWindow::updateComponentArea(unsigned int entityID)
             {
                 auto render = static_cast<MeshComponent*>(component);
                 auto widget = new MeshWidget(this);
-
-                // Set up render widget here
-
                 connect(widget, &MeshWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
 
+
+                // Set up render widget here
                 widget->update(render->meshData.mName);
+
 
                 layout->addWidget(widget);
                 break;
@@ -179,12 +177,12 @@ void MainWindow::updateComponentArea(unsigned int entityID)
             {
                 auto transform = static_cast<TransformComponent*>(component);
                 auto widget = new TransformWidget(this);
-
-                // Set up transform widget here
-
                 connect(widget, &TransformWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
 
+
+                // Set up transform widget here
                 widget->update(transform->position, transform->rotation, transform->scale);
+
 
                 layout->addWidget(widget);
                 break;
@@ -193,12 +191,12 @@ void MainWindow::updateComponentArea(unsigned int entityID)
             {
                 auto input = static_cast<InputComponent*>(component);
                 auto widget = new InputWidget(this);
-
-                // Set up input widget here
-
                 connect(widget, &InputWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
 
+
+                // Set up input widget here
                 widget->update(input->isCurrentlyControlled);
+
 
                 layout->addWidget(widget);
                 break;

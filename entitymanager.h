@@ -32,7 +32,19 @@ private:
 signals:
     void updateUI(const std::vector<EntityData>& entityData);
 
-public slots:
+    // ------------------------- Member functions ---------------
+public:
+    EntityManager()
+    {
+
+    }
+
+    std::vector<TransformComponent>& getTransforms() { return mTransforms; }
+    std::vector<MeshComponent>& getMeshComponents() { return mMeshComponents; }
+    std::vector<EntityData>& getEntityData() { return mEntityData; }
+    std::vector<CameraComponent>& getCameraComponents() { return mCameraComponents; }
+    std::vector<InputComponent>& getInputComponents() { return mInputComponents; }
+
     void createObject(int index)
     {
         switch (index)
@@ -90,19 +102,6 @@ public slots:
         }
         return addedAnyComponents;
     }
-
-    // ------------------------- Member functions ---------------
-public:
-    EntityManager()
-    {
-
-    }
-
-    std::vector<TransformComponent>& getTransforms() { return mTransforms; }
-    std::vector<MeshComponent>& getMeshComponents() { return mMeshComponents; }
-    std::vector<EntityData>& getEntityData() { return mEntityData; }
-    std::vector<CameraComponent>& getCameraComponents() { return mCameraComponents; }
-    std::vector<InputComponent>& getInputComponents() { return mInputComponents; }
 
     void createCube()
     {

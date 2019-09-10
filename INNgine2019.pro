@@ -11,6 +11,7 @@ INCLUDEPATH +=  ./GSL
 
 HEADERS += \
     GSL/math.h \
+    Widgets/componentwidget.h \
     Widgets/inputwidget.h \
     Widgets/meshwidget.h \
     Widgets/transformwidget.h \
@@ -54,6 +55,7 @@ HEADERS += \
 
 SOURCES += \
     GSL/math.cpp \
+    Widgets/componentwidget.cpp \
     Widgets/inputwidget.cpp \
     Widgets/meshwidget.cpp \
     Widgets/transformwidget.cpp \

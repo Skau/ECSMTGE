@@ -2,23 +2,14 @@
 #include "ui_mesh.h"
 #include "QFileDialog"
 #include "constants.h"
-#include <QDebug>
 #include <QMenu>
 #include "mainwindow.h"
 #include "entitymanager.h"
-#include "componentdata.h"
 
 MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
-    : QWidget(parent), ui(new Ui::Mesh), mMainWindow(mainWindow)
+    : ComponentWidget(mainWindow, parent), ui(new Ui::Mesh)
 {
     ui->setupUi(this);
-    setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &QWidget::customContextMenuRequested, this, &MeshWidget::ProvideContextMenu);
-}
-
-MeshWidget::~MeshWidget()
-{
-
 }
 
 void MeshWidget::update(const std::string &name)
@@ -64,16 +55,6 @@ void MeshWidget::on_checkBox_Visible_toggled(bool checked)
             render->isVisible = checked;
         }
     }
-}
-
-void MeshWidget::ProvideContextMenu(const QPoint &point)
-{
-    QMenu subMenu;
-    subMenu.addAction("Remove", this, &MeshWidget::Remove);
-
-    QPoint globalPos = mapToGlobal(point);
-
-    subMenu.exec(globalPos);
 }
 
 void MeshWidget::Remove()

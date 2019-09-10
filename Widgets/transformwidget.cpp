@@ -5,16 +5,9 @@
 #include <QMenu>
 
 TransformWidget::TransformWidget(MainWindow* mainWindow, QWidget *parent)
-    : QWidget(parent), ui(new Ui::Transform), mMainWindow(mainWindow)
+    : ComponentWidget(mainWindow, parent), ui(new Ui::Transform)
 {
     ui->setupUi(this);
-
-    setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &QWidget::customContextMenuRequested, this, &TransformWidget::ProvideContextMenu);
-}
-
-TransformWidget::~TransformWidget()
-{
 }
 
 void TransformWidget::setPosition(const gsl::vec3 &pos)
@@ -205,16 +198,6 @@ void TransformWidget::on_spinBox_Scale_Z_valueChanged(double arg1)
             transform->updated = true;
         }
     }
-}
-
-void TransformWidget::ProvideContextMenu(const QPoint& point)
-{
-    QMenu subMenu;
-    subMenu.addAction("Remove", this, &TransformWidget::Remove);
-
-    QPoint globalPos = mapToGlobal(point);
-
-    subMenu.exec(globalPos);
 }
 
 void TransformWidget::Remove()

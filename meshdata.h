@@ -9,10 +9,10 @@
 struct Material
 {
     gsl::Vector3D mObjectColor{1.f, 1.f, 1.f};
-    std::shared_ptr<Texture> mTexture{nullptr};
+    int mTexture{-1};
     std::shared_ptr<Shader> mShader{nullptr};
 
-    Material(const gsl::Vector3D& objectColor = {1.f, 1.f, 1.f}, std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(), std::shared_ptr<Shader> shader = std::shared_ptr<Shader>())
+    Material(const gsl::Vector3D& objectColor = {1.f, 1.f, 1.f}, int texture = -1, std::shared_ptr<Shader> shader = std::shared_ptr<Shader>())
         : mObjectColor(objectColor), mTexture(texture), mShader(shader) {}
 
 };

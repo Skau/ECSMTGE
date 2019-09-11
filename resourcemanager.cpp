@@ -11,6 +11,7 @@ void ResourceManager::addShader(const std::string &name, std::shared_ptr<Shader>
 {
     if(shader && mShaders.find(name) == mShaders.end())
     {
+        shader->mName = name;
         mShaders[name] = shader;
 
         qDebug() << "ResourceManager: Added shader " << QString::fromStdString(name) << " (id: " << shader->getProgram() << ")";
@@ -38,9 +39,6 @@ void ResourceManager::loadTexture(const std::string &name, const std::string &pa
         }
 
         mTextures[name] = std::make_shared<Texture>(path);
-
-        glActiveTexture(static_cast<GLuint>(GL_TEXTURE0 + mTextures.size() - 1));
-        glBindTexture(GL_TEXTURE_2D, mTextures[name]->id());
     }
 }
 
@@ -155,6 +153,18 @@ std::vector<std::string> ResourceManager::getAllShaderNames()
     for(auto& shader : mShaders)
     {
         returnStrings.push_back(shader.first);
+    }
+
+    return returnStrings;
+}
+
+std::vector<std::string> ResourceManager::getAllTextureNames()
+{
+    std::vector<std::string> returnStrings;
+
+    for(auto& texture : mTextures)
+    {
+        returnStrings.push_back(texture.first);
     }
 
     return returnStrings;

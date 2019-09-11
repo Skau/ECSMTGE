@@ -34,6 +34,8 @@ public:
 
     CameraSystem *getCurrentCamera() const;
 
+    std::string mName{};
+
 protected:
     GLuint program{0};
     GLint mMatrixUniform{-1};

@@ -35,6 +35,8 @@ private slots:
 
     void on_pushButton_ChangeShaderDropdown_clicked();
 
+    void on_pushButton_ChangeTextureDropdown_clicked();
+
 private:
     MeshComponent* getRenderComponent(unsigned int entity);
 

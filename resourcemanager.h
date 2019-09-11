@@ -34,6 +34,7 @@ public:
 
     std::vector<std::string> getAllMeshNames();
     std::vector<std::string> getAllShaderNames();
+    std::vector<std::string> getAllTextureNames();
 
 
 private:

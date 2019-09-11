@@ -6,6 +6,7 @@
 #include "mainwindow.h"
 #include "entitymanager.h"
 #include "resourcemanager.h"
+#include "texture.h"
 
 MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
     : ComponentWidget(mainWindow, parent), ui(new Ui::Mesh)
@@ -45,6 +46,11 @@ void MeshWidget::update(const std::string &name)
     for(auto& name : ResourceManager::instance()->getAllShaderNames())
     {
         ui->comboBox_Shaders->addItem(QString::fromStdString(name));
+    }
+
+    for(auto& name : ResourceManager::instance()->getAllTextureNames())
+    {
+        ui->comboBox_Textures->addItem(QString::fromStdString(name));
     }
 }
 
@@ -121,5 +127,18 @@ void MeshWidget::on_pushButton_ChangeShaderDropdown_clicked()
     if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
     {
         render->meshData.mMaterial.mShader = ResourceManager::instance()->getShader(name.toStdString());
+    }
+}
+
+void MeshWidget::on_pushButton_ChangeTextureDropdown_clicked()
+{
+    if(!mMainWindow->currentEntitySelected) return;
+
+    auto name = ui->comboBox_Textures->currentText();
+    if(!name.length()) return;
+
+    if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
+    {
+        render->meshData.mMaterial.mTexture = ResourceManager::instance()->getTexture(name.toStdString());
     }
 }

@@ -157,12 +157,22 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
                     shader = ResourceManager::instance()->getShader("plain");
                 }
 
+                glUseProgram(shader->getProgram());
+
+                if(meshData.mMaterial.mShader->mName == "texture" && meshData.mMaterial.mTexture > -1)
+                {
+                    glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(meshData.mMaterial.mTexture));
+                    glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(meshData.mMaterial.mTexture));
+
+                    glUniform1i(glGetUniformLocation(shader->getProgram(), "textureSampler"), meshData.mMaterial.mTexture);
+                }
+
+
                 gsl::mat4 matrix;
                 matrix.setToIdentity();
                 matrix.translate(transIt->position);
                 matrix.scale(transIt->scale);
 
-                glUseProgram(shader->getProgram());
 
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, matrix.constData());
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
@@ -176,9 +186,12 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
                 {
                     glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
                 }
+
                 // Increment all
                 ++transIt;
                 ++renderIt;
+
+
             }
         }
 

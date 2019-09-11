@@ -74,12 +74,12 @@ void InputSystem::HandleInput(float deltaTime, const std::vector<InputComponent>
 
                 if(keys[Qt::Key_Q] == true)
                 {
-                    transIt->position += (gsl::vec3(0, 1, 0) * (deltaTime / 1000.f));
+                    transIt->position += (gsl::vec3(0, -1, 0) * (deltaTime / 1000.f));
                 }
 
                 if(keys[Qt::Key_E] == true)
                 {
-                    transIt->position += (gsl::vec3(0, -1, 0) * (deltaTime / 1000.f));
+                    transIt->position += (gsl::vec3(0, 1, 0) * (deltaTime / 1000.f));
                 }
 
                 auto mouseOffset = InputHandler::MouseOffset;

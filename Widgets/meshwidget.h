@@ -30,6 +30,11 @@ private slots:
 
     void on_checkBox_Visible_toggled(bool checked);
 
+
+    void on_pushButton_ChangeMeshDropdown_clicked();
+
+    void on_pushButton_ChangeShaderDropdown_clicked();
+
 private:
     MeshComponent* getRenderComponent(unsigned int entity);
 

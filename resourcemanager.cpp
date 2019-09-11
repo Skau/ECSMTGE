@@ -74,6 +74,8 @@ std::shared_ptr<MeshData> ResourceManager::addMesh(const std::string& name, cons
             data = readTxtFile(path);
         }
 
+        if(!data.first.size()) return nullptr;
+
         MeshData meshData;
 
         meshData.mName = name;
@@ -132,6 +134,30 @@ std::shared_ptr<MeshData> ResourceManager::getMesh(const std::string& name)
     }
     qDebug() << "No mesh named " << QString::fromStdString(name) << " could be found";
     return nullptr;
+}
+
+std::vector<std::string> ResourceManager::getAllMeshNames()
+{
+    std::vector<std::string> returnStrings;
+
+    for(auto& mesh : mMeshes)
+    {
+        returnStrings.push_back(mesh.first);
+    }
+
+    return returnStrings;
+}
+
+std::vector<std::string> ResourceManager::getAllShaderNames()
+{
+    std::vector<std::string> returnStrings;
+
+    for(auto& shader : mShaders)
+    {
+        returnStrings.push_back(shader.first);
+    }
+
+    return returnStrings;
 }
 
 std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readObjFile(std::string filename)

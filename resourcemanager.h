@@ -32,6 +32,9 @@ public:
     std::shared_ptr<MeshData> addMesh(const std::string& name, const std::string& path, GLenum renderType = GL_TRIANGLES);
     std::shared_ptr<MeshData> getMesh(const std::string& name);
 
+    std::vector<std::string> getAllMeshNames();
+    std::vector<std::string> getAllShaderNames();
+
 
 private:
     ResourceManager();

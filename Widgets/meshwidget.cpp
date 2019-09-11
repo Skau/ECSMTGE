@@ -5,6 +5,7 @@
 #include <QMenu>
 #include "mainwindow.h"
 #include "entitymanager.h"
+#include "resourcemanager.h"
 
 MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
     : ComponentWidget(mainWindow, parent), ui(new Ui::Mesh)
@@ -34,6 +35,16 @@ void MeshWidget::update(const std::string &name)
         {
             ui->checkBox_Visible->setCheckState(Qt::CheckState::Unchecked);
         }
+    }
+
+    for(auto& name : ResourceManager::instance()->getAllMeshNames())
+    {
+        ui->comboBox_Meshes->addItem(QString::fromStdString(name));
+    }
+
+    for(auto& name : ResourceManager::instance()->getAllShaderNames())
+    {
+        ui->comboBox_Shaders->addItem(QString::fromStdString(name));
     }
 }
 
@@ -85,4 +96,30 @@ void MeshWidget::Remove()
 MeshComponent *MeshWidget::getRenderComponent(unsigned int entity)
 {
     return mMainWindow->getEntityManager()->getComponent<MeshComponent>(entity);
+}
+
+void MeshWidget::on_pushButton_ChangeMeshDropdown_clicked()
+{
+    if(!mMainWindow->currentEntitySelected) return;
+
+    auto name = ui->comboBox_Meshes->currentText();
+    if(!name.length()) return;
+
+    if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
+    {
+        render->meshData = *ResourceManager::instance()->getMesh(name.toStdString());
+    }
+}
+
+void MeshWidget::on_pushButton_ChangeShaderDropdown_clicked()
+{
+    if(!mMainWindow->currentEntitySelected) return;
+
+    auto name = ui->comboBox_Shaders->currentText();
+    if(!name.length()) return;
+
+    if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
+    {
+        render->meshData.mMaterial.mShader = ResourceManager::instance()->getShader(name.toStdString());
+    }
 }

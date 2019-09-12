@@ -159,12 +159,15 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
 
                 glUseProgram(shader->getProgram());
 
-                if(meshData.mMaterial.mShader->mName == "texture" && meshData.mMaterial.mTexture > -1)
+                if(meshData.mMaterial.mShader && meshData.mMaterial.mShader->mName.length())
                 {
-                    glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(meshData.mMaterial.mTexture));
-                    glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(meshData.mMaterial.mTexture));
+                    if(meshData.mMaterial.mShader->mName == "texture" && meshData.mMaterial.mTexture > -1)
+                    {
+                        glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(meshData.mMaterial.mTexture));
+                        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(meshData.mMaterial.mTexture));
 
-                    glUniform1i(glGetUniformLocation(shader->getProgram(), "textureSampler"), meshData.mMaterial.mTexture);
+                        glUniform1i(glGetUniformLocation(shader->getProgram(), "textureSampler"), meshData.mMaterial.mTexture);
+                    }
                 }
 
 

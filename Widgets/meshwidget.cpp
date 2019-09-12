@@ -25,7 +25,6 @@ void MeshWidget::update(const std::string &name)
         ui->label_Name->setText("None");
     }
 
-
     if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
     {
         if(render->isVisible)
@@ -65,12 +64,31 @@ void MeshWidget::on_button_ChangeMesh_clicked()
         auto name = splits[0];
         if(name.length())
         {
-            mMainWindow->getEntityManager()->setMesh(mMainWindow->currentEntitySelected->entityId, name.toStdString());
-            update(name.toStdString());
             if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
             {
-                render->isVisible = true;
-                ui->checkBox_Visible->setCheckState(Qt::CheckState::Checked);
+                bool found = false;
+                for(int i = 0; i < ui->comboBox_Meshes->count(); ++i)
+                {
+                    if(name == ui->comboBox_Meshes->itemText(0))
+                    {
+                        render->meshData = *ResourceManager::instance()->getMesh(name.toStdString());
+                        found = true;
+                        break;
+                    }
+                }
+
+                if(!found)
+                {
+                    render->meshData = *ResourceManager::instance()->addMesh(name.toStdString(), last.toStdString());
+                }
+
+                if(render->meshData.mVAO)
+                {
+                    render->isVisible = true;
+                    ui->checkBox_Visible->setCheckState(Qt::CheckState::Checked);
+                    ui->label_Name->setText(name);
+                    ui->comboBox_Meshes->addItem(name);
+                }
             }
         }
     }
@@ -114,6 +132,9 @@ void MeshWidget::on_pushButton_ChangeMeshDropdown_clicked()
     if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
     {
         render->meshData = *ResourceManager::instance()->getMesh(name.toStdString());
+        render->isVisible = true;
+        ui->checkBox_Visible->setCheckState(Qt::CheckState::Checked);
+        ui->label_Name->setText(name);
     }
 }
 

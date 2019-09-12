@@ -131,6 +131,7 @@ void MainWindow::updateComponentArea(unsigned int entityID)
         ui->scrollArea->setWidget(widget);
         QVBoxLayout* layout = new QVBoxLayout(widget);
         widget->setLayout(layout);
+        layout->setMargin(0);
 
         for(auto& component: components)
         {

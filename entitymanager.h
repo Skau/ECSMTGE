@@ -90,10 +90,10 @@ class EntityManager : public QObject
     Q_OBJECT
 private:
     // ------------------------------ Member Variables ------------------------------
-    // Component arrays. Remember to update componentCount if adding more.
     std::vector<TransformComponent> mTransformComponents;
     std::vector<MeshComponent> mMeshComponents;
     std::vector<EntityData> mEntityData;
+    std::vector<PhysicsComponent> mPhysicsComponents;
     std::vector<CameraComponent> mCameraComponents;
     std::vector<InputComponent> mInputComponents;
 
@@ -113,6 +113,7 @@ public:
     std::vector<TransformComponent>& getTransforms() { return mTransformComponents; }
     std::vector<MeshComponent>& getMeshComponents() { return mMeshComponents; }
     std::vector<EntityData>& getEntityData() { return mEntityData; }
+    std::vector<PhysicsComponent>& getPhysicsComponents() { return mPhysicsComponents; }
     std::vector<CameraComponent>& getCameraComponents() { return mCameraComponents; }
     std::vector<InputComponent>& getInputComponents() { return mInputComponents; }
 
@@ -215,6 +216,11 @@ public:
             addComponent<TransformComponent>(entity);
             break;
         }
+        case ComponentType::Physics:
+        {
+            addComponent<PhysicsComponent>(entity);
+            break;
+        }
         case ComponentType::Input:
         {
             addComponent<InputComponent>(entity);
@@ -228,6 +234,7 @@ public:
 
     GETCOMPONENT(TransformComponent)
     GETCOMPONENT(MeshComponent)
+    GETCOMPONENT(PhysicsComponent)
     GETCOMPONENT(CameraComponent)
     GETCOMPONENT(InputComponent)
 
@@ -257,6 +264,14 @@ public:
                 addedAnyComponents = true;
             }
         }
+        if(auto comp = getComponent<PhysicsComponent>(entity))
+        {
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
+        }
         if(auto comp = getComponent<InputComponent>(entity))
         {
             if(comp->valid)
@@ -270,6 +285,7 @@ public:
 
     REMOVECOMPONENT(TransformComponent)
     REMOVECOMPONENT(MeshComponent)
+    REMOVECOMPONENT(PhysicsComponent)
     REMOVECOMPONENT(CameraComponent)
     REMOVECOMPONENT(InputComponent)
 
@@ -286,6 +302,7 @@ public:
 private:
     ADDCOMPONENTS(TransformComponent)
     ADDCOMPONENTS(MeshComponent)
+    ADDCOMPONENTS(PhysicsComponent)
     ADDCOMPONENTS(CameraComponent)
     ADDCOMPONENTS(InputComponent)
 

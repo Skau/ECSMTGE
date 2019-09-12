@@ -11,6 +11,7 @@
 #include "renderer.h"
 #include "Widgets/transformwidget.h"
 #include "Widgets/meshwidget.h"
+#include "Widgets/physicswidget.h"
 #include "Widgets/inputwidget.h"
 #include "componentdata.h"
 
@@ -167,6 +168,20 @@ void MainWindow::updateComponentArea(unsigned int entityID)
                 layout->addWidget(widget);
                 break;
             }
+            case ComponentType::Physics:
+            {
+                auto physics = static_cast<PhysicsComponent*>(component);
+                auto widget = new PhysicsWidget(this);
+                connect(widget, &PhysicsWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
+
+
+                // Set up physics widget here
+                widget->update(physics->velocity, physics->acceleration, physics->mass);
+
+
+                layout->addWidget(widget);
+                break;
+            }
             case ComponentType::Input:
             {
                 auto input = static_cast<InputComponent*>(component);
@@ -219,6 +234,11 @@ void MainWindow::updateAvailableComponents(std::vector<ComponentType> types)
         case ComponentType::Transform:
         {
             ui->comboBox_Components->addItem("Transform");
+            break;
+        }
+        case ComponentType::Physics:
+        {
+            ui->comboBox_Components->addItem("Physics");
             break;
         }
         case ComponentType::Input:

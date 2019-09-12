@@ -10,13 +10,15 @@
 enum class ComponentType
 {
     Transform,
+    Physics,
     Mesh,
+    Camera,
     Input,
     Other
 };
 
 // Used by UI so it knows what components are available to add if the entity doesnt have one.
-const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, ComponentType::Transform, ComponentType::Input};
+const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, ComponentType::Transform, ComponentType::Physics, ComponentType::Input};
 
 
 struct Component
@@ -24,6 +26,7 @@ struct Component
     unsigned int entityId;
     bool valid : 1;
     ComponentType type;
+
 
     Component(unsigned int _eID = 0, bool _valid = false, ComponentType typeIn = ComponentType::Other)
         : entityId{_eID}, valid(_valid), type(typeIn)
@@ -33,6 +36,11 @@ struct Component
 struct EntityData : public Component
 {
     std::string name{};
+
+
+    EntityData()
+        : Component(0, false, ComponentType::Other)
+    {}
 };
 
 struct TransformComponent : public Component
@@ -49,6 +57,20 @@ struct TransformComponent : public Component
               const gsl::vec3& _rot = gsl::vec3{})
         : Component (_eID, _valid, ComponentType::Transform), updated{true}, position{_pos},
           scale{_scale}, rotation{_rot}
+    {}
+};
+
+
+struct PhysicsComponent : public Component
+{
+    gsl::vec3 velocity{};
+    gsl::vec3 acceleration{};
+    float mass{1.f};
+
+
+    PhysicsComponent(unsigned int _eID = 0, bool _valid = false,
+                     const gsl::vec3& _velocity = gsl::vec3{})
+        : Component (_eID, _valid, ComponentType::Physics), velocity{_velocity}
     {}
 };
 

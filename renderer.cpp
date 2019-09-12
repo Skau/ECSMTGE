@@ -154,7 +154,7 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
                 auto shader = meshData.mMaterial.mShader;
                 if(!shader)
                 {
-                    shader = ResourceManager::instance()->getShader("plain");
+                    shader = ResourceManager::instance()->getShader("color");
                 }
 
                 gsl::mat4 matrix;
@@ -188,16 +188,6 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
     }
 }
 
-void Renderer::setupCamera()
-{
-    mCurrentCamera = new CameraSystem();
-    mCurrentCamera->setPosition(gsl::Vector3D(1.f, 1.f, 4.4f));
-    ResourceManager::instance()->getShader("plain")->setCurrentCamera(mCurrentCamera);
-    ResourceManager::instance()->getShader("texture")->setCurrentCamera(mCurrentCamera);
-    ResourceManager::instance()->getShader("phong")->setCurrentCamera(mCurrentCamera);
-}
-
-
 void Renderer::exposeEvent(QExposeEvent *)
 {
     if(!isInitialized)
@@ -208,8 +198,6 @@ void Renderer::exposeEvent(QExposeEvent *)
 
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, static_cast<GLint>(width() * retinaScale), static_cast<GLint>(height() * retinaScale));
-    mAspectratio = static_cast<float>(width()) / height();
-    mCurrentCamera->mProjectionMatrix.setPersp(45.f, mAspectratio, 1.f, 100.f);
     windowUpdated();
 }
 

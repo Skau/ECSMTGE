@@ -494,22 +494,22 @@ void Matrix4x4::setLookAt(const Vector3D &eye, const Vector3D &center, const Vec
 
 Matrix4x4 Matrix4x4::lookAtRotation(const Vector3D &from, const Vector3D &to, const Vector3D &up_axis)
 {
-    Vector3D f = (to - from).normalized(); // Forward
-    Vector3D r = Vector3D::cross(f, up_axis).normalized(); // Right
-    Vector3D u = Vector3D::cross(r, f).normalized(); // Up
+    Vector3D f = (to - from).normalized(); // Forward (n)
+    Vector3D r = Vector3D::cross(up_axis, f).normalized(); // Right (u)
+    Vector3D u = Vector3D::cross(f, r).normalized(); // Up (v)
 
     return gsl::Matrix4x4
     {
-        r.x, r.y, r.z, 0.f,
-        u.x, u.y, u.z, 0.f,
-        f.x, f.y, f.z, 0.f,
+        r.x, u.x, f.x, 0.f,
+        r.y, u.y, f.y, 0.f,
+        r.z, u.z, f.z, 0.f,
         0.f, 0.f, 0.f, 1.f
     };
 }
 
 Matrix4x4 Matrix4x4::viewMatrix(const Vector3D &from, const Vector3D &to, const Vector3D &up_axis)
 {
-    return lookAtRotation(from, to, up_axis) * translation(-from);
+    return lookAtRotation(from, to, up_axis).transposed() * translation(-from);
 }
 
 void Matrix4x4::setRotationToVector(const Vector3D &direction, Vector3D up)

@@ -29,7 +29,7 @@ void InputHandler::updateMouse()
         QPoint mousePos = mRenderer->mapFromGlobal(QCursor::pos());
 
         MouseOffset.setX(mousePos.x() - mCenter.x());
-        MouseOffset.setY(mCenter.y() - mousePos.y());
+        MouseOffset.setY(mousePos.y() - mCenter.y());
 
         QCursor::setPos(mRenderer->mapToGlobal(mCenter));
     }

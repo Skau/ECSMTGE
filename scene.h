@@ -54,8 +54,13 @@ public:
         auto camera = entityManager->createEntity("mainCam");
         auto [trans, cam] = entityManager->addComponent<TransformComponent, CameraComponent>(camera);
         trans.position = gsl::vec3{0.f, 0.f, 5.f};
-        trans.rotation = gsl::vec3{0.f, -90.f, 0.f};
+        trans.rotation = gsl::vec3{0.f, 90.f, 0.f};
         trans.updated = true;
+
+        // Axis:
+        auto [axisTrans, axisMesh] = entityManager->addComponent<TransformComponent, MeshComponent>(entityManager->createEntity("axis"));
+        axisMesh.meshData = *ResourceManager::instance()->getMesh("axis");
+        axisMesh.isVisible = true;
     }
 };
 

@@ -151,9 +151,9 @@ void CameraSystem::updateCameras(const std::vector<TransformComponent>& transfor
             };
 
             // If transform is updated, viewMatrix needs to be updated
-            // camIt->viewMatrix = gsl::mat4::viewMatrix(transIt->position, gsl::vec3{0.f, 0.f, 0.f});
-            camIt->viewMatrix.setToIdentity();
-            camIt->viewMatrix.setLookAt(transIt->position, transIt->position + lookAtPoint, gsl::vec3{0.f, 1.f, 0.f});
+            camIt->viewMatrix = gsl::mat4::viewMatrix(transIt->position, transIt->position + lookAtPoint, gsl::vec3{0.f, 1.f, 0.f});
+//            camIt->viewMatrix.setToIdentity();
+//            camIt->viewMatrix.setLookAt(transIt->position, transIt->position + lookAtPoint, gsl::vec3{0.f, 1.f, 0.f});
 
 
             // Increment all

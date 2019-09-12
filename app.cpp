@@ -37,8 +37,6 @@ void App::initTheRest()
 
     mWorld->initCurrentScene();
 
-    mRenderer->setupCamera();
-
     connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);
 
     mUpdateTimer.start(16); // Simulates 60ish fps

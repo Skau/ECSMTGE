@@ -42,10 +42,6 @@ public:
     // Should only need renders, materials and transforms
     void render(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
 
-    void setupCamera();
-
-    CameraSystem *mCurrentCamera{nullptr};
-
 signals:
     void initDone();
     void windowUpdated();
@@ -61,8 +57,6 @@ private:
     bool mWireframe{false};
 
     bool isInitialized{false};
-
-    float mAspectratio{1.f};
 
    // MainWindow *mMainWindow{nullptr};    //points back to MainWindow to be able to put info in StatusBar
 

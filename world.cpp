@@ -6,7 +6,7 @@
 
 World::World()
 {
-    ResourceManager::instance()->addShader("plain",     std::make_shared<Shader>("plainshader"));
+    ResourceManager::instance()->addShader("color",     std::make_shared<Shader>("colorshader"));
     ResourceManager::instance()->addShader("texture",   std::make_shared<Shader>("textureshader"));
     ResourceManager::instance()->addShader("phong",     std::make_shared<Shader>("phongshader"));
 
@@ -16,6 +16,7 @@ World::World()
 
     ResourceManager::instance()->addMesh("box2", "box2.txt");
     ResourceManager::instance()->addMesh("monkey", "monkey.obj");
+    ResourceManager::instance()->addMesh("axis", "axis.txt", GL_LINES);
 
     if(auto mesh =  ResourceManager::instance()->getMesh("box2"))
     {

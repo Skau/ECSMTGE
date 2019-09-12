@@ -9,6 +9,7 @@ World::World()
     ResourceManager::instance()->addShader("color",     std::make_shared<Shader>("colorshader"));
     ResourceManager::instance()->addShader("texture",   std::make_shared<Shader>("textureshader"));
     ResourceManager::instance()->addShader("phong",     std::make_shared<Shader>("phongshader"));
+    ResourceManager::instance()->addShader("axis",      std::make_shared<Shader>("axisshader.vert", "colorshader.frag"));
 
     ResourceManager::instance()->loadTexture("white",   "white.bmp");
     ResourceManager::instance()->loadTexture("hund",    "hund.bmp");
@@ -16,16 +17,20 @@ World::World()
 
     ResourceManager::instance()->addMesh("box2", "box2.txt");
     ResourceManager::instance()->addMesh("monkey", "monkey.obj");
-    ResourceManager::instance()->addMesh("axis", "axis.txt", GL_LINES);
 
-    if(auto mesh =  ResourceManager::instance()->getMesh("box2"))
+    if (auto mesh =  ResourceManager::instance()->getMesh("box2"))
     {
         mesh->mMaterial.mShader = ResourceManager::instance()->getShader("plain");
     }
 
-    if(auto mesh = ResourceManager::instance()->getMesh("monkey"))
+    if (auto mesh = ResourceManager::instance()->getMesh("monkey"))
     {
         mesh->mMaterial.mShader = ResourceManager::instance()->getShader("phong");
+    }
+
+    if (auto mesh = ResourceManager::instance()->addMesh("axis", "axis.txt", GL_LINES))
+    {
+       mesh->mMaterial.mShader = ResourceManager::instance()->getShader("axis");
     }
 
     entityManager = std::make_shared<EntityManager>();

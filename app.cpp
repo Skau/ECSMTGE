@@ -8,6 +8,7 @@
 #include "entitymanager.h"
 
 #include "inputsystem.h"
+#include "physicssystem.h"
 
 #include "ui_mainwindow.h"
 
@@ -54,22 +55,37 @@ void App::update()
     currentlyUpdating = true;
 
 
-    mDeltaTime = mDeltaTimer.restart();
+    // Time since last frame in seconds
+    mDeltaTime = mDeltaTimer.restart() / 1000.f;
 
 
     calculateFrames();
 
+    // Input:
     const auto& inputs = mWorld->getEntityManager()->getInputComponents();
     auto& transforms = mWorld->getEntityManager()->getTransforms();
 
     mEventHandler->updateMouse();
-
     InputSystem::HandleInput(mDeltaTime, inputs, transforms);
 
+    // Physics:
+    /* Note: Physics calculation should be happening on a separate thread
+     * and instead of sending references to the lists we should take copies
+     * and then later apply those copies to the original lists.
+     */
+    auto& physics = mWorld->getEntityManager()->getPhysicsComponents();
+
+    PhysicsSystem::UpdatePhysics(transforms, physics, mDeltaTime);
+
+    // Rendering:
     const auto& renders = mWorld->getEntityManager()->getMeshComponents();
     auto& cameras = mWorld->getEntityManager()->getCameraComponents();
 
-    CameraSystem::updateCameras(transforms, cameras);
+    auto usedTrans = CameraSystem::updateCameras(transforms, cameras);
+    // Set all used transforms's "updated" to false so that updateCameras
+    // won't need to calculate more viewmatrixes than it needs to.
+    for (auto index : usedTrans)
+        transforms[index] = false;
 
     for (const auto& camera : cameras) {
         mRenderer->render(renders, transforms, camera);
@@ -97,7 +113,7 @@ void App::calculateFrames()
     double elapsed = mFPSTimer.elapsed();
     if(elapsed >= 100)
     {
-        mMainWindow->showFPS(mTotalDeltaTime / mFrameCounter, mFrameCounter / mTotalDeltaTime * 1000);
+        mMainWindow->showFPS(mTotalDeltaTime / mFrameCounter, mFrameCounter / mTotalDeltaTime);
         mFrameCounter = 0;
         mTotalDeltaTime = 0;
         mFPSTimer.restart();

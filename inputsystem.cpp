@@ -54,38 +54,38 @@ void InputSystem::HandleInput(float deltaTime, const std::vector<InputComponent>
             {
                 if(keys[Qt::Key_W] == true)
                 {
-                    transIt->position += (gsl::vec3(0, 0, -1) * (deltaTime / 1000.f));
+                    transIt->position += (gsl::vec3(0, 0, -1) * deltaTime);
                 }
 
                 if(keys[Qt::Key_A] == true)
                 {
-                    transIt->position += (gsl::vec3(-1, 0, 0) * (deltaTime / 1000.f));
+                    transIt->position += (gsl::vec3(-1, 0, 0) * deltaTime);
                 }
 
                 if(keys[Qt::Key_S] == true)
                 {
-                    transIt->position += (gsl::vec3(0, 0, 1) * (deltaTime / 1000.f));
+                    transIt->position += (gsl::vec3(0, 0, 1) * deltaTime);
                 }
 
                 if(keys[Qt::Key_D] == true)
                 {
-                    transIt->position += (gsl::vec3(1, 0, 0) * (deltaTime / 1000.f));
+                    transIt->position += (gsl::vec3(1, 0, 0) * deltaTime);
                 }
 
                 if(keys[Qt::Key_Q] == true)
                 {
-                    transIt->position += (gsl::vec3(0, -1, 0) * (deltaTime / 1000.f));
+                    transIt->position += (gsl::vec3(0, -1, 0) * deltaTime);
                 }
 
                 if(keys[Qt::Key_E] == true)
                 {
-                    transIt->position += (gsl::vec3(0, 1, 0) * (deltaTime / 1000.f));
+                    transIt->position += (gsl::vec3(0, 1, 0) * deltaTime);
                 }
 
                 auto mouseOffset = InputHandler::MouseOffset;
 
-                float deltaX = mouseOffset.x() * 5 * deltaTime / 1000;
-                float deltaY = mouseOffset.y() * 5 * deltaTime / 1000;
+                float deltaX = mouseOffset.x() * 5 * deltaTime;
+                float deltaY = mouseOffset.y() * 5 * deltaTime;
 
                 auto& rot = transIt->rotation;
                 rot.x += deltaY;

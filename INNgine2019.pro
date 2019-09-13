@@ -46,6 +46,7 @@ HEADERS += \
     Renderables/skybox.h \
     Renderables/octahedronball.h \
     Renderables/trianglesurface.h \
+    physicssystem.h \
     renderer.h \
     resourcemanager.h \
     scene.h \
@@ -84,6 +85,7 @@ SOURCES += \
     Renderables/objmesh.cpp \
     Renderables/skybox.cpp \
     Renderables/triangle.cpp \
+    physicssystem.cpp \
     renderer.cpp \
     resourcemanager.cpp \
     scene.cpp \

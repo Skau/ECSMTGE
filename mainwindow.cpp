@@ -54,7 +54,7 @@ void MainWindow::showFPS(float deltaTime, float frameCounter)
 {
     statusBar()->showMessage(" Time pr FrameDraw: "
                              + QString::number(static_cast<double>(deltaTime), 'g', 4)
-                             + " ms  |  " + "FPS: "
+                             + " s  |  " + "FPS: "
                              + QString::number(static_cast<double>(frameCounter), 'g', 4));
 }
 

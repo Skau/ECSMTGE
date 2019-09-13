@@ -98,9 +98,12 @@ gsl::Vector3D CameraSystem::forward() const
     return mForward;
 }
 
-void CameraSystem::updateCameras(const std::vector<TransformComponent>& transforms, std::vector<CameraComponent>& cameras)
+std::vector<unsigned int> CameraSystem::updateCameras(std::vector<TransformComponent> transforms, std::vector<CameraComponent>& cameras)
 {
-    auto transIt = transforms.begin();
+    std::vector<unsigned int> usedTransforms{};
+    usedTransforms.reserve(cameras.size());
+
+    unsigned int transIt{0};
     auto camIt = cameras.begin();
 
     bool transformShortest = transforms.size() < cameras.size();
@@ -112,7 +115,7 @@ void CameraSystem::updateCameras(const std::vector<TransformComponent>& transfor
     {
         if (transformShortest)
         {
-            if (transIt == transforms.end())
+            if (transIt == transforms.size())
                 break;
         }
         else
@@ -122,11 +125,11 @@ void CameraSystem::updateCameras(const std::vector<TransformComponent>& transfor
         }
 
         // Increment lowest index
-        if (!transIt->valid || transIt->entityId < camIt->entityId)
+        if (!transforms[transIt].valid || transforms[transIt].entityId < camIt->entityId)
         {
             ++transIt;
         }
-        else if (!camIt->valid || camIt->entityId < transIt->entityId)
+        else if (!camIt->valid || camIt->entityId < transforms[transIt].entityId)
         {
             ++camIt;
         }
@@ -134,7 +137,7 @@ void CameraSystem::updateCameras(const std::vector<TransformComponent>& transfor
         {
             // If transform isn't updated,
             // matrices doesn't need to be updated
-            if(!transIt->updated)
+            if(!transforms[transIt].updated)
             {
                 // Increment all
                 ++transIt;
@@ -143,7 +146,7 @@ void CameraSystem::updateCameras(const std::vector<TransformComponent>& transfor
             }
 
             // Transforms rotation around x axis is pitch and rotation about y axis is yaw
-            auto rot = transIt->rotation;
+            auto rot = transforms[transIt].rotation;
             gsl::vec3 lookAtPoint{
                 std::cos(gsl::deg2radf(rot.x)) * std::cos(gsl::deg2radf(rot.y)) * 1.f,
                 std::sin(gsl::deg2radf(rot.x))                                  * 1.f,
@@ -151,16 +154,18 @@ void CameraSystem::updateCameras(const std::vector<TransformComponent>& transfor
             };
 
             // If transform is updated, viewMatrix needs to be updated
-            camIt->viewMatrix = gsl::mat4::viewMatrix(transIt->position, transIt->position + lookAtPoint, gsl::vec3{0.f, 1.f, 0.f});
+            camIt->viewMatrix = gsl::mat4::viewMatrix(transforms[transIt].position, transforms[transIt].position + lookAtPoint, gsl::vec3{0.f, 1.f, 0.f});
 //            camIt->viewMatrix.setToIdentity();
 //            camIt->viewMatrix.setLookAt(transIt->position, transIt->position + lookAtPoint, gsl::vec3{0.f, 1.f, 0.f});
 
+            usedTransforms.push_back(transIt);
 
             // Increment all
             ++transIt;
             ++camIt;
         }
     }
+    return usedTransforms;
 }
 
 void CameraSystem::updateCameras(std::vector<CameraComponent>& cameras, const gsl::mat4 &projectionMatrix)

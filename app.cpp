@@ -85,7 +85,7 @@ void App::update()
     // Set all used transforms's "updated" to false so that updateCameras
     // won't need to calculate more viewmatrixes than it needs to.
     for (auto index : usedTrans)
-        transforms[index] = false;
+        transforms[index].updated = false;
 
     for (const auto& camera : cameras) {
         mRenderer->render(renders, transforms, camera);

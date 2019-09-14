@@ -78,6 +78,16 @@ namespace gsl
         return {x * rhs, y * rhs, z * rhs};
     }
 
+    Vector3D operator*(GLfloat f, const Vector3D &rhs)
+    {
+        return {f * rhs.x, f * rhs.y, f * rhs.z};
+    }
+
+    GLfloat Vector3D::operator*(const Vector3D &rhs) const
+    {
+        return dot(*this, rhs);
+    }
+
 
     Vector3D Vector3D::operator^(const Vector3D &rhs) const
         {

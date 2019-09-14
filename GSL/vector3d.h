@@ -20,14 +20,16 @@ public:
     Vector3D(const double v);
 
     //Operators
-    const Vector3D& operator=(const Vector3D &rhs);     // v = v
-    Vector3D operator+(const Vector3D &rhs) const;      // v + v
-    Vector3D operator-(const Vector3D &rhs) const;      // v - v
-    Vector3D& operator+=(const Vector3D &rhs);          // v += v
-    Vector3D& operator-=(const Vector3D &rhs);          // v -= v
-    Vector3D operator-() const;                     // -v
-    Vector3D operator*(GLfloat rhs) const;          // v * f
-    Vector3D operator^(const Vector3D& rhs) const; // v x v  - cross product
+    const Vector3D& operator= (const Vector3D &rhs);     // v = v
+    Vector3D operator+ (const Vector3D &rhs) const;      // v + v
+    Vector3D operator- (const Vector3D &rhs) const;      // v - v
+    Vector3D& operator+= (const Vector3D &rhs);          // v += v
+    Vector3D& operator-= (const Vector3D &rhs);          // v -= v
+    Vector3D operator- () const;                     // -v
+    Vector3D operator* (GLfloat rhs) const;          // v * f
+    friend Vector3D operator* (GLfloat f, const Vector3D &rhs); // f * v
+    GLfloat operator* (const Vector3D &rhs) const; // v * v - dot product
+    Vector3D operator^ (const Vector3D& rhs) const; // v x v  - cross product
 
     //Functions
     GLfloat length() const;

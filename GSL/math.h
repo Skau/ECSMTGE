@@ -10,6 +10,7 @@ namespace gsl
 // Typedefs
 #ifndef MATH_TYPEDEF
 #define MATH_TYPEDEF
+    typedef Quaternion quat;
     typedef Vector2D vec2;
     typedef Vector3D vec3;
     typedef Vector4D vec4;

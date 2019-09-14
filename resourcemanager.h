@@ -34,6 +34,11 @@ public:
 
     virtual ~ResourceManager();
 
+    /**
+     * @brief Iteratively goes through all folders in Assets/ and loads the files.
+     */
+    void LoadAssetFiles();
+
     void addShader(const std::string& name, std::shared_ptr<Shader> shader);
     std::shared_ptr<Shader> getShader(const std::string& name);
 

@@ -1,5 +1,7 @@
 #include "resourcemanager.h"
 #include "innpch.h"
+#include <QDirIterator>
+#include "constants.h"
 #include "wavfilehandler.h"
 #include <QDebug>
 #include "openalmanager.h"
@@ -8,6 +10,34 @@
 ResourceManager::~ResourceManager()
 {
 
+}
+
+void ResourceManager::LoadAssetFiles()
+{
+    QDirIterator dirIt(QString::fromStdString(gsl::assetFilePath), QDirIterator::Subdirectories);
+    while (dirIt.hasNext())
+    {
+        dirIt.next();
+        if (QFileInfo(dirIt.filePath()).isFile())
+        {
+            auto fileInfo = QFileInfo(dirIt.filePath());
+            auto baseName = fileInfo.baseName().toStdString();
+            auto fileName = fileInfo.fileName().toStdString();
+            if (fileInfo.suffix() == "txt" || fileInfo.suffix() == "obj")
+            {
+                auto mesh = addMesh(baseName, fileName);
+                mesh->mMaterial.mShader = getShader("plain");
+            }
+            else if(fileInfo.suffix() == "bmp")
+            {
+                addTexture(baseName, fileName);
+            }
+            else if(fileInfo.suffix() == "wav")
+            {
+                loadWav(baseName, fileName);
+            }
+        }
+    }
 }
 
 void ResourceManager::addShader(const std::string &name, std::shared_ptr<Shader> shader)

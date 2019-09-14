@@ -32,6 +32,10 @@ App::App()
 // Slot called from Renderer when its done with initialization
 void App::initTheRest()
 {
+    mOpenALManager = std::make_unique<OpenALManager>();
+
+    mSoundListener = std::make_unique<SoundListener>();
+
     mWorld = std::make_unique<World>();
 
     mMainWindow->setEntityManager(mWorld->getEntityManager());
@@ -58,7 +62,6 @@ void App::update()
     // Time since last frame in seconds
     mDeltaTime = mDeltaTimer.restart() / 1000.f;
 
-
     calculateFrames();
 
     // Input:
@@ -67,6 +70,17 @@ void App::update()
 
     mEventHandler->updateMouse();
     InputSystem::HandleInput(mDeltaTime, inputs, transforms);
+
+    auto& cameras = mWorld->getEntityManager()->getCameraComponents();
+
+    // Sound listener is using the active camera view matrix (for directions) and transform (for position)
+    for (const auto& camera : cameras)
+    {
+        if(camera.isCurrentActive)
+        {
+            mSoundListener->update(camera, *mWorld->getEntityManager()->getComponent<TransformComponent>(camera.entityId));
+        }
+    }
 
     // Physics:
     /* Note: Physics calculation should be happening on a separate thread
@@ -79,7 +93,7 @@ void App::update()
 
     // Rendering:
     const auto& renders = mWorld->getEntityManager()->getMeshComponents();
-    auto& cameras = mWorld->getEntityManager()->getCameraComponents();
+
 
     auto usedTrans = CameraSystem::updateCameras(transforms, cameras);
     // Set all used transforms's "updated" to false so that updateCameras
@@ -87,8 +101,14 @@ void App::update()
     for (auto index : usedTrans)
         transforms[index].updated = false;
 
-    for (const auto& camera : cameras) {
-        mRenderer->render(renders, transforms, camera);
+
+    for (const auto& camera : cameras)
+    {
+        if(camera.isCurrentActive)
+        {
+            mRenderer->render(renders, transforms, camera);
+            break;
+        }
     }
 
     currentlyUpdating = false;

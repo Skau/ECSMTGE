@@ -3,6 +3,7 @@
 
 #include "innpch.h"
 #include "meshdata.h"
+#include "soundsource.h"
 
 // Something like this?
 
@@ -88,16 +89,17 @@ struct MeshComponent : public Component
 
 struct CameraComponent : public Component
 {
+    bool isCurrentActive;
     GLuint framebufferTarget;
     gsl::Matrix4x4 viewMatrix;
     gsl::Matrix4x4 projectionMatrix;
 
 
     CameraComponent(unsigned int _eID = 0, bool _valid = false,
-           GLuint fbTarget = 0, const gsl::mat4& vMat = gsl::mat4{},
+           bool currentActive = true, GLuint fbTarget = 0, const gsl::mat4& vMat = gsl::mat4{},
            const gsl::mat4& pMat = gsl::mat4{})
-        : Component (_eID, _valid), framebufferTarget{fbTarget},
-          viewMatrix{vMat}, projectionMatrix{pMat}
+        : Component (_eID, _valid), isCurrentActive{currentActive},
+          framebufferTarget{fbTarget}, viewMatrix{vMat}, projectionMatrix{pMat}
     {}
 };
 
@@ -108,6 +110,11 @@ struct InputComponent : public Component
     InputComponent(unsigned int _eID = 0, bool _valid = false)
         : Component(_eID, _valid, ComponentType::Input)
     {}
+};
+
+struct SoundComponent : public Component
+{
+    SoundSource sound;
 };
 
 // .. etc

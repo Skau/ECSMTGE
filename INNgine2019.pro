@@ -8,6 +8,16 @@ TARGET      = INNgine2019
 PRECOMPILED_HEADER = innpch.h
 
 INCLUDEPATH +=  ./GSL
+INCLUDEPATH += ./include
+
+mac {
+    LIBS += -framework OpenAL
+}
+
+win32 {
+    INCLUDEPATH += $(OPENAL_HOME)\\include\\AL
+    LIBS *= $(OPENAL_HOME)\\libs\\Win64\\libOpenAL32.dll.a
+}
 
 HEADERS += \
     GSL/math.h \
@@ -46,11 +56,15 @@ HEADERS += \
     Renderables/skybox.h \
     Renderables/octahedronball.h \
     Renderables/trianglesurface.h \
+    openalmanager.h \
     physicssystem.h \
     renderer.h \
     resourcemanager.h \
     scene.h \
+    soundlistener.h \
+    soundsource.h \
     texture.h \
+    wavfilehandler.h \
     world.h \
     meshdata.h
 
@@ -85,11 +99,15 @@ SOURCES += \
     Renderables/objmesh.cpp \
     Renderables/skybox.cpp \
     Renderables/triangle.cpp \
+    openalmanager.cpp \
     physicssystem.cpp \
     renderer.cpp \
     resourcemanager.cpp \
     scene.cpp \
+    soundlistener.cpp \
+    soundsource.cpp \
     texture.cpp \
+    wavfilehandler.cpp \
     world.cpp
 
 

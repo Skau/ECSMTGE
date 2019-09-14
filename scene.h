@@ -4,6 +4,7 @@
 #include "resourcemanager.h"
 #include "world.h"
 #include "entitymanager.h"
+#include "soundsource.h"
 
 class Scene : public QObject
 {
@@ -61,6 +62,9 @@ public:
         auto [axisTrans, axisMesh] = entityManager->addComponent<TransformComponent, MeshComponent>(entityManager->createEntity("axis"));
         axisMesh.meshData = *ResourceManager::instance()->getMesh("axis");
         axisMesh.isVisible = true;
+
+        auto laserSound = ResourceManager::instance()->createSource("laser", true);
+        laserSound->play();
     }
 };
 

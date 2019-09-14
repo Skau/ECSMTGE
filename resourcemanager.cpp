@@ -1,6 +1,9 @@
 #include "resourcemanager.h"
 #include "innpch.h"
+#include "wavfilehandler.h"
 #include <QDebug>
+#include "openalmanager.h"
+#include "soundsource.h"
 
 ResourceManager::~ResourceManager()
 {
@@ -28,7 +31,7 @@ std::shared_ptr<Shader> ResourceManager::getShader(const std::string &name)
     return nullptr;
 }
 
-void ResourceManager::loadTexture(const std::string &name, const std::string &path)
+void ResourceManager::addTexture(const std::string &name, const std::string &path)
 {
     if(mTextures.find(name) == mTextures.end())
     {
@@ -134,6 +137,29 @@ std::shared_ptr<MeshData> ResourceManager::getMesh(const std::string& name)
     return nullptr;
 }
 
+void ResourceManager::loadWav(const std::string& name, const std::string& path)
+{
+    auto waveData = new wave_t();
+    if (!WavFileHandler::loadWave(path, waveData))
+    {
+        qDebug() << "Error loading wave file " << QString::fromStdString(name) << "!";
+        return;
+    }
+
+    std::ostringstream i2s;
+    i2s << waveData->dataSize;
+    qDebug() << "DataSize: " << QString::fromStdString(i2s.str()) << " bytes";
+
+    if(!OpenALManager::checkOpenALError(alGetError()))
+    {
+        return;
+    }
+
+    mWavFiles[name] = waveData;
+
+    qDebug() << "Loaded " << QString::fromStdString(path);
+}
+
 std::vector<std::string> ResourceManager::getAllMeshNames()
 {
     std::vector<std::string> returnStrings;
@@ -168,6 +194,76 @@ std::vector<std::string> ResourceManager::getAllTextureNames()
     }
 
     return returnStrings;
+}
+
+SoundSource* ResourceManager::createSource(const std::string& wav, bool loop, float gain)
+{
+    if(mWavFiles.find(wav) != mWavFiles.end())
+    {
+        auto waveData = mWavFiles[wav];
+
+        ALuint frequency{};
+        ALenum format{};
+
+        frequency = waveData->sampleRate;
+
+        switch (waveData->bitsPerSample)
+        {
+        case 8:
+            switch (waveData->channels)
+            {
+            case 1:
+                format = AL_FORMAT_MONO8;
+                //qDebug() << "Format: 8bit Mono";
+                break;
+            case 2:
+                format = AL_FORMAT_STEREO8;
+                //qDebug() << "Format: 8bit Stereo";
+                break;
+            default: break;
+            }
+            break;
+        case 16:
+            switch (waveData->channels)
+            {
+            case 1:
+                format = AL_FORMAT_MONO16;
+               // qDebug() << "Format: 16bit Mono";
+                break;
+            case 2:
+                format = AL_FORMAT_STEREO16;
+                //qDebug() << "Format: 16bit Stereo";
+                break;
+            default: break;
+            }
+            break;
+        default: break;
+        }
+
+        if (waveData->buffer == nullptr)
+        {
+            qDebug() << "Error: No wave data!";
+        }
+
+        if(!OpenALManager::checkOpenALError(alGetError()))
+        {
+            return nullptr;
+        }
+
+        auto sound = new SoundSource(wav, loop, gain);
+        alBufferData(sound->mBuffer, format, waveData->buffer, static_cast<ALsizei>(waveData->dataSize), static_cast<ALsizei>(frequency));
+        alSourcei(sound->mSource, AL_BUFFER, static_cast<ALint>(sound->mBuffer));
+
+        if(!OpenALManager::checkOpenALError(alGetError()))
+        {
+            return nullptr;
+        }
+
+        return sound;
+    }
+
+    qDebug() << "Could not find " << QString::fromStdString(wav);
+    return nullptr;
 }
 
 std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readObjFile(std::string filename)

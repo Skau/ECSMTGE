@@ -11,6 +11,9 @@
 #include "renderer.h"
 #include "world.h"
 
+#include "openalmanager.h"
+#include "soundlistener.h"
+
 class InputHandler;
 class InputSystem;
 
@@ -48,6 +51,9 @@ private:
 
     Renderer* mRenderer;
     InputSystem* mInputSystem;
+
+    std::unique_ptr<OpenALManager> mOpenALManager;
+    std::unique_ptr<SoundListener> mSoundListener;
 
     // Handles input events in Renderer
     std::shared_ptr<InputHandler> mEventHandler;

@@ -11,12 +11,14 @@ World::World()
     ResourceManager::instance()->addShader("phong",     std::make_shared<Shader>("phongshader"));
     ResourceManager::instance()->addShader("axis",      std::make_shared<Shader>("axisshader.vert", "colorshader.frag"));
 
-    ResourceManager::instance()->loadTexture("white",   "white.bmp");
-    ResourceManager::instance()->loadTexture("hund",    "hund.bmp");
-    ResourceManager::instance()->loadTexture("skybox",  "skybox.bmp");
+    ResourceManager::instance()->addTexture("white",   "white.bmp");
+    ResourceManager::instance()->addTexture("hund",    "hund.bmp");
+    ResourceManager::instance()->addTexture("skybox",  "skybox.bmp");
 
     ResourceManager::instance()->addMesh("box2", "box2.txt");
     ResourceManager::instance()->addMesh("monkey", "monkey.obj");
+
+    ResourceManager::instance()->loadWav("laser", "laser.wav");
 
     if (auto mesh =  ResourceManager::instance()->getMesh("box2"))
     {

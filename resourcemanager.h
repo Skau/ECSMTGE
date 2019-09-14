@@ -11,6 +11,17 @@
 
 #include "meshdata.h"
 
+#ifdef _WIN32
+#include <al.h>
+#include <alc.h>
+#elif __APPLE__
+#include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+#endif
+
+#include "wavfilehandler.h"
+
+class SoundSource;
 
 class ResourceManager : protected QOpenGLFunctions_4_1_Core
 {
@@ -26,16 +37,19 @@ public:
     void addShader(const std::string& name, std::shared_ptr<Shader> shader);
     std::shared_ptr<Shader> getShader(const std::string& name);
 
-    void loadTexture(const std::string& name, const std::string& path);
+    void addTexture(const std::string& name, const std::string& path);
     int getTexture(const std::string& name);
 
     std::shared_ptr<MeshData> addMesh(const std::string& name, const std::string& path, GLenum renderType = GL_TRIANGLES);
     std::shared_ptr<MeshData> getMesh(const std::string& name);
 
+    void loadWav(const std::string& name, const std::string& path);
+
     std::vector<std::string> getAllMeshNames();
     std::vector<std::string> getAllShaderNames();
     std::vector<std::string> getAllTextureNames();
 
+    SoundSource* createSource(const std::string& wav, bool loop = false, float gain = 1.0);
 
 private:
     ResourceManager();
@@ -46,6 +60,7 @@ private:
     std::map<std::string, std::shared_ptr<Shader>> mShaders;
     std::map<std::string, std::shared_ptr<Texture>> mTextures;
     std::map<std::string, std::shared_ptr<MeshData>> mMeshes;
+    std::map<std::string, wave_t*> mWavFiles;
 
     bool mIsInitialized = false;
 };

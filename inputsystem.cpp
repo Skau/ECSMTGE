@@ -88,13 +88,13 @@ void InputSystem::HandleInput(float deltaTime, const std::vector<InputComponent>
                 float deltaY = mouseOffset.y() * 5 * deltaTime;
 
                 auto& rot = transIt->rotation;
-                rot.x += deltaY;
-                rot.y += deltaX;
+                rot.i += deltaY;
+                rot.j += deltaX;
 
-                if(rot.x > 89.0f)
-                    rot.x = 89.0f;
-                if(rot.x < -89.0f)
-                    rot.x = -89.0f;
+                if(rot.i > 89.0f)
+                    rot.i = 89.0f;
+                if(rot.i < -89.0f)
+                    rot.i = -89.0f;
 
                 transIt->updated = true;
             }

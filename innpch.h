@@ -17,6 +17,7 @@
 #include "matrix4x4.h"
 #include "matrix3x3.h"
 #include "matrix2x2.h"
+#include "quaternion.h"
 #include "vector4d.h"
 #include "vector3d.h"
 #include "vector2d.h"

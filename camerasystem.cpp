@@ -148,9 +148,9 @@ std::vector<unsigned int> CameraSystem::updateCameras(std::vector<TransformCompo
             // Transforms rotation around x axis is pitch and rotation about y axis is yaw
             auto rot = transforms[transIt].rotation;
             gsl::vec3 lookAtPoint{
-                std::cos(gsl::deg2radf(rot.x)) * std::cos(gsl::deg2radf(rot.y)) * 1.f,
-                std::sin(gsl::deg2radf(rot.x))                                  * 1.f,
-                std::cos(gsl::deg2radf(rot.x)) * std::sin(gsl::deg2radf(rot.y)) * 1.f
+                std::cos(gsl::deg2radf(rot.i)) * std::cos(gsl::deg2radf(rot.j)) * 1.f,
+                std::sin(gsl::deg2radf(rot.i))                                  * 1.f,
+                std::cos(gsl::deg2radf(rot.i)) * std::sin(gsl::deg2radf(rot.j)) * 1.f
             };
 
             // If transform is updated, viewMatrix needs to be updated

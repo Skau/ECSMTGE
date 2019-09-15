@@ -5,6 +5,7 @@
 
 #include "GSL/math.h"
 #include "GSL/vector3d.h"
+#include "GSL/quaternion.h"
 
 namespace Ui{
     class Transform;
@@ -18,15 +19,15 @@ public:
     explicit TransformWidget(MainWindow *mainWindow, QWidget* parent = nullptr);
 
     void setPosition(const gsl::vec3& pos);
-    void setRotation(const gsl::vec3& rot);
+    void setRotation(const gsl::quat& rot);
     void setScale(const gsl::vec3& scale);
 
     gsl::vec3 getPosition();
-    gsl::vec3 getRotation();
+    gsl::quat getRotation();
     gsl::vec3 getScale();
 
 public slots:
-    void update(const gsl::vec3& pos, const gsl::vec3& rot, const gsl::vec3& scale);
+    void update(const gsl::vec3& pos, const gsl::quat& rot, const gsl::vec3& scale);
 
 private slots:
     void on_spinBox_Position_X_valueChanged(double arg1);
@@ -40,6 +41,8 @@ private slots:
     void on_spinBox_Rotation_Y_valueChanged(double arg1);
 
     void on_spinBox_Rotation_Z_valueChanged(double arg1);
+
+    // void on_spinBox_Rotation_W_valueChanged(double arg1);
 
     void on_spinBox_Scale_X_valueChanged(double arg1);
 

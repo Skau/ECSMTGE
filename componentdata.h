@@ -48,16 +48,16 @@ struct TransformComponent : public Component
 {
     bool updated{true};
     gsl::Vector3D position{};
+    gsl::Quaternion rotation{};
     gsl::Vector3D scale{1,1,1};
-    gsl::Vector3D rotation{};
 
 
     TransformComponent(unsigned int _eID = 0, bool _valid = false,
-              const gsl::vec3& _pos = gsl::vec3{},
-              const gsl::vec3& _scale = gsl::vec3{1.f, 1.f, 1.f},
-              const gsl::vec3& _rot = gsl::vec3{})
+                    const gsl::vec3& _pos = gsl::vec3{},
+                    const gsl::vec3& _scale = gsl::vec3{1.f, 1.f, 1.f},
+                    const gsl::quat& _rot = gsl::quat{})
         : Component (_eID, _valid, ComponentType::Transform), updated{true}, position{_pos},
-          scale{_scale}, rotation{_rot}
+          rotation{_rot}, scale{_scale}
     {}
 };
 

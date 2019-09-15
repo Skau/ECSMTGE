@@ -1,6 +1,7 @@
 #include "vector4d.h"
 #include "vector3d.h"
 #include <cmath>
+#include <cassert>
 
 namespace gsl
 {
@@ -105,6 +106,29 @@ namespace gsl
     Vector4D Vector4D::operator*(GLfloat rhs) const
     {
         return {x * rhs, y * rhs, z * rhs, w * rhs};
+    }
+
+    GLfloat Vector4D::operator[](const int index) const
+    {
+        assert(index < 4 && index >= 0);
+        return *(&x + index);
+    }
+
+    GLfloat &Vector4D::operator[](const int index)
+    {
+        assert(index <4 && index >=0);
+
+        switch (index) {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return w;
+        }
+        return x;   //to silence compiler warnings
     }
 
 

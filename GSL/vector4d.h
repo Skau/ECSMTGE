@@ -4,7 +4,6 @@
 #include "gltypes.h"
 #include <cmath>
 #include <iostream>
-#include <cassert>
 
 namespace gsl
 {
@@ -35,28 +34,9 @@ public:
     Vector4D operator*(GLfloat rhs) const;          // v * f
     //Vec4 operator*(Matrix4x4 q) const;        // v * m
 
-    GLfloat& operator[](const int index)
-    {
-        assert(index <4 && index >=0);
+    GLfloat& operator[](const int index);
 
-        switch (index) {
-        case 0:
-            return x;
-        case 1:
-            return y;
-        case 2:
-            return z;
-        case 3:
-            return w;
-        }
-        return x;   //to silence compiler warnings
-    }
-
-    GLfloat operator[] (const int index) const
-    {
-        assert(index < 4 && index >= 0);
-        return *(&x + index);
-    }
+    GLfloat operator[] (const int index) const;
 
     //Functions:
     GLfloat length();

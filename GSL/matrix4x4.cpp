@@ -4,6 +4,7 @@
 #include "math.h"
 #include "matrix2x2.h"
 #include "matrix3x3.h"
+#include "quaternion.h"
 
 #include <cmath>
 #include <cstring> // For memcpy on linux
@@ -202,6 +203,20 @@ bool Matrix4x4::inverse()
     return true;
 }
 
+Matrix4x4 Matrix4x4::calcInverse()
+{
+    gsl::mat4 mat{*this};
+    mat.LU();
+    gsl::vec4 params[4];
+    for (unsigned int i{0}; i < 4; ++i) {
+        float v[4];
+        for (unsigned int j{0}; j < 4; ++j)
+            v[j] = (i == j) ? 1.f : 0.f;
+        params[i] = mat.solve({v[0], v[1], v[2], v[3]});
+    }
+    return gsl::mat4{{params[0], params[1], params[2], params[3]}};
+}
+
 void Matrix4x4::translateX(GLfloat x)
 {
     translate(x, 0.f, 0.f);
@@ -338,7 +353,85 @@ Matrix4x4 Matrix4x4::transposed() const
         data[0], data[4], data[8], data[12],
         data[1], data[5], data[9], data[13],
         data[2], data[6], data[10], data[14],
-        data[3], data[7], data[11], data[15]};
+                data[3], data[7], data[11], data[15]};
+}
+
+void Matrix4x4::pivot(unsigned int i)
+{
+    // Search for maximum in this column
+    float maxEl = std::abs(at(i, i));
+    unsigned int maxRow = i;
+    for (unsigned int k{i+1}; k < 4; k++) {
+        if (std::abs(at(i, k)) > maxEl) {
+            maxEl = std::abs(at(i, k));
+            maxRow = k;
+        }
+    }
+
+    // Swap maximum row with current row (column by column)
+    for (unsigned int k{0}; k < 4; k++) { // k needs to start at 0, cause I need to swap the entire row
+        std::swap(at(k, maxRow), at(k, i));
+    }
+    // Swap the augmented part of the matrix. (Actually swap the order, and use that to swap)
+    std::swap(pivotOrder[maxRow], pivotOrder[i]);
+}
+
+Matrix4x4 Matrix4x4::LU()
+{
+    // Make a copy of this
+    auto mat{*this};
+
+    // Reset from former pivoting
+    for (int i{0}; i < 4; i++)
+        mat.pivotOrder[i] = i;
+
+    for (unsigned int i{0}; i < 4; i++) {
+        mat.pivot(i);
+
+        // Make all rows below this one 0 in current column
+        for (unsigned int k{i + 1}; k < 4; k++) {
+            float c = mat.at(i, k) / mat.at(i, i);
+
+            if (c != c) { // NaN is the only number who is unequal to itself
+                c = 0;
+            }
+            for (unsigned int j{i}; j < 4; j++) {
+                if (j == i) {
+                    // at(j, k) = 0; // Set to zero manually to dodge precision errors.
+                    mat.at(j, k) = c; // Store c in here for efficiency!
+                } else {
+                    mat.at(j, k) -= c * mat.at(j, i);
+                }
+            }
+        }
+    }
+
+    return mat;
+}
+
+Vector4D Matrix4x4::solve(Vector4D b)
+{
+    // Gjør LU faktorisering og pivotering på b:
+    b = gsl::vec4{b[pivotOrder[0]], b[pivotOrder[1]], b[pivotOrder[2]], b[pivotOrder[3]]}; // Pivoting
+    for (unsigned int i{0}; i < 4; i++) {
+        for (unsigned int k{i + 1}; k < 4; k++) {
+            float c = at(i, k);
+            // NaN check
+            if (c != c) {
+                c = 0;
+            }
+            b[static_cast<int>(k)] -= c * b[static_cast<int>(i)];
+        }
+    }
+
+    gsl::vec4 x{b};
+    for (int i{4 - 1}; i >= 0; i--) {
+        // Innsettingsmetoden
+        for (int j{i + 1}; j < 4; j++)
+            x[i] -= (*this)(j, i) * x[j];
+        x[i] /= (*this)(i, i);
+    }
+    return x;
 }
 
 Matrix4x4& Matrix4x4::setOrtho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat nearPlane, GLfloat farPlane)
@@ -512,6 +605,42 @@ Matrix4x4 Matrix4x4::viewMatrix(const Vector3D &from, const Vector3D &to, const 
     return lookAtRotation(from, to, up_axis).transposed() * translation(-from);
 }
 
+Matrix4x4 Matrix4x4::modelMatrix(const vec3 &pos, const quat &rot, const vec3 &scale)
+{
+    return gsl::mat4::translation(pos) * rot.toMat() * gsl::mat4::scaling(scale);
+}
+
+std::vector<mat4> Matrix4x4::extractModelMatrix(mat4 model)
+{
+    // This should be safe to do as the order a model matrix is made is:
+    // M = T * R * S
+    // Which means that translation is on the left hand side and will only be
+    // multiplied by the 1 placed at the lower right end in the rotation matrix.
+    // Thanks affine rooms
+    gsl::mat4 T{1.f};
+    for (int i{0}; i < 3; ++i)
+        std::swap(T(i, 3), model(i, 3));
+
+    // Find scale before rotation because scale is multiplied column wise
+    // into all the rows of the rotation matrix.
+    // To extract the scale we just take the magnitude of each column vector
+    // Note: Non-uniform scaling might not make the rotation matrix correct
+    gsl::mat4 S{1.f};
+    for (int i{0}; i < 3; ++i)
+        S(i, i) = gsl::vec3{model(0, i), model(1, i), model(2, i)}.length();
+
+    // Divide remaining matrix by scale.
+    for (int x{0}; x < 3; ++x)
+        for (int y{0}; y < 3; ++y)
+            model(y, x) /= S(x, x);
+
+    // Lastly extract rotation matrix
+    // This should basically just be all that's left
+    gsl::mat4 R{model};
+
+    return std::vector<gsl::mat4>{T, S, R};
+}
+
 void Matrix4x4::setRotationToVector(const Vector3D &direction, Vector3D up)
 {
     Vector3D xaxis = Vector3D::cross(up, direction);
@@ -570,6 +699,17 @@ Matrix4x4 Matrix4x4::translation(const Vector3D &trans)
     };
 }
 
+Matrix4x4 Matrix4x4::scaling(const Vector3D &scale)
+{
+    return gsl::mat4
+    {
+        scale.x,    0.f,    0.f,    0.f,
+        0.f,    scale.y,    0.f,    0.f,
+        0.f,    0.f,    scale.z,    0.f,
+        0.f,    0.f,    0.f,    1.f,
+    };
+}
+
 Matrix2x2 Matrix4x4::toMatrix2()
 {
     return
@@ -589,6 +729,15 @@ Matrix3x3 Matrix4x4::toMatrix3() const
     };
 }
 
+GLfloat &Matrix4x4::at(unsigned int y, unsigned int x)
+{
+    return data[y * 4 + x];
+}
+
+GLfloat Matrix4x4::at(unsigned int y, unsigned int x) const
+{
+    return data[y * 4 + x];
+}
 
 GLfloat& Matrix4x4::operator()(const int &y, const int &x)
 {

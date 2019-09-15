@@ -157,20 +157,20 @@ void TransformWidget::on_spinBox_Rotation_Z_valueChanged(double arg1)
     }
 }
 
-//void TransformWidget::on_spinBox_Rotation_W_valueChanged(double arg1)
-//{
-//    auto entityData = mMainWindow->currentEntitySelected;
-//    if(entityData)
-//    {
-//        auto entityManager = mMainWindow->getEntityManager();
-//        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
-//        if(transform)
-//        {
-//            transform->rotation.s = static_cast<float>(arg1);
-//            transform->updated = true;
-//        }
-//    }
-//}
+void TransformWidget::on_spinBox_Rotation_W_valueChanged(double arg1)
+{
+    auto entityData = mMainWindow->currentEntitySelected;
+    if(entityData)
+    {
+        auto entityManager = mMainWindow->getEntityManager();
+        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
+        if(transform)
+        {
+            transform->rotation.s = static_cast<float>(arg1);
+            transform->updated = true;
+        }
+    }
+}
 
 void TransformWidget::on_spinBox_Scale_X_valueChanged(double arg1)
 {

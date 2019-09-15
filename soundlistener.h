@@ -15,6 +15,7 @@ public:
     void setPosition(const gsl::vec3& pos);
     void setVelocity(const gsl::vec3& vel);
     void setDirection(const gsl::vec3& dir, const gsl::vec3& up);
+    void setMute(bool mute);
 
     void update(const CameraComponent& camera, const TransformComponent& transform);
 

@@ -42,7 +42,7 @@ private slots:
 
     void on_spinBox_Rotation_Z_valueChanged(double arg1);
 
-    // void on_spinBox_Rotation_W_valueChanged(double arg1);
+    void on_spinBox_Rotation_W_valueChanged(double arg1);
 
     void on_spinBox_Scale_X_valueChanged(double arg1);
 

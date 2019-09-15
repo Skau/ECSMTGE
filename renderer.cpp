@@ -171,13 +171,14 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
                 }
 
 
-                gsl::mat4 matrix;
-                matrix.setToIdentity();
-                matrix.translate(transIt->position);
-                matrix.scale(transIt->scale);
+//                gsl::mat4 matrix;
+//                matrix.setToIdentity();
+//                matrix.translate(transIt->position);
+//                matrix.scale(transIt->scale);
 
+                auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
 
-                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, matrix.constData());
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
 

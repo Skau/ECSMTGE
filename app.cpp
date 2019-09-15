@@ -35,6 +35,7 @@ void App::initTheRest()
     mOpenALManager = std::make_unique<OpenALManager>();
 
     mSoundListener = std::make_unique<SoundListener>();
+    connect(mMainWindow->ui->actionToggle_shutup, &QAction::toggled, this, &App::toggleMute);
 
     mWorld = std::make_unique<World>();
 
@@ -48,6 +49,12 @@ void App::initTheRest()
 
     mDeltaTimer.start();
     mFPSTimer.start();
+}
+
+void App::toggleMute(bool mode)
+{
+    if (mSoundListener)
+        mSoundListener->setMute(mode);
 }
 
 

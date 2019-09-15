@@ -37,6 +37,7 @@ signals:
 
 public slots:
     void initTheRest();
+    void toggleMute(bool mode);
 
 private slots:
     void update();

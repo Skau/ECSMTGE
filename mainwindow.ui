@@ -492,6 +492,7 @@
      <string>Fun stuff</string>
     </property>
     <addaction name="actionToggle_wireframe"/>
+    <addaction name="actionToggle_shutup"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -554,6 +555,14 @@
   <action name="actionEmpty_Object">
    <property name="text">
     <string>Empty</string>
+   </property>
+  </action>
+  <action name="actionToggle_shutup">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Shut up!</string>
    </property>
   </action>
  </widget>

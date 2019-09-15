@@ -56,6 +56,11 @@ void SoundListener::setDirection(const gsl::vec3& dir, const gsl::vec3& up)
     alListenerfv(AL_ORIENTATION, head);
 }
 
+void SoundListener::setMute(bool mute)
+{
+    alListenerf(AL_GAIN, mute ? 0.f : 1.f);
+}
+
 void SoundListener::update(const CameraComponent& camera, const TransformComponent& transform)
 {
     setPosition(transform.position);

@@ -3,6 +3,7 @@
 #include "math.h"
 #include <cmath>
 #include <QVector3D>
+#include "quaternion.h"
 
 namespace gsl
 {
@@ -175,6 +176,24 @@ namespace gsl
         x = dir.getX();
         y = dir.getY();
         z = dir.getZ();
+    }
+
+    Quaternion Vector3D::toQuat() const
+    {
+        // Abbreviations for the various angular functions
+        double cy = cos(static_cast<double>(z) * 0.5);
+        double sy = sin(static_cast<double>(z) * 0.5);
+        double cp = cos(static_cast<double>(y) * 0.5);
+        double sp = sin(static_cast<double>(y) * 0.5);
+        double cr = cos(static_cast<double>(x) * 0.5);
+        double sr = sin(static_cast<double>(x) * 0.5);
+
+        return gsl::quat{
+            static_cast<float>(cy * cp * cr + sy * sp * sr),
+            static_cast<float>(cy * cp * sr - sy * sp * cr),
+            static_cast<float>(sy * cp * sr + cy * sp * cr),
+            static_cast<float>(sy * cp * cr - cy * sp * sr)
+        };
     }
 
     GLfloat *Vector3D::xP()

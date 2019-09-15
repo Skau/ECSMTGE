@@ -2,6 +2,7 @@
 #define VECTOR3D_H
 
 #include "gltypes.h"
+#include "mathfwd.h"
 #include <cmath>
 #include <iostream>
 #include <QDebug>
@@ -41,6 +42,8 @@ public:
     void rotateX(GLfloat angle);
     void rotateY(GLfloat angle);
     void rotateZ(GLfloat angle);
+
+    Quaternion toQuat() const;
 
     //Getters and setters
     GLfloat getX() const;

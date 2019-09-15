@@ -162,7 +162,8 @@ void MainWindow::updateComponentArea(unsigned int entityID)
 
 
                 // Set up transform widget here
-                widget->update(transform->position, transform->rotation, transform->scale);
+                // (We send in the rotations as euler angles so that they are easy to work with in the editor)
+                widget->update(transform->position, transform->rotation.toEuler(), transform->scale);
 
 
                 layout->addWidget(widget);

@@ -101,6 +101,15 @@ public:
      * rotating with the quaternion
      */
     gsl::mat4 toMat() const;
+    /** Converts the quaternion to normal
+     * euler angles.
+     * Angles is specified in radians
+     * @see https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Quaternion_to_Euler_Angles_Conversion
+     * @brief Convert to euler angles
+     * @return vec3 corresponding to angles rotation around
+     * x-axis, y-axis and z-axis.
+     */
+    gsl::vec3 toEuler() const;
     /// The conjugate of the quaternion
     gsl::quat conj() const;
     /** Returns the squared magnitude of the

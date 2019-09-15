@@ -121,6 +121,15 @@ gsl::mat4 gsl::Quaternion::toMat() const
     };
 }
 
+gsl::vec3 gsl::Quaternion::toEuler() const
+{
+    return gsl::vec3{
+        std::atan2(2.f * (s * i + j + k), 1.f - 2.f * (i * i + j * j)),
+        std::asin(2.f * (s * j - k * i)),
+        std::atan2(2.f * (s * k + i * j), 1.f - 2.f * (j * j + k * k))
+    };
+}
+
 gsl::quat gsl::Quaternion::conj() const
 {
     return gsl::quat{s, -i, -j, -k};

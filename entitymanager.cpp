@@ -76,3 +76,21 @@ void EntityManager::setTransformScale(unsigned int eID, const gsl::vec3 &scale)
             setTransformScale(*it, scale);
     }
 }
+
+gsl::vec3 EntityManager::getTransformPos(unsigned int eID)
+{
+    auto comp = getComponent<TransformComponent>(eID);
+    return (comp != nullptr) ? comp->position : gsl::vec3{};
+}
+
+gsl::quat EntityManager::getTransformRot(unsigned int eID)
+{
+    auto comp = getComponent<TransformComponent>(eID);
+    return (comp != nullptr) ? comp->rotation : gsl::quat{};
+}
+
+gsl::vec3 EntityManager::getTransformScale(unsigned int eID)
+{
+    auto comp = getComponent<TransformComponent>(eID);
+    return (comp != nullptr) ? comp->scale : gsl::vec3{};
+}

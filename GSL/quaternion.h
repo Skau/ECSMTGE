@@ -35,7 +35,7 @@ public:
     // Another way to visualize quaternions
     struct Pair
     {
-        Pair(GLfloat scalar = 0.f, const gsl::vec3& vector = gsl::vec3{0.f, 0.f, 0.f});
+        Pair(GLfloat scalar = 1.f, const gsl::vec3& vector = gsl::vec3{0.f, 0.f, 0.f});
 
         GLfloat s;
         gsl::vec3 v;
@@ -82,7 +82,7 @@ public:
      * @param axis - The axis to rotate around
      * @brief Create rotation quaternion
      */
-    gsl::quat rot(GLfloat angle, const gsl::vec3& axis) const;
+    static gsl::quat rot(GLfloat angle, const gsl::vec3& axis);
     /** Uses a quaternion to rotate a point
      * Performs the operation:
      * P' = q * P * q^-1

@@ -127,9 +127,9 @@ gsl::quat &gsl::Quaternion::operator*=(GLfloat scalar)
     return *this = *this * scalar;
 }
 
-gsl::quat gsl::Quaternion::rot(GLfloat angle, const gsl::vec3 &axis) const
+gsl::quat gsl::Quaternion::rot(GLfloat angle, const gsl::vec3 &axis)
 {
-    return gsl::quat{std::cos(angle) / 2, axis * (std::sin(angle) / 2)};
+    return gsl::quat{std::cos(angle) / 2.f, axis * (std::sin(angle) / 2.f)};
 }
 
 gsl::vec3 gsl::Quaternion::rotatePoint(const gsl::vec3 &p, const gsl::quat &rot)

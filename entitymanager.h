@@ -410,6 +410,10 @@ public:
     void setTransformPos(unsigned int eID, const gsl::vec3& pos);
     void setTransformRot(unsigned int eID, const gsl::quat& rot);
     void setTransformScale(unsigned int eID, const gsl::vec3& scale);
+
+    gsl::vec3 getTransformPos(unsigned int eID);
+    gsl::quat getTransformRot(unsigned int eID);
+    gsl::vec3 getTransformScale(unsigned int eID);
 };
 
 #endif // COMPONENTMANAGER_H

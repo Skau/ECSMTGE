@@ -71,12 +71,8 @@ void TransformWidget::on_spinBox_Position_X_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
-        if(transform)
-        {
-            transform->position = gsl::vec3(static_cast<float>(arg1), transform->position.y, transform->position.z);
-            transform->updated = true;
-        }
+        auto oldPos = entityManager->getComponent<TransformComponent>(entityData->entityId)->position;
+        entityManager->setTransformPos(entityData->entityId, gsl::vec3(static_cast<float>(arg1), oldPos.y, oldPos.z));
     }
 }
 
@@ -86,12 +82,8 @@ void TransformWidget::on_spinBox_Position_Y_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
-        if(transform)
-        {
-            transform->position = gsl::vec3(transform->position.x, static_cast<float>(arg1), transform->position.z);
-            transform->updated = true;
-        }
+        auto oldPos = entityManager->getComponent<TransformComponent>(entityData->entityId)->position;
+        entityManager->setTransformPos(entityData->entityId, gsl::vec3(oldPos.x, static_cast<float>(arg1), oldPos.z));
     }
 }
 
@@ -101,12 +93,9 @@ void TransformWidget::on_spinBox_Position_Z_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
-        if(transform)
-        {
-            transform->position = gsl::vec3(transform->position.x, transform->position.y, static_cast<float>(arg1));
-            transform->updated = true;
-        }
+        auto oldPos = entityManager->getComponent<TransformComponent>(entityData->entityId)->position;
+        entityManager->setTransformPos(entityData->entityId,
+            gsl::vec3(oldPos.x, static_cast<float>(arg1), oldPos.z));
     }
 }
 
@@ -116,13 +105,9 @@ void TransformWidget::on_spinBox_Rotation_X_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
-        if(transform)
-        {
-            auto oldRot = transform->rotation.toEuler();
-            transform->rotation = gsl::vec3{static_cast<float>(arg1), oldRot.y, oldRot.z}.toQuat();
-            transform->updated = true;
-        }
+        auto oldRot = entityManager->getComponent<TransformComponent>(entityData->entityId)->rotation.toEuler();
+        entityManager->setTransformRot(entityData->entityId,
+            gsl::vec3{static_cast<float>(arg1), oldRot.y, oldRot.z}.toQuat());
     }
 }
 
@@ -132,13 +117,9 @@ void TransformWidget::on_spinBox_Rotation_Y_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
-        if(transform)
-        {
-            auto oldRot = transform->rotation.toEuler();
-            transform->rotation = gsl::vec3{oldRot.x, static_cast<float>(arg1), oldRot.z}.toQuat();
-            transform->updated = true;
-        }
+        auto oldRot = entityManager->getComponent<TransformComponent>(entityData->entityId)->rotation.toEuler();
+        entityManager->setTransformRot(entityData->entityId,
+            gsl::vec3{oldRot.x, static_cast<float>(arg1), oldRot.z}.toQuat());
     }
 }
 
@@ -148,13 +129,9 @@ void TransformWidget::on_spinBox_Rotation_Z_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
-        if(transform)
-        {
-            auto oldRot = transform->rotation.toEuler();
-            transform->rotation = gsl::vec3{oldRot.x, oldRot.y, static_cast<float>(arg1)}.toQuat();
-            transform->updated = true;
-        }
+        auto oldRot = entityManager->getComponent<TransformComponent>(entityData->entityId)->rotation.toEuler();
+        entityManager->setTransformRot(entityData->entityId,
+            gsl::vec3{oldRot.x, oldRot.y, static_cast<float>(arg1)}.toQuat());
     }
 }
 
@@ -164,12 +141,9 @@ void TransformWidget::on_spinBox_Scale_X_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
-        if(transform)
-        {
-            transform->scale = gsl::vec3(static_cast<float>(arg1), transform->scale.y, transform->scale.z);
-            transform->updated = true;
-        }
+        auto oldScale = entityManager->getComponent<TransformComponent>(entityData->entityId)->scale;
+        entityManager->setTransformScale(entityData->entityId,
+            gsl::vec3{static_cast<float>(arg1), oldScale.y, oldScale.z});
     }
 }
 
@@ -179,12 +153,9 @@ void TransformWidget::on_spinBox_Scale_Y_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
-        if(transform)
-        {
-            transform->scale = gsl::vec3(transform->scale.x, static_cast<float>(arg1), transform->scale.z);
-            transform->updated = true;
-        }
+        auto oldScale = entityManager->getComponent<TransformComponent>(entityData->entityId)->scale;
+        entityManager->setTransformScale(entityData->entityId,
+            gsl::vec3{oldScale.x, static_cast<float>(arg1), oldScale.z});
     }
 }
 
@@ -194,12 +165,9 @@ void TransformWidget::on_spinBox_Scale_Z_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = mMainWindow->getEntityManager();
-        auto transform = entityManager->getComponent<TransformComponent>(entityData->entityId);
-        if(transform)
-        {
-            transform->scale = gsl::vec3(transform->scale.x, transform->scale.y, static_cast<float>(arg1));
-            transform->updated = true;
-        }
+        auto oldScale = entityManager->getComponent<TransformComponent>(entityData->entityId)->scale;
+        entityManager->setTransformScale(entityData->entityId,
+            gsl::vec3{oldScale.x, oldScale.y, static_cast<float>(arg1)});
     }
 }
 

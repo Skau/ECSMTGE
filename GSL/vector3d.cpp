@@ -180,20 +180,23 @@ namespace gsl
 
     Quaternion Vector3D::toQuat() const
     {
-        // Abbreviations for the various angular functions
-        double cy = cos(static_cast<double>(z) * 0.5);
-        double sy = sin(static_cast<double>(z) * 0.5);
-        double cp = cos(static_cast<double>(y) * 0.5);
-        double sp = sin(static_cast<double>(y) * 0.5);
-        double cr = cos(static_cast<double>(x) * 0.5);
-        double sr = sin(static_cast<double>(x) * 0.5);
+//        // Abbreviations for the various angular functions
+//        double cy = cos(static_cast<double>(z) * 0.5);
+//        double sy = sin(static_cast<double>(z) * 0.5);
+//        double cp = cos(static_cast<double>(y) * 0.5);
+//        double sp = sin(static_cast<double>(y) * 0.5);
+//        double cr = cos(static_cast<double>(x) * 0.5);
+//        double sr = sin(static_cast<double>(x) * 0.5);
 
-        return gsl::quat{
-            static_cast<float>(cy * cp * cr + sy * sp * sr),
-            static_cast<float>(cy * cp * sr - sy * sp * cr),
-            static_cast<float>(sy * cp * sr + cy * sp * cr),
-            static_cast<float>(sy * cp * cr - cy * sp * sr)
-        };
+//        return gsl::quat{
+//            static_cast<float>(cy * cp * cr + sy * sp * sr),
+//            static_cast<float>(cy * cp * sr - sy * sp * cr),
+//            static_cast<float>(sy * cp * sr + cy * sp * cr),
+//            static_cast<float>(sy * cp * cr - cy * sp * sr)
+//        };
+        return gsl::quat::rot(z, gsl::vec3{0.f, 0.f, 1.f})
+                * gsl::quat::rot(y, gsl::vec3{0.f, 1.f, 0.f})
+                * gsl::quat::rot(x, gsl::vec3{1.f, 0.f, 0.f});
     }
 
     GLfloat *Vector3D::xP()

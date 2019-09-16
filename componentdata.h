@@ -64,10 +64,10 @@ struct TransformComponent : public Component
 
     void addPosition(const gsl::vec3& pos);
     void addRotation(const gsl::quat& rot);
-    void addScale(const gsl::vec3& scale);
+    void addScale(const gsl::vec3& scl);
     void setPosition(const gsl::vec3& pos);
     void setRotation(const gsl::quat& rot);
-    void setScale(const gsl::vec3& scale);
+    void setScale(const gsl::vec3& scl);
 };
 
 

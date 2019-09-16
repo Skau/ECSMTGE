@@ -49,15 +49,26 @@ public:
 
 
     // Mathematical operations
-    gsl::quat operator+(const gsl::quat& quat) const;
-    gsl::quat operator+(GLfloat scalar) const;
-    friend gsl::quat operator+(GLfloat scalar, const gsl::quat& quat);
-    gsl::quat operator-(const gsl::quat& quat) const;
-    gsl::quat operator-(GLfloat scalar) const;
-    friend gsl::quat operator-(GLfloat scalar, const gsl::quat& quat);
-    gsl::quat operator*(const gsl::quat& quat) const;
-    gsl::quat operator*(GLfloat scalar) const;
-    friend gsl::quat operator*(GLfloat scalar, const gsl::quat& quat);
+    gsl::quat operator+ (const gsl::quat& quat) const;
+    gsl::quat operator+ (GLfloat scalar) const;
+    friend gsl::quat operator+ (GLfloat scalar, const gsl::quat& quat);
+
+    gsl::quat operator- (const gsl::quat& quat) const;
+    gsl::quat operator- (GLfloat scalar) const;
+    friend gsl::quat operator- (GLfloat scalar, const gsl::quat& quat);
+
+    gsl::quat operator* (const gsl::quat& quat) const;
+    gsl::quat operator* (GLfloat scalar) const;
+    friend gsl::quat operator* (GLfloat scalar, const gsl::quat& quat);
+
+    gsl::quat& operator= (const gsl::quat& quat);
+    gsl::quat& operator+= (const gsl::quat& quat);
+    gsl::quat& operator+= (GLfloat scalar);
+    gsl::quat& operator-= (const gsl::quat& quat);
+    gsl::quat& operator-= (GLfloat scalar);
+    gsl::quat& operator*= (const gsl::quat& quat);
+    gsl::quat& operator*= (GLfloat scalar);
+
 
 
 

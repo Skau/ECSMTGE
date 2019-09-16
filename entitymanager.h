@@ -322,7 +322,7 @@ public:
      * a tree.
      * @brief Breadth first search iterator
      */
-    class ParentTreeIterator
+    class TreeIterator
     {
     private:
         struct ChildInfo
@@ -345,19 +345,19 @@ public:
         }
 
     public:
-        ParentTreeIterator(EntityManager* entityManager, unsigned int startId)
+        TreeIterator(EntityManager* entityManager, unsigned int startId)
             : currentChild{startId}, EM{entityManager}, mCurrent{EM->getComponent<TransformComponent>(startId)}
         {
             if (mCurrent != nullptr)
                 findChilds();
         }
-        ParentTreeIterator(EntityManager* entityManager, TransformComponent* current)
+        TreeIterator(EntityManager* entityManager, TransformComponent* current)
             : EM{entityManager}, mCurrent{current}
         {
 
         }
 
-        ParentTreeIterator& operator++()
+        TreeIterator& operator++()
         {
             if (mNext.empty() && !mNextNext.empty())
             {
@@ -386,7 +386,7 @@ public:
             }
             return *this;
         }
-        bool operator!= (const ParentTreeIterator& it) { return mCurrent != it.mCurrent; }
+        bool operator!= (const TreeIterator& it) { return mCurrent != it.mCurrent; }
         TransformComponent& operator* () { return *mCurrent; }
         TransformComponent* operator-> () { return mCurrent; }
         unsigned int getLevel() const { return mLevel; }
@@ -400,9 +400,9 @@ public:
     };
 
     // Returns a begin iterator pointing to eID's transform component
-    ParentTreeIterator treeBegin(unsigned int eID) { return ParentTreeIterator{this, eID}; }
+    TreeIterator treeBegin(unsigned int eID) { return TreeIterator{this, eID}; }
     // Returns an end iterator pointing to nothing
-    ParentTreeIterator treeEnd() { return ParentTreeIterator{this, nullptr}; }
+    TreeIterator treeEnd() { return TreeIterator{this, nullptr}; }
 
     void addTransformPos(unsigned int eID, const gsl::vec3& pos);
     void addTransformRot(unsigned int eID, const gsl::quat& rot);

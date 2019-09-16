@@ -88,6 +88,45 @@ gsl::quat operator*(GLfloat scalar, const gsl::quat& quat)
 }
 }
 
+gsl::quat &gsl::Quaternion::operator=(const gsl::quat &quat)
+{
+    s = quat.s;
+    i = quat.i;
+    j = quat.j;
+    k = quat.k;
+    return *this;
+}
+
+gsl::quat &gsl::Quaternion::operator+=(const gsl::quat &quat)
+{
+    return *this = *this + quat;
+}
+
+gsl::quat &gsl::Quaternion::operator+=(GLfloat scalar)
+{
+    return *this = *this + scalar;
+}
+
+gsl::quat &gsl::Quaternion::operator-=(const gsl::quat &quat)
+{
+    return *this = *this - quat;
+}
+
+gsl::quat &gsl::Quaternion::operator-=(GLfloat scalar)
+{
+    return *this = *this - scalar;
+}
+
+gsl::quat &gsl::Quaternion::operator*=(const gsl::quat &quat)
+{
+    return *this = *this * quat;
+}
+
+gsl::quat &gsl::Quaternion::operator*=(GLfloat scalar)
+{
+    return *this = *this * scalar;
+}
+
 gsl::quat gsl::Quaternion::rot(GLfloat angle, const gsl::vec3 &axis) const
 {
     return gsl::quat{std::cos(angle) / 2, axis * (std::sin(angle) / 2)};

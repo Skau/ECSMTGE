@@ -7,6 +7,7 @@
 #include "resourcemanager.h"
 #include <QObject>
 #include <QDebug>
+#include <queue>
 
 
 /** Precompiler directives
@@ -289,16 +290,6 @@ public:
     REMOVECOMPONENT(CameraComponent)
     REMOVECOMPONENT(InputComponent)
 
-    void print() {
-        std::cout << "transforms: ";
-        for (auto comp : mTransformComponents)
-            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
-        std::cout << std::endl << "renders: ";
-        for (auto comp : mMeshComponents)
-            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
-        std::cout << std::endl;
-    }
-
 private:
     ADDCOMPONENTS(TransformComponent)
     ADDCOMPONENTS(MeshComponent)
@@ -314,6 +305,111 @@ private:
             return t1.entityId < t2.entityId;
         });
     }
+
+public:
+    // ---------------------------- Helper functions ---------------------------
+    void print() {
+        std::cout << "transforms: ";
+        for (auto comp : mTransformComponents)
+            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
+        std::cout << std::endl << "renders: ";
+        for (auto comp : mMeshComponents)
+            std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
+        std::cout << std::endl;
+    }
+
+    /** Breadth first search iterator for iterating through
+     * a tree.
+     * @brief Breadth first search iterator
+     */
+    class ParentTreeIterator
+    {
+    private:
+        struct ChildInfo
+        {
+            unsigned int eID;
+            int parentID{-1};
+        } currentChild;
+        EntityManager *EM;
+        TransformComponent* mCurrent;
+        std::queue<ChildInfo> mNext{};
+        std::queue<ChildInfo> mNextNext{};
+        unsigned int mLevel{0};
+
+        void findChilds()
+        {
+            for (auto eID{mCurrent->children.begin()}; eID != mCurrent->children.end(); ++eID)
+            {
+                mNextNext.push({*eID, static_cast<int>(mCurrent->entityId)});
+            }
+        }
+
+    public:
+        ParentTreeIterator(EntityManager* entityManager, unsigned int startId)
+            : currentChild{startId}, EM{entityManager}, mCurrent{EM->getComponent<TransformComponent>(startId)}
+        {
+            if (mCurrent != nullptr)
+                findChilds();
+        }
+        ParentTreeIterator(EntityManager* entityManager, TransformComponent* current)
+            : EM{entityManager}, mCurrent{current}
+        {
+
+        }
+
+        ParentTreeIterator& operator++()
+        {
+            if (mNext.empty() && !mNextNext.empty())
+            {
+                mNext.swap(mNextNext);
+                ++mLevel;
+            }
+
+            if (mNext.empty())
+            {
+                mCurrent = nullptr;
+            }
+            else
+            {
+                while (!mNext.empty())
+                {
+                    currentChild = mNext.front();
+                    mCurrent = EM->getComponent<TransformComponent>(currentChild.eID);
+                    mNext.pop();
+
+                    if (mCurrent != nullptr)
+                    {
+                        findChilds();
+                        break;
+                    }
+                }
+            }
+            return *this;
+        }
+        bool operator!= (const ParentTreeIterator& it) { return mCurrent != it.mCurrent; }
+        TransformComponent& operator* () { return *mCurrent; }
+        TransformComponent* operator-> () { return mCurrent; }
+        unsigned int getLevel() const { return mLevel; }
+        int getParentId() const { return currentChild.parentID; }
+        TransformComponent* getParent()
+        {
+            return (currentChild.parentID != -1)
+                ? EM->getComponent<TransformComponent>(static_cast<unsigned int>(currentChild.parentID))
+                : nullptr;
+        }
+    };
+
+    // Returns a begin iterator pointing to eID's transform component
+    ParentTreeIterator treeBegin(unsigned int eID) { return ParentTreeIterator{this, eID}; }
+    // Returns an end iterator pointing to nothing
+    ParentTreeIterator treeEnd() { return ParentTreeIterator{this, nullptr}; }
+
+    void addTransformPos(unsigned int eID, const gsl::vec3& pos);
+    void addTransformRot(unsigned int eID, const gsl::quat& rot);
+    void addTransformScale(unsigned int eID, const gsl::vec3& scale);
+    void setTransformPos(unsigned int eID, const gsl::vec3& pos);
+    void setTransformRot(unsigned int eID, const gsl::quat& rot);
+    void setTransformScale(unsigned int eID, const gsl::vec3& scale);
 };
 
 #endif // COMPONENTMANAGER_H

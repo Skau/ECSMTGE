@@ -80,6 +80,8 @@ SOURCES += \
     Widgets/transformwidget.cpp \
     app.cpp \
     camerasystem.cpp \
+    componentdata.cpp \
+    entitymanager.cpp \
     inputhandler.cpp \
     inputsystem.cpp \
     main.cpp \

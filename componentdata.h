@@ -47,6 +47,7 @@ struct EntityData : public Component
 struct TransformComponent : public Component
 {
     bool updated{true};
+    std::vector<unsigned int> children;
     gsl::Vector3D position{};
     gsl::Quaternion rotation{};
     gsl::Vector3D scale{1,1,1};
@@ -59,6 +60,14 @@ struct TransformComponent : public Component
         : Component (_eID, _valid, ComponentType::Transform), updated{true}, position{_pos},
           rotation{_rot}, scale{_scale}
     {}
+
+
+    void addPosition(const gsl::vec3& pos);
+    void addRotation(const gsl::quat& rot);
+    void addScale(const gsl::vec3& scale);
+    void setPosition(const gsl::vec3& pos);
+    void setRotation(const gsl::quat& rot);
+    void setScale(const gsl::vec3& scale);
 };
 
 

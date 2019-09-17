@@ -62,9 +62,6 @@ public:
         auto [axisTrans, axisMesh] = entityManager->addComponent<TransformComponent, MeshComponent>(entityManager->createEntity("axis"));
         axisMesh.meshData = *ResourceManager::instance()->getMesh("axis");
         axisMesh.isVisible = true;
-
-        auto laserSound = ResourceManager::instance()->createSource("laser", true);
-        laserSound->play();
     }
 };
 

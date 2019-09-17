@@ -97,6 +97,7 @@ private:
     std::vector<PhysicsComponent> mPhysicsComponents;
     std::vector<CameraComponent> mCameraComponents;
     std::vector<InputComponent> mInputComponents;
+    std::vector<SoundComponent> mSoundComponents;
 
     unsigned int idCounter{0};
 
@@ -117,6 +118,7 @@ public:
     std::vector<PhysicsComponent>& getPhysicsComponents() { return mPhysicsComponents; }
     std::vector<CameraComponent>& getCameraComponents() { return mCameraComponents; }
     std::vector<InputComponent>& getInputComponents() { return mInputComponents; }
+    std::vector<SoundComponent>& getSoundComponents() { return mSoundComponents; }
 
     void createObject(int index)
     {
@@ -227,6 +229,11 @@ public:
             addComponent<InputComponent>(entity);
             break;
         }
+        case ComponentType::Sound:
+        {
+            addComponent<SoundComponent>(entity);
+            break;
+        }
         default:
             break;
         }
@@ -238,6 +245,7 @@ public:
     GETCOMPONENT(PhysicsComponent)
     GETCOMPONENT(CameraComponent)
     GETCOMPONENT(InputComponent)
+    GETCOMPONENT(SoundComponent)
 
 
     /**
@@ -281,6 +289,14 @@ public:
                 addedAnyComponents = true;
             }
         }
+        if(auto comp = getComponent<SoundComponent>(entity))
+        {
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
+        }
         return addedAnyComponents;
     }
 
@@ -289,6 +305,7 @@ public:
     REMOVECOMPONENT(PhysicsComponent)
     REMOVECOMPONENT(CameraComponent)
     REMOVECOMPONENT(InputComponent)
+    REMOVECOMPONENT(SoundComponent)
 
 private:
     ADDCOMPONENTS(TransformComponent)
@@ -296,6 +313,7 @@ private:
     ADDCOMPONENTS(PhysicsComponent)
     ADDCOMPONENTS(CameraComponent)
     ADDCOMPONENTS(InputComponent)
+    ADDCOMPONENTS(SoundComponent)
 
     template <class T>
     void sortComponents(std::vector<T>& vector)

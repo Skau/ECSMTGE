@@ -14,6 +14,9 @@
 
 App::App()
 {
+    mSoundManager = std::make_unique<SoundManager>();
+    mSoundListener = std::make_unique<SoundListener>();
+
     mMainWindow = std::make_unique<MainWindow>();
     mRenderer = mMainWindow->getRenderer();
 
@@ -31,10 +34,7 @@ App::App()
 
 // Slot called from Renderer when its done with initialization
 void App::initTheRest()
-{
-    mOpenALManager = std::make_unique<OpenALManager>();
-
-    mSoundListener = std::make_unique<SoundListener>();
+{ 
     connect(mMainWindow->ui->actionToggle_shutup, &QAction::toggled, this, &App::toggleMute);
 
     mWorld = std::make_unique<World>();
@@ -49,6 +49,8 @@ void App::initTheRest()
 
     mDeltaTimer.start();
     mFPSTimer.start();
+
+    SoundManager::checkOpenALError();
 }
 
 void App::toggleMute(bool mode)
@@ -97,6 +99,11 @@ void App::update()
     auto& physics = mWorld->getEntityManager()->getPhysicsComponents();
 
     PhysicsSystem::UpdatePhysics(transforms, physics, mDeltaTime);
+
+    auto& sounds = mWorld->getEntityManager()->getSoundComponents();
+
+    SoundManager::UpdatePositions(transforms, sounds);
+    SoundManager::UpdateVelocities(physics, sounds);
 
     mMainWindow->updateComponentWidgets();
 

@@ -15,11 +15,12 @@ enum class ComponentType
     Mesh,
     Camera,
     Input,
+    Sound,
     Other
 };
 
 // Used by UI so it knows what components are available to add if the entity doesnt have one.
-const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, ComponentType::Transform, ComponentType::Physics, ComponentType::Input};
+const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, ComponentType::Transform, ComponentType::Physics, ComponentType::Input, ComponentType::Sound};
 
 
 struct Component
@@ -123,7 +124,16 @@ struct InputComponent : public Component
 
 struct SoundComponent : public Component
 {
-    SoundSource sound;
+    int mSource;
+    std::string name;
+    bool isLooping = false;
+    bool isMuted = false;
+    float pitch = 1.f;
+    float gain = .4f;
+
+    SoundComponent(unsigned int _eID = 0, bool _valid = false)
+        : Component(_eID, _valid, ComponentType::Sound), mSource{-1}
+    {}
 };
 
 // .. etc

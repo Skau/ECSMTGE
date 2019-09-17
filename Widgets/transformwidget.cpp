@@ -72,7 +72,8 @@ void TransformWidget::on_spinBox_Position_X_valueChanged(double arg1)
     {
         auto entityManager = mMainWindow->getEntityManager();
         auto oldPos = entityManager->getComponent<TransformComponent>(entityData->entityId)->position;
-        entityManager->setTransformPos(entityData->entityId, gsl::vec3(static_cast<float>(arg1), oldPos.y, oldPos.z));
+        entityManager->setTransformPos(entityData->entityId,
+            gsl::vec3(static_cast<float>(arg1), oldPos.y, oldPos.z));
     }
 }
 
@@ -83,7 +84,8 @@ void TransformWidget::on_spinBox_Position_Y_valueChanged(double arg1)
     {
         auto entityManager = mMainWindow->getEntityManager();
         auto oldPos = entityManager->getComponent<TransformComponent>(entityData->entityId)->position;
-        entityManager->setTransformPos(entityData->entityId, gsl::vec3(oldPos.x, static_cast<float>(arg1), oldPos.z));
+        entityManager->setTransformPos(entityData->entityId,
+            gsl::vec3(oldPos.x, static_cast<float>(arg1), oldPos.z));
     }
 }
 
@@ -95,7 +97,7 @@ void TransformWidget::on_spinBox_Position_Z_valueChanged(double arg1)
         auto entityManager = mMainWindow->getEntityManager();
         auto oldPos = entityManager->getComponent<TransformComponent>(entityData->entityId)->position;
         entityManager->setTransformPos(entityData->entityId,
-            gsl::vec3(oldPos.x, static_cast<float>(arg1), oldPos.z));
+            gsl::vec3(oldPos.x, oldPos.y, static_cast<float>(arg1)));
     }
 }
 

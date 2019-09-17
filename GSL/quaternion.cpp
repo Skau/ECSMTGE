@@ -2,29 +2,30 @@
 #include "vector4d.h"
 #include "matrix4x4.h"
 #include <cmath>
+#include <limits>
 
 gsl::Quaternion::Quaternion(GLfloat sIn, GLfloat iIn, GLfloat jIn, GLfloat kIn)
     : s{sIn}, i{iIn}, j{jIn}, k{kIn}
 {
-
+    std::cout << "first construction run!" << std::endl;
 }
 
 gsl::Quaternion::Quaternion(GLfloat scalar, const gsl::vec3 &v)
     : s{scalar}, i{v.x}, j{v.y}, k{v.z}
 {
-
+    std::cout << "second construction run!" << std::endl;
 }
 
 gsl::Quaternion::Quaternion(const gsl::Quaternion::Pair &pair)
     : s{pair.s}, i{pair.v.x}, j{pair.v.y}, k{pair.v.z}
 {
-
+    std::cout << "third construction run!" << std::endl;
 }
 
 gsl::Quaternion::Pair::Pair(GLfloat scalar, const gsl::vec3 &vector)
     : s{scalar}, v{vector}
 {
-
+    std::cout << "pair construction run!" << std::endl;
 }
 
 namespace gsl {
@@ -129,7 +130,7 @@ gsl::quat &gsl::Quaternion::operator*=(GLfloat scalar)
 
 gsl::quat gsl::Quaternion::rot(GLfloat angle, const gsl::vec3 &axis)
 {
-    return gsl::quat{std::cos(angle) / 2.f, axis * (std::sin(angle) / 2.f)};
+    return gsl::quat{std::cos(angle / 2.f), axis * (std::sin(angle / 2.f))};
 }
 
 gsl::vec3 gsl::Quaternion::rotatePoint(const gsl::vec3 &p, const gsl::quat &rot)
@@ -193,4 +194,21 @@ gsl::vec4 gsl::Quaternion::toVec4() const
 gsl::Quaternion::Pair gsl::Quaternion::toPair() const
 {
     return gsl::quat::Pair{s, {i, j, k}};
+}
+
+namespace gsl {
+std::ostream& operator<<(std::ostream &out, const gsl::quat &quat)
+{
+    out << ((std::abs(quat.s) > std::numeric_limits<float>::epsilon()) ? quat.s : 0.f);
+    for (int i{0}; i < 3; ++i)
+    {
+        auto num = *(&quat.i + i);
+        if (std::abs(num) > std::numeric_limits<float>::epsilon())
+        {
+            out << " + " << num << static_cast<char>('i' + i);
+        }
+    }
+    return out;
+    // return out << quat.s << " + " << quat.i << "i + " << quat.j << "j + " << quat.k << "k";
+}
 }

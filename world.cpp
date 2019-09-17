@@ -14,6 +14,7 @@ World::World()
     ResourceManager::instance()->LoadAssetFiles();
 
     ResourceManager::instance()->getMesh("axis")->mRenderType = GL_LINES;
+    ResourceManager::instance()->getMesh("axis")->mMaterial.mShader = ResourceManager::instance()->getShader("axis");
 
     entityManager = std::make_shared<EntityManager>();
 

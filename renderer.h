@@ -36,7 +36,6 @@ public:
 
     void checkForGLerrors();
 
-    void handleInput(double deltaTime);
     void render(const std::vector<VisualObject*>& objects, double deltaTime);
 
     // Should only need renders, materials and transforms
@@ -48,8 +47,6 @@ signals:
 
 
 private:
-    void setCameraSpeed(float value);
-
     QOpenGLContext *mContext{nullptr};
 
     Light *mLight;

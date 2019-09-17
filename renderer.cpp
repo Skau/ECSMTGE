@@ -170,12 +170,6 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
                     }
                 }
 
-
-//                gsl::mat4 matrix;
-//                matrix.setToIdentity();
-//                matrix.translate(transIt->position);
-//                matrix.scale(transIt->scale);
-
                 auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
 
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
@@ -277,51 +271,4 @@ void Renderer::startOpenGLDebugger()
         if(mOpenGLDebugLogger)
             mOpenGLDebugLogger->disableMessages(QOpenGLDebugMessage::APISource, QOpenGLDebugMessage::OtherType, QOpenGLDebugMessage::NotificationSeverity);
     }
-}
-
-void Renderer::setCameraSpeed(float /*value*/)
-{
-//    mCameraSpeed += value;
-
-//    //Keep within min and max values
-//    if(mCameraSpeed < 0.01f)
-//        mCameraSpeed = 0.01f;
-//    if (mCameraSpeed > 0.3f)
-//        mCameraSpeed = 0.3f;
-}
-
-void Renderer::handleInput(double /*deltaTime*/)
-{
-    //Camera
-//    mCurrentCamera->setSpeed(0.f);  //cancel last frame movement
-//    if(mInput.RMB)
-//    {
-//        if(mInput.W)
-//            mCurrentCamera->setSpeed(-mCameraSpeed);
-//        if(mInput.S)
-//            mCurrentCamera->setSpeed(mCameraSpeed);
-//        if(mInput.D)
-//            mCurrentCamera->moveRight(mCameraSpeed);
-//        if(mInput.A)
-//            mCurrentCamera->moveRight(-mCameraSpeed);
-//        if(mInput.Q)
-//            mCurrentCamera->updateHeigth(-mCameraSpeed);
-//        if(mInput.E)
-//            mCurrentCamera->updateHeigth(mCameraSpeed);
-//    }
-//    else
-//    {
-        //        if(mInput.W)
-        //            mLight->mMatrix.translateZ(-mCameraSpeed);
-        //        if(mInput.S)
-        //            mLight->mMatrix.translateZ(mCameraSpeed);
-        //        if(mInput.D)
-        //            mLight->mMatrix.translateX(mCameraSpeed);
-        //        if(mInput.A)
-        //            mLight->mMatrix.translateX(-mCameraSpeed);
-        //        if(mInput.Q)
-        //            mLight->mMatrix.translateY(mCameraSpeed);
-        //        if(mInput.E)
-        //            mLight->mMatrix.translateY(-mCameraSpeed);
-//    }
 }

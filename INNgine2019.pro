@@ -26,6 +26,7 @@ HEADERS += \
     Widgets/inputwidget.h \
     Widgets/meshwidget.h \
     Widgets/physicswidget.h \
+    Widgets/soundwidget.h \
     Widgets/transformwidget.h \
     app.h \
     camerasystem.h \
@@ -78,6 +79,7 @@ SOURCES += \
     Widgets/inputwidget.cpp \
     Widgets/meshwidget.cpp \
     Widgets/physicswidget.cpp \
+    Widgets/soundwidget.cpp \
     Widgets/transformwidget.cpp \
     app.cpp \
     camerasystem.cpp \
@@ -122,6 +124,7 @@ FORMS += \
     mainwindow.ui \
     mesh.ui \
     physics.ui \
+    sound.ui \
     transform.ui
 
 

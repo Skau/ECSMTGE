@@ -14,8 +14,9 @@ class InputWidget : public ComponentWidget
 public:
     InputWidget(MainWindow *mainWindow, QWidget* parent = nullptr);
 
+    void updateData() override;
+
 public slots:
-    void update(bool isControlled);
     void on_checkBox_IsBeingControlled_toggled(bool checked);
 
 protected slots:

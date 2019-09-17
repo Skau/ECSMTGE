@@ -14,42 +14,52 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
     ui->setupUi(this);
 }
 
-void MeshWidget::update(const std::string &name)
+void MeshWidget::updateData()
 {
-    if(name.size())
+    auto entity = mMainWindow->currentEntitySelected;
+    if(entity)
     {
-        ui->label_Name->setText(QString::fromStdString(name));
-    }
-    else
-    {
-        ui->label_Name->setText("None");
-    }
-
-    if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
-    {
-        if(render->isVisible)
+        if(auto mesh = getRenderComponent(entity->entityId))
         {
-             ui->checkBox_Visible->setCheckState(Qt::CheckState::Checked);
+            auto name = entity->name;
+            isUpdating = true;
+            if(name.size())
+            {
+                ui->label_Name->setText(QString::fromStdString(name));
+            }
+            else
+            {
+                ui->label_Name->setText("None");
+            }
+
+            if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
+            {
+                if(render->isVisible)
+                {
+                     ui->checkBox_Visible->setCheckState(Qt::CheckState::Checked);
+                }
+                else
+                {
+                    ui->checkBox_Visible->setCheckState(Qt::CheckState::Unchecked);
+                }
+            }
+
+            for(auto& name : ResourceManager::instance()->getAllMeshNames())
+            {
+                ui->comboBox_Meshes->addItem(QString::fromStdString(name));
+            }
+
+            for(auto& name : ResourceManager::instance()->getAllShaderNames())
+            {
+                ui->comboBox_Shaders->addItem(QString::fromStdString(name));
+            }
+
+            for(auto& name : ResourceManager::instance()->getAllTextureNames())
+            {
+                ui->comboBox_Textures->addItem(QString::fromStdString(name));
+            }
+            isUpdating = false;
         }
-        else
-        {
-            ui->checkBox_Visible->setCheckState(Qt::CheckState::Unchecked);
-        }
-    }
-
-    for(auto& name : ResourceManager::instance()->getAllMeshNames())
-    {
-        ui->comboBox_Meshes->addItem(QString::fromStdString(name));
-    }
-
-    for(auto& name : ResourceManager::instance()->getAllShaderNames())
-    {
-        ui->comboBox_Shaders->addItem(QString::fromStdString(name));
-    }
-
-    for(auto& name : ResourceManager::instance()->getAllTextureNames())
-    {
-        ui->comboBox_Textures->addItem(QString::fromStdString(name));
     }
 }
 
@@ -96,6 +106,8 @@ void MeshWidget::on_button_ChangeMesh_clicked()
 
 void MeshWidget::on_checkBox_Visible_toggled(bool checked)
 {
+    if(isUpdating) return;
+
     if(mMainWindow->currentEntitySelected)
     {
         if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
@@ -112,7 +124,7 @@ void MeshWidget::Remove()
     {
         if(mMainWindow->getEntityManager()->removeComponent<MeshComponent>(entity->entityId))
         {
-            widgetRemoved();
+            widgetRemoved(this);
         }
     }
 }

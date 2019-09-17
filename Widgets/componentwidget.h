@@ -11,8 +11,10 @@ class ComponentWidget : public QWidget
 public:
     ComponentWidget(MainWindow* mainWindow, QWidget* parent = nullptr);
 
+    virtual void updateData()=0;
+
 signals:
-    void widgetRemoved();
+    void widgetRemoved(ComponentWidget* widget);
 
 protected slots:
     virtual void Remove()=0;
@@ -22,6 +24,7 @@ private slots:
 
 protected:
     MainWindow* mMainWindow;
+    bool isUpdating = false;
 };
 
 #endif // COMPONENTWIDGET_H

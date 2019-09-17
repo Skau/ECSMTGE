@@ -10,6 +10,22 @@ PhysicsWidget::PhysicsWidget(MainWindow* mainWindow, QWidget *parent)
     ui->setupUi(this);
 }
 
+void PhysicsWidget::updateData()
+{
+    auto entity = mMainWindow->currentEntitySelected;
+    if(entity)
+    {
+        if(auto physics = mMainWindow->getEntityManager()->getComponent<PhysicsComponent>(entity->entityId))
+        {
+            isUpdating = true;
+            setVelocity(physics->velocity);
+            setAcceleration(physics->acceleration);
+            setMass(physics->mass);
+            isUpdating = false;
+        }
+    }
+}
+
 void PhysicsWidget::setVelocity(const gsl::vec3 &vel)
 {
     ui->spinBox_Velocity_X->setValue(static_cast<double>(vel.x));
@@ -52,15 +68,10 @@ float PhysicsWidget::getMass()
     return static_cast<float>(ui->spinBox_Mass->value());
 }
 
-void PhysicsWidget::update(const gsl::vec3 &vel, const gsl::vec3 &acc, float weight)
-{
-    setVelocity(vel);
-    setAcceleration(acc);
-    setMass(weight);
-}
-
 void PhysicsWidget::on_spinBox_Velocity_X_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -75,6 +86,8 @@ void PhysicsWidget::on_spinBox_Velocity_X_valueChanged(double arg1)
 
 void PhysicsWidget::on_spinBox_Velocity_Y_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -89,6 +102,8 @@ void PhysicsWidget::on_spinBox_Velocity_Y_valueChanged(double arg1)
 
 void PhysicsWidget::on_spinBox_Velocity_Z_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -103,6 +118,8 @@ void PhysicsWidget::on_spinBox_Velocity_Z_valueChanged(double arg1)
 
 void PhysicsWidget::on_spinBox_Acceleration_X_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -117,6 +134,8 @@ void PhysicsWidget::on_spinBox_Acceleration_X_valueChanged(double arg1)
 
 void PhysicsWidget::on_spinBox_Acceleration_Y_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -131,6 +150,8 @@ void PhysicsWidget::on_spinBox_Acceleration_Y_valueChanged(double arg1)
 
 void PhysicsWidget::on_spinBox_Acceleration_Z_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -145,6 +166,8 @@ void PhysicsWidget::on_spinBox_Acceleration_Z_valueChanged(double arg1)
 
 void PhysicsWidget::on_spinBox_Mass_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -164,7 +187,7 @@ void PhysicsWidget::Remove()
     {
         if(mMainWindow->getEntityManager()->removeComponent<PhysicsComponent>(entity->entityId))
         {
-            widgetRemoved();
+            widgetRemoved(this);
         }
     }
 }

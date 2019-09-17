@@ -10,6 +10,22 @@ TransformWidget::TransformWidget(MainWindow* mainWindow, QWidget *parent)
     ui->setupUi(this);
 }
 
+void TransformWidget::updateData()
+{
+    auto entity = mMainWindow->currentEntitySelected;
+    if(entity)
+    {
+        if(auto transform = mMainWindow->getEntityManager()->getComponent<TransformComponent>(entity->entityId))
+        {
+            isUpdating = true;
+            setPosition(transform->position);
+            setRotation(transform->rotation.toEuler());
+            setScale(transform->scale);
+            isUpdating = false;
+        }
+    }
+}
+
 void TransformWidget::setPosition(const gsl::vec3 &pos)
 {
     ui->spinBox_Position_X->setValue(static_cast<double>(pos.x));
@@ -58,15 +74,10 @@ gsl::vec3 TransformWidget::getScale()
     return returnVec;
 }
 
-void TransformWidget::update(const gsl::vec3 &pos, const gsl::vec3 &rot, const gsl::vec3 &scale)
-{
-    setPosition(pos);
-    setRotation(rot);
-    setScale(scale);
-}
-
 void TransformWidget::on_spinBox_Position_X_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -79,6 +90,8 @@ void TransformWidget::on_spinBox_Position_X_valueChanged(double arg1)
 
 void TransformWidget::on_spinBox_Position_Y_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -91,6 +104,8 @@ void TransformWidget::on_spinBox_Position_Y_valueChanged(double arg1)
 
 void TransformWidget::on_spinBox_Position_Z_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -103,6 +118,8 @@ void TransformWidget::on_spinBox_Position_Z_valueChanged(double arg1)
 
 void TransformWidget::on_spinBox_Rotation_X_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -115,6 +132,8 @@ void TransformWidget::on_spinBox_Rotation_X_valueChanged(double arg1)
 
 void TransformWidget::on_spinBox_Rotation_Y_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -127,6 +146,8 @@ void TransformWidget::on_spinBox_Rotation_Y_valueChanged(double arg1)
 
 void TransformWidget::on_spinBox_Rotation_Z_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -139,6 +160,8 @@ void TransformWidget::on_spinBox_Rotation_Z_valueChanged(double arg1)
 
 void TransformWidget::on_spinBox_Scale_X_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -151,6 +174,8 @@ void TransformWidget::on_spinBox_Scale_X_valueChanged(double arg1)
 
 void TransformWidget::on_spinBox_Scale_Y_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -163,6 +188,8 @@ void TransformWidget::on_spinBox_Scale_Y_valueChanged(double arg1)
 
 void TransformWidget::on_spinBox_Scale_Z_valueChanged(double arg1)
 {
+    if(isUpdating) return;
+
     auto entityData = mMainWindow->currentEntitySelected;
     if(entityData)
     {
@@ -180,7 +207,7 @@ void TransformWidget::Remove()
     {
         if(mMainWindow->getEntityManager()->removeComponent<TransformComponent>(entity->entityId))
         {
-            widgetRemoved();
+            widgetRemoved(this);
         }
     }
 }

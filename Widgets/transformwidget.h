@@ -18,6 +18,8 @@ class TransformWidget : public ComponentWidget
 public:
     explicit TransformWidget(MainWindow *mainWindow, QWidget* parent = nullptr);
 
+    void updateData() override;
+
     void setPosition(const gsl::vec3& pos);
     void setRotation(const gsl::vec3 &rot);
     void setScale(const gsl::vec3& scale);
@@ -25,9 +27,6 @@ public:
     gsl::vec3 getPosition();
     gsl::vec3 getRotation();
     gsl::vec3 getScale();
-
-public slots:
-    void update(const gsl::vec3& pos, const gsl::vec3& rot, const gsl::vec3& scale);
 
 private slots:
     void on_spinBox_Position_X_valueChanged(double arg1);
@@ -48,7 +47,7 @@ private slots:
 
     void on_spinBox_Scale_Z_valueChanged(double arg1);
 
-    void Remove();
+    void Remove() override;
 
 private:
     Ui::Transform* ui;

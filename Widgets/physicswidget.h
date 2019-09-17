@@ -17,6 +17,8 @@ class PhysicsWidget : public ComponentWidget
 public:
     explicit PhysicsWidget(MainWindow *mainWindow, QWidget* parent = nullptr);
 
+    void updateData() override;
+
     void setVelocity(const gsl::vec3& vel);
     void setAcceleration(const gsl::vec3& acc);
     void setMass(float ass); // ;)
@@ -24,9 +26,6 @@ public:
     gsl::vec3 getVelocity();
     gsl::vec3 getAcceleration();
     float getMass();
-
-public slots:
-    void update(const gsl::vec3& vel, const gsl::vec3& acc, float weight);
 
 private slots:
     void on_spinBox_Velocity_X_valueChanged(double arg1);
@@ -43,7 +42,7 @@ private slots:
 
     void on_spinBox_Mass_valueChanged(double arg1);
 
-    void Remove();
+    void Remove() override;
 
 private:
     Ui::Physics* ui;

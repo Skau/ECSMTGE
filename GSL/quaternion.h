@@ -61,6 +61,8 @@ public:
     gsl::quat operator* (GLfloat scalar) const;
     friend gsl::quat operator* (GLfloat scalar, const gsl::quat& quat);
 
+    gsl::quat operator/ (GLfloat scalar) const;
+
     gsl::quat& operator= (const gsl::quat& quat);
     gsl::quat& operator+= (const gsl::quat& quat);
     gsl::quat& operator+= (GLfloat scalar);
@@ -130,8 +132,23 @@ public:
      * @return
      */
     GLfloat sizeSqrd() const;
+    /** Calculates the dot product as a vec4 * vec4 operation.
+     * Tip: The dot product of itself is the same as the magnitude.
+     * @brief Dot product
+     * @param rhs - Other quat to take dot product of.
+     */
+    GLfloat dot(const gsl::quat& rhs) const;
     /// The inverse of the quaternion
     gsl::quat inverse() const;
+    /** Finds the difference between two quaternions so that
+     * a * diff = b <=> diff = a^-1 * b
+     * @brief a * diff = b
+     * @param a - from-quaternion, leftside.
+     * @param b - to-quaternion, rightside.
+     * @return A quaternion that can be multiplied to a to get b.
+     * a * diff = b
+     */
+    static gsl::quat diff(const gsl::quat& a, const gsl::quat& b);
 
 
 

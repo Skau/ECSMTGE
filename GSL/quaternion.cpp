@@ -77,6 +77,11 @@ gsl::quat gsl::Quaternion::operator*(const gsl::quat &quat) const
     };
 }
 
+gsl::quat gsl::Quaternion::operator/(GLfloat scalar) const
+{
+    return gsl::quat{s / scalar, i / scalar, j / scalar, k / scalar};
+}
+
 gsl::quat gsl::Quaternion::operator*(GLfloat scalar) const
 {
     return gsl::quat{s * scalar, s * i, s * j, s * k};
@@ -183,7 +188,17 @@ GLfloat gsl::Quaternion::sizeSqrd() const
 
 gsl::quat gsl::Quaternion::inverse() const
 {
-    return (1.f / sizeSqrd()) * gsl::quat{s, -i, -j, -k};
+    return conj() / dot(*this);
+}
+
+gsl::quat gsl::Quaternion::diff(const gsl::quat &a, const quat &b)
+{
+    return a.inverse() * b;
+}
+
+GLfloat gsl::Quaternion::dot(const gsl::quat &rhs) const
+{
+    return s * rhs.s + i * rhs.i + j * rhs.j + k * rhs.k;
 }
 
 gsl::vec4 gsl::Quaternion::toVec4() const

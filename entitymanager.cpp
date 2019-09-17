@@ -62,7 +62,7 @@ void EntityManager::setTransformRot(unsigned int eID, const gsl::quat &rot)
     if (comp != nullptr)
     {
         // Temporary: Needs to find diff instead and add that.
-        auto delta = rot - getTransformRot(eID);
+        auto delta = gsl::quat::diff(getTransformRot(eID), rot);
         comp->addRotation(delta);
         for (auto it{comp->children.begin()}; it != comp->children.end(); ++it)
             addTransformRot(*it, delta);

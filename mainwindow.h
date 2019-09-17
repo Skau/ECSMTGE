@@ -39,6 +39,8 @@ public:
 
     EntityData* currentEntitySelected{nullptr};
 
+    EntityData* getEntityAt(QTreeWidgetItem* item);
+
 public slots:
     void updateUI(const std::vector<EntityData>& entityData);
     void onWidgetRemoved();

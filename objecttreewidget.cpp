@@ -14,7 +14,7 @@ void ObjectTreeWidget::dropEvent(QDropEvent* event)
 {
     auto currentEntity = mMainWindow->getEntityAt(currentItem());
     auto destinationEntity = mMainWindow->getEntityAt(itemAt(event->pos()));
-    auto parentEntity = mMainWindow->getEntityAt(itemAt(event->pos())->parent());
+    auto parentEntity = mMainWindow->getEntityAt(currentItem()->parent());
 
     if(currentEntity)
     {

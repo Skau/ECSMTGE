@@ -52,7 +52,7 @@ void EntityManager::setTransformPos(unsigned int eID, const gsl::vec3 &pos)
         auto delta = pos - getTransformPos(eID);
         comp->addPosition(delta);
         for (auto it{comp->children.begin()}; it != comp->children.end(); ++it)
-            addTransformPos(*it, pos);
+            addTransformPos(*it, delta);
     }
 }
 

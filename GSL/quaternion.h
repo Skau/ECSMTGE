@@ -42,7 +42,7 @@ public:
     };
 
 public:
-    Quaternion(GLfloat sIn = 0.f, GLfloat iIn = 0.f, GLfloat jIn = 0.f, GLfloat kIn = 0.f);
+    Quaternion(GLfloat sIn = 1.f, GLfloat iIn = 0.f, GLfloat jIn = 0.f, GLfloat kIn = 0.f);
     Quaternion(GLfloat scalar, const gsl::vec3& v);
     Quaternion(const Pair& pair);
 
@@ -150,6 +150,7 @@ public:
      * @return A quaternion pair
      */
     gsl::quat::Pair toPair() const;
+    friend std::ostream& operator<< (std::ostream& out, const gsl::quat& quat);
 
 
 

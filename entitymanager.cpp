@@ -49,9 +49,10 @@ void EntityManager::setTransformPos(unsigned int eID, const gsl::vec3 &pos)
     auto comp = getComponent<TransformComponent>(eID);
     if (comp != nullptr)
     {
-        comp->setPosition(pos);
+        auto delta = pos - getTransformPos(eID);
+        comp->addPosition(delta);
         for (auto it{comp->children.begin()}; it != comp->children.end(); ++it)
-            setTransformPos(*it, pos);
+            addTransformPos(*it, pos);
     }
 }
 
@@ -60,9 +61,11 @@ void EntityManager::setTransformRot(unsigned int eID, const gsl::quat &rot)
     auto comp = getComponent<TransformComponent>(eID);
     if (comp != nullptr)
     {
-        comp->setRotation(rot);
+        // Temporary: Needs to find diff instead and add that.
+        auto delta = rot - getTransformRot(eID);
+        comp->addRotation(delta);
         for (auto it{comp->children.begin()}; it != comp->children.end(); ++it)
-            setTransformRot(*it, rot);
+            addTransformRot(*it, delta);
     }
 }
 
@@ -71,9 +74,10 @@ void EntityManager::setTransformScale(unsigned int eID, const gsl::vec3 &scale)
     auto comp = getComponent<TransformComponent>(eID);
     if (comp != nullptr)
     {
-        comp->setScale(scale);
+        auto delta = scale - getTransformScale(eID);
+        comp->addScale(delta);
         for (auto it{comp->children.begin()}; it != comp->children.end(); ++it)
-            setTransformScale(*it, scale);
+            addTransformScale(*it, delta);
     }
 }
 

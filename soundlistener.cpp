@@ -9,6 +9,8 @@
 #include <OpenAL/alc.h>
 #endif
 
+#include "soundmanager.h"
+
 SoundListener::SoundListener(const gsl::vec3& pos, const gsl::vec3& vel, const gsl::vec3& dir, const gsl::vec3& up)
 {
     setPosition(pos);
@@ -75,5 +77,7 @@ void SoundListener::update(const CameraComponent& camera, const TransformCompone
     orientation[5] = view.getFloat(32);
 
     alListenerfv(AL_ORIENTATION, orientation);
+
+    SoundManager::checkOpenALError();
 }
 

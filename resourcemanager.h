@@ -49,12 +49,14 @@ public:
     std::shared_ptr<MeshData> getMesh(const std::string& name);
 
     void loadWav(const std::string& name, const std::string& path);
+    wave_t* getWav(const std::string& name);
+
+    int getSourceBuffer(const std::string& name);
 
     std::vector<std::string> getAllMeshNames();
     std::vector<std::string> getAllShaderNames();
     std::vector<std::string> getAllTextureNames();
-
-    SoundSource* createSource(const std::string& wav, bool loop = false, float gain = 1.0);
+    std::vector<std::string> getAllWavFileNames();
 
 private:
     ResourceManager();
@@ -66,6 +68,7 @@ private:
     std::map<std::string, std::shared_ptr<Texture>> mTextures;
     std::map<std::string, std::shared_ptr<MeshData>> mMeshes;
     std::map<std::string, wave_t*> mWavFiles;
+    std::map<std::string, unsigned int> mSourceBuffers;
 
     bool mIsInitialized = false;
 };

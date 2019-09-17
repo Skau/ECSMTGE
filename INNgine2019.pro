@@ -59,12 +59,12 @@ HEADERS += \
     Renderables/octahedronball.h \
     Renderables/trianglesurface.h \
     objecttreewidget.h \
-    openalmanager.h \
     physicssystem.h \
     renderer.h \
     resourcemanager.h \
     scene.h \
     soundlistener.h \
+    soundmanager.h \
     soundsource.h \
     texture.h \
     wavfilehandler.h \
@@ -107,12 +107,12 @@ SOURCES += \
     Renderables/skybox.cpp \
     Renderables/triangle.cpp \
     objecttreewidget.cpp \
-    openalmanager.cpp \
     physicssystem.cpp \
     renderer.cpp \
     resourcemanager.cpp \
     scene.cpp \
     soundlistener.cpp \
+    soundmanager.cpp \
     soundsource.cpp \
     texture.cpp \
     wavfilehandler.cpp \

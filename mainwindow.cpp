@@ -13,6 +13,7 @@
 #include "Widgets/meshwidget.h"
 #include "Widgets/physicswidget.h"
 #include "Widgets/inputwidget.h"
+#include "Widgets/soundwidget.h"
 #include "componentdata.h"
 
 #include <QSplitter>
@@ -193,6 +194,11 @@ void MainWindow::updateComponentArea(unsigned int entityID)
                 componentWidget = new InputWidget(this);
                 break;
             }
+            case ComponentType::Sound:
+            {
+                componentWidget = new SoundWidget(this);
+                break;
+            }
             default:
                 break;
             }
@@ -250,6 +256,11 @@ void MainWindow::updateAvailableComponents(std::vector<ComponentType> types)
         case ComponentType::Input:
         {
             ui->comboBox_Components->addItem("Input");
+            break;
+        }
+        case ComponentType::Sound:
+        {
+            ui->comboBox_Components->addItem("Sound");
             break;
         }
         default:

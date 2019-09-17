@@ -12,6 +12,21 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
     : ComponentWidget(mainWindow, parent), ui(new Ui::Mesh)
 {
     ui->setupUi(this);
+
+    for(auto& name : ResourceManager::instance()->getAllMeshNames())
+    {
+        ui->comboBox_Meshes->addItem(QString::fromStdString(name));
+    }
+
+    for(auto& name : ResourceManager::instance()->getAllShaderNames())
+    {
+        ui->comboBox_Shaders->addItem(QString::fromStdString(name));
+    }
+
+    for(auto& name : ResourceManager::instance()->getAllTextureNames())
+    {
+        ui->comboBox_Textures->addItem(QString::fromStdString(name));
+    }
 }
 
 void MeshWidget::updateData()
@@ -44,20 +59,6 @@ void MeshWidget::updateData()
                 }
             }
 
-            for(auto& name : ResourceManager::instance()->getAllMeshNames())
-            {
-                ui->comboBox_Meshes->addItem(QString::fromStdString(name));
-            }
-
-            for(auto& name : ResourceManager::instance()->getAllShaderNames())
-            {
-                ui->comboBox_Shaders->addItem(QString::fromStdString(name));
-            }
-
-            for(auto& name : ResourceManager::instance()->getAllTextureNames())
-            {
-                ui->comboBox_Textures->addItem(QString::fromStdString(name));
-            }
             isUpdating = false;
         }
     }

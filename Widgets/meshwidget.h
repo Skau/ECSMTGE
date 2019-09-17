@@ -16,11 +16,10 @@ class MeshWidget : public ComponentWidget
 public:
     explicit MeshWidget(MainWindow* mainWindow, QWidget* parent = nullptr);
 
+    void updateData() override;
+
 signals:
     void chooseMesh(unsigned int entity, const std::string& name);
-
-public slots:
-    void update(const std::string& name);
 
 protected slots:
     void Remove() override;

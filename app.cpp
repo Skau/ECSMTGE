@@ -98,6 +98,8 @@ void App::update()
 
     PhysicsSystem::UpdatePhysics(transforms, physics, mDeltaTime);
 
+    mMainWindow->updateComponentWidgets();
+
     // Rendering:
     const auto& renders = mWorld->getEntityManager()->getMeshComponents();
 

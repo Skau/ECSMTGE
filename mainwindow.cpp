@@ -84,9 +84,21 @@ EntityData* MainWindow::getEntityAt(QTreeWidgetItem* item)
     return nullptr;
 }
 
-// If a widget is removed we need to recreate the components
-void MainWindow::onWidgetRemoved()
+void MainWindow::updateComponentWidgets()
 {
+    if(currentEntitySelected)
+    {
+        for(auto& component : mCurrentComponentWidgets)
+        {
+            component->updateData();
+        }
+    }
+}
+
+// If a widget is removed we need to recreate the components
+void MainWindow::onWidgetRemoved(ComponentWidget* widget)
+{
+    mCurrentComponentWidgets.erase(std::remove(mCurrentComponentWidgets.begin(), mCurrentComponentWidgets.end(), widget), mCurrentComponentWidgets.end());
     updateComponentArea(currentEntitySelected->entityId);
 }
 
@@ -139,6 +151,8 @@ void MainWindow::updateComponentArea(unsigned int entityID)
     // Get all available components
     mAvailableComponentsToAddCache = ComponentTypes;
 
+    mCurrentComponentWidgets.clear();
+
     // Get the components for this entity
     std::vector<Component*> components;
     if(mEntityManager->getAllComponents(entityID, components))
@@ -151,6 +165,8 @@ void MainWindow::updateComponentArea(unsigned int entityID)
         widget->setLayout(layout);
         layout->setMargin(0);
 
+        ComponentWidget* componentWidget = nullptr;
+
         for(auto& component: components)
         {
             mAvailableComponentsToAddCache.erase(std::remove(mAvailableComponentsToAddCache.begin(), mAvailableComponentsToAddCache.end(), component->type), mAvailableComponentsToAddCache.end());
@@ -159,63 +175,35 @@ void MainWindow::updateComponentArea(unsigned int entityID)
             {
             case ComponentType::Mesh:
             {
-                auto render = static_cast<MeshComponent*>(component);
-                auto widget = new MeshWidget(this);
-                connect(widget, &MeshWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
-
-
-                // Set up render widget here
-                widget->update(render->meshData.mName);
-
-
-                layout->addWidget(widget);
+                componentWidget = new MeshWidget(this);
                 break;
             }
             case ComponentType::Transform:
             {
-                auto transform = static_cast<TransformComponent*>(component);
-                auto widget = new TransformWidget(this);
-                connect(widget, &TransformWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
-
-
-                // Set up transform widget here
-                // (We send in the rotations as euler angles so that they are easy to work with in the editor)
-                widget->update(transform->position, transform->rotation.toEuler(), transform->scale);
-
-
-                layout->addWidget(widget);
+                componentWidget = new TransformWidget(this);
                 break;
             }
             case ComponentType::Physics:
             {
-                auto physics = static_cast<PhysicsComponent*>(component);
-                auto widget = new PhysicsWidget(this);
-                connect(widget, &PhysicsWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
-
-
-                // Set up physics widget here
-                widget->update(physics->velocity, physics->acceleration, physics->mass);
-
-
-                layout->addWidget(widget);
+                componentWidget = new PhysicsWidget(this);
                 break;
             }
             case ComponentType::Input:
             {
-                auto input = static_cast<InputComponent*>(component);
-                auto widget = new InputWidget(this);
-                connect(widget, &InputWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
-
-
-                // Set up input widget here
-                widget->update(input->isCurrentlyControlled);
-
-
-                layout->addWidget(widget);
+                componentWidget = new InputWidget(this);
                 break;
             }
             default:
                 break;
+            }
+
+            if(componentWidget)
+            {
+                connect(componentWidget, &ComponentWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
+                componentWidget->updateData();
+                layout->addWidget(componentWidget);
+                mCurrentComponentWidgets.push_back(componentWidget);
+                componentWidget = nullptr;
             }
         }
     }

@@ -18,6 +18,7 @@ enum class ComponentType;
 
 class EntityManager;
 class QTreeWidgetItem;
+class ComponentWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -41,9 +42,11 @@ public:
 
     EntityData* getEntityAt(QTreeWidgetItem* item);
 
+    void updateComponentWidgets();
+
 public slots:
     void updateUI(const std::vector<EntityData>& entityData);
-    void onWidgetRemoved();
+    void onWidgetRemoved(ComponentWidget* widget);
 
 private slots:
     void on_actionEmpty_Object_triggered();
@@ -77,6 +80,8 @@ private:
     std::vector<ComponentType> mAvailableComponentsToAddCache;
 
     std::map<QTreeWidgetItem*, EntityData> mTreeDataCache;
+
+    std::vector<ComponentWidget*> mCurrentComponentWidgets;
 };
 
 #endif // MAINWINDOW_H

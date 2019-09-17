@@ -9,15 +9,25 @@ InputWidget::InputWidget(MainWindow *mainWindow, QWidget *parent)
     ui->setupUi(this);
 }
 
-
-void InputWidget::update(bool isControlled)
+void InputWidget::updateData()
 {
-    auto checkState = isControlled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
-    ui->checkBox_IsBeingControlled->setCheckState(checkState);
+    auto entity = mMainWindow->currentEntitySelected;
+    if(entity)
+    {
+        if(auto input = mMainWindow->getEntityManager()->getComponent<InputComponent>(entity->entityId))
+        {
+            isUpdating = true;
+            auto checkState = input->isCurrentlyControlled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
+            ui->checkBox_IsBeingControlled->setCheckState(checkState);
+            isUpdating = false;
+        }
+    }
 }
 
 void InputWidget::on_checkBox_IsBeingControlled_toggled(bool checked)
 {
+    if(isUpdating) return;
+
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
@@ -35,7 +45,7 @@ void InputWidget::Remove()
     {
         if(mMainWindow->getEntityManager()->removeComponent<InputComponent>(entity->entityId))
         {
-            widgetRemoved();
+            widgetRemoved(this);
         }
     }
 }

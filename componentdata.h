@@ -100,6 +100,7 @@ struct CameraComponent : public Component
 {
     bool isCurrentActive;
     GLuint framebufferTarget;
+    float pitch{0.f}, yaw{0.f};
     gsl::Matrix4x4 viewMatrix;
     gsl::Matrix4x4 projectionMatrix;
 

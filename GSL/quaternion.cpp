@@ -7,25 +7,25 @@
 gsl::Quaternion::Quaternion(GLfloat sIn, GLfloat iIn, GLfloat jIn, GLfloat kIn)
     : s{sIn}, i{iIn}, j{jIn}, k{kIn}
 {
-    std::cout << "first construction run!" << std::endl;
+
 }
 
 gsl::Quaternion::Quaternion(GLfloat scalar, const gsl::vec3 &v)
     : s{scalar}, i{v.x}, j{v.y}, k{v.z}
 {
-    std::cout << "second construction run!" << std::endl;
+
 }
 
 gsl::Quaternion::Quaternion(const gsl::Quaternion::Pair &pair)
     : s{pair.s}, i{pair.v.x}, j{pair.v.y}, k{pair.v.z}
 {
-    std::cout << "third construction run!" << std::endl;
+
 }
 
 gsl::Quaternion::Pair::Pair(GLfloat scalar, const gsl::vec3 &vector)
     : s{scalar}, v{vector}
 {
-    std::cout << "pair construction run!" << std::endl;
+
 }
 
 namespace gsl {
@@ -136,6 +136,16 @@ gsl::quat &gsl::Quaternion::operator*=(GLfloat scalar)
 gsl::quat gsl::Quaternion::rot(GLfloat angle, const gsl::vec3 &axis)
 {
     return gsl::quat{std::cos(angle / 2.f), axis * (std::sin(angle / 2.f))};
+}
+
+gsl::quat gsl::Quaternion::lookAt(GLfloat pitch, GLfloat yaw)
+{
+    auto qPitch = rot(pitch, {1.f, 0.f, 0.f});
+    auto qYaw = rot(yaw, {0.f, 1.f, 0.f});
+
+    auto orientation = qPitch * qYaw;
+
+    return orientation / orientation.sizeSqrd();
 }
 
 gsl::vec3 gsl::Quaternion::rotatePoint(const gsl::vec3 &p, const gsl::quat &rot)

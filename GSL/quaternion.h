@@ -85,6 +85,16 @@ public:
      * @brief Create rotation quaternion
      */
     static gsl::quat rot(GLfloat angle, const gsl::vec3& axis);
+    /** Creates a lookAt quaternion. That is a quaternion that is
+     * rotated to look in a certain pitch and yaw. Taken from
+     * mat::lookAt, but much simpler.
+     * @brief quaternion that rotates around a pitch and yaw
+     * @param pitch - rotation around x-axis
+     * @param yaw - rotation around y-axis
+     * @see http://in2gpu.com/2016/03/14/opengl-fps-camera-quaternion/
+     * @return Rotation quaternion
+     */
+    static gsl::quat lookAt(GLfloat pitch, GLfloat yaw);
     /** Uses a quaternion to rotate a point
      * Performs the operation:
      * P' = q * P * q^-1

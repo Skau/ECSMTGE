@@ -74,11 +74,11 @@ void App::update()
     // Input:
     const auto& inputs = mWorld->getEntityManager()->getInputComponents();
     auto& transforms = mWorld->getEntityManager()->getTransforms();
+    auto& cameras = mWorld->getEntityManager()->getCameraComponents();
 
     mEventHandler->updateMouse();
     InputSystem::HandleInput(mDeltaTime, inputs, transforms);
-
-    auto& cameras = mWorld->getEntityManager()->getCameraComponents();
+    InputSystem::HandleCameraInput(mDeltaTime, inputs, transforms, cameras);
 
     // Sound listener is using the active camera view matrix (for directions) and transform (for position)
     for (const auto& camera : cameras)

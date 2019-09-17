@@ -182,8 +182,7 @@ gsl::quat gsl::Quaternion::conj() const
 
 GLfloat gsl::Quaternion::sizeSqrd() const
 {
-    auto qp = toPair();
-    return qp.s * qp.s + qp.v * qp.v;
+    return dot(*this);
 }
 
 gsl::quat gsl::Quaternion::inverse() const

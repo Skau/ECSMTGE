@@ -127,7 +127,7 @@ public:
     gsl::quat conj() const;
     /** Returns the squared magnitude of the
      * quaternion.
-     * |q|^2 = s^2 + v * v
+     * |q|^2 = s * s + a * a + b * b + c * c
      * @brief Magnitude squared
      * @return
      */

@@ -36,6 +36,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->treeWidget_ObjectList->setEditTriggers(QAbstractItemView::DoubleClicked);
 
+    ui->treeWidget_ObjectList->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->treeWidget_ObjectList->setDragEnabled(true);
+    ui->treeWidget_ObjectList->viewport()->setAcceptDrops(true);
+    ui->treeWidget_ObjectList->setDropIndicatorShown(true);
+    ui->treeWidget_ObjectList->setDragDropMode(QAbstractItemView::InternalMove);
+    ui->treeWidget_ObjectList->setMainWindow(this);
+
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     ui->scrollArea->setWidgetResizable(true);
 
@@ -65,6 +72,16 @@ void MainWindow::setEntityManager(std::shared_ptr<EntityManager> entityManager)
 
     // Called from Entitymanager to refresh the tree widget showing all entities
     connect(mEntityManager.get(), &EntityManager::updateUI, this, &MainWindow::updateUI);
+}
+
+EntityData* MainWindow::getEntityAt(QTreeWidgetItem* item)
+{
+    if(mTreeDataCache.find(item) != mTreeDataCache.end())
+    {
+        return &mTreeDataCache[item];
+    }
+
+    return nullptr;
 }
 
 // If a widget is removed we need to recreate the components

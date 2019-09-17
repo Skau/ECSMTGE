@@ -57,6 +57,7 @@ HEADERS += \
     Renderables/skybox.h \
     Renderables/octahedronball.h \
     Renderables/trianglesurface.h \
+    objecttreewidget.h \
     openalmanager.h \
     physicssystem.h \
     renderer.h \
@@ -103,6 +104,7 @@ SOURCES += \
     Renderables/objmesh.cpp \
     Renderables/skybox.cpp \
     Renderables/triangle.cpp \
+    objecttreewidget.cpp \
     openalmanager.cpp \
     physicssystem.cpp \
     renderer.cpp \

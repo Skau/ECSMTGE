@@ -9,7 +9,7 @@ class SoundListener
 public:
     SoundListener(const gsl::vec3& pos = gsl::vec3(0),
                   const gsl::vec3& vel = gsl::vec3(0),
-                  const gsl::vec3& dir = gsl::vec3(0.f, 0.f, 1.f),
+                  const gsl::vec3& dir = gsl::vec3(0.f, 0.f, -1.f),
                   const gsl::vec3& up = gsl::vec3(0.f, 1.f, 0.f));
 
     void setPosition(const gsl::vec3& pos);

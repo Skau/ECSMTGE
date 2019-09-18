@@ -37,7 +37,6 @@ struct EntityInfo : public Component
 {
     std::string name{};
 
-
     EntityInfo(unsigned int _eID = 0, bool _valid = false)
         : Component(_eID, _valid, ComponentType::Other)
     {}
@@ -83,12 +82,12 @@ struct PhysicsComponent : public Component
 
 struct MeshComponent : public Component
 {
-    MeshData meshData{};
     bool isVisible : 1;
+    MeshData meshData{};
 
     MeshComponent(unsigned int _eID = 0, bool _valid = false,
            const MeshData& _meshData = MeshData{}, bool _visible = false)
-        : Component (_eID, _valid, ComponentType::Mesh), meshData{_meshData}, isVisible{_visible}
+        : Component (_eID, _valid, ComponentType::Mesh), isVisible{_visible}, meshData{_meshData}
     {}
 };
 
@@ -119,12 +118,12 @@ struct InputComponent : public Component
 
 struct SoundComponent : public Component
 {
-    int mSource;
-    std::string name;
     bool isLooping = false;
     bool isMuted = false;
+    int mSource;
     float pitch = 1.f;
     float gain = .4f;
+    std::string name;
 
     SoundComponent(unsigned int _eID = 0, bool _valid = false)
         : Component(_eID, _valid, ComponentType::Sound), mSource{-1}

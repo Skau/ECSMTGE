@@ -69,12 +69,14 @@ void SoundListener::update(const CameraComponent& camera, const TransformCompone
 
     auto view = camera.viewMatrix;
     ALfloat orientation[6];
-    orientation[0] = view.getFloat(13);
-    orientation[1] = view.getFloat(23);
-    orientation[2] = view.getFloat(33);
-    orientation[3] = view.getFloat(12);
-    orientation[4] = view.getFloat(22);
-    orientation[5] = view.getFloat(32);
+    auto v = view.calcInverse();
+    orientation[0] = v.getFloat(3);
+    orientation[1] = v.getFloat(7);
+    orientation[2] = v.getFloat(11);
+
+    orientation[3] = view.getFloat(4);
+    orientation[4] = view.getFloat(5);
+    orientation[5] = view.getFloat(6);
 
     alListenerfv(AL_ORIENTATION, orientation);
 

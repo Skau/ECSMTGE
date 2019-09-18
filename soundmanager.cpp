@@ -3,7 +3,6 @@
 #include <QDebug>
 
 #include "resourcemanager.h"
-#include "soundsource.h"
 #include "componentdata.h"
 
 SoundManager::SoundManager()

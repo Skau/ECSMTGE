@@ -65,7 +65,6 @@ HEADERS += \
     scene.h \
     soundlistener.h \
     soundmanager.h \
-    soundsource.h \
     texture.h \
     wavfilehandler.h \
     world.h \
@@ -113,7 +112,6 @@ SOURCES += \
     scene.cpp \
     soundlistener.cpp \
     soundmanager.cpp \
-    soundsource.cpp \
     texture.cpp \
     wavfilehandler.cpp \
     world.cpp

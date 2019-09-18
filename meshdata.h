@@ -6,6 +6,7 @@
 #include "gltypes.h"
 #include "texture.h"
 
+
 struct Material
 {
     gsl::Vector3D mObjectColor{1.f, 1.f, 1.f};

@@ -15,8 +15,29 @@
  * so then we templated the instanced functions
  * with a precompiler directive.
  * These defines replace some codes with their
- * respective instanced typename K
+ * respective instanced typename K.
+ * This removed a lot of bloat and copy pasting of code.
  */
+
+
+/** Registers the component in the manager
+ * 1. Constructs the vector container for the components of type K.
+ * 2. Creates a getter of the vector used in the corresponding systems that needs them.
+ * 3. Creates a getter for a given entity.
+ * 4. Creates a remove component function for a given entity.
+ * 5. Creates an add component function for a given entity.
+ */
+#define REGISTER(K) \
+    private: \
+    std::vector<K> CONCATENATE(m, K, s); \
+    public: \
+    std::vector<K>& CONCATENATE(get, K, s)() { return CONCATENATE(m, K, s); } \
+    GETCOMPONENT(K) \
+    REMOVECOMPONENT(K) \
+    private: \
+    ADDCOMPONENTS(K) \
+
+
 #define GETCOMPONENT(K) \
 template<class T, \
     typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
@@ -79,7 +100,6 @@ bool removeComponent(unsigned int entity) \
 #define CONCATENATE( x, y, z) x##y##z
 
 
-
 /** A component data manager class
  * Constructs entities and manages
  * component data for each entity.
@@ -89,21 +109,22 @@ bool removeComponent(unsigned int entity) \
 class EntityManager : public QObject
 {
     Q_OBJECT
-private:
-    // ------------------------------ Member Variables ------------------------------
-    std::vector<TransformComponent> mTransformComponents;
-    std::vector<MeshComponent> mMeshComponents;
-    std::vector<EntityData> mEntityData;
-    std::vector<PhysicsComponent> mPhysicsComponents;
-    std::vector<CameraComponent> mCameraComponents;
-    std::vector<InputComponent> mInputComponents;
-    std::vector<SoundComponent> mSoundComponents;
 
+    REGISTER(TransformComponent)
+    REGISTER(MeshComponent)
+    REGISTER(PhysicsComponent)
+    REGISTER(CameraComponent)
+    REGISTER(InputComponent)
+    REGISTER(SoundComponent)
+    REGISTER(EntityInfo)
+
+private:
+    // ------------------------------ Member Variables -----------------------------
     unsigned int idCounter{0};
 
 
 signals:
-    void updateUI(const std::vector<EntityData>& entityData);
+    void updateUI(const std::vector<EntityInfo>& entityData);
 
     // ------------------------- Member functions ---------------
 public:
@@ -111,14 +132,6 @@ public:
     {
 
     }
-
-    std::vector<TransformComponent>& getTransforms() { return mTransformComponents; }
-    std::vector<MeshComponent>& getMeshComponents() { return mMeshComponents; }
-    std::vector<EntityData>& getEntityData() { return mEntityData; }
-    std::vector<PhysicsComponent>& getPhysicsComponents() { return mPhysicsComponents; }
-    std::vector<CameraComponent>& getCameraComponents() { return mCameraComponents; }
-    std::vector<InputComponent>& getInputComponents() { return mInputComponents; }
-    std::vector<SoundComponent>& getSoundComponents() { return mSoundComponents; }
 
     void createObject(int index)
     {
@@ -187,15 +200,15 @@ public:
     unsigned int createEntity(std::string name = "")
     {
         auto id = idCounter++;
-        EntityData entityData;
-        entityData.entityId = id;
+        EntityInfo entityInfo;
+        entityInfo.entityId = id;
         if(!name.size())
         {
             name = "Entity" + std::to_string(id);
         }
-        entityData.name = name;
-        mEntityData.push_back(entityData);
-        updateUI(mEntityData);
+        entityInfo.name = name;
+        mEntityInfos.push_back(entityInfo);
+        updateUI(mEntityInfos);
         return id;
     }
 
@@ -238,15 +251,6 @@ public:
             break;
         }
     }
-
-
-    GETCOMPONENT(TransformComponent)
-    GETCOMPONENT(MeshComponent)
-    GETCOMPONENT(PhysicsComponent)
-    GETCOMPONENT(CameraComponent)
-    GETCOMPONENT(InputComponent)
-    GETCOMPONENT(SoundComponent)
-
 
     /**
      * @brief Adds all components for a given entity to the given vector. Returns true if any was found.
@@ -298,30 +302,6 @@ public:
             }
         }
         return addedAnyComponents;
-    }
-
-    REMOVECOMPONENT(TransformComponent)
-    REMOVECOMPONENT(MeshComponent)
-    REMOVECOMPONENT(PhysicsComponent)
-    REMOVECOMPONENT(CameraComponent)
-    REMOVECOMPONENT(InputComponent)
-    REMOVECOMPONENT(SoundComponent)
-
-private:
-    ADDCOMPONENTS(TransformComponent)
-    ADDCOMPONENTS(MeshComponent)
-    ADDCOMPONENTS(PhysicsComponent)
-    ADDCOMPONENTS(CameraComponent)
-    ADDCOMPONENTS(InputComponent)
-    ADDCOMPONENTS(SoundComponent)
-
-    template <class T>
-    void sortComponents(std::vector<T>& vector)
-    {
-        std::sort(vector.begin(), vector.end(), [](Component t1, Component t2)
-        {
-            return t1.entityId < t2.entityId;
-        });
     }
 
 public:

@@ -4,7 +4,6 @@
 #include "resourcemanager.h"
 #include "world.h"
 #include "entitymanager.h"
-#include "soundsource.h"
 
 class Scene : public QObject
 {

@@ -75,7 +75,7 @@ void MainWindow::setEntityManager(std::shared_ptr<EntityManager> entityManager)
     connect(mEntityManager.get(), &EntityManager::updateUI, this, &MainWindow::updateUI);
 }
 
-EntityData* MainWindow::getEntityAt(QTreeWidgetItem* item)
+EntityInfo* MainWindow::getEntityAt(QTreeWidgetItem* item)
 {
     if(mTreeDataCache.find(item) != mTreeDataCache.end())
     {
@@ -119,7 +119,7 @@ void MainWindow::on_actionMonkey_triggered()
 }
 
 // Called from entity manager when a new entity is added to the scene
-void MainWindow::updateUI(const std::vector<EntityData> &entityData)
+void MainWindow::updateUI(const std::vector<EntityInfo> &entityData)
 {
     // Clear the map and widget
     mTreeDataCache.clear();

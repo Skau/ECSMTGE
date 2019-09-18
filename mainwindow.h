@@ -7,7 +7,7 @@
 
 class QWidget;
 class Renderer;
-class EntityData;
+class EntityInfo;
 class Component;
 
 namespace Ui {
@@ -38,14 +38,14 @@ public:
 
     std::shared_ptr<EntityManager> getEntityManager() { return mEntityManager; }
 
-    EntityData* currentEntitySelected{nullptr};
+    EntityInfo* currentEntitySelected{nullptr};
 
-    EntityData* getEntityAt(QTreeWidgetItem* item);
+    EntityInfo* getEntityAt(QTreeWidgetItem* item);
 
     void updateComponentWidgets();
 
 public slots:
-    void updateUI(const std::vector<EntityData>& entityData);
+    void updateUI(const std::vector<EntityInfo>& entityData);
     void onWidgetRemoved(ComponentWidget* widget);
 
 private slots:
@@ -76,10 +76,10 @@ private:
 
     std::shared_ptr<EntityManager> mEntityManager;
 
-    std::vector<EntityData> mEntityDataCache;
+    std::vector<EntityInfo> mEntityDataCache;
     std::vector<ComponentType> mAvailableComponentsToAddCache;
 
-    std::map<QTreeWidgetItem*, EntityData> mTreeDataCache;
+    std::map<QTreeWidgetItem*, EntityInfo> mTreeDataCache;
 
     std::vector<ComponentWidget*> mCurrentComponentWidgets;
 };

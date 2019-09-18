@@ -5,7 +5,6 @@
 #include "wavfilehandler.h"
 #include <QDebug>
 #include "soundmanager.h"
-#include "soundsource.h"
 
 ResourceManager::~ResourceManager()
 {
@@ -26,6 +25,7 @@ void ResourceManager::LoadAssetFiles()
             if (fileInfo.suffix() == "txt" || fileInfo.suffix() == "obj")
             {
                 auto mesh = addMesh(baseName, fileName);
+
                 mesh->mMaterial.mShader = getShader("plain");
             }
             else if(fileInfo.suffix() == "bmp")

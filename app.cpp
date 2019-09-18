@@ -75,7 +75,7 @@ void App::update()
 
     // Input:
     const auto& inputs = mWorld->getEntityManager()->getInputComponents();
-    auto& transforms = mWorld->getEntityManager()->getTransforms();
+    auto& transforms = mWorld->getEntityManager()->getTransformComponents();
     auto& cameras = mWorld->getEntityManager()->getCameraComponents();
 
     mEventHandler->updateMouse();

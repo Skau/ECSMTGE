@@ -199,6 +199,7 @@ void SoundManager::setVelocity(unsigned source, gsl::vec3 velocity)
 
 void SoundManager::cleanupSource(unsigned source)
 {
+    stop(source);
     alSourcei(source, AL_BUFFER, 0);
     alDeleteSources(1, &source);
     checkOpenALError();

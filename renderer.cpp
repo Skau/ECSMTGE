@@ -77,6 +77,48 @@ void Renderer::init()
 
     startOpenGLDebugger();
 
+    // Setup deferred shading textures
+    glGenFramebuffers(1, &mGBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+
+    // - position color buffer
+    glGenTextures(1, &mGPosition);
+    glBindTexture(GL_TEXTURE_2D, mGPosition);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width(), height(), 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mGPosition, 0);
+
+    // - normal color buffer
+    glGenTextures(1, &mGNormal);
+    glBindTexture(GL_TEXTURE_2D, mGNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width(), height(), 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, mGNormal, 0);
+
+    // - color + specular color buffer
+    glGenTextures(1, &mGAlbedoSpec);
+    glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width(),  height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, mGAlbedoSpec, 0);
+
+    // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+    unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers(3, attachments);
+
+    // create and attach depth buffer (renderbuffer)
+    glGenRenderbuffers(1, &mRboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, mRboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width(), height());
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRboDepth);
+    // finally check if framebuffer is complete
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        qDebug() << "Framebuffer not complete!";
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     // Called to tell App that it can continue initializing
     initDone();
 }
@@ -155,6 +197,7 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
                 if(!shader)
                 {
                     shader = ResourceManager::instance()->getShader("color");
+                    meshData.mMaterial.mShader = shader;
                 }
 
                 glUseProgram(shader->getProgram());
@@ -197,6 +240,191 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
 
         mContext->swapBuffers(this);
     }
+}
+
+void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera)
+{
+    if(isExposed())
+    {
+        mContext->makeCurrent(this);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // mCurrentCamera->update(deltaTime);
+
+        auto transIt = transforms.begin();
+        auto renderIt = renders.begin();
+
+        bool transformShortest = transforms.size() < renders.size();
+
+        bool _{true};
+
+        // cause normal while (true) loops are so outdated
+        for ( ;_; )
+        {
+            if (transformShortest)
+            {
+                if (transIt == transforms.end())
+                    break;
+            }
+            else
+            {
+                if (renderIt == renders.end())
+                    break;
+            }
+
+            // Increment lowest index
+            if (!transIt->valid || transIt->entityId < renderIt->entityId)
+            {
+                ++transIt;
+            }
+            else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
+            {
+                ++renderIt;
+            }
+            else
+            {
+                // They are the same
+                if(!renderIt->isVisible)
+                {
+                    // Increment all
+                    ++transIt;
+                    ++renderIt;
+                    continue;
+                }
+
+                // Mesh data available
+                auto meshData = renderIt->meshData;
+                if(!meshData.mVerticesCount)
+                {
+                    // Increment all
+                    ++transIt;
+                    ++renderIt;
+                    continue;
+                }
+
+                // Entity can be drawn. Draw.
+
+                glBindVertexArray(meshData.mVAO);
+
+
+                // ** NEEDS TO BE A DEFERRED SHADER ** //
+
+                auto shader = meshData.mMaterial.mShader;
+                if(!shader)
+                {
+                    shader = ResourceManager::instance()->getShader("defaultDeferred");
+                    meshData.mMaterial.mShader = shader;
+                }
+
+                glUseProgram(shader->getProgram());
+
+                auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
+
+                // ** Geometry pass ** //
+                glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+                if(meshData.mIndicesCount > 0)
+                {
+                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
+                }
+                else
+                {
+                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
+                }
+
+
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                glClear(GL_COLOR_BUFFER_BIT);
+
+
+                // ** Lighting pass ** //
+
+                glDisable(GL_DEPTH_TEST);
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+                glActiveTexture(GL_TEXTURE0 + mGPosition);
+                glBindTexture(GL_TEXTURE_2D, mGPosition);
+                glActiveTexture(GL_TEXTURE0 + mGNormal);
+                glBindTexture(GL_TEXTURE_2D, mGNormal);
+                glActiveTexture(GL_TEXTURE0 + mGAlbedoSpec);
+                glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
+
+                // 1. For each lighting type
+                //      2. Get lighting shader
+                //      3. Set uniforms
+                //      4. renderQuad()
+
+                // ** Directional light ** //
+
+                glUseProgram(mDirectionalLightShader->getProgram());
+                auto location = mDirectionalLightShader->getProgram();
+                glUniform3fv(glGetUniformLocation(location, "light.Direction"), 1, gsl::vec3(0, -1, 0).xP());
+                glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, gsl::vec3(1, 1, 1).xP());
+                auto v = camera.viewMatrix;
+                v.inverse();
+                auto pos = gsl::vec3(v.at(0, 3), v.at(1, 3), v.at(2, 3));
+                glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, gsl::vec3(0, -1, 0).xP());
+                renderQuad();
+
+                glEnable(GL_DEPTH_TEST);
+                glDisable(GL_BLEND);
+
+                // ** Forward shading ** //
+
+                // copy content of geometry's depth buffer to default framebuffer's depth buffer
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
+                glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+
+                // blit to default framebuffer
+                glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+                // Draw foward here
+
+                // Increment all
+                ++transIt;
+                ++renderIt;
+            }
+        }
+
+        checkForGLerrors();
+
+        mContext->swapBuffers(this);
+    }
+}
+
+void Renderer::renderQuad()
+{
+    if (mQuadVAO == 0)
+    {
+        float quadVertices[] = {
+            //    positions   texture Coords
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+            1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // plane VAO setup
+        glGenVertexArrays(1, &mQuadVAO);
+        glGenBuffers(1, &mQuadVBO);
+        glBindVertexArray(mQuadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, mQuadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)nullptr);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+    glBindVertexArray(mQuadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 }
 
 void Renderer::exposeEvent(QExposeEvent *)
@@ -248,6 +476,15 @@ void Renderer::checkForGLerrors()
             qDebug() << "glGetError returns " << err;
         }
     }
+}
+
+void Renderer::updateShaders()
+{
+    mDirectionalLightShader = ResourceManager::instance()->getShader("directionalLight");
+    glUseProgram(mDirectionalLightShader->getProgram());
+    glUniform1i(glGetUniformLocation(mDirectionalLightShader->getProgram(), "gPosition"), static_cast<int>(mGPosition));
+    glUniform1i(glGetUniformLocation(mDirectionalLightShader->getProgram(), "gNormal"), static_cast<int>(mGNormal));
+    glUniform1i(glGetUniformLocation(mDirectionalLightShader->getProgram(), "gAlbedoSpec"), static_cast<int>(mGAlbedoSpec));
 }
 
 /// Tries to start the extended OpenGL debugger that comes with Qt

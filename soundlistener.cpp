@@ -69,6 +69,7 @@ void SoundListener::update(const CameraComponent& camera, const TransformCompone
 
     auto view = camera.viewMatrix;
     ALfloat orientation[6];
+    // TODO: Fix this. The calculations for forward vector is probably wrong.
     auto v = view.calcInverse();
     orientation[0] = v.getFloat(3);
     orientation[1] = v.getFloat(7);

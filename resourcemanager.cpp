@@ -24,9 +24,7 @@ void ResourceManager::LoadAssetFiles()
             auto fileName = fileInfo.fileName().toStdString();
             if (fileInfo.suffix() == "txt" || fileInfo.suffix() == "obj")
             {
-                auto mesh = addMesh(baseName, fileName);
-
-                mesh->mMaterial.mShader = getShader("plain");
+                addMesh(baseName, fileName);
             }
             else if(fileInfo.suffix() == "bmp")
             {

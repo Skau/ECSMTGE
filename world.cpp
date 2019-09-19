@@ -6,10 +6,12 @@
 
 World::World()
 {
-    ResourceManager::instance()->addShader("color",     std::make_shared<Shader>("colorshader"));
-    ResourceManager::instance()->addShader("texture",   std::make_shared<Shader>("textureshader"));
-    ResourceManager::instance()->addShader("phong",     std::make_shared<Shader>("phongshader"));
-    ResourceManager::instance()->addShader("axis",      std::make_shared<Shader>("axisshader.vert", "colorshader.frag"));
+    ResourceManager::instance()->addShader("color",             std::make_shared<Shader>("colorshader"));
+    ResourceManager::instance()->addShader("texture",           std::make_shared<Shader>("textureshader"));
+    ResourceManager::instance()->addShader("phong",             std::make_shared<Shader>("phongshader"));
+    ResourceManager::instance()->addShader("axis",              std::make_shared<Shader>("axisshader.vert", "colorshader.frag"));
+    ResourceManager::instance()->addShader("defaultDeferred",   std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag"));
+    ResourceManager::instance()->addShader("directionalLight",  std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/directionallight.frag"));
 
     ResourceManager::instance()->LoadAssetFiles();
 

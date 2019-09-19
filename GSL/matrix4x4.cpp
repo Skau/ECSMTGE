@@ -252,8 +252,8 @@ void Matrix4x4::rotateX(GLfloat degrees)
     Matrix4x4 temp =
     {
         1.f,   0.f,       0.f,    0.f,
-        0.f, std::cos(rad),  std::sin(rad), 0.f,
-        0.f, -std::sin(rad), std::cos(rad), 0.f,
+        0.f, std::cos(rad),  -std::sin(rad), 0.f,
+        0.f, std::sin(rad), std::cos(rad), 0.f,
         0.f,   0.f,       0.f,    1.f
     };
 
@@ -266,9 +266,9 @@ void Matrix4x4::rotateY(GLfloat degrees)
 
     Matrix4x4 temp =
     {
-        std::cos(rad), 0.f, -std::sin(rad), 0.f,
+        std::cos(rad), 0.f, std::sin(rad), 0.f,
         0.f,       1.f,      0.f,       0.f,
-        std::sin(rad), 0.f,  std::cos(rad), 0.f,
+        -std::sin(rad), 0.f,  std::cos(rad), 0.f,
         0.f,       0.f,      0.f,       1.f
     };
 
@@ -281,8 +281,8 @@ void Matrix4x4::rotateZ(GLfloat degrees)
 
     Matrix4x4 temp =
     {
-        std::cos(rad),  std::sin(rad), 0.f, 0.f,
-        -std::sin(rad),  std::cos(rad), 0.f, 0.f,
+        std::cos(rad),  -std::sin(rad), 0.f, 0.f,
+        std::sin(rad),  std::cos(rad), 0.f, 0.f,
         0.f,            0.f,       1.f, 0.f,
         0.f,            0.f,       0.f, 1.f
     };

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>OpenGL in Qt</string>
+   <string>Entity Component Manager and Multi Threading performance based Game Engine</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">

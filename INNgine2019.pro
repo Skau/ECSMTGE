@@ -49,9 +49,9 @@ win32 {
             OpenAL32.commands = copy /Y \"$(OPENAL_HOME)\\bin\\Win64\\soft_oal.dll\" release\\OpenAL32.dll
             OpenAL32.target = release/OpenAL32.dll
 
-#            QMAKE_EXTRA_TARGETS += OpenAL32
-#            PRE_TARGETDEPS += release/OpenAL32.dll
-#        }
+            QMAKE_EXTRA_TARGETS += OpenAL32
+            PRE_TARGETDEPS += release/OpenAL32.dll
+        }
     }
 }
 

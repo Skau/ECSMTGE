@@ -119,6 +119,28 @@ void Renderer::init()
         qDebug() << "Framebuffer not complete!";
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+
+    // Create renderquad
+    float quadVertices[] = {
+        //    positions   texture Coords
+        -1.0f,  -1.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 0.0f, 1.f, 1.0f,
+    };
+    // plane VAO setup
+    GLuint mQuadVBO;
+    glGenVertexArrays(1, &mQuadVAO);
+    glGenBuffers(1, &mQuadVBO);
+    glBindVertexArray(mQuadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, mQuadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+
     // Called to tell App that it can continue initializing
     initDone();
 }
@@ -258,6 +280,10 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
         bool _{true};
 
+        // ** Geometry pass ** //
+        glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         // cause normal while (true) loops are so outdated
         for ( ;_; )
         {
@@ -323,11 +349,6 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
 
-                // ** Geometry pass ** //
-                glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
                 if(meshData.mIndicesCount > 0)
                 {
                     glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
@@ -338,61 +359,66 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
                 }
 
 
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                glClear(GL_COLOR_BUFFER_BIT);
-
-
-                // ** Lighting pass ** //
-
-                glDisable(GL_DEPTH_TEST);
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-                glActiveTexture(GL_TEXTURE0 + mGPosition);
-                glBindTexture(GL_TEXTURE_2D, mGPosition);
-                glActiveTexture(GL_TEXTURE0 + mGNormal);
-                glBindTexture(GL_TEXTURE_2D, mGNormal);
-                glActiveTexture(GL_TEXTURE0 + mGAlbedoSpec);
-                glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
-
-                // 1. For each lighting type
-                //      2. Get lighting shader
-                //      3. Set uniforms
-                //      4. renderQuad()
-
-                // ** Directional light ** //
-
-                glUseProgram(mDirectionalLightShader->getProgram());
-                auto location = mDirectionalLightShader->getProgram();
-                glUniform3fv(glGetUniformLocation(location, "light.Direction"), 1, gsl::vec3(0, -1, 0).xP());
-                glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, gsl::vec3(1, 1, 1).xP());
-                auto v = camera.viewMatrix;
-                v.inverse();
-                auto pos = gsl::vec3(v.at(0, 3), v.at(1, 3), v.at(2, 3));
-                glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, gsl::vec3(0, -1, 0).xP());
-                renderQuad();
-
-                glEnable(GL_DEPTH_TEST);
-                glDisable(GL_BLEND);
-
-                // ** Forward shading ** //
-
-                // copy content of geometry's depth buffer to default framebuffer's depth buffer
-                glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
-                glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-
-                // blit to default framebuffer
-                glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-                // Draw foward here
-
                 // Increment all
                 ++transIt;
                 ++renderIt;
             }
         }
+
+
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+        // ** Lighting pass ** //
+
+        glDisable(GL_DEPTH_TEST);
+//        glEnable(GL_BLEND);
+//        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, mGPosition);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, mGNormal);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
+
+        // 1. For each lighting type
+        //      2. Get lighting shader
+        //      3. Set uniforms
+        //      4. renderQuad()
+
+        // ** Directional light ** //
+
+        glUseProgram(mDirectionalLightShader->getProgram());
+        auto location = mDirectionalLightShader->getProgram();
+        glUniform3fv(glGetUniformLocation(location, "light.Direction"), 1, gsl::vec3(0, -1, 0).xP());
+        glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, gsl::vec3(1, 1, 1).xP());
+        auto v = camera.viewMatrix;
+        v.inverse();
+        auto pos = gsl::vec3(v.at(0, 3), v.at(1, 3), v.at(2, 3));
+        glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, gsl::vec3(0, -1, 0).xP());
+        glUniform1i(glGetUniformLocation(location, "gPosition"), 0);
+        glUniform1i(glGetUniformLocation(location, "gNormal"), 1);
+        glUniform1i(glGetUniformLocation(location, "gAlbedoSpec"), 2);
+        renderQuad();
+
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
+
+        // ** Forward shading ** //
+
+        // copy content of geometry's depth buffer to default framebuffer's depth buffer
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+
+        // blit to default framebuffer
+        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+        // Draw foward here
 
         checkForGLerrors();
 
@@ -402,26 +428,6 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
 void Renderer::renderQuad()
 {
-    if (mQuadVAO == 0)
-    {
-        float quadVertices[] = {
-            //    positions   texture Coords
-            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-            1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-        };
-        // plane VAO setup
-        glGenVertexArrays(1, &mQuadVAO);
-        glGenBuffers(1, &mQuadVBO);
-        glBindVertexArray(mQuadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, mQuadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)nullptr);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    }
     glBindVertexArray(mQuadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);

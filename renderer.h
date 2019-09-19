@@ -53,7 +53,7 @@ private:
 
     Light *mLight;
 
-    unsigned int mQuadVAO, mQuadVBO{};
+    unsigned int mQuadVAO;
     unsigned int mGBuffer, mGPosition{}, mGNormal{}, mGAlbedoSpec{};
     unsigned int mRboDepth{};
     std::shared_ptr<Shader> mDirectionalLightShader;

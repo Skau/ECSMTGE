@@ -15,6 +15,9 @@ SoundManager::SoundManager()
         alcMakeContextCurrent(mContext);
     }
 
+    const ALCchar *tempname = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
+    qDebug() << tempname << "used as audio device";
+
     checkOpenALError();
 
     if (!mDevice)

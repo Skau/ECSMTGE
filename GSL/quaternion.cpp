@@ -3,6 +3,8 @@
 #include "matrix4x4.h"
 #include <cmath>
 #include <limits>
+#include "math_constants.h"
+#include <QDebug>
 
 gsl::Quaternion::Quaternion(GLfloat sIn, GLfloat iIn, GLfloat jIn, GLfloat kIn)
     : s{sIn}, i{iIn}, j{jIn}, k{kIn}
@@ -178,11 +180,23 @@ gsl::mat4 gsl::Quaternion::toMat() const
 
 gsl::vec3 gsl::Quaternion::toEuler() const
 {
-    return gsl::vec3{
-        std::atan2(2.f * (s * i + j + k), 1.f - 2.f * (i * i + j * j)),
-        std::asin(2.f * (s * j - k * i)),
-        std::atan2(2.f * (s * k + i * j), 1.f - 2.f * (j * j + k * k))
-    };
+    // float test = i * j + k * s;
+    vec3 returnValue;
+    returnValue.x = std::atan2(2.f * (s * i + j * k), 1.f - 2.f * (i * i + j * j));
+
+    auto pitchTest = 2.f * (s * j - k * i);
+    if (std::fabs(pitchTest) >= 1.f)
+    {
+        returnValue.y = std::copysign(gsl::PI / 2.f, pitchTest);
+    }
+    else
+    {
+        returnValue.y = std::asin(pitchTest);
+    }
+
+    returnValue.z = std::atan2(2.f * (s * k + i * j), 1.f - 2.f * (j * j + k * k));
+
+    return returnValue;
 }
 
 gsl::quat gsl::Quaternion::conj() const
@@ -234,5 +248,19 @@ std::ostream& operator<<(std::ostream &out, const gsl::quat &quat)
     }
     return out;
     // return out << quat.s << " + " << quat.i << "i + " << quat.j << "j + " << quat.k << "k";
+}
+
+QDebug& operator<<(QDebug &out, const gsl::quat &quat)
+{
+    out << ((std::abs(quat.s) > std::numeric_limits<float>::epsilon()) ? quat.s : 0.f);
+    for (int i{0}; i < 3; ++i)
+    {
+        auto num = *(&quat.i + i);
+        if (std::abs(num) > std::numeric_limits<float>::epsilon())
+        {
+            out << " + " << num << static_cast<char>('i' + i);
+        }
+    }
+    return out;
 }
 }

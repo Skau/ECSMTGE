@@ -26,6 +26,8 @@ A mathematical structure that uses a complex numnber
  * @author andesyv (Quaternion concept described by Sir William Rowan Hamilton)
  */
 
+class QDebug;
+
 namespace gsl
 {
 
@@ -178,6 +180,7 @@ public:
      */
     gsl::quat::Pair toPair() const;
     friend std::ostream& operator<< (std::ostream& out, const gsl::quat& quat);
+    friend QDebug& operator<< (QDebug& out, const gsl::quat& quat);
 
 
 

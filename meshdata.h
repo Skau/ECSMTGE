@@ -28,7 +28,7 @@ struct MeshData
     Material mMaterial;
 
     MeshData(unsigned int VAO = 0, unsigned int verticesCount = 0, unsigned int indicesCount = 0, const std::string& name = "", Material material = Material(), GLenum renderType = GL_TRIANGLES)
-        : mVAO(VAO), mVerticesCount(verticesCount), mIndicesCount(indicesCount), mName(name), mMaterial(material), mRenderType(renderType) {}
+        : mRenderType(renderType), mVAO(VAO), mVerticesCount(verticesCount), mIndicesCount(indicesCount), mName(name), mMaterial(material) {}
 };
 
 #endif // MESHDATA_H

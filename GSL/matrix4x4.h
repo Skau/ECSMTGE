@@ -15,7 +15,6 @@ namespace gsl
 class Matrix4x4
 {
 private:
-    // TODO: Change structure so that matrices doesn't need to be transposed to send to OpenGL.
     GLfloat data[16];
 
 private:

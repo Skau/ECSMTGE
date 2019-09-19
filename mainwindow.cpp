@@ -328,7 +328,8 @@ void MainWindow::on_treeWidget_ObjectList_itemChanged(QTreeWidgetItem *item, int
         entity.name = item->text(0).toStdString();
         if(currentEntitySelected && entity.entityId == currentEntitySelected->entityId)
         {
-        ui->lineEdit_SelectedObject->setText(item->text(0));
+            ui->lineEdit_SelectedObject->setText(item->text(0));
+            currentEntitySelected->name = item->text(0).toStdString();
         }
     }
 }

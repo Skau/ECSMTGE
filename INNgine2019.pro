@@ -23,13 +23,13 @@ win32 {
         LIBS *= $(OPENAL_HOME)\\libs\\Win32\\libOpenAL32.dll.a
 
         CONFIG(debug, debug|release) {
-            OpenAL32.commands = copy /Y \"$(OPENAL_HOME)\\bin\\Win32\\OpenAL32.dll\" debug
+            OpenAL32.commands = copy /Y \"$(OPENAL_HOME)\\bin\\Win32\\soft_oal.dll\" debug\\OpenAL32.dll
             OpenAL32.target = debug/OpenAL32.dll
 
             QMAKE_EXTRA_TARGETS += OpenAL32
             PRE_TARGETDEPS += debug/OpenAL32.dll
         } else:CONFIG(release, debug|release) {
-            OpenAL32.commands = copy /Y \"$(OPENAL_HOME)\\bin\\Win32\\OpenAL32.dll\" release
+            OpenAL32.commands = copy /Y \"$(OPENAL_HOME)\\bin\\Win32\\soft_oal.dll\" release\\OpenAL32.dll
             OpenAL32.target = release/OpenAL32.dll
 
             QMAKE_EXTRA_TARGETS += OpenAL32
@@ -40,13 +40,13 @@ win32 {
         LIBS *= $(OPENAL_HOME)\\libs\\Win64\\libOpenAL32.dll.a
 
         CONFIG(debug, debug|release) {
-            OpenAL32.commands = copy /Y \"$(OPENAL_HOME)\\bin\\Win64\\OpenAL32.dll\" debug
+            OpenAL32.commands = copy \"$(OPENAL_HOME)\\bin\\Win64\\soft_oal.dll\" debug\\OpenAL32.dll
             OpenAL32.target = debug/OpenAL32.dll
 
             QMAKE_EXTRA_TARGETS += OpenAL32
             PRE_TARGETDEPS += debug/OpenAL32.dll
         } else:CONFIG(release, debug|release) {
-            OpenAL32.commands = copy /Y \"$(OPENAL_HOME)\\bin\\Win64\\OpenAL32.dll\" release
+            OpenAL32.commands = copy /Y \"$(OPENAL_HOME)\\bin\\Win64\\soft_oal.dll\" release\\OpenAL32.dll
             OpenAL32.target = release/OpenAL32.dll
 
             QMAKE_EXTRA_TARGETS += OpenAL32

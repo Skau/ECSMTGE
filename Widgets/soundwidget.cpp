@@ -11,6 +11,7 @@ SoundWidget::SoundWidget(MainWindow* mainWindow, QWidget* parent)
 {
     ui->setupUi(this);
 
+    ui->comboBox_AvailableSounds->addItem("None");
     for(auto& name : ResourceManager::instance()->getAllWavFileNames())
     {
         ui->comboBox_AvailableSounds->addItem(QString::fromStdString(name));
@@ -38,7 +39,7 @@ void SoundWidget::on_horizontalSlider_Gain_valueChanged(int value)
 {
     if(auto sound = getSoundComponent())
     {
-        if(sound->mSource)
+        if(sound->mSource != -1)
         {
             float v = value / 10.f;
             sound->gain = v;
@@ -52,7 +53,7 @@ void SoundWidget::on_checkBox_Loop_toggled(bool checked)
 {
     if(auto sound = getSoundComponent())
     {
-        if(sound->mSource)
+        if(sound->mSource != -1)
         {
             SoundManager::setLooping(static_cast<unsigned>(sound->mSource), checked);
             sound->isLooping = checked;
@@ -65,7 +66,7 @@ void SoundWidget::on_checkBox_Mute_toggled(bool checked)
 {
     if(auto sound = getSoundComponent())
     {
-        if(sound->mSource)
+        if(sound->mSource != -1)
         {
             sound->isMuted = checked;
             SoundManager::setMute(static_cast<unsigned>(sound->mSource), checked, sound->gain);
@@ -78,7 +79,7 @@ void SoundWidget::on_pushButton_Start_clicked()
 {
     if(auto sound = getSoundComponent())
     {
-        if(sound->mSource)
+        if(sound->mSource != -1)
         {
             SoundManager::play(static_cast<unsigned>(sound->mSource));
             isPlaying = true;
@@ -90,7 +91,7 @@ void SoundWidget::on_pushButton_Pause_clicked()
 {
     if(auto sound = getSoundComponent())
     {
-        if(sound->mSource)
+        if(sound->mSource != -1)
         {
             SoundManager::pause(static_cast<unsigned>(sound->mSource));
             isPlaying = false;
@@ -102,7 +103,7 @@ void SoundWidget::on_pushButton_Stop_clicked()
 {
     if(auto sound = getSoundComponent())
     {
-        if(sound->mSource)
+        if(sound->mSource != -1)
         {
             SoundManager::stop(static_cast<unsigned>(sound->mSource));
             isPlaying = false;
@@ -114,11 +115,11 @@ void SoundWidget::on_pushButton_ChangeSound_clicked()
 {
     auto name = ui->comboBox_AvailableSounds->currentText();
 
-    if(name.size())
+    if(name.size() && name != "None")
     {
         if(auto sound = getSoundComponent())
         {
-            if(sound->mSource > 0)
+            if(sound->mSource != -1)
             {
                 SoundManager::cleanupSource(static_cast<unsigned>(sound->mSource));
                 sound->mSource = -1;
@@ -160,7 +161,7 @@ void SoundWidget::on_doubleSpinBox_Pitch_valueChanged(double arg1)
 
     if(auto sound = getSoundComponent())
     {
-        if(sound->mSource)
+        if(sound->mSource != -1)
         {
             sound->pitch = static_cast<float>(arg1);
             SoundManager::changePitch(static_cast<unsigned>(sound->mSource), static_cast<float>(arg1));
@@ -179,7 +180,7 @@ void SoundWidget::on_pushButton_soundFromFile_clicked()
     {
         if(auto sound = getSoundComponent())
         {
-            if(sound->mSource > 0)
+            if(sound->mSource != -1)
             {
                 SoundManager::cleanupSource(static_cast<unsigned>(sound->mSource));
                 sound->mSource = -1;

@@ -13,16 +13,19 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
 {
     ui->setupUi(this);
 
+    ui->comboBox_Meshes->addItem("None");
     for(auto& name : ResourceManager::instance()->getAllMeshNames())
     {
         ui->comboBox_Meshes->addItem(QString::fromStdString(name));
     }
 
+    ui->comboBox_Shaders->addItem("None");
     for(auto& name : ResourceManager::instance()->getAllShaderNames())
     {
         ui->comboBox_Shaders->addItem(QString::fromStdString(name));
     }
 
+    ui->comboBox_Textures->addItem("None");
     for(auto& name : ResourceManager::instance()->getAllTextureNames())
     {
         ui->comboBox_Textures->addItem(QString::fromStdString(name));
@@ -140,7 +143,7 @@ void MeshWidget::on_pushButton_ChangeMeshDropdown_clicked()
     if(!mMainWindow->currentEntitySelected) return;
 
     auto name = ui->comboBox_Meshes->currentText();
-    if(!name.length()) return;
+    if(!name.length() || name == "None") return;
 
     if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
     {
@@ -156,7 +159,7 @@ void MeshWidget::on_pushButton_ChangeShaderDropdown_clicked()
     if(!mMainWindow->currentEntitySelected) return;
 
     auto name = ui->comboBox_Shaders->currentText();
-    if(!name.length()) return;
+    if(!name.length() || name == "None") return;
 
     if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
     {
@@ -169,7 +172,7 @@ void MeshWidget::on_pushButton_ChangeTextureDropdown_clicked()
     if(!mMainWindow->currentEntitySelected) return;
 
     auto name = ui->comboBox_Textures->currentText();
-    if(!name.length()) return;
+    if(!name.length() || name == "None") return;
 
     if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
     {

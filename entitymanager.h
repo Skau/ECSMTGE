@@ -122,7 +122,6 @@ private:
     // ------------------------------ Member Variables -----------------------------
     unsigned int idCounter{0};
 
-
 signals:
     void updateUI(const std::vector<EntityInfo>& entityData);
 

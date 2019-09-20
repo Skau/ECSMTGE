@@ -130,9 +130,9 @@ void Renderer::init()
     };
     // plane VAO setup
     GLuint mQuadVBO;
-    glGenVertexArrays(1, &mQuadVAO);
+    glGenVertexArrays(1, &mScreenSpacedQuadVAO);
     glGenBuffers(1, &mQuadVBO);
-    glBindVertexArray(mQuadVAO);
+    glBindVertexArray(mScreenSpacedQuadVAO);
     glBindBuffer(GL_ARRAY_BUFFER, mQuadVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
@@ -269,113 +269,15 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
     if(isExposed())
     {
         mContext->makeCurrent(this);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // mCurrentCamera->update(deltaTime);
-
-        auto transIt = transforms.begin();
-        auto renderIt = renders.begin();
-
-        bool transformShortest = transforms.size() < renders.size();
-
-        bool _{true};
-
-        // ** Geometry pass ** //
-        glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // cause normal while (true) loops are so outdated
-        for ( ;_; )
-        {
-            if (transformShortest)
-            {
-                if (transIt == transforms.end())
-                    break;
-            }
-            else
-            {
-                if (renderIt == renders.end())
-                    break;
-            }
-
-            // Increment lowest index
-            if (!transIt->valid || transIt->entityId < renderIt->entityId)
-            {
-                ++transIt;
-            }
-            else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
-            {
-                ++renderIt;
-            }
-            else
-            {
-                // They are the same
-                if(!renderIt->isVisible)
-                {
-                    // Increment all
-                    ++transIt;
-                    ++renderIt;
-                    continue;
-                }
-
-                // Mesh data available
-                auto meshData = renderIt->meshData;
-                if(!meshData.mVerticesCount)
-                {
-                    // Increment all
-                    ++transIt;
-                    ++renderIt;
-                    continue;
-                }
-
-                // Entity can be drawn. Draw.
-
-                glBindVertexArray(meshData.mVAO);
-
-
-                // ** NEEDS TO BE A DEFERRED SHADER ** //
-
-                auto shader = meshData.mMaterial.mShader;
-                if(!shader)
-                {
-                    shader = ResourceManager::instance()->getShader("defaultDeferred");
-                    meshData.mMaterial.mShader = shader;
-                }
-
-                glUseProgram(shader->getProgram());
-
-                auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
-                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
-                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
-                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
-
-                if(meshData.mIndicesCount > 0)
-                {
-                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
-                }
-                else
-                {
-                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
-                }
-
-
-                // Increment all
-                ++transIt;
-                ++renderIt;
-            }
-        }
-
-
+        deferredGeometryPass(renders, transforms, camera);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-        // ** Lighting pass ** //
-
         glDisable(GL_DEPTH_TEST);
-//        glEnable(GL_BLEND);
-//        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, mGPosition);
@@ -384,25 +286,7 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
 
-        // 1. For each lighting type
-        //      2. Get lighting shader
-        //      3. Set uniforms
-        //      4. renderQuad()
-
-        // ** Directional light ** //
-
-        glUseProgram(mDirectionalLightShader->getProgram());
-        auto location = mDirectionalLightShader->getProgram();
-        glUniform3fv(glGetUniformLocation(location, "light.Direction"), 1, gsl::vec3(0, -1, 0).xP());
-        glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, gsl::vec3(1, 1, 1).xP());
-        auto v = camera.viewMatrix;
-        v.inverse();
-        auto pos = gsl::vec3(v.at(0, 3), v.at(1, 3), v.at(2, 3));
-        glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, gsl::vec3(0, -1, 0).xP());
-        glUniform1i(glGetUniformLocation(location, "gPosition"), 0);
-        glUniform1i(glGetUniformLocation(location, "gNormal"), 1);
-        glUniform1i(glGetUniformLocation(location, "gAlbedoSpec"), 2);
-        renderQuad();
+        deferredLightningPass(camera);
 
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
@@ -417,7 +301,6 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
         // Draw foward here
 
         checkForGLerrors();
@@ -426,9 +309,129 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
     }
 }
 
+void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera)
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    auto transIt = transforms.begin();
+    auto renderIt = renders.begin();
+
+    bool transformShortest = transforms.size() < renders.size();
+
+    bool _{true};
+
+    // ** Geometry pass ** //
+    glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // cause normal while (true) loops are so outdated
+    for ( ;_; )
+    {
+        if (transformShortest)
+        {
+            if (transIt == transforms.end())
+                break;
+        }
+        else
+        {
+            if (renderIt == renders.end())
+                break;
+        }
+
+        // Increment lowest index
+        if (!transIt->valid || transIt->entityId < renderIt->entityId)
+        {
+            ++transIt;
+        }
+        else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
+        {
+            ++renderIt;
+        }
+        else
+        {
+            // They are the same
+            if(!renderIt->isVisible)
+            {
+                // Increment all
+                ++transIt;
+                ++renderIt;
+                continue;
+            }
+
+            // Mesh data available
+            auto meshData = renderIt->meshData;
+            if(!meshData.mVerticesCount)
+            {
+                // Increment all
+                ++transIt;
+                ++renderIt;
+                continue;
+            }
+
+            // Entity can be drawn. Draw.
+
+            glBindVertexArray(meshData.mVAO);
+
+
+            // ** NEEDS TO BE A DEFERRED SHADER ** //
+
+            auto shader = meshData.mMaterial.mShader;
+            if(!shader)
+            {
+                shader = ResourceManager::instance()->getShader("defaultDeferred");
+                meshData.mMaterial.mShader = shader;
+            }
+
+            glUseProgram(shader->getProgram());
+
+            auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
+            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
+            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
+            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
+
+            if(meshData.mIndicesCount > 0)
+            {
+                glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
+            }
+            else
+            {
+                glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
+            }
+
+
+            // Increment all
+            ++transIt;
+            ++renderIt;
+        }
+    }
+}
+
+void Renderer::deferredLightningPass(const CameraComponent &camera)
+{
+    // 1. For each lighting type
+    //      2. Get lighting shader
+    //      3. Set uniforms
+    //      4. renderQuad()
+
+    // ** Directional light ** //
+
+    glUseProgram(mDirectionalLightShader->getProgram());
+    auto location = mDirectionalLightShader->getProgram();
+    glUniform3fv(glGetUniformLocation(location, "light.Direction"), 1, gsl::vec3(0, -1, 0).xP());
+    glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, gsl::vec3(1, 1, 1).xP());
+    auto v = camera.viewMatrix;
+    v.inverse();
+    auto pos = gsl::vec3(v.at(0, 3), v.at(1, 3), v.at(2, 3));
+    glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, gsl::vec3(0, -1, 0).xP());
+    glUniform1i(glGetUniformLocation(location, "gPosition"), 0);
+    glUniform1i(glGetUniformLocation(location, "gNormal"), 1);
+    glUniform1i(glGetUniformLocation(location, "gAlbedoSpec"), 2);
+    renderQuad();
+}
+
 void Renderer::renderQuad()
 {
-    glBindVertexArray(mQuadVAO);
+    glBindVertexArray(mScreenSpacedQuadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }

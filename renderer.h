@@ -43,6 +43,10 @@ public:
     // Should only need renders, materials and transforms
     void render(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
     void renderDeferred(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
+
+private:
+    void deferredGeometryPass(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
+    void deferredLightningPass(const CameraComponent &camera);
 signals:
     void initDone();
     void windowUpdated();
@@ -53,7 +57,7 @@ private:
 
     Light *mLight;
 
-    unsigned int mQuadVAO;
+    unsigned int mScreenSpacedQuadVAO;
     unsigned int mGBuffer, mGPosition{}, mGNormal{}, mGAlbedoSpec{};
     unsigned int mRboDepth{};
     std::shared_ptr<Shader> mDirectionalLightShader;

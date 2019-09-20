@@ -130,6 +130,12 @@ struct SoundComponent : public Component
     {}
 };
 
+struct DirectionalLightComponent : public Component
+{
+    gsl::vec3 direction;
+    gsl::vec3 color;
+};
+
 // .. etc
 
 #endif // COMPONENTS_H

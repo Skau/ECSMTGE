@@ -74,6 +74,20 @@ void ResourceManager::addTexture(const std::string &name, const std::string &pat
     }
 }
 
+void ResourceManager::addCubemapTexture(const std::string &name, const std::string &path)
+{
+    if(mTextures.find(name) == mTextures.end())
+    {
+        if(!mIsInitialized)
+        {
+            initializeOpenGLFunctions();
+            mIsInitialized = true;
+        }
+
+        mTextures[name] = std::make_shared<Texture>(path);
+    }
+}
+
 int ResourceManager::getTexture(const std::string &name)
 {
     if(mTextures.find(name) != mTextures.end())

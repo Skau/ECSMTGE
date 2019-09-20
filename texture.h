@@ -22,6 +22,8 @@ private:
 public:
     Texture(GLuint textureUnit = 0);  //basic texture from code
     Texture(const std::string &filename, GLuint textureUnit = 0);
+    // Cubemap constructor
+    explicit Texture(const std::string &filename, GLuint faceCount, GLuint textureUnit = 0);
     GLuint id() const;
 
 private:

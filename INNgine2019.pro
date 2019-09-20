@@ -99,6 +99,7 @@ HEADERS += \
     renderer.h \
     resourcemanager.h \
     scene.h \
+    skybox.h \
     soundlistener.h \
     soundmanager.h \
     texture.h \
@@ -146,6 +147,7 @@ SOURCES += \
     renderer.cpp \
     resourcemanager.cpp \
     scene.cpp \
+    skybox.cpp \
     soundlistener.cpp \
     soundmanager.cpp \
     texture.cpp \

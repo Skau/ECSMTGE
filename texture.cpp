@@ -48,6 +48,41 @@ Texture::Texture(const std::string& filename, GLuint textureUnit): QOpenGLFuncti
     setTexture(textureUnit);
 }
 
+Texture::Texture(const std::string &filename, GLuint faceCount, GLuint textureUnit)
+{
+    initializeOpenGLFunctions();
+
+    readBitmap(filename);
+
+    glGenTextures(1, &mId);
+    // activate the texture unit first before binding texture
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, mId);
+    qDebug() << "Texture::Texture() id = " << mId;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+
+    for (unsigned int face{0}; face < filename.size(); ++face)
+    {
+
+        glTexImage2D(
+                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+                    0,
+                    GL_RGB,
+                    mColumns,
+                    mRows,
+                    0,
+                    GL_RGB,
+                    GL_UNSIGNED_BYTE,
+                    mBitmap);
+        // glGenerateMipmap(GL_TEXTURE_2D);
+    }
+}
+
 /**
     \brief Texture::id() Return the id of a previously generated texture object
     \return The id of a previously generated texture object

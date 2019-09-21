@@ -12,11 +12,27 @@ World::World()
     ResourceManager::instance()->addShader("axis",              std::make_shared<Shader>("axisshader.vert", "colorshader.frag"));
     ResourceManager::instance()->addShader("defaultDeferred",   std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag"));
     ResourceManager::instance()->addShader("directionalLight",  std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/directionallight.frag"));
+    ResourceManager::instance()->addShader("skybox",            std::make_shared<Shader>("skybox.vert", "skybox.frag"));
 
-    ResourceManager::instance()->LoadAssetFiles();
+    // This function is troublesome...
+    // ResourceManager::instance()->LoadAssetFiles();
+
+    ResourceManager::instance()->addMesh("box", "skybox.txt");
+    ResourceManager::instance()->addMesh("box2", "box2.txt");
+    ResourceManager::instance()->addMesh("axis", "axis.txt");
+    ResourceManager::instance()->addMesh("suzanne", "monkey.obj");
+
+    ResourceManager::instance()->loadWav("Caravan_mono", std::string{gsl::soundsFilePath}.append("Caravan_mono.wav"));
+    ResourceManager::instance()->loadWav("explosion", std::string{gsl::soundsFilePath}.append("explosion.wav"));
+    ResourceManager::instance()->loadWav("laser", std::string{gsl::soundsFilePath}.append("laser.wav"));
+    ResourceManager::instance()->loadWav("stereo", std::string{gsl::soundsFilePath}.append("stereo.wav"));
 
     ResourceManager::instance()->getMesh("axis")->mRenderType = GL_LINES;
     ResourceManager::instance()->getMesh("axis")->mMaterial.mShader = ResourceManager::instance()->getShader("axis");
+
+    ResourceManager::instance()->getMesh("box")->mMaterial.mShader = ResourceManager::instance()->getShader("skybox");
+    ResourceManager::instance()->addCubemapTexture("skybox", "skyboxSpaceBoring.bmp");
+    ResourceManager::instance()->getMesh("box")->mMaterial.mTexture = ResourceManager::instance()->getTexture("skybox");
 
     entityManager = std::make_shared<EntityManager>();
 

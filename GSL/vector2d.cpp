@@ -122,4 +122,14 @@ namespace gsl
     {
         y = value;
     }
+
+
+
+
+
+    IVector2D::IVector2D(int _x, int _y) : x{_x}, y{_y}
+    {
+
+    }
+
 } //namespace

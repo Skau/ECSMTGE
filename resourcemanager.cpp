@@ -84,7 +84,7 @@ void ResourceManager::addCubemapTexture(const std::string &name, const std::stri
             mIsInitialized = true;
         }
 
-        mTextures[name] = std::make_shared<Texture>(path);
+        mTextures[name] = std::make_shared<Texture>(path, Texture::Cube_Map_Texture);
     }
 }
 

@@ -2,6 +2,7 @@
 #include <QImage>
 #include <QBuffer>
 #include <QByteArray>
+#include <cstring>
 
 #include "texture.h"
 
@@ -48,38 +49,23 @@ Texture::Texture(const std::string& filename, GLuint textureUnit): QOpenGLFuncti
     setTexture(textureUnit);
 }
 
-Texture::Texture(const std::string &filename, GLuint faceCount, GLuint textureUnit)
+Texture::Texture(const std::string &filename, Texture::TEXTURETYPE type, GLuint textureUnit)
 {
     initializeOpenGLFunctions();
 
     readBitmap(filename);
 
-    glGenTextures(1, &mId);
-    // activate the texture unit first before binding texture
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, mId);
-    qDebug() << "Texture::Texture() id = " << mId;
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-
-    for (unsigned int face{0}; face < filename.size(); ++face)
+    switch (type)
     {
-
-        glTexImage2D(
-                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
-                    0,
-                    GL_RGB,
-                    mColumns,
-                    mRows,
-                    0,
-                    GL_RGB,
-                    GL_UNSIGNED_BYTE,
-                    mBitmap);
-        // glGenerateMipmap(GL_TEXTURE_2D);
+        case Texture_1D:
+            // Idk how to do that yet
+            break;
+        case Texture_2D:
+            setTexture(textureUnit);
+            break;
+        case Cube_Map_Texture:
+            initCubeMap(textureUnit);
+            break;
     }
 }
 
@@ -150,4 +136,67 @@ void Texture::setTexture(GLuint textureUnit)
                 GL_UNSIGNED_BYTE,
                 mBitmap);
     glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void Texture::initCubeMap(GLuint textureUnit)
+{
+    glGenTextures(1, &mId);
+    // activate the texture unit first before binding texture
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, mId);
+    qDebug() << "Texture::Texture(Cube_Map_Texture) id = " << mId;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+
+    const gsl::ivec2 skyboxSampleOrder[]
+    {
+        // Right, left, top, bottom, back, front
+        {0, 1}, {2, 1}, {1, 0}, {1, 2}, {3, 1}, {1, 1}
+    };
+
+    // Cubemap file should be 4 in width and 3 in height
+    if (mRows < 1 || mColumns < 1 || mnByte < 1)
+        return;
+    unsigned int faceWidth{static_cast<unsigned int>(mColumns / 4)},
+    faceHeight{static_cast<unsigned int>(mRows / 3)},
+    byteSize{static_cast<unsigned int>(mnByte)};
+
+    // Create a buffer to copy subimage to.
+    unsigned char *buffer = new unsigned char[faceWidth * faceHeight * byteSize]{};
+
+    for (unsigned int i{0}; i < 6; ++i)
+    {
+        auto coords = skyboxSampleOrder[i];
+
+        // Copy each line of the subimage into the buffer
+        for (unsigned int j{0}; j < faceHeight; ++j)
+        {
+            std::memcpy(
+                    (buffer + j * faceWidth * byteSize),
+                    (mBitmap // Start
+                     + j * static_cast<unsigned int>(mColumns) * byteSize // entire line offset
+                     + static_cast<unsigned int>(coords.x) * faceWidth * byteSize // x offset
+                     + static_cast<unsigned int>(coords.y) * faceHeight * static_cast<unsigned int>(mColumns) * byteSize), // y offset
+                    faceWidth * byteSize
+                );
+        }
+
+        // Copy subimage from buffer to texture
+        glTexImage2D(
+                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                    0,
+                    GL_RGB,
+                    static_cast<int>(faceWidth),
+                    static_cast<int>(faceHeight),
+                    0,
+                    GL_RGB,
+                    GL_UNSIGNED_BYTE,
+                    buffer);
+    }
+
+    // glGenerateMipmap(GL_TEXTURE_2D);
 }

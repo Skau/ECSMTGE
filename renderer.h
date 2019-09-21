@@ -23,6 +23,8 @@ class QTime;
 class Renderer : public QWindow, protected QOpenGLFunctions_4_1_Core
 {
     Q_OBJECT
+
+    friend class App;
 public:
     Renderer();
     ~Renderer() override;
@@ -57,6 +59,9 @@ private:
 
     Light *mLight;
 
+    MeshComponent mSkybox;
+    Texture *skyboxTexture;
+
     unsigned int mScreenSpacedQuadVAO;
     unsigned int mGBuffer, mGPosition{}, mGNormal{}, mGAlbedoSpec{};
     unsigned int mRboDepth{};
@@ -71,6 +76,7 @@ private:
     class QOpenGLDebugLogger *mOpenGLDebugLogger{nullptr};
 
     void renderQuad();
+    void renderSkybox(const CameraComponent& camera);
 
     void startOpenGLDebugger();
 };

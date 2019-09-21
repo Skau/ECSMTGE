@@ -50,6 +50,24 @@ public:
     GLfloat y;
 };
 
+
+
+
+
+class IVector2D;
+typedef IVector2D ivec2;
+
+// Integer version of vec2
+class IVector2D
+{
+public:
+    IVector2D(int _x, int _y);
+
+
+    int x;
+    int y;
+};
+
 } //namespace
 
 #endif // VECTOR2D_H

@@ -53,6 +53,15 @@ void App::initTheRest()
     mFPSTimer.start();
 
     SoundManager::checkOpenALError();
+
+    // Send skybox to renderer.
+    for (auto mesh : mWorld->getEntityManager()->getMeshComponents())
+    {
+        if (mesh.meshData.mMaterial.mShader == ResourceManager::instance()->getShader("skybox"))
+        {
+            mRenderer->mSkybox = mesh;
+        }
+    }
 }
 
 void App::toggleMute(bool mode)
@@ -124,8 +133,8 @@ void App::update()
     {
         if(camera.isCurrentActive)
         {
-            // mRenderer->render(renders, transforms, camera);
-            mRenderer->renderDeferred(renders, transforms, camera);
+            mRenderer->render(renders, transforms, camera);
+            // mRenderer->renderDeferred(renders, transforms, camera);
             break;
         }
     }

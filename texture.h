@@ -10,21 +10,33 @@
  */
 class Texture : protected QOpenGLFunctions_4_1_Core
 {
+public:
+    enum TEXTURETYPE
+    {
+        Texture_1D,
+        Texture_2D,
+        Cube_Map_Texture
+    };
+
 private:
     GLubyte pixels[16];
     GLuint mId{0};
     unsigned char *mBitmap;
+    // NB: Columns are actually width because idk...
     int mColumns;
     int mRows;
     int mnByte;
     void readBitmap(const std::string& filename);
     void setTexture(GLuint textureUnit);
+    void initCubeMap(GLuint textureUnit = 0);
 public:
     Texture(GLuint textureUnit = 0);  //basic texture from code
     Texture(const std::string &filename, GLuint textureUnit = 0);
-    // Cubemap constructor
-    explicit Texture(const std::string &filename, GLuint faceCount, GLuint textureUnit = 0);
+    // More general constructor
+    Texture(const std::string& filename, TEXTURETYPE type, GLuint textureUnit = 0);
     GLuint id() const;
+
+    static Texture cubeMap(const std::string &filename, GLuint textureUnit = 0);
 
 private:
     //this is put inside this class to avoid spamming the main namespace

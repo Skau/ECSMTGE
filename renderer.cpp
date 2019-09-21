@@ -141,6 +141,9 @@ void Renderer::init()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
 
+    // Skybox
+    skyboxTexture = new Texture{"skybox.bmp", Texture::Cube_Map_Texture};
+
     // Called to tell App that it can continue initializing
     initDone();
 }
@@ -158,8 +161,10 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
         mContext->makeCurrent(this);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // mCurrentCamera->update(deltaTime);
 
+        renderSkybox(camera);
+        // mCurrentCamera->update(deltaTime);
+/*
         auto transIt = transforms.begin();
         auto renderIt = renders.begin();
 
@@ -257,6 +262,7 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
 
             }
         }
+        */
 
         checkForGLerrors();
 
@@ -292,6 +298,9 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         glDisable(GL_BLEND);
 
         // ** Forward shading ** //
+
+        // Skybox
+        renderSkybox(camera);
 
         // copy content of geometry's depth buffer to default framebuffer's depth buffer
         glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
@@ -434,6 +443,30 @@ void Renderer::renderQuad()
     glBindVertexArray(mScreenSpacedQuadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
+}
+
+void Renderer::renderSkybox(const CameraComponent &camera)
+{
+
+    if (mSkybox.meshData.mMaterial.mTexture < 0)
+        return;
+
+    glDepthMask(GL_FALSE);
+    glBindVertexArray(mSkybox.meshData.mVAO);
+
+    auto shader = mSkybox.meshData.mMaterial.mShader;
+    glUseProgram(shader->getProgram());
+
+    glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_CUBE_MAP, ResourceManager::instance()->getTexture("skybox")/*static_cast<unsigned int>(mSkybox.meshData.mMaterial.mTexture)*/);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture->id());
+
+    glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
+    glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
+    glUniform1i(glGetUniformLocation(shader->getProgram(), "cubemap"), 0);
+
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mSkybox.meshData.mVerticesCount));
+    glDepthMask(GL_TRUE);
 }
 
 void Renderer::exposeEvent(QExposeEvent *)

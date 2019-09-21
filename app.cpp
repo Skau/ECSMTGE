@@ -30,6 +30,7 @@ App::App()
     connect(mEventHandler.get(), &InputHandler::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
     connect(mMainWindow->ui->actionExit, &QAction::triggered, mMainWindow.get(), &MainWindow::close);
     connect(mRenderer, &Renderer::windowUpdated, this, &App::updatePerspective);
+    connect(mRenderer, &Renderer::windowUpdated, mRenderer, &Renderer::resizeGBuffer);
 }
 
 // Slot called from Renderer when its done with initialization

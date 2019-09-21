@@ -161,7 +161,7 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
 
         renderSkybox(camera);
         // mCurrentCamera->update(deltaTime);
-/*
+
         auto transIt = transforms.begin();
         auto renderIt = renders.begin();
 
@@ -259,7 +259,6 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
 
             }
         }
-        */
 
         checkForGLerrors();
 
@@ -431,6 +430,23 @@ void Renderer::deferredLightningPass(const CameraComponent &camera)
     glUniform1i(glGetUniformLocation(location, "gNormal"), 1);
     glUniform1i(glGetUniformLocation(location, "gAlbedoSpec"), 2);
     renderQuad();
+}
+
+void Renderer::resizeGBuffer()
+{
+    glBindTexture(GL_TEXTURE_2D, mGPosition);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width(), height(), 0, GL_RGB, GL_FLOAT, nullptr);
+
+    glBindTexture(GL_TEXTURE_2D, mGNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width(), height(), 0, GL_RGB, GL_FLOAT, nullptr);
+
+    glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width(),  height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, mRboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width(), height());
+
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
 void Renderer::renderQuad()

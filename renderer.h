@@ -53,6 +53,9 @@ signals:
     void initDone();
     void windowUpdated();
 
+public slots:
+    void resizeGBuffer();
+
 
 private:
     QOpenGLContext *mContext{nullptr};

@@ -141,9 +141,6 @@ void Renderer::init()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
 
-    // Skybox
-    skyboxTexture = new Texture{"skybox.bmp", Texture::Cube_Map_Texture};
-
     // Called to tell App that it can continue initializing
     initDone();
 }
@@ -278,12 +275,15 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
         deferredGeometryPass(renders, transforms, camera);
 
+        // Skybox
+        renderSkybox(camera);
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDisable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+//        glEnable(GL_BLEND);
+//        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, mGPosition);
@@ -298,9 +298,6 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         glDisable(GL_BLEND);
 
         // ** Forward shading ** //
-
-        // Skybox
-        renderSkybox(camera);
 
         // copy content of geometry's depth buffer to default framebuffer's depth buffer
         glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
@@ -320,8 +317,6 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
 void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera)
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     auto transIt = transforms.begin();
     auto renderIt = renders.begin();
 
@@ -448,25 +443,24 @@ void Renderer::renderQuad()
 void Renderer::renderSkybox(const CameraComponent &camera)
 {
 
-    if (mSkybox.meshData.mMaterial.mTexture < 0)
+    if (mSkybox->mMaterial.mTexture < 0)
         return;
 
-    glDepthMask(GL_FALSE);
-    glBindVertexArray(mSkybox.meshData.mVAO);
+    glDepthFunc(GL_EQUAL);
+    glBindVertexArray(mSkybox->mVAO);
 
-    auto shader = mSkybox.meshData.mMaterial.mShader;
+    auto shader = mSkybox->mMaterial.mShader;
     glUseProgram(shader->getProgram());
 
     glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_CUBE_MAP, ResourceManager::instance()->getTexture("skybox")/*static_cast<unsigned int>(mSkybox.meshData.mMaterial.mTexture)*/);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture->id());
+    glBindTexture(GL_TEXTURE_CUBE_MAP, static_cast<unsigned int>(mSkybox->mMaterial.mTexture));
 
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
     glUniform1i(glGetUniformLocation(shader->getProgram(), "cubemap"), 0);
 
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mSkybox.meshData.mVerticesCount));
-    glDepthMask(GL_TRUE);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mSkybox->mVerticesCount));
+    glDepthFunc(GL_LESS);
 }
 
 void Renderer::exposeEvent(QExposeEvent *)

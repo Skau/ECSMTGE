@@ -101,7 +101,6 @@ HEADERS += \
     scene.h \
     soundlistener.h \
     soundmanager.h \
-    stb_image_write.h \
     texture.h \
     wavfilehandler.h \
     world.h \

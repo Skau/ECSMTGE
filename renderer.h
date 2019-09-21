@@ -59,8 +59,7 @@ private:
 
     Light *mLight;
 
-    MeshComponent mSkybox;
-    Texture *skyboxTexture;
+    std::shared_ptr<MeshData> mSkybox;
 
     unsigned int mScreenSpacedQuadVAO;
     unsigned int mGBuffer, mGPosition{}, mGNormal{}, mGAlbedoSpec{};

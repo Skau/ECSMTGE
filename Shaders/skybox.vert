@@ -13,5 +13,6 @@ void main()
 {
     texCoords = inPos;
 
-    gl_Position = pMatrix * vMatrix * vec4(inPos, 1);
+    vec4 pos = pMatrix * mat4(mat3(vMatrix)) * vec4(inPos, 1);
+    gl_Position = pos.xyww;
 }

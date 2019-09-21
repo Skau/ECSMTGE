@@ -59,11 +59,6 @@ public:
         auto [axisTrans, axisMesh] = entityManager->addComponent<TransformComponent, MeshComponent>(entityManager->createEntity("axis"));
         axisMesh.meshData = *ResourceManager::instance()->getMesh("axis");
         axisMesh.isVisible = true;
-
-        // Skybox:
-        auto [skyboxTrans, skyboxMesh] = entityManager->addComponent<TransformComponent, MeshComponent>(entityManager->createEntity("skybox"));
-        skyboxMesh.meshData = *ResourceManager::instance()->getMesh("box");
-        skyboxMesh.isVisible = false; // Setting it to false to prevent it to be rendered with the other stuff.
     }
 };
 

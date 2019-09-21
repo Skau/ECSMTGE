@@ -17,7 +17,7 @@ World::World()
     // This function is troublesome...
     // ResourceManager::instance()->LoadAssetFiles();
 
-    ResourceManager::instance()->addMesh("box", "skybox.txt");
+    ResourceManager::instance()->addMesh("skybox", "skybox.txt");
     ResourceManager::instance()->addMesh("box2", "box2.txt");
     ResourceManager::instance()->addMesh("axis", "axis.txt");
     ResourceManager::instance()->addMesh("suzanne", "monkey.obj");
@@ -30,9 +30,9 @@ World::World()
     ResourceManager::instance()->getMesh("axis")->mRenderType = GL_LINES;
     ResourceManager::instance()->getMesh("axis")->mMaterial.mShader = ResourceManager::instance()->getShader("axis");
 
-    ResourceManager::instance()->getMesh("box")->mMaterial.mShader = ResourceManager::instance()->getShader("skybox");
+    ResourceManager::instance()->getMesh("skybox")->mMaterial.mShader = ResourceManager::instance()->getShader("skybox");
     ResourceManager::instance()->addCubemapTexture("skybox", "skyboxSpaceBoring.bmp");
-    ResourceManager::instance()->getMesh("box")->mMaterial.mTexture = ResourceManager::instance()->getTexture("skybox");
+    ResourceManager::instance()->getMesh("skybox")->mMaterial.mTexture = ResourceManager::instance()->getTexture("skybox");
 
     entityManager = std::make_shared<EntityManager>();
 

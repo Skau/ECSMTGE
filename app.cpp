@@ -55,13 +55,7 @@ void App::initTheRest()
     SoundManager::checkOpenALError();
 
     // Send skybox to renderer.
-    for (auto mesh : mWorld->getEntityManager()->getMeshComponents())
-    {
-        if (mesh.meshData.mMaterial.mShader == ResourceManager::instance()->getShader("skybox"))
-        {
-            mRenderer->mSkybox = mesh;
-        }
-    }
+    mRenderer->mSkybox = ResourceManager::instance()->getMesh("skybox");
 }
 
 void App::toggleMute(bool mode)
@@ -133,8 +127,8 @@ void App::update()
     {
         if(camera.isCurrentActive)
         {
-            mRenderer->render(renders, transforms, camera);
-            // mRenderer->renderDeferred(renders, transforms, camera);
+            // mRenderer->render(renders, transforms, camera);
+            mRenderer->renderDeferred(renders, transforms, camera);
             break;
         }
     }
@@ -151,7 +145,7 @@ void App::updatePerspective()
 {
     auto& cameras = mWorld->getEntityManager()->getCameraComponents();
 
-    CameraSystem::updateCameras(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 1.f, 100.f));
+    CameraSystem::updateCameras(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 0.1f, 100.f));
 }
 
 void App::calculateFrames()

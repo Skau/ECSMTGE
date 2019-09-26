@@ -159,7 +159,6 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-        renderSkybox(camera);
         // mCurrentCamera->update(deltaTime);
 
         auto transIt = transforms.begin();
@@ -259,6 +258,8 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
 
             }
         }
+
+        renderSkybox(camera);
 
         checkForGLerrors();
 
@@ -462,7 +463,7 @@ void Renderer::renderSkybox(const CameraComponent &camera)
     if (mSkybox->mMaterial.mTexture < 0)
         return;
 
-    glDepthFunc(GL_EQUAL);
+    glDepthFunc(GL_LEQUAL);
     glBindVertexArray(mSkybox->mVAO);
 
     auto shader = mSkybox->mMaterial.mShader;

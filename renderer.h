@@ -38,17 +38,24 @@ public:
 
     void checkForGLerrors();
 
-    void updateShaders();
-
     void render(const std::vector<VisualObject*>& objects, double deltaTime);
 
     // Should only need renders, materials and transforms
     void render(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
-    void renderDeferred(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
+    void renderDeferred(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
+                        const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
+                        const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
+                        const std::vector<PointLightComponent>& pointLights = std::vector<PointLightComponent>());
 
 private:
     void deferredGeometryPass(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
-    void deferredLightningPass(const CameraComponent &camera);
+    void deferredLightningPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
+                               const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
+                               const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
+                               const std::vector<PointLightComponent>& pointLights = std::vector<PointLightComponent>());
+    void directionalLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<DirectionalLightComponent>& dirLights);
+    void pointLightPass(const std::vector<TransformComponent>& transforms,const CameraComponent &camera, const std::vector<PointLightComponent>& pointLights);
+    void spotLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<SpotLightComponent>& spotLights);
 signals:
     void initDone();
     void windowUpdated();
@@ -60,14 +67,14 @@ public slots:
 private:
     QOpenGLContext *mContext{nullptr};
 
-    Light *mLight;
-
     std::shared_ptr<MeshData> mSkybox;
 
     unsigned int mScreenSpacedQuadVAO;
     unsigned int mGBuffer, mGPosition{}, mGNormal{}, mGAlbedoSpec{};
     unsigned int mRboDepth{};
     std::shared_ptr<Shader> mDirectionalLightShader;
+    std::shared_ptr<Shader> mPointLightShader;
+    std::shared_ptr<Shader> mSpotLightShader;
 
     bool mWireframe{false};
 

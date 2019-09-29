@@ -14,6 +14,9 @@
 #include "Widgets/physicswidget.h"
 #include "Widgets/inputwidget.h"
 #include "Widgets/soundwidget.h"
+#include "Widgets/directionallightwidget.h"
+#include "Widgets/pointlightwidget.h"
+#include "Widgets/spotlightwidget.h"
 #include "componentdata.h"
 
 #include <QSplitter>
@@ -199,6 +202,21 @@ void MainWindow::updateComponentArea(unsigned int entityID)
                 componentWidget = new SoundWidget(this);
                 break;
             }
+            case ComponentType::LightSpot:
+            {
+                componentWidget = new SpotLightWidget(this);
+                break;
+            }
+            case ComponentType::LightPoint:
+            {
+                componentWidget = new PointLightWidget(this);
+                break;
+            }
+            case ComponentType::LightDirectional:
+            {
+                componentWidget = new DirectionalLightWidget(this);
+                break;
+            }
             default:
                 break;
             }
@@ -261,6 +279,21 @@ void MainWindow::updateAvailableComponents(std::vector<ComponentType> types)
         case ComponentType::Sound:
         {
             ui->comboBox_Components->addItem("Sound");
+            break;
+        }
+        case ComponentType::LightSpot:
+        {
+            ui->comboBox_Components->addItem("Spot light");
+            break;
+        }
+        case ComponentType::LightPoint:
+        {
+            ui->comboBox_Components->addItem("Point light");
+            break;
+        }
+        case ComponentType::LightDirectional:
+        {
+            ui->comboBox_Components->addItem("Directionbal light");
             break;
         }
         default:

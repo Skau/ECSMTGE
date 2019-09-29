@@ -40,8 +40,6 @@ void App::initTheRest()
 
     mWorld = std::make_unique<World>();
 
-    mRenderer->updateShaders();
-
     mMainWindow->setEntityManager(mWorld->getEntityManager());
 
     mWorld->initCurrentScene();
@@ -129,7 +127,10 @@ void App::update()
         if(camera.isCurrentActive)
         {
             // mRenderer->render(renders, transforms, camera);
-            mRenderer->renderDeferred(renders, transforms, camera);
+            mRenderer->renderDeferred(renders, transforms, camera,
+                                      mWorld->getEntityManager()->getDirectionalLightComponents(),
+                                      mWorld->getEntityManager()->getSpotLightComponents(),
+                                      mWorld->getEntityManager()->getPointLightComponents());
             break;
         }
     }

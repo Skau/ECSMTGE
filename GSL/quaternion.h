@@ -163,6 +163,11 @@ public:
     static gsl::quat diff(const gsl::quat& a, const gsl::quat& b);
 
 
+    /**
+     * @brief Returns the forward vector represented by this quaternion
+     * @return 3 comp vector holding the forward vector
+     */
+    gsl::vec3 forwardVector() const;
 
     // Helper functions
     /** Places the contents of a quaternion

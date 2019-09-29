@@ -56,6 +56,7 @@ public:
     void setZ(const GLfloat &value);
 
     GLfloat *xP();
+    const GLfloat *xP() const;
     GLfloat *yP();
     GLfloat *zP();
 

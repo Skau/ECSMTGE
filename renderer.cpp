@@ -267,7 +267,10 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
     }
 }
 
-void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera)
+void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera,
+                              const std::vector<DirectionalLightComponent>& dirLights,
+                              const std::vector<SpotLightComponent>& spotLights,
+                              const std::vector<PointLightComponent>& pointLights)
 {
     if(isExposed())
     {
@@ -275,15 +278,12 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
         deferredGeometryPass(renders, transforms, camera);
 
-        // Skybox
-        renderSkybox(camera);
-
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDisable(GL_DEPTH_TEST);
-//        glEnable(GL_BLEND);
-//        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, mGPosition);
@@ -292,7 +292,7 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
 
-        deferredLightningPass(camera);
+        deferredLightningPass(transforms, camera, dirLights, spotLights, pointLights);
 
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
@@ -308,6 +308,9 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // Draw foward here
+
+        // Skybox
+        renderSkybox(camera);
 
         checkForGLerrors();
 
@@ -410,27 +413,212 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
     }
 }
 
-void Renderer::deferredLightningPass(const CameraComponent &camera)
+void Renderer::deferredLightningPass(const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
+                                     const std::vector<DirectionalLightComponent>& dirLights,
+                                     const std::vector<SpotLightComponent>& spotLights,
+                                     const std::vector<PointLightComponent>& pointLights)
 {
-    // 1. For each lighting type
-    //      2. Get lighting shader
-    //      3. Set uniforms
-    //      4. renderQuad()
+    if(dirLights.size())
+    {
+        if(mDirectionalLightShader == nullptr)
+        {
+            mDirectionalLightShader = ResourceManager::instance()->getShader("directionalLight");
+        }
+        directionalLightPass(transforms, camera, dirLights);
+    }
 
-    // ** Directional light ** //
 
-    glUseProgram(mDirectionalLightShader->getProgram());
-    auto location = mDirectionalLightShader->getProgram();
-    glUniform3fv(glGetUniformLocation(location, "light.Direction"), 1, gsl::vec3(0, -1, 0).xP());
-    glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, gsl::vec3(1, 1, 1).xP());
+    if(spotLights.size())
+    {
+        if(mSpotLightShader == nullptr)
+        {
+            mSpotLightShader = ResourceManager::instance()->getShader("spotLight");
+        }
+        spotLightPass(transforms, camera, spotLights);
+    }
+
+    if(pointLights.size())
+    {
+        if(mPointLightShader == nullptr)
+        {
+            mPointLightShader = ResourceManager::instance()->getShader("pointLight");
+        }
+        pointLightPass(transforms, camera, pointLights);
+    }
+}
+
+void Renderer::directionalLightPass(const std::vector<TransformComponent> &transforms, const CameraComponent& camera, const std::vector<DirectionalLightComponent> &dirLights)
+{
     auto v = camera.viewMatrix;
     v.inverse();
     auto pos = gsl::vec3(v.at(0, 3), v.at(1, 3), v.at(2, 3));
-    glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, gsl::vec3(0, -1, 0).xP());
-    glUniform1i(glGetUniformLocation(location, "gPosition"), 0);
-    glUniform1i(glGetUniformLocation(location, "gNormal"), 1);
+    auto location = mDirectionalLightShader->getProgram();
+    glUseProgram(location);
+    glUniform1i(glGetUniformLocation(location, "gPosition"),   0);
+    glUniform1i(glGetUniformLocation(location, "gNormal"),     1);
     glUniform1i(glGetUniformLocation(location, "gAlbedoSpec"), 2);
-    renderQuad();
+
+    auto transIt = transforms.begin();
+    auto lightIt = dirLights.begin();
+
+    bool transformShortest = transforms.size() < dirLights.size();
+
+    bool _{true};
+
+    // cause normal while (true) loops are so outdated
+    for ( ;_; )
+    {
+        if (transformShortest)
+        {
+            if (transIt == transforms.end())
+                break;
+        }
+        else
+        {
+            if (lightIt == dirLights.end())
+                break;
+        }
+
+        // Increment lowest index
+        if (!transIt->valid || transIt->entityId < lightIt->entityId)
+        {
+            ++transIt;
+        }
+        else if (!lightIt->valid || lightIt->entityId < transIt->entityId)
+        {
+            ++lightIt;
+        }
+        else
+        {
+            glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, pos.xP());
+            glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, lightIt->color.xP());
+            glUniform3fv(glGetUniformLocation(location, "light.Direction"), 1, transIt->rotation.forwardVector().xP());
+            renderQuad();
+
+            // Increment all
+            ++transIt;
+            ++lightIt;
+        }
+    }
+}
+
+void Renderer::pointLightPass(const std::vector<TransformComponent> &transforms,const CameraComponent& camera, const std::vector<PointLightComponent> &pointLights)
+{
+    auto v = camera.viewMatrix;
+    v.inverse();
+    auto pos = gsl::vec3(v.at(0, 3), v.at(1, 3), v.at(2, 3));
+    auto location = mPointLightShader->getProgram();
+    glUseProgram(location);
+    glUniform1i(glGetUniformLocation(location, "gPosition"),   0);
+    glUniform1i(glGetUniformLocation(location, "gNormal"),     1);
+    glUniform1i(glGetUniformLocation(location, "gAlbedoSpec"), 2);
+
+    auto transIt = transforms.begin();
+    auto lightIt = pointLights.begin();
+
+    bool transformShortest = transforms.size() < pointLights.size();
+
+    bool _{true};
+
+    // cause normal while (true) loops are so outdated
+    for ( ;_; )
+    {
+        if (transformShortest)
+        {
+            if (transIt == transforms.end())
+                break;
+        }
+        else
+        {
+            if (lightIt == pointLights.end())
+                break;
+        }
+
+        // Increment lowest index
+        if (!transIt->valid || transIt->entityId < lightIt->entityId)
+        {
+            ++transIt;
+        }
+        else if (!lightIt->valid || lightIt->entityId < transIt->entityId)
+        {
+            ++lightIt;
+        }
+        else
+        {
+            glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, pos.xP());
+            glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, lightIt->color.xP());
+            glUniform3fv(glGetUniformLocation(location, "light.Position"), 1, transIt->position.xP());
+            glUniform1f(glGetUniformLocation(location, "light.Linear"), lightIt->linear);
+            glUniform1f(glGetUniformLocation(location, "light.Quadratic"), lightIt->quadratic);
+            glUniform1f(glGetUniformLocation(location, "light.Radius"), lightIt->calculateRadius());
+            renderQuad();
+
+            // Increment all
+            ++transIt;
+            ++lightIt;
+        }
+    }
+}
+
+void Renderer::spotLightPass(const std::vector<TransformComponent> &transforms, const CameraComponent& camera, const std::vector<SpotLightComponent> &spotLights)
+{
+    auto v = camera.viewMatrix;
+    v.inverse();
+    auto pos = gsl::vec3(v.at(0, 3), v.at(1, 3), v.at(2, 3));
+    auto location = mSpotLightShader->getProgram();
+    glUseProgram(location);
+    glUniform1i(glGetUniformLocation(location, "gPosition"),   0);
+    glUniform1i(glGetUniformLocation(location, "gNormal"),     1);
+    glUniform1i(glGetUniformLocation(location, "gAlbedoSpec"), 2);
+
+    auto transIt = transforms.begin();
+    auto lightIt = spotLights.begin();
+
+    bool transformShortest = transforms.size() < spotLights.size();
+
+    bool _{true};
+
+    // cause normal while (true) loops are so outdated
+    for ( ;_; )
+    {
+        if (transformShortest)
+        {
+            if (transIt == transforms.end())
+                break;
+        }
+        else
+        {
+            if (lightIt == spotLights.end())
+                break;
+        }
+
+        // Increment lowest index
+        if (!transIt->valid || transIt->entityId < lightIt->entityId)
+        {
+            ++transIt;
+        }
+        else if (!lightIt->valid || lightIt->entityId < transIt->entityId)
+        {
+            ++lightIt;
+        }
+        else
+        {
+            glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, pos.xP());
+            glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, lightIt->color.xP());
+            glUniform3fv(glGetUniformLocation(location, "light.Position"), 1, transIt->position.xP());
+            glUniform3fv(glGetUniformLocation(location, "light.Direction"), 1, transIt->rotation.forwardVector().xP());
+            glUniform1f(glGetUniformLocation(location, "light.CutOff"), lightIt->cutOff);
+            glUniform1f(glGetUniformLocation(location, "light.OuterCutOff"), lightIt->outerCutOff);
+            glUniform1f(glGetUniformLocation(location, "light.constant"), lightIt->constant);
+            glUniform1f(glGetUniformLocation(location, "light.linear"), lightIt->linear);
+            glUniform1f(glGetUniformLocation(location, "light.quadratic"), lightIt->quadratic);
+            renderQuad();
+
+            // Increment all
+            ++transIt;
+            ++lightIt;
+        }
+    }
 }
 
 void Renderer::resizeGBuffer()
@@ -529,15 +717,6 @@ void Renderer::checkForGLerrors()
             qDebug() << "glGetError returns " << err;
         }
     }
-}
-
-void Renderer::updateShaders()
-{
-    mDirectionalLightShader = ResourceManager::instance()->getShader("directionalLight");
-    glUseProgram(mDirectionalLightShader->getProgram());
-    glUniform1i(glGetUniformLocation(mDirectionalLightShader->getProgram(), "gPosition"), static_cast<int>(mGPosition));
-    glUniform1i(glGetUniformLocation(mDirectionalLightShader->getProgram(), "gNormal"), static_cast<int>(mGNormal));
-    glUniform1i(glGetUniformLocation(mDirectionalLightShader->getProgram(), "gAlbedoSpec"), static_cast<int>(mGAlbedoSpec));
 }
 
 /// Tries to start the extended OpenGL debugger that comes with Qt

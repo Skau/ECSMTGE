@@ -219,6 +219,20 @@ gsl::quat gsl::Quaternion::diff(const gsl::quat &a, const quat &b)
     return a.inverse() * b;
 }
 
+gsl::vec3 gsl::Quaternion::forwardVector() const
+{
+    const float x2 = 2.0f * i;
+    const float y2 = 2.0f * j;
+    const float z2 = 2.0f * k;
+    const float x2w = x2 * s;
+    const float y2w = y2 * s;
+    const float x2x = x2 * i;
+    const float z2x = z2 * i;
+    const float y2y = y2 * j;
+    const float z2y = z2 * j;
+    return gsl::vec3( z2x + y2w, z2y - x2w, 1.0f - ( x2x + y2y ) );
+}
+
 GLfloat gsl::Quaternion::dot(const gsl::quat &rhs) const
 {
     return s * rhs.s + i * rhs.i + j * rhs.j + k * rhs.k;

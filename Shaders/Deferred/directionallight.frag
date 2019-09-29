@@ -3,17 +3,16 @@ out vec4 FragColor;
 
 in vec2 TexCoords;
 
-uniform sampler2D gPosition;
-uniform sampler2D gNormal;
-uniform sampler2D gAlbedoSpec;
-
 struct Light {
     vec3 Direction;
     vec3 Color;
 };
-const int NR_LIGHTS = 1;
-uniform Light light;
+
 uniform vec3 viewPos;
+uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+uniform sampler2D gAlbedoSpec;
+uniform Light light;
 
 void main()
 {

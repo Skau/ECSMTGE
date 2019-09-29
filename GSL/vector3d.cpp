@@ -204,6 +204,11 @@ namespace gsl
         return &x;
     }
 
+    const GLfloat *Vector3D::xP() const
+    {
+        return &x;
+    }
+
     GLfloat *Vector3D::yP()
     {
         return &y;

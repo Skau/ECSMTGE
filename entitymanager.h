@@ -116,6 +116,9 @@ class EntityManager : public QObject
     REGISTER(CameraComponent)
     REGISTER(InputComponent)
     REGISTER(SoundComponent)
+    REGISTER(DirectionalLightComponent)
+    REGISTER(SpotLightComponent)
+    REGISTER(PointLightComponent)
     REGISTER(EntityInfo)
 
 private:
@@ -246,6 +249,21 @@ public:
             addComponent<SoundComponent>(entity);
             break;
         }
+        case ComponentType::LightSpot:
+        {
+            addComponent<SpotLightComponent>(entity);
+            break;
+        }
+        case ComponentType::LightDirectional:
+        {
+            addComponent<DirectionalLightComponent>(entity);
+            break;
+        }
+        case ComponentType::LightPoint:
+        {
+            addComponent<PointLightComponent>(entity);
+            break;
+        }
         default:
             break;
         }
@@ -293,6 +311,30 @@ public:
             }
         }
         if(auto comp = getComponent<SoundComponent>(entity))
+        {
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
+        }
+        if(auto comp = getComponent<DirectionalLightComponent>(entity))
+        {
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
+        }
+        if(auto comp = getComponent<SpotLightComponent>(entity))
+        {
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
+        }
+        if(auto comp = getComponent<PointLightComponent>(entity))
         {
             if(comp->valid)
             {

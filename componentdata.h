@@ -3,6 +3,7 @@
 
 #include "innpch.h"
 #include "meshdata.h"
+#include <QtMath> // temp for qDegreesRadians in spot light component
 
 // Something like this?
 
@@ -15,11 +16,16 @@ enum class ComponentType
     Camera,
     Input,
     Sound,
+    LightPoint,
+    LightDirectional,
+    LightSpot,
     Other
 };
 
 // Used by UI so it knows what components are available to add if the entity doesnt have one.
-const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, ComponentType::Transform, ComponentType::Physics, ComponentType::Input, ComponentType::Sound};
+const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, ComponentType::Transform, ComponentType::Physics,
+                                                   ComponentType::Input, ComponentType::Sound, ComponentType::LightPoint,
+                                                   ComponentType::LightDirectional, ComponentType::LightSpot};
 
 
 struct Component
@@ -130,10 +136,70 @@ struct SoundComponent : public Component
     {}
 };
 
+struct PointLightComponent : public Component
+{
+    gsl::vec3 color;
+    float intensity;
+    float linear;
+    float quadratic;
+    float maxBrightness;
+
+    PointLightComponent(unsigned int _eID = 0, bool _valid = false,
+                        gsl::vec3 _color = gsl::vec3(1.f, 1.f, 1.f),
+                        float _intensity = 1.f,
+                        float _linear = 0.045f,
+                        float _quadratic = 0.0075f,
+                        float _maxBrightness = 2.f)
+        : Component(_eID, _valid, ComponentType::LightPoint),
+          color(_color), intensity(_intensity),
+          linear(_linear), quadratic(_quadratic), maxBrightness(_maxBrightness)
+    {}
+
+    float calculateRadius() const
+    {
+        float constant = 1.0f;
+        return (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness)))
+                / (2.0f * quadratic);
+    }
+};
+
+struct SpotLightComponent : public Component
+{
+    gsl::vec3 color;
+    float intensity;
+    float cutOff;
+    float outerCutOff;
+    float linear;
+    float quadratic;
+    float constant;
+
+    SpotLightComponent(unsigned int _eID = 0, bool _valid = false,
+                       gsl::vec3 _color = gsl::vec3(1.f, 1.f, 1.f),
+                       float _intensity = 1.f,
+                       float _cutOff = qDegreesToRadians(25.f),
+                       float _outerCutOff = qDegreesToRadians(35.f),
+                       float _linear = 0.045f,
+                       float _quadratic = 0.0075f,
+                       float _constant = 1.0f)
+        : Component(_eID, _valid, ComponentType::LightSpot),
+           color(_color), intensity(_intensity),
+          cutOff(_cutOff), outerCutOff(_outerCutOff), linear(_linear),
+          quadratic(_quadratic), constant(_constant)
+    {}
+
+};
+
 struct DirectionalLightComponent : public Component
 {
-    gsl::vec3 direction;
     gsl::vec3 color;
+    float intensity;
+
+    DirectionalLightComponent(unsigned int _eID = 0, bool _valid = false,
+                              gsl::vec3 _color = gsl::vec3(1.f, 1.f, 1.f),
+                              float _intensity = 1.f)
+        : Component(_eID, _valid, ComponentType::LightDirectional),
+          color(_color), intensity(_intensity)
+    {}
 };
 
 // .. etc

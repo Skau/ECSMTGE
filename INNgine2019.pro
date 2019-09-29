@@ -59,10 +59,13 @@ HEADERS += \
     GSL/math.h \
     GSL/quaternion.h \
     Widgets/componentwidget.h \
+    Widgets/directionallightwidget.h \
     Widgets/inputwidget.h \
     Widgets/meshwidget.h \
     Widgets/physicswidget.h \
+    Widgets/pointlightwidget.h \
     Widgets/soundwidget.h \
+    Widgets/spotlightwidget.h \
     Widgets/transformwidget.h \
     app.h \
     camerasystem.h \
@@ -111,10 +114,13 @@ SOURCES += \
     GSL/math.cpp \
     GSL/quaternion.cpp \
     Widgets/componentwidget.cpp \
+    Widgets/directionallightwidget.cpp \
     Widgets/inputwidget.cpp \
     Widgets/meshwidget.cpp \
     Widgets/physicswidget.cpp \
+    Widgets/pointlightwidget.cpp \
     Widgets/soundwidget.cpp \
+    Widgets/spotlightwidget.cpp \
     Widgets/transformwidget.cpp \
     app.cpp \
     camerasystem.cpp \
@@ -154,12 +160,20 @@ SOURCES += \
 
 
 FORMS += \
-    input.ui \
+    Widgets/directionallight.ui \
+    Widgets/input.ui \
+    Widgets/input.ui \
+    Widgets/mesh.ui \
+    Widgets/physics.ui \
+    Widgets/pointlight.ui \
+    Widgets/sound.ui \
+    Widgets/spotlight.ui \
+    Widgets/transform.ui \
     mainwindow.ui \
-    mesh.ui \
-    physics.ui \
-    sound.ui \
-    transform.ui
+    Widgets/mesh.ui \
+    Widgets/physics.ui \
+    Widgets/sound.ui \
+    Widgets/transform.ui
 
 
 DISTFILES += \

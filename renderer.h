@@ -67,6 +67,8 @@ public slots:
 private:
     QOpenGLContext *mContext{nullptr};
 
+    float mTimeSinceStart{0};
+
     std::shared_ptr<MeshData> mSkybox;
 
     unsigned int mScreenSpacedQuadVAO;

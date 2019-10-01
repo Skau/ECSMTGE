@@ -74,6 +74,7 @@ void App::update()
 
     // Time since last frame in seconds
     mDeltaTime = mDeltaTimer.restart() / 1000.f;
+    mRenderer->mTimeSinceStart += mDeltaTime;
 
     calculateFrames();
 

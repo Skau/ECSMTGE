@@ -19,7 +19,7 @@ World::World()
     // This function is troublesome...
     // ResourceManager::instance()->LoadAssetFiles();
 
-    ResourceManager::instance()->addMesh("skybox", "box.txt");
+    ResourceManager::instance()->addMesh("skybox", "skybox.txt");
     ResourceManager::instance()->addMesh("box2", "box2.txt");
     ResourceManager::instance()->addMesh("axis", "axis.txt");
     ResourceManager::instance()->addMesh("suzanne", "monkey.obj");

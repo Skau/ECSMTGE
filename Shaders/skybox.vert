@@ -11,7 +11,7 @@ out vec3 texCoords;
 
 void main()
 {
-    texCoords = inPos;
+    texCoords = normalize(inPos);
 
     vec4 pos = pMatrix * mat4(mat3(vMatrix)) * vec4(inPos, 1);
     gl_Position = pos.xyww;

@@ -664,6 +664,17 @@ void Renderer::renderSkybox(const CameraComponent &camera)
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
     glUniform1i(glGetUniformLocation(shader->getProgram(), "cubemap"), 0);
 
+    int uniform = glGetUniformLocation(shader->getProgram(), "sTime");
+    if (0 <= uniform)
+        glUniform1f(uniform, mTimeSinceStart);
+
+    uniform = glGetUniformLocation(shader->getProgram(), "sResolution");
+    if (0 <= uniform)
+    {
+        gsl::ivec2 res{width(), height()};
+        glUniform2iv(uniform, 1, &res.x);
+    }
+
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mSkybox->mVerticesCount));
     glDepthFunc(GL_LESS);
 }

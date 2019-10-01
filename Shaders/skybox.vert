@@ -8,10 +8,14 @@ uniform mat4 vMatrix;
 uniform mat4 pMatrix;
 
 out vec3 texCoords;
+out vec3 normal;
+out vec2 uv2d;
 
 void main()
 {
-    texCoords = inPos;
+    texCoords = normalize(inPos);
+    normal = inNormal;
+    uv2d = normalize(inPos.xy);
 
     vec4 pos = pMatrix * mat4(mat3(vMatrix)) * vec4(inPos, 1);
     gl_Position = pos.xyww;

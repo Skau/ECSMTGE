@@ -60,6 +60,8 @@ public slots:
 private:
     QOpenGLContext *mContext{nullptr};
 
+    float mTimeSinceStart{0};
+
     Light *mLight;
 
     std::shared_ptr<MeshData> mSkybox;

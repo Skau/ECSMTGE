@@ -7,6 +7,27 @@ PhysicsSystem::PhysicsSystem()
 
 void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, std::vector<PhysicsComponent> &physics, float deltaTime)
 {
+    // 1. Update positions and velocities
+    updatePosVel(transforms, physics, deltaTime);
+
+    std::vector<HitInfo> hitInfos;
+    // 2. Collision detection
+    for (const auto &item : transforms)
+    {
+        hitInfos.push_back(getHitInfo(item));
+    }
+
+    // 3. Handle collisions
+    for (const auto &item : hitInfos)
+    {
+        handleHitInfo(item);
+    }
+
+    // 4. Recursive update
+}
+
+void PhysicsSystem::updatePosVel(std::vector<TransformComponent> &transforms, std::vector<PhysicsComponent> &physics, float deltaTime)
+{
     auto transIt = transforms.begin();
     auto physIt = physics.begin();
 
@@ -53,4 +74,14 @@ void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, s
 
         ++transIt;
     }
+}
+
+PhysicsSystem::HitInfo PhysicsSystem::getHitInfo(const TransformComponent &transform)
+{
+    return HitInfo{};
+}
+
+void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info)
+{
+
 }

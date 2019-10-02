@@ -23,9 +23,21 @@
 class PhysicsSystem
 {
 public:
+    struct HitInfo
+    {
+        gsl::vec3 hitPoint;
+        gsl::vec3 velocity;
+        gsl::vec3 normal;
+    };
+
     PhysicsSystem();
 
     static void UpdatePhysics(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent>& physics, float deltaTime);
+
+private:
+    static void updatePosVel(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent> &physics, float deltaTime);
+    static HitInfo getHitInfo(const TransformComponent& transform);
+    static void handleHitInfo(HitInfo info);
 };
 
 #endif // PHYSICSSYSTEM_H

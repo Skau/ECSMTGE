@@ -318,6 +318,122 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
     }
 }
 
+gsl::vec2 Renderer::getMouseHoverObject(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms)
+{
+    if(isExposed())
+    {
+//        mContext->makeCurrent(this);
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+//        // mCurrentCamera->update(deltaTime);
+
+//        auto transIt = transforms.begin();
+//        auto renderIt = renders.begin();
+
+//        bool transformShortest = transforms.size() < renders.size();
+
+//        bool _{true};
+
+//        // cause normal while (true) loops are so outdated
+//        for ( ;_; )
+//        {
+//            if (transformShortest)
+//            {
+//                if (transIt == transforms.end())
+//                    break;
+//            }
+//            else
+//            {
+//                if (renderIt == renders.end())
+//                    break;
+//            }
+
+//            // Increment lowest index
+//            if (!transIt->valid || transIt->entityId < renderIt->entityId)
+//            {
+//                ++transIt;
+//            }
+//            else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
+//            {
+//                ++renderIt;
+//            }
+//            else
+//            {
+//                // They are the same
+//                if(!renderIt->isVisible)
+//                {
+//                    // Increment all
+//                    ++transIt;
+//                    ++renderIt;
+//                    continue;
+//                }
+
+//                // Mesh data available
+//                auto meshData = renderIt->meshData;
+//                if(!meshData.mVerticesCount)
+//                {
+//                    // Increment all
+//                    ++transIt;
+//                    ++renderIt;
+//                    continue;
+//                }
+
+//                // Entity can be drawn. Draw.
+
+//                glBindVertexArray(meshData.mVAO);
+
+//                auto shader = meshData.mMaterial.mShader;
+//                if(!shader)
+//                {
+//                    shader = ResourceManager::instance()->getShader("color");
+//                    meshData.mMaterial.mShader = shader;
+//                }
+
+//                glUseProgram(shader->getProgram());
+
+//                if(meshData.mMaterial.mShader && meshData.mMaterial.mShader->mName.length())
+//                {
+//                    if(meshData.mMaterial.mShader->mName == "texture" && meshData.mMaterial.mTexture > -1)
+//                    {
+//                        glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(meshData.mMaterial.mTexture));
+//                        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(meshData.mMaterial.mTexture));
+
+//                        glUniform1i(glGetUniformLocation(shader->getProgram(), "textureSampler"), meshData.mMaterial.mTexture);
+//                    }
+//                }
+
+//                auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
+
+//                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
+//                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
+//                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
+
+//                if(meshData.mIndicesCount > 0)
+//                {
+//                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
+//                }
+//                else
+//                {
+//                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
+//                }
+
+//                // Increment all
+//                ++transIt;
+//                ++renderIt;
+
+
+//            }
+//        }
+
+//        renderSkybox(camera);
+
+//        checkForGLerrors();
+
+//        mContext->swapBuffers(this);
+    }
+}
+
 void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera)
 {
     auto transIt = transforms.begin();

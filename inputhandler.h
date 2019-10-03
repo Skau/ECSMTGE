@@ -23,6 +23,7 @@ public:
 
 signals:
     void escapeKeyPressed();
+    void mousePress();
 
 protected:
     bool eventFilter(QObject* obj, QEvent* event) override;

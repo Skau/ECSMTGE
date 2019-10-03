@@ -25,6 +25,7 @@ class Renderer : public QWindow, protected QOpenGLFunctions_4_1_Core
     Q_OBJECT
 
     friend class App;
+    friend class Postprocessor;
 public:
     Renderer();
     ~Renderer() override;
@@ -46,6 +47,11 @@ public:
                         const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                         const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
                         const std::vector<PointLightComponent>& pointLights = std::vector<PointLightComponent>());
+
+    /** Renders a picture to the screen and uses the pixel locations to figure out what objects the mouse i hovering over.
+     * The process is a accurate, but slow process and therefore should never be used in runtime; only in the editor.
+     */
+    gsl::vec2 getMouseHoverObject(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms);
 
 private:
     void deferredGeometryPass(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);

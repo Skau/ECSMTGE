@@ -99,6 +99,7 @@ HEADERS += \
     Renderables/trianglesurface.h \
     objecttreewidget.h \
     physicssystem.h \
+    postprocessor.h \
     renderer.h \
     resourcemanager.h \
     scene.h \
@@ -149,6 +150,7 @@ SOURCES += \
     Renderables/triangle.cpp \
     objecttreewidget.cpp \
     physicssystem.cpp \
+    postprocessor.cpp \
     renderer.cpp \
     resourcemanager.cpp \
     scene.cpp \

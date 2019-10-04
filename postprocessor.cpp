@@ -4,7 +4,7 @@
 Postprocessor::Postprocessor(Renderer *renderer)
 {
     mRenderer = renderer;
-    init();
+    // init();
 }
 
 void Postprocessor::init()
@@ -13,29 +13,8 @@ void Postprocessor::init()
     {
         initializeOpenGLFunctions();
 
-        glGenFramebuffers(2, mPingpong);
-        glGenTextures(2, mRenderTextures);
-        for (unsigned int i{0}; i < 2; ++i)
-        {
-            glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[i]);
-            glBindTexture(GL_TEXTURE_2D, mRenderTextures[i]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mRenderer->width(), mRenderer->height(), 0, GL_RGB, GL_FLOAT, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mRenderTextures[i], 0);
-
-            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            {
-                std::cout << "Postprocessor framebuffer failed to be created!" << std::endl;
-                glDeleteFramebuffers(2, mPingpong);
-                glDeleteTextures(2, mRenderTextures);
-                return;
-            }
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+        // This also creates buffers, btw.
+        updateRatio();
 
         // Create renderquad
         float quadVertices[] = {
@@ -82,6 +61,8 @@ void Postprocessor::Render()
 {
     if (!mInitialized)
         init();
+    else if (outdatedRatio())
+        updateRatio();
 
     // Reset so that we start at the first ping-pong buffer
     mLastUsedBuffer = 0;
@@ -129,6 +110,8 @@ void Postprocessor::clear()
 {
     if (!mInitialized)
         init();
+    else if (outdatedRatio())
+        updateRatio();
 
     glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[0]);
 
@@ -145,6 +128,90 @@ void Postprocessor::renderQuad()
     glBindVertexArray(mScreenSpacedQuadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
+}
+
+bool Postprocessor::outdatedRatio() const
+{
+    return mRenderer->width() != mScrWidth || mRenderer->height() != mScrHeight;
+}
+
+void Postprocessor::updateRatio()
+{
+    mScrWidth = mRenderer->width();
+    mScrHeight = mRenderer->height();
+
+    recreateBuffers();
+
+    glViewport(0, 0, mScrWidth, mScrHeight);
+
+}
+
+void Postprocessor::recreateBuffers()
+{
+    if (mInitialized)
+    {
+        glDeleteFramebuffers(2, mPingpong);
+        glDeleteTextures(2, mRenderTextures);
+        if (depthStencilUsingRenderbuffer)
+        {
+            glDeleteRenderbuffers(2, depthStencilBuffer);
+        }
+        else
+        {
+            glDeleteTextures(2, depthStencilBuffer);
+        }
+    }
+
+    glGenFramebuffers(2, mPingpong);
+    glGenTextures(2, mRenderTextures);
+
+    if (depthSampling)
+    {
+        glGenTextures(2, depthStencilBuffer);
+        depthStencilUsingRenderbuffer = false;
+    }
+    else
+    {
+        glGenRenderbuffers(2, depthStencilBuffer);
+        depthStencilUsingRenderbuffer = true;
+    }
+
+    for (unsigned int i{0}; i < 2; ++i)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[i]);
+        glBindTexture(GL_TEXTURE_2D, mRenderTextures[i]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mScrWidth, mScrWidth, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mRenderTextures[i], 0);
+
+
+        if (depthStencilUsingRenderbuffer)
+        {
+            glBindRenderbuffer(GL_RENDERBUFFER, depthStencilBuffer[i]);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, mScrWidth, mScrHeight);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthStencilBuffer[i]);
+        }
+        else
+        {
+            glBindTexture(GL_TEXTURE_2D, depthStencilBuffer[i]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_STENCIL, mScrWidth, mScrHeight, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_BYTE, nullptr);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencilBuffer[i], 0);
+        }
+
+
+        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        {
+            std::cout << "Postprocessor framebuffer failed to be created!" << std::endl;
+            glDeleteFramebuffers(2, mPingpong);
+            glDeleteTextures(2, mRenderTextures);
+            return;
+        }
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 Postprocessor::~Postprocessor()

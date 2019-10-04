@@ -28,6 +28,12 @@ public:
      */
     bool outputToDefault = true;
 
+    /* When depth sampling is disabled a renderbuffer is used
+     * for depth storage, which is faster but cannot be sampled
+     * from. Otherwise uses a texture.
+     */
+    bool depthSampling = false;
+
 
 private:
     bool mInitialized{false};
@@ -36,10 +42,19 @@ private:
     // Ping pong framebuffers.
     GLuint mPingpong[2];
     GLuint mRenderTextures[2];
+    GLuint depthStencilBuffer[2];
+    bool depthStencilUsingRenderbuffer = true;
+    int mScrWidth{0}, mScrHeight{0};
     unsigned char mLastUsedBuffer{0};
 
     GLuint mScreenSpacedQuadVAO;
     void renderQuad();
+    // Returns true if screen sizes has changed.
+    bool outdatedRatio() const;
+    void updateRatio();
+
+    // Manually destroys and recreates the framebuffers and textures.
+    void recreateBuffers();
 
 public:
     Postprocessor(Renderer* renderer);

@@ -49,7 +49,8 @@ bool InputHandler::eventFilter(QObject* obj, QEvent* event)
     {
         auto mouseEvent = static_cast<QMouseEvent*>(event);
         Keys[static_cast<int>(mouseEvent->button())] = true;
-        mousePress();
+        if (mouseEvent->button() == Qt::MouseButton::LeftButton)
+            mousePress();
         return true;
     }
     case QEvent::MouseButtonRelease:

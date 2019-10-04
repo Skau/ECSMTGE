@@ -22,6 +22,7 @@ class ComponentWidget;
 
 class MainWindow : public QMainWindow
 {
+    friend class App;
     Q_OBJECT
 
 public:
@@ -82,6 +83,7 @@ private:
     std::map<QTreeWidgetItem*, EntityInfo> mTreeDataCache;
 
     std::vector<ComponentWidget*> mCurrentComponentWidgets;
+    void setSelected(EntityInfo *entityInfo);
 };
 
 #endif // MAINWINDOW_H

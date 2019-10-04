@@ -368,17 +368,25 @@ void MainWindow::on_treeWidget_ObjectList_itemChanged(QTreeWidgetItem *item, int
 }
 
 // When left clicking on an item in the tree (selecting an entity)
+void MainWindow::setSelected(EntityInfo* entityInfo)
+{
+    if (entityInfo == nullptr)
+        return;
+
+    // Cache currently selected entity
+    currentEntitySelected = entityInfo;
+
+    // Update the selected object name
+    ui->lineEdit_SelectedObject->setText(QString::fromStdString(currentEntitySelected->name));
+
+    // Update widgets
+    updateComponentArea(currentEntitySelected->entityId);
+}
+
 void MainWindow::on_treeWidget_ObjectList_itemClicked(QTreeWidgetItem *item, int /*column*/)
 {
     if(mTreeDataCache.find(item) != mTreeDataCache.end())
     {
-        // Cache currently selected entity
-        currentEntitySelected = &mTreeDataCache[item];
-
-        // Update the selected object name
-        ui->lineEdit_SelectedObject->setText(QString::fromStdString(currentEntitySelected->name));
-
-        // Update widgets
-        updateComponentArea(currentEntitySelected->entityId);
+        setSelected(&mTreeDataCache[item]);
     }
 }

@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include "innpch.h"
+#include "componentdata.h"
 
 // Forward declarations
 class Renderer;
@@ -49,6 +50,8 @@ public:
 
     // Renders every post process effect over the screen
     void Render();
+
+    void clear();
 
     ~Postprocessor();
 };

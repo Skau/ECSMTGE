@@ -31,6 +31,7 @@ App::App()
     connect(mMainWindow->ui->actionExit, &QAction::triggered, mMainWindow.get(), &MainWindow::close);
     connect(mRenderer, &Renderer::windowUpdated, this, &App::updatePerspective);
     connect(mRenderer, &Renderer::windowUpdated, mRenderer, &Renderer::resizeGBuffer);
+    connect(mEventHandler.get(), &InputHandler::mousePress, this, &App::mousePicking);
 }
 
 // Slot called from Renderer when its done with initialization
@@ -61,6 +62,27 @@ void App::toggleMute(bool mode)
 {
     if (mSoundListener)
         mSoundListener->setMute(mode);
+}
+
+void App::mousePicking()
+{
+    auto mousePoint = mRenderer->mapFromGlobal(QCursor::pos());
+    auto cameras = mWorld->getEntityManager()->getCameraComponents();
+    auto meshes = mWorld->getEntityManager()->getMeshComponents();
+    auto transforms = mWorld->getEntityManager()->getTransformComponents();
+
+    if (!cameras.empty())
+    {
+        auto entity = mRenderer->getMouseHoverObject(gsl::ivec2{mousePoint.x(), mousePoint.y()}, meshes, transforms, cameras.front());
+        for (auto it = mMainWindow->mTreeDataCache.begin(); it != mMainWindow->mTreeDataCache.end(); ++it)
+        {
+            if (it->second.entityId == entity)
+            {
+                mMainWindow->setSelected(&it->second);
+                break;
+            }
+        }
+    }
 }
 
 

@@ -38,7 +38,7 @@ public:
     GLfloat& operator()(const int &y, const int &x);
     GLfloat operator()(const int &y, const int &x) const;
 
-    Matrix4x4 operator*(const Matrix4x4 &other);
+    Matrix4x4 operator*(const Matrix4x4 &other) const;
 
     Vector4D operator*(const Vector4D &other);
 

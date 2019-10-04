@@ -9,7 +9,7 @@ Postprocessor::Postprocessor(Renderer *renderer)
 
 void Postprocessor::init()
 {
-    if (mRenderer != nullptr && mRenderer->mContext->isValid())
+    if (mRenderer != nullptr && mRenderer->mContext->makeCurrent(mRenderer))
     {
         initializeOpenGLFunctions();
 
@@ -58,7 +58,13 @@ void Postprocessor::init()
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
+        mRenderer->checkForGLerrors();
+
         mInitialized = true;
+    }
+    else
+    {
+        std::cout << "Postprocessor init failed because invalid renderer reference or missing opengl context" << std::endl;
     }
 }
 
@@ -74,6 +80,9 @@ GLuint Postprocessor::output() const
 
 void Postprocessor::Render()
 {
+    if (!mInitialized)
+        init();
+
     // Reset so that we start at the first ping-pong buffer
     mLastUsedBuffer = 0;
 
@@ -110,9 +119,25 @@ void Postprocessor::Render()
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
             glBlitFramebuffer(0, 0, mRenderer->width(), mRenderer->height(), 0, 0, mRenderer->width(), mRenderer->height(),
                               GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT, GL_NEAREST);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
     }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Postprocessor::clear()
+{
+    if (!mInitialized)
+        init();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[0]);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Reset so that we start at the first ping-pong buffer
+    mLastUsedBuffer = 0;
 }
 
 void Postprocessor::renderQuad()

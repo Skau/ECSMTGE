@@ -46,6 +46,8 @@ Renderer::Renderer()
         mContext = nullptr;
         qDebug() << "Context could not be made - quitting this application";
     }
+
+    mPostprocessor = std::make_unique<Postprocessor>(this);
 }
 
 Renderer::~Renderer()
@@ -68,7 +70,7 @@ void Renderer::init()
     glEnable(GL_DEPTH_TEST);    //enables depth sorting - must use GL_DEPTH_BUFFER_BIT in glClear
     glEnable(GL_CULL_FACE);     //draws only front side of models - usually what you want
 
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     //Print render version info:
     std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
@@ -318,120 +320,123 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
     }
 }
 
-gsl::vec2 Renderer::getMouseHoverObject(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms)
+unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms,
+                                           const CameraComponent &camera)
 {
-    if(isExposed())
+    if(isExposed() && mouseScreenPos.x < width() && mouseScreenPos.y < height())
     {
-//        mContext->makeCurrent(this);
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        mContext->makeCurrent(this);
+        mPostprocessor->clear();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
+
+        auto shader = ResourceManager::instance()->getShader("mousepicking");
+        if(!shader)
+        {
+            std::cout << "mouse hover object function failed because it could'nt find mousepicking shader!" << std::endl;
+            return 0;
+        }
+
+        glUseProgram(shader->getProgram());
 
 
-//        // mCurrentCamera->update(deltaTime);
+        auto transIt = transforms.begin();
+        auto renderIt = renders.begin();
 
-//        auto transIt = transforms.begin();
-//        auto renderIt = renders.begin();
+        bool transformShortest = transforms.size() < renders.size();
 
-//        bool transformShortest = transforms.size() < renders.size();
+        bool _{true};
 
-//        bool _{true};
+        // cause normal while (true) loops are so outdated
+        for ( ;_; )
+        {
+            if (transformShortest)
+            {
+                if (transIt == transforms.end())
+                    break;
+            }
+            else
+            {
+                if (renderIt == renders.end())
+                    break;
+            }
 
-//        // cause normal while (true) loops are so outdated
-//        for ( ;_; )
-//        {
-//            if (transformShortest)
-//            {
-//                if (transIt == transforms.end())
-//                    break;
-//            }
-//            else
-//            {
-//                if (renderIt == renders.end())
-//                    break;
-//            }
+            // Increment lowest index
+            if (!transIt->valid || transIt->entityId < renderIt->entityId)
+            {
+                ++transIt;
+            }
+            else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
+            {
+                ++renderIt;
+            }
+            else
+            {
+                // They are the same
+                if(!renderIt->isVisible)
+                {
+                    // Increment all
+                    ++transIt;
+                    ++renderIt;
+                    continue;
+                }
 
-//            // Increment lowest index
-//            if (!transIt->valid || transIt->entityId < renderIt->entityId)
-//            {
-//                ++transIt;
-//            }
-//            else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
-//            {
-//                ++renderIt;
-//            }
-//            else
-//            {
-//                // They are the same
-//                if(!renderIt->isVisible)
-//                {
-//                    // Increment all
-//                    ++transIt;
-//                    ++renderIt;
-//                    continue;
-//                }
+                // Mesh data available
+                auto meshData = renderIt->meshData;
+                if(!meshData.mVerticesCount)
+                {
+                    // Increment all
+                    ++transIt;
+                    ++renderIt;
+                    continue;
+                }
 
-//                // Mesh data available
-//                auto meshData = renderIt->meshData;
-//                if(!meshData.mVerticesCount)
-//                {
-//                    // Increment all
-//                    ++transIt;
-//                    ++renderIt;
-//                    continue;
-//                }
+                // Entity can be drawn. Draw.
 
-//                // Entity can be drawn. Draw.
+                glBindVertexArray(meshData.mVAO);
 
-//                glBindVertexArray(meshData.mVAO);
-
-//                auto shader = meshData.mMaterial.mShader;
-//                if(!shader)
-//                {
-//                    shader = ResourceManager::instance()->getShader("color");
-//                    meshData.mMaterial.mShader = shader;
-//                }
-
-//                glUseProgram(shader->getProgram());
-
-//                if(meshData.mMaterial.mShader && meshData.mMaterial.mShader->mName.length())
-//                {
-//                    if(meshData.mMaterial.mShader->mName == "texture" && meshData.mMaterial.mTexture > -1)
-//                    {
-//                        glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(meshData.mMaterial.mTexture));
-//                        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(meshData.mMaterial.mTexture));
-
-//                        glUniform1i(glGetUniformLocation(shader->getProgram(), "textureSampler"), meshData.mMaterial.mTexture);
-//                    }
-//                }
-
-//                auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
-
-//                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
-//                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
-//                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
-
-//                if(meshData.mIndicesCount > 0)
-//                {
-//                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
-//                }
-//                else
-//                {
-//                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
-//                }
-
-//                // Increment all
-//                ++transIt;
-//                ++renderIt;
+                auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
+                auto MVP = camera.projectionMatrix * camera.viewMatrix * mMatrix;
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "MVP"), 1, true, MVP.constData());
 
 
-//            }
-//        }
+                // Convert the entity ID, into an RGB color
+                int r = (transIt->entityId & 0x000000FF) >>  0;
+                int g = (transIt->entityId & 0x0000FF00) >>  8;
+                int b = (transIt->entityId & 0x00FF0000) >> 16;
+                gsl::vec3 color{ r / 255.f, g / 255.f, b / 255.f };
+                glUniform3fv(glGetUniformLocation(shader->getProgram(), "idColor"), 1, color.xP());
 
-//        renderSkybox(camera);
 
-//        checkForGLerrors();
+                if(meshData.mIndicesCount > 0)
+                {
+                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
+                }
+                else
+                {
+                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
+                }
 
-//        mContext->swapBuffers(this);
+                // Increment all
+                ++transIt;
+                ++renderIt;
+            }
+        }
+
+        checkForGLerrors();
+
+
+        // Read color value from framebuffer
+        unsigned char data[4];
+        glReadPixels(mouseScreenPos.x, mouseScreenPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        unsigned int returnedId = data[0] + data[1] * 256 + data[2] * 256 * 256;
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return returnedId;
     }
+
+    return 0;
 }
 
 void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera)

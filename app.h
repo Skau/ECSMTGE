@@ -38,6 +38,7 @@ signals:
 public slots:
     void initTheRest();
     void toggleMute(bool mode);
+    void mousePicking();
 
 private slots:
     void update();

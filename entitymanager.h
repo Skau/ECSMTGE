@@ -201,7 +201,7 @@ public:
 
     unsigned int createEntity(std::string name = "")
     {
-        auto id = idCounter++;
+        auto id = ++idCounter;
         EntityInfo entityInfo;
         entityInfo.entityId = id;
         if(!name.size())

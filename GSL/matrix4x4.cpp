@@ -749,7 +749,7 @@ GLfloat Matrix4x4::operator()(const int &y, const int &x) const
     return data[y * 4 + x];
 }
 
-Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &other)
+Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &other) const
 {
     return
     {

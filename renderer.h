@@ -9,7 +9,7 @@
 #include "camerasystem.h"
 #include "Renderables/visualobject.h"
 #include "componentdata.h"
-
+#include "postprocessor.h"
 
 class QOpenGLContext;
 class Shader;
@@ -51,7 +51,8 @@ public:
     /** Renders a picture to the screen and uses the pixel locations to figure out what objects the mouse i hovering over.
      * The process is a accurate, but slow process and therefore should never be used in runtime; only in the editor.
      */
-    gsl::vec2 getMouseHoverObject(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms);
+    unsigned int getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms,
+                                     const CameraComponent& camera);
 
 private:
     void deferredGeometryPass(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
@@ -74,6 +75,8 @@ private:
     QOpenGLContext *mContext{nullptr};
 
     float mTimeSinceStart{0};
+
+    std::unique_ptr<Postprocessor> mPostprocessor;
 
     std::shared_ptr<MeshData> mSkybox;
 

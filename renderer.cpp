@@ -328,6 +328,7 @@ unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std:
         mContext->makeCurrent(this);
         mPostprocessor->clear();
 
+        // Using the postprocessor input framebuffer as an offscreen render.
         glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
         auto shader = ResourceManager::instance()->getShader("mousepicking");
@@ -428,7 +429,7 @@ unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std:
 
         // Read color value from framebuffer
         unsigned char data[4];
-        glReadPixels(mouseScreenPos.x, mouseScreenPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glReadPixels(mouseScreenPos.x, height() - mouseScreenPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
         unsigned int returnedId = data[0] + data[1] * 256 + data[2] * 256 * 256;
 

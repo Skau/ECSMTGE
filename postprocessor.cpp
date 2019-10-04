@@ -98,7 +98,7 @@ void Postprocessor::Render()
             // If no postprocess steps, just blit framebuffer onto default framebuffer.
             glBindFramebuffer(GL_READ_FRAMEBUFFER, mPingpong[0]);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-            glBlitFramebuffer(0, 0, mRenderer->width(), mRenderer->height(), 0, 0, mRenderer->width(), mRenderer->height(),
+            glBlitFramebuffer(0, 0, mScrWidth, mScrHeight, 0, 0, mScrWidth, mScrHeight,
                               GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT, GL_NEAREST);
         }
     }
@@ -115,6 +115,7 @@ void Postprocessor::clear()
 
     glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[0]);
 
+    glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -125,6 +126,11 @@ void Postprocessor::clear()
 
 void Postprocessor::renderQuad()
 {
+    if (!mInitialized)
+        init();
+    else if (outdatedRatio())
+        updateRatio();
+
     glBindVertexArray(mScreenSpacedQuadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
@@ -180,7 +186,7 @@ void Postprocessor::recreateBuffers()
     {
         glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[i]);
         glBindTexture(GL_TEXTURE_2D, mRenderTextures[i]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mScrWidth, mScrWidth, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mScrWidth, mScrWidth, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

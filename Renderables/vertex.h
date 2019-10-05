@@ -8,6 +8,7 @@ class Vertex {
 public:
     Vertex();
     Vertex(float x, float y, float z, float r, float g, float b);
+    Vertex(gsl::Vector3D a);
     Vertex(gsl::Vector3D a, gsl::Vector3D b, gsl::Vector2D c);
     ~Vertex();
 

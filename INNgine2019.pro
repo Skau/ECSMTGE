@@ -103,6 +103,7 @@ HEADERS += \
     renderer.h \
     resourcemanager.h \
     scene.h \
+    simplify.h \
     soundlistener.h \
     soundmanager.h \
     texture.h \

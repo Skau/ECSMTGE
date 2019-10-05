@@ -5,6 +5,7 @@
 #include "wavfilehandler.h"
 #include <QDebug>
 #include "soundmanager.h"
+#include "simplify.h"
 
 ResourceManager::~ResourceManager()
 {
@@ -112,6 +113,7 @@ std::shared_ptr<MeshData> ResourceManager::addMesh(const std::string& name, cons
         if(QString::fromStdString(path).contains(".obj"))
         {
             data = readObjFile(path);
+            addLODs(data, name, path, renderType);
         }
         else
         {
@@ -120,54 +122,93 @@ std::shared_ptr<MeshData> ResourceManager::addMesh(const std::string& name, cons
 
         if(!data.first.size()) return nullptr;
 
-        MeshData meshData;
-
-        meshData.mName = name;
-        meshData.mRenderType = renderType;
-
-        //Vertex Array Object - VAO
-        glGenVertexArrays( 1, &meshData.mVAO );
-        glBindVertexArray(meshData.mVAO);
-
-        //Vertex Buffer Object to hold vertices - VBO
-        GLuint vbo;
-        glGenBuffers( 1, &vbo );
-        glBindBuffer( GL_ARRAY_BUFFER, vbo );
-
-        glBufferData( GL_ARRAY_BUFFER, data.first.size() * sizeof(Vertex), data.first.data(), GL_STATIC_DRAW );
-
-        // 1rst attribute buffer : vertices
-        glVertexAttribPointer(0, 3, GL_FLOAT,GL_FALSE, sizeof(Vertex), (GLvoid*)0);
-        glEnableVertexAttribArray(0);
-
-        // 2nd attribute buffer : colors
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,  sizeof(Vertex),  (GLvoid*)(3 * sizeof(GLfloat)) );
-        glEnableVertexAttribArray(1);
-
-        // 3rd attribute buffer : uvs
-        glVertexAttribPointer(2, 2,  GL_FLOAT, GL_FALSE, sizeof( Vertex ), (GLvoid*)( 6 * sizeof( GLfloat ) ));
-        glEnableVertexAttribArray(2);
-
-        meshData.mVerticesCount = data.first.size();
-        meshData.mIndicesCount = data.second.size();
-
-        if(meshData.mIndicesCount)
-        {
-            //Second buffer - holds the indices (Element Array Buffer - EAB):
-            GLuint eab;
-            glGenBuffers(1, &eab);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eab);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.mIndicesCount * sizeof(GLuint), data.second.data(), GL_STATIC_DRAW);
-        }
-
-        auto mesh = std::make_shared<MeshData>(meshData);
-        mMeshes[name] = mesh;
-        glBindVertexArray(0);
-
-        return mesh;
+        return initializeMeshData(name, renderType, data);
     }
 
     return nullptr;
+}
+
+void ResourceManager::addLODs(std::pair<std::vector<Vertex>, std::vector<GLuint>> data, const std::string& name, const std::string& path, GLenum renderType)
+{
+    auto split = QString::fromStdString(path).split(".");
+    auto firstSplit = split[0].toStdString();
+
+    // Load original mesh
+    Simplify::load_obj((gsl::assetFilePath + "Meshes/" + path).c_str());
+    qDebug() << "LOD0 vertices count: " << data.first.size();
+
+    // LOD1
+
+    // Simplify (Target is 30% triangle count)
+    Simplify::simplify_mesh(static_cast<int>((data.first.size() * 3) * 0.3f));
+    qDebug() << "LOD1 vertices count: " << Simplify::vertices.size();
+    // Create new path (this will be in working directory)
+    auto pathName = firstSplit + "_LOD1.obj";
+    // Create new OBJ file in path
+    Simplify::write_obj(pathName.c_str());
+    // Load the newly created OBJ
+    initializeMeshData(name + "_LOD1", renderType, readObjFile(pathName, false));
+
+    // LOD 2
+
+    // Simplify (Target is 1/3 of triangles)
+    Simplify::simplify_mesh(static_cast<int>(Simplify::triangles.size() / 3));
+    qDebug() << "LOD2 vertices count: " << Simplify::vertices.size();
+    // Create new path (this will be in working directory)
+    pathName = firstSplit + "_LOD2.obj";
+    // Create new OBJ file in path
+    Simplify::write_obj(pathName.c_str());
+    // Load the newly created OBJ
+    initializeMeshData(name + "_LOD2", renderType, readObjFile(pathName, false));
+}
+
+std::shared_ptr<MeshData> ResourceManager::initializeMeshData(const std::string& name, GLenum renderType, std::pair<std::vector<Vertex>, std::vector<GLuint>> data)
+{
+    MeshData meshData;
+
+    meshData.mName = name;
+    meshData.mRenderType = renderType;
+
+    //Vertex Array Object - VAO
+    glGenVertexArrays( 1, &meshData.mVAO );
+    glBindVertexArray(meshData.mVAO);
+
+    //Vertex Buffer Object to hold vertices - VBO
+    GLuint vbo;
+    glGenBuffers( 1, &vbo );
+    glBindBuffer( GL_ARRAY_BUFFER, vbo );
+
+    glBufferData( GL_ARRAY_BUFFER, static_cast<GLsizei>(data.first.size() * sizeof(Vertex)), data.first.data(), GL_STATIC_DRAW );
+
+    // 1rst attribute buffer : vertices
+    glVertexAttribPointer(0, 3, GL_FLOAT,GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+
+    // 2nd attribute buffer : colors
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,  sizeof(Vertex),  (GLvoid*)(3 * sizeof(GLfloat)) );
+    glEnableVertexAttribArray(1);
+
+    // 3rd attribute buffer : uvs
+    glVertexAttribPointer(2, 2,  GL_FLOAT, GL_FALSE, sizeof( Vertex ), (GLvoid*)( 6 * sizeof( GLfloat ) ));
+    glEnableVertexAttribArray(2);
+
+    meshData.mVerticesCount = static_cast<unsigned>(data.first.size());
+    meshData.mIndicesCount = static_cast<unsigned>(data.second.size());
+
+    if(meshData.mIndicesCount)
+    {
+        //Second buffer - holds the indices (Element Array Buffer - EAB):
+        GLuint eab;
+        glGenBuffers(1, &eab);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eab);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.mIndicesCount * sizeof(GLuint), data.second.data(), GL_STATIC_DRAW);
+    }
+
+    auto mesh = std::make_shared<MeshData>(meshData);
+    mMeshes[name] = mesh;
+    glBindVertexArray(0);
+
+    return mesh;
 }
 
 std::shared_ptr<MeshData> ResourceManager::getMesh(const std::string& name)
@@ -266,15 +307,24 @@ std::vector<std::string> ResourceManager::getAllWavFileNames()
     return returnStrings;
 }
 
-std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readObjFile(std::string filename)
+std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readObjFile(std::string filename, bool relative)
 {
     std::vector<Vertex> mVertices;
     std::vector<GLuint> mIndices;
 
     //Open File
-    std::string fileWithPath = gsl::assetFilePath + "Meshes/" + filename;
+
     std::ifstream fileIn;
-    fileIn.open (fileWithPath, std::ifstream::in);
+    if(relative)
+    {
+        std::string fileWithPath = gsl::assetFilePath + "Meshes/" + filename;
+        fileIn.open (fileWithPath, std::ifstream::in);
+    }
+    else
+    {
+        fileIn.open(filename, std::ifstream::in);
+    }
+
     if(!fileIn)
         qDebug() << "Could not open file for reading: " << QString::fromStdString(filename);
 
@@ -292,6 +342,9 @@ std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readObjFile
 
     // Varible for constructing the indices vector
     unsigned int temp_index = 0;
+
+    bool normalsPresent = false;
+    bool UVsPresent = false;
 
     //Reading one line at a time from file to oneLine
     while(std::getline(fileIn, oneLine))
@@ -344,6 +397,7 @@ std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readObjFile
             //UV made - pushing it into UV-vector
             tempUVs.push_back(tempUV);
 
+            UVsPresent = true;
             continue;
         }
         if (oneWord == "vn")
@@ -359,6 +413,8 @@ std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readObjFile
 
             //Vertex made - pushing it into vertex-vector
             tempNormals.push_back(tempNormal);
+
+            normalsPresent = true;
             continue;
         }
         if (oneWord == "f")
@@ -376,32 +432,44 @@ std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readObjFile
                 {
                     segmentArray.push_back(segment);
                 }
-                index = std::stoi(segmentArray[0]);     //first is vertex
-                if (segmentArray[1] != "")              //second is uv
+
+                index = std::stoi(segmentArray[0]);
+                --index;
+
+                if(UVsPresent)
+                {
                     uv = std::stoi(segmentArray[1]);
+                    --uv;
+                }
+
+                if(normalsPresent)
+                {
+                    normal = std::stoi(segmentArray[2]);
+                    --normal;
+                }
+
+                Vertex tempVert(tempVertecies[index]);
+
+                if (UVsPresent)
+                {
+                    tempVert.set_uv(tempUVs[uv].x, tempUVs[uv].y);
+                }
                 else
                 {
-                    //qDebug() << "No uvs in mesh";       //uv not present
-                    uv = 0;                             //this will become -1 in a couple of lines
+                    tempVert.set_uv(0.f, 0.f);
                 }
-                normal = std::stoi(segmentArray[2]);    //third is normal
 
-                //Fixing the indexes
-                //because obj f-lines starts with 1, not 0
-                --index;
-                --uv;
-                --normal;
 
-                if (uv > -1)    //uv present!
+                if(normalsPresent)
                 {
-                    Vertex tempVert(tempVertecies[index], tempNormals[normal], tempUVs[uv]);
-                    mVertices.push_back(tempVert);
+                    tempVert.set_normal(tempNormals[normal]);
                 }
-                else            //no uv in mesh data, use 0, 0 as uv
+                else
                 {
-                    Vertex tempVert(tempVertecies[index], tempNormals[normal], gsl::Vector2D(0.0f, 0.0f));
-                    mVertices.push_back(tempVert);
+                    tempVert.set_normal(0, 1, 0);
                 }
+
+                mVertices.push_back(tempVert);
                 mIndices.push_back(temp_index++);
             }
 

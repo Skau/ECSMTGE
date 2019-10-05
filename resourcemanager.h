@@ -62,8 +62,15 @@ public:
 private:
     ResourceManager();
 
-    std::pair<std::vector<Vertex>, std::vector<GLuint>> readObjFile(std::string filename);
+    std::pair<std::vector<Vertex>, std::vector<GLuint>> readObjFile(std::string filename, bool relative = true);
     std::pair<std::vector<Vertex>, std::vector<GLuint>> readTxtFile(std::string filename);
+
+    /**
+     * @brief Creates LOD meshes for a given data pair. Only works with OBJ files. Hardcoded to create 2 LODs
+     */
+    void addLODs(std::pair<std::vector<Vertex>, std::vector<GLuint> > data, const std::string& name, const std::string& path, GLenum renderType);
+
+    std::shared_ptr<MeshData> initializeMeshData(const std::string& name, GLenum renderType, std::pair<std::vector<Vertex>, std::vector<GLuint>> data);
 
     std::map<std::string, std::shared_ptr<Shader>> mShaders;
     std::map<std::string, std::shared_ptr<Texture>> mTextures;

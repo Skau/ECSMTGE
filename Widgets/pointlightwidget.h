@@ -19,8 +19,13 @@ public:
 protected slots:
     void Remove() override;
 
+private slots:
+    void on_button_ChangeColor_clicked();
+
 private:
     Ui::PointLightWidget *ui;
+
+    QColor initialColor;
 };
 
 #endif // POINTLIGHTWIDGET_H

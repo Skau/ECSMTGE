@@ -2,6 +2,7 @@
 #include "ui_spotlight.h"
 #include "mainwindow.h"
 #include "entitymanager.h"
+#include <QColorDialog>
 
 SpotLightWidget::SpotLightWidget(MainWindow *mainWindow, QWidget *parent) :
     ComponentWidget(mainWindow, parent), ui(new Ui::SpotLightWidget)
@@ -17,9 +18,8 @@ void SpotLightWidget::updateData()
         if(auto comp = mMainWindow->getEntityManager()->getComponent<SpotLightComponent>(entity->entityId))
         {
             isUpdating = true;
-
-
-
+            initialColor =  QColor(comp->color.x*255, comp->color.y*255, comp->color.z*255);
+            ui->textEdit_Color->setStyleSheet("background-color: " + initialColor.name());
             isUpdating = false;
         }
     }
@@ -37,3 +37,18 @@ void SpotLightWidget::Remove()
     }
 }
 
+
+void SpotLightWidget::on_button_ChangeColor_clicked()
+{
+    if(auto entity = mMainWindow->currentEntitySelected)
+    {
+        QColor color = QColorDialog::getColor(initialColor, this, "Change light color");
+
+        if(auto comp = mMainWindow->getEntityManager()->getComponent<SpotLightComponent>(entity->entityId))
+        {
+            comp->color = gsl::vec3(static_cast<float>(color.redF()), static_cast<float>(color.greenF()), static_cast<float>(color.blueF()));
+            initialColor = color;
+            ui->textEdit_Color->setStyleSheet("background-color: " + initialColor.name());
+        }
+    }
+}

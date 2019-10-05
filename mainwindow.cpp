@@ -293,7 +293,7 @@ void MainWindow::updateAvailableComponents(std::vector<ComponentType> types)
         }
         case ComponentType::LightDirectional:
         {
-            ui->comboBox_Components->addItem("Directionbal light");
+            ui->comboBox_Components->addItem("Directional light");
             break;
         }
         default:

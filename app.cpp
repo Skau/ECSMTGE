@@ -9,6 +9,7 @@
 
 #include "inputsystem.h"
 #include "physicssystem.h"
+#include "scriptsystem.h"
 
 #include "ui_mainwindow.h"
 
@@ -38,6 +39,9 @@ App::App()
 void App::initTheRest()
 { 
     connect(mMainWindow->ui->actionToggle_shutup, &QAction::toggled, this, &App::toggleMute);
+
+    connect(mMainWindow.get(), &MainWindow::play, this, &App::onPlay);
+    connect(mMainWindow.get(), &MainWindow::stop, this, &App::onStop);
 
     mWorld = std::make_unique<World>();
 
@@ -85,7 +89,6 @@ void App::mousePicking()
     }
 }
 
-
 void App::update()
 {
     // Not exactly needed now, but maybe this should be here? Timer does call this function every 16 ms.
@@ -99,6 +102,13 @@ void App::update()
     mRenderer->mTimeSinceStart += mDeltaTime;
 
     calculateFrames();
+
+    // Tick scripts if playing
+    if(mCurrentlyPlaying)
+    {
+        auto& scripts = mWorld->getEntityManager()->getScriptComponents();
+        ScriptSystem::get()->tick(mDeltaTime, scripts);
+    }
 
     // Input:
     const auto& inputs = mWorld->getEntityManager()->getInputComponents();
@@ -171,6 +181,22 @@ void App::updatePerspective()
     auto& cameras = mWorld->getEntityManager()->getCameraComponents();
 
     CameraSystem::updateCameras(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 0.1f, 100.f));
+}
+
+// Called when play action is pressed while not playing in UI
+void App::onPlay()
+{
+    mCurrentlyPlaying = true;
+    auto& scripts = mWorld->getEntityManager()->getScriptComponents();
+    ScriptSystem::get()->beginPlay(scripts);
+}
+
+// Called when play action is pressed while playing in UI
+void App::onStop()
+{
+    mCurrentlyPlaying = false;
+    auto& scripts = mWorld->getEntityManager()->getScriptComponents();
+    ScriptSystem::get()->endPlay(scripts);
 }
 
 void App::calculateFrames()

@@ -1,4 +1,4 @@
-QT          += core gui widgets
+QT          += core gui widgets qml
 
 TEMPLATE    = app
 CONFIG      += c++17
@@ -64,6 +64,7 @@ HEADERS += \
     Widgets/meshwidget.h \
     Widgets/physicswidget.h \
     Widgets/pointlightwidget.h \
+    Widgets/scriptwidget.h \
     Widgets/soundwidget.h \
     Widgets/spotlightwidget.h \
     Widgets/transformwidget.h \
@@ -103,6 +104,7 @@ HEADERS += \
     renderer.h \
     resourcemanager.h \
     scene.h \
+    scriptsystem.h \
     simplify.h \
     soundlistener.h \
     soundmanager.h \
@@ -121,6 +123,7 @@ SOURCES += \
     Widgets/meshwidget.cpp \
     Widgets/physicswidget.cpp \
     Widgets/pointlightwidget.cpp \
+    Widgets/scriptwidget.cpp \
     Widgets/soundwidget.cpp \
     Widgets/spotlightwidget.cpp \
     Widgets/transformwidget.cpp \
@@ -155,6 +158,7 @@ SOURCES += \
     renderer.cpp \
     resourcemanager.cpp \
     scene.cpp \
+    scriptsystem.cpp \
     soundlistener.cpp \
     soundmanager.cpp \
     texture.cpp \
@@ -163,20 +167,16 @@ SOURCES += \
 
 
 FORMS += \
-    Widgets/directionallight.ui \
-    Widgets/input.ui \
-    Widgets/input.ui \
-    Widgets/mesh.ui \
-    Widgets/physics.ui \
-    Widgets/pointlight.ui \
-    Widgets/sound.ui \
-    Widgets/spotlight.ui \
-    Widgets/transform.ui \
+    directionallight.ui \
+    input.ui \
     mainwindow.ui \
-    Widgets/mesh.ui \
-    Widgets/physics.ui \
-    Widgets/sound.ui \
-    Widgets/transform.ui
+    mesh.ui \
+    physics.ui \
+    pointlight.ui \
+    script.ui \
+    sound.ui \
+    spotlight.ui \
+    transform.ui
 
 
 DISTFILES += \

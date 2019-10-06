@@ -119,6 +119,7 @@ class EntityManager : public QObject
     REGISTER(DirectionalLightComponent)
     REGISTER(SpotLightComponent)
     REGISTER(PointLightComponent)
+    REGISTER(ScriptComponent)
     REGISTER(EntityInfo)
 
 private:
@@ -264,6 +265,11 @@ public:
             addComponent<PointLightComponent>(entity);
             break;
         }
+        case ComponentType::Script:
+        {
+            addComponent<ScriptComponent>(entity);
+            break;
+        }
         default:
             break;
         }
@@ -335,6 +341,14 @@ public:
             }
         }
         if(auto comp = getComponent<PointLightComponent>(entity))
+        {
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
+        }
+        if(auto comp = getComponent<ScriptComponent>(entity))
         {
             if(comp->valid)
             {

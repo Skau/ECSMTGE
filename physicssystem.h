@@ -31,7 +31,6 @@ public:
     };
 
     PhysicsSystem();
-
     static void UpdatePhysics(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent>& physics, float deltaTime);
 
 private:

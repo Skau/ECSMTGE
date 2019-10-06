@@ -45,6 +45,9 @@ public:
 
     void updateComponentWidgets();
 
+signals:
+    void play();
+    void stop();
 public slots:
     void updateUI(const std::vector<EntityInfo>& entityData);
     void onWidgetRemoved(ComponentWidget* widget);
@@ -55,6 +58,8 @@ private slots:
     void on_actionCube_triggered();
 
     void on_actionMonkey_triggered();
+
+    void on_actionPlay_triggered(bool value);
 
     void on_button_AddComponent_clicked();
 

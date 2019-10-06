@@ -17,6 +17,7 @@
 #include "Widgets/directionallightwidget.h"
 #include "Widgets/pointlightwidget.h"
 #include "Widgets/spotlightwidget.h"
+#include "Widgets/scriptwidget.h"
 #include "componentdata.h"
 
 #include <QSplitter>
@@ -121,6 +122,20 @@ void MainWindow::on_actionMonkey_triggered()
     mEntityManager->createObject(2);
 }
 
+void MainWindow::on_actionPlay_triggered(bool value)
+{
+    if(value)
+    {
+        play();
+        ui->actionPlay->setText("Stop");
+    }
+    else
+    {
+        stop();
+        ui->actionPlay->setText("Play");
+    }
+}
+
 // Called from entity manager when a new entity is added to the scene
 void MainWindow::updateUI(const std::vector<EntityInfo> &entityData)
 {
@@ -217,6 +232,11 @@ void MainWindow::updateComponentArea(unsigned int entityID)
                 componentWidget = new DirectionalLightWidget(this);
                 break;
             }
+            case ComponentType::Script:
+            {
+                componentWidget = new ScriptWidget(this);
+                break;
+            }
             default:
                 break;
             }
@@ -294,6 +314,11 @@ void MainWindow::updateAvailableComponents(std::vector<ComponentType> types)
         case ComponentType::LightDirectional:
         {
             ui->comboBox_Components->addItem("Directional light");
+            break;
+        }
+        case ComponentType::Script:
+        {
+            ui->comboBox_Components->addItem("Script");
             break;
         }
         default:

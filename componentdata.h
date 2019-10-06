@@ -19,13 +19,14 @@ enum class ComponentType
     LightPoint,
     LightDirectional,
     LightSpot,
+    Script,
     Other
 };
 
 // Used by UI so it knows what components are available to add if the entity doesnt have one.
 const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, ComponentType::Transform, ComponentType::Physics,
                                                    ComponentType::Input, ComponentType::Sound, ComponentType::LightPoint,
-                                                   ComponentType::LightDirectional, ComponentType::LightSpot};
+                                                   ComponentType::LightDirectional, ComponentType::LightSpot, ComponentType::Script};
 
 
 struct Component
@@ -199,6 +200,15 @@ struct DirectionalLightComponent : public Component
                               float _intensity = 1.f)
         : Component(_eID, _valid, ComponentType::LightDirectional),
           color(_color), intensity(_intensity)
+    {}
+};
+
+struct ScriptComponent : public Component
+{
+    std::string filePath;
+
+    ScriptComponent(unsigned int _eID = 0, bool _valid = false)
+        : Component(_eID, _valid, ComponentType::Script)
     {}
 };
 

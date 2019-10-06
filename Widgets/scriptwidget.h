@@ -25,6 +25,8 @@ private slots:
 
     void on_button_ExecuteJS_clicked();
 
+    void on_button_NewFile_clicked();
+
 private:
     Ui::ScriptWidget *ui;
 

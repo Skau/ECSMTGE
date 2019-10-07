@@ -77,6 +77,7 @@ private:
     float mTimeSinceStart{0};
 
     std::unique_ptr<Postprocessor> mPostprocessor;
+    std::unique_ptr<Postprocessor> mOutlineeffect;
 
     std::shared_ptr<MeshData> mSkybox;
 

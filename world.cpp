@@ -17,6 +17,10 @@ World::World()
     ResourceManager::instance()->addShader("skybox",            std::make_shared<Shader>("skybox.vert", "skybox.frag"));
     ResourceManager::instance()->addShader("mousepicking",      std::make_shared<Shader>("mousepicking.vert", "mousepicking.frag"));
 
+    // Post prosessing shaders
+    ResourceManager::instance()->addShader("passthrough",       std::make_shared<Shader>("pass.vert", "pass.frag"));
+    ResourceManager::instance()->addShader("blur",              std::make_shared<Shader>("pass.vert", "blur.frag"));
+
     // This function is troublesome...
     // ResourceManager::instance()->LoadAssetFiles();
 

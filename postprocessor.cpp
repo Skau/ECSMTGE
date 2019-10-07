@@ -19,10 +19,12 @@ void Postprocessor::init()
         // Create renderquad
         float quadVertices[] = {
             //    positions   texture Coords
-            -1.0f,  -1.0f, 0.0f, 0.0f, 0.0f,
-            1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 0.0f, 1.f, 1.0f,
+            -1.0f,  -1.0f, 0.0f, // 0.0f, 0.0f,
+            1.0f, -1.0f, 0.0f, // 1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f, // 0.0f, 1.0f,
+            -1.0f, 1.0f, 0.0f, // 1.0f, 0.0f,
+            1.0f,  -1.0f, 0.0f, // 0.0f, 1.0f,
+            1.0f, 1.0f, 0.0f // 1.f, 1.0f
         };
         // plane VAO setup
         GLuint mQuadVBO;
@@ -30,12 +32,12 @@ void Postprocessor::init()
         glGenBuffers(1, &mQuadVBO);
         glBindVertexArray(mScreenSpacedQuadVAO);
         glBindBuffer(GL_ARRAY_BUFFER, mQuadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)nullptr);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+//        glEnableVertexAttribArray(1);
+//        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
         mRenderer->checkForGLerrors();
 
@@ -73,24 +75,44 @@ void Postprocessor::Render()
         {
             // If last render, use default framebuffer; else use the one we didn't use last.
             glBindFramebuffer(GL_FRAMEBUFFER, (outputToDefault && setting + 1 == steps.end()) ? 0 : mPingpong[!mLastUsedBuffer]);
+            // qDebug() << "Bound to framebuffer: " << ((outputToDefault && setting + 1 == steps.end()) ? 0 : mPingpong[!mLastUsedBuffer]);
 
             auto shader = setting->shader;
-            if (!shader)
+            if (!shader) {
+                qDebug() << "using pass through shader";
                 shader = passThroughShader;
+            }
 
             shader->use();
 
-            // Send relevant uniforms.
-            // F.eks. Time.
+            glBindVertexArray(mScreenSpacedQuadVAO);
 
-            renderQuad();
+            // Bind to framebuffer texture
+            glActiveTexture(GL_TEXTURE0);
+            // qDebug() << "uniform: " << glGetUniformLocation(shader->getProgram(), "fbt");
+            glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt"), 0);
+            glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
+
+            int uniform = glGetUniformLocation(shader->getProgram(), "sResolution");
+            if (0 <= uniform)
+                glUniform2i(uniform, mScrWidth, mScrHeight);
+
+            uniform = glGetUniformLocation(shader->getProgram(), "sTime");
+            if (0 <= uniform)
+                glUniform1f(uniform, mRenderer->mTimeSinceStart);
+
+            // renderQuad();
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glBindVertexArray(0);
         }
     }
     else
     {
         if (!passThroughShader)
         {
-            std::cout << "Postprocessor render step skipped because of missing default shader" << std::endl;
+            if (!(passThroughShader = ResourceManager::instance()->getShader("passthrough")))
+                std::cout << "Postprocessor render step skipped because of missing default shader" << std::endl;
         }
 
         if (outputToDefault)
@@ -118,7 +140,7 @@ void Postprocessor::clear()
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Reset so that we start at the first ping-pong buffer
     mLastUsedBuffer = 0;
@@ -132,7 +154,7 @@ void Postprocessor::renderQuad()
         updateRatio();
 
     glBindVertexArray(mScreenSpacedQuadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 }
 
@@ -186,7 +208,7 @@ void Postprocessor::recreateBuffers()
     {
         glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[i]);
         glBindTexture(GL_TEXTURE_2D, mRenderTextures[i]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mScrWidth, mScrWidth, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mScrWidth, mScrHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -208,6 +230,38 @@ void Postprocessor::recreateBuffers()
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencilBuffer[i], 0);
         }
 
+
+        switch (glCheckFramebufferStatus(GL_FRAMEBUFFER))
+        {
+            case GL_FRAMEBUFFER_UNDEFINED:
+            qDebug() << "GL_FRAMEBUFFER_UNDEFINED";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
+            break;
+        case GL_FRAMEBUFFER_UNSUPPORTED:
+            qDebug() << "GL_FRAMEBUFFER_UNSUPPORTED";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
+            break;
+        case GL_FRAMEBUFFER_COMPLETE:
+            qDebug() << "Framebuffer is complete!";
+            break;
+
+        }
 
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {

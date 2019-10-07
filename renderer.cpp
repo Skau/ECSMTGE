@@ -68,6 +68,7 @@ void Renderer::init()
     initializeOpenGLFunctions();
 
     glEnable(GL_DEPTH_TEST);    //enables depth sorting - must use GL_DEPTH_BUFFER_BIT in glClear
+    glEnable(GL_STENCIL_TEST);
     glEnable(GL_CULL_FACE);     //draws only front side of models - usually what you want
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -108,17 +109,51 @@ void Renderer::init()
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, mGAlbedoSpec, 0);
 
     // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
-    unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    GLenum attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
     glDrawBuffers(3, attachments);
 
-    // create and attach depth buffer (renderbuffer)
+    // create and attach depth and stencil buffer (renderbuffer)
     glGenRenderbuffers(1, &mRboDepth);
     glBindRenderbuffer(GL_RENDERBUFFER, mRboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width(), height());
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRboDepth);
     // finally check if framebuffer is complete
+
+    // qDebug() << "Framebuffer status: " << glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         qDebug() << "Framebuffer not complete!";
+    switch (glCheckFramebufferStatus(GL_FRAMEBUFFER))
+    {
+        case GL_FRAMEBUFFER_UNDEFINED:
+        qDebug() << "GL_FRAMEBUFFER_UNDEFINED";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+        qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+        qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+        qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+        qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
+        break;
+    case GL_FRAMEBUFFER_UNSUPPORTED:
+        qDebug() << "GL_FRAMEBUFFER_UNSUPPORTED";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+        qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+        qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
+        break;
+    case GL_FRAMEBUFFER_COMPLETE:
+        qDebug() << "Framebuffer is complete!";
+        break;
+
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
@@ -142,6 +177,8 @@ void Renderer::init()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
+    // Init postprocessor
+    mPostprocessor->init();
 
     // Called to tell App that it can continue initializing
     initDone();
@@ -280,8 +317,10 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
         deferredGeometryPass(renders, transforms, camera);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        checkForGLerrors();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -303,16 +342,23 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
         // copy content of geometry's depth buffer to default framebuffer's depth buffer
         glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mPostprocessor->input()); // write to postprocessor framebuffer
 
         // blit to default framebuffer
-        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
         // Draw foward here
+        checkForGLerrors();
 
         // Skybox
         renderSkybox(camera);
+
+        glDisable(GL_DEPTH_TEST);
+
+        mPostprocessor->Render();
+
+        glEnable(GL_DEPTH_TEST);
 
         checkForGLerrors();
 
@@ -451,7 +497,9 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
 
     // ** Geometry pass ** //
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    checkForGLerrors();
 
     // cause normal while (true) loops are so outdated
     for ( ;_; )

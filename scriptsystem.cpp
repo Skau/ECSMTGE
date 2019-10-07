@@ -1,6 +1,7 @@
 #include "scriptsystem.h"
 #include <QFile>
 #include <QTextStream>
+#include "entitymanager.h"
 
 ScriptSystem::ScriptSystem()
 {
@@ -61,9 +62,10 @@ void ScriptSystem::beginPlay(std::vector<ScriptComponent>& comps)
             checkError(value);
             return;
         }
+        value.call();
 
         mGlobalObject.setProperty("entity", comp.entityId);
-        value.call();
+
     }
 }
 
@@ -128,69 +130,17 @@ void ScriptSystem::call(QString function, QString contents, QString fileName, Sc
         return;
     }
 
+    // entity is now a variable in JS holding the int
     mGlobalObject.setProperty("entity", comp.entityId);
     value.call();
 }
 
-void ScriptSystem::call(const std::string& function, QJSValueList params, ScriptComponent& comp)
+void ScriptSystem::setPosition(unsigned int entity, float x, float y, float z)
 {
-    if(!load(comp))
-    {
+    if(!entityManager)
         return;
-    }
 
-    QJSValue value = mJSEngine.evaluate(QString::fromStdString(function));
-    if(value.isError())
-    {
-        checkError(value);
-        return;
-    }
-
-    mGlobalObject.setProperty("entity", comp.entityId);
-    value.call(params);
-}
-
-void ScriptSystem::call(const std::string& function, QJSValueList params, std::vector<ScriptComponent>& comps)
-{
-    for(auto& comp : comps)
-    {
-        if(!load(comp))
-        {
-            continue;
-        }
-
-        QJSValue value = mJSEngine.evaluate(QString::fromStdString(function));
-        if(value.isError())
-        {
-            checkError(value);
-            continue;
-        }
-
-        mGlobalObject.setProperty("entity", comp.entityId);
-        value.call(params);
-    }
-}
-
-
-void ScriptSystem::call(const std::string& function, std::vector<ScriptComponent>& comps)
-{
-    for(auto& comp : comps)
-    {
-        if(!load(comp))
-        {
-            continue;
-        }
-
-        QJSValue value = mJSEngine.evaluate(QString::fromStdString(function));
-        if(value.isError())
-        {
-            checkError(value);
-            continue;
-        }
-
-        mGlobalObject.setProperty("entity", comp.entityId);
-        value.call();
-    }
+    entityManager->setTransformPos(entity, gsl::vec3(x, y, z));
 }
 
 

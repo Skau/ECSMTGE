@@ -47,6 +47,9 @@ void App::initTheRest()
 
     mMainWindow->setEntityManager(mWorld->getEntityManager());
 
+    // Script System needs the entity manager so data is available in scripts
+    ScriptSystem::get()->setEntityManager(mWorld->getEntityManager());
+
     mWorld->initCurrentScene();
 
     connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);

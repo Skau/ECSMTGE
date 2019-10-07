@@ -21,8 +21,11 @@ struct Material
 struct MeshData
 {
     GLenum mRenderType{};
+    std::array<unsigned, 3> mVAOs{};
     unsigned int mVAO{};
+    std::array<unsigned, 3> mVerticesCounts{};
     unsigned int mVerticesCount{};
+    std::array<unsigned, 3> mIndicesCounts{};
     unsigned int mIndicesCount{};
     std::string mName{};
     Material mMaterial;

@@ -109,26 +109,30 @@ std::shared_ptr<MeshData> ResourceManager::addMesh(const std::string& name, cons
             mIsInitialized = true;
         }
 
-        std::pair<std::vector<Vertex>, std::vector<GLuint>> data;
         if(QString::fromStdString(path).contains(".obj"))
         {
-            data = readObjFile(path);
-            addLODs(data, name, path, renderType);
+            auto verticesIndicesPair = readObjFile(path);
+            if(!verticesIndicesPair.first.size()) return nullptr;
+            auto mesh = initializeMeshData(name, renderType, verticesIndicesPair);
+            auto [LOD1, LOD2] = initializeLODs(verticesIndicesPair, name, path, renderType);
+            setupLODs(mesh, LOD1, LOD2);
+            return mesh;
         }
         else
         {
-            data = readTxtFile(path);
+            auto verticesIndicesPair = readTxtFile(path);
+            if(!verticesIndicesPair.first.size()) return nullptr;
+            auto mesh = initializeMeshData(name, renderType, verticesIndicesPair);
+            setupLODs(mesh);
+            return mesh;
+
         }
-
-        if(!data.first.size()) return nullptr;
-
-        return initializeMeshData(name, renderType, data);
     }
 
     return nullptr;
 }
 
-void ResourceManager::addLODs(std::pair<std::vector<Vertex>, std::vector<GLuint>> data, const std::string& name, const std::string& path, GLenum renderType)
+std::pair<std::shared_ptr<MeshData>, std::shared_ptr<MeshData>> ResourceManager::initializeLODs(std::pair<std::vector<Vertex>, std::vector<GLuint>> data, const std::string& name, const std::string& path, GLenum renderType)
 {
     auto split = QString::fromStdString(path).split(".");
     auto firstSplit = split[0].toStdString();
@@ -147,7 +151,7 @@ void ResourceManager::addLODs(std::pair<std::vector<Vertex>, std::vector<GLuint>
     // Create new OBJ file in path
     Simplify::write_obj(pathName.c_str());
     // Load the newly created OBJ
-    initializeMeshData(name + "_LOD1", renderType, readObjFile(pathName, false));
+    auto LOD1 = initializeMeshData(name + "_LOD1", renderType, readObjFile(pathName, false));
 
     // LOD 2
 
@@ -159,7 +163,45 @@ void ResourceManager::addLODs(std::pair<std::vector<Vertex>, std::vector<GLuint>
     // Create new OBJ file in path
     Simplify::write_obj(pathName.c_str());
     // Load the newly created OBJ
-    initializeMeshData(name + "_LOD2", renderType, readObjFile(pathName, false));
+    auto LOD2 = initializeMeshData(name + "_LOD2", renderType, readObjFile(pathName, false));
+
+    return {LOD1, LOD2};
+}
+
+void ResourceManager::setupLODs(std::shared_ptr<MeshData> baseMeshData, std::shared_ptr<MeshData> LOD1, std::shared_ptr<MeshData> LOD2)
+{
+    baseMeshData.get()->mVAOs[0] = baseMeshData.get()->mVAO;
+    baseMeshData.get()->mVerticesCounts[0] = baseMeshData.get()->mVerticesCount;
+    baseMeshData.get()->mIndicesCounts[0] = baseMeshData.get()->mIndicesCount;
+    if(LOD1)
+    {
+        baseMeshData.get()->mVAOs[1] = LOD1.get()->mVAO;
+        baseMeshData.get()->mVerticesCounts[1] = LOD1.get()->mVerticesCount;
+        baseMeshData.get()->mIndicesCounts[1] = LOD1.get()->mIndicesCount;
+        mMeshes.erase(LOD1.get()->mName);
+        if(LOD2)
+        {
+            baseMeshData.get()->mVAOs[2] = LOD2.get()->mVAO;
+            baseMeshData.get()->mVerticesCounts[2] = LOD2.get()->mVerticesCount;
+            baseMeshData.get()->mIndicesCounts[2] = LOD2.get()->mIndicesCount;
+            mMeshes.erase(LOD2.get()->mName);
+        }
+        else
+        {
+            baseMeshData.get()->mVAOs[2] = LOD1.get()->mVAO;
+            baseMeshData.get()->mVerticesCounts[2] = LOD1.get()->mVerticesCount;
+            baseMeshData.get()->mIndicesCounts[2] = LOD1.get()->mIndicesCount;
+        }
+    }
+    else
+    {
+        baseMeshData.get()->mVAOs[1] = baseMeshData.get()->mVAO;
+        baseMeshData.get()->mVerticesCounts[1] = baseMeshData.get()->mVerticesCount;
+        baseMeshData.get()->mIndicesCounts[1] = baseMeshData.get()->mIndicesCount;
+        baseMeshData.get()->mVAOs[2] = baseMeshData.get()->mVAO;
+        baseMeshData.get()->mVerticesCounts[2] = baseMeshData.get()->mVerticesCount;
+        baseMeshData.get()->mIndicesCounts[2] = baseMeshData.get()->mIndicesCount;
+    }
 }
 
 std::shared_ptr<MeshData> ResourceManager::initializeMeshData(const std::string& name, GLenum renderType, std::pair<std::vector<Vertex>, std::vector<GLuint>> data)

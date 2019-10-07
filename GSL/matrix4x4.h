@@ -115,7 +115,7 @@ public:
     void translateZ(GLfloat z = 0.f);
 
     void setPosition(GLfloat x = 0.f, GLfloat y = 0.f, GLfloat z = 0.f);
-    gsl::Vector3D getPosition();
+    gsl::Vector3D getPosition() const;
     GLfloat getFloat(int space);
 
     void translate(GLfloat x = 0.f, GLfloat y = 0.f, GLfloat z = 0.f);

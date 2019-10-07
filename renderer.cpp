@@ -499,7 +499,21 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
 
             // Entity can be drawn. Draw.
 
-            glBindVertexArray(meshData.mVAO);
+            auto camPos = camera.viewMatrix.getPosition();
+            auto distance = std::abs((camPos - transIt->position).length());
+
+            unsigned index = 0;
+            if(distance > 10.f)
+            {
+                index = 1;
+            }
+            else if(distance > 20.f)
+            {
+                index = 2;
+            }
+
+
+            glBindVertexArray(meshData.mVAOs[index]);
 
 
             // ** NEEDS TO BE A DEFERRED SHADER ** //
@@ -518,13 +532,13 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
             glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
             glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
 
-            if(meshData.mIndicesCount > 0)
+            if(meshData.mIndicesCounts[index] > 0)
             {
-                glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
+                glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCounts[index]), GL_UNSIGNED_INT, nullptr);
             }
             else
             {
-                glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
+                glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCounts[index]));
             }
 
 

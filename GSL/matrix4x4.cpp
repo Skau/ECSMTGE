@@ -240,7 +240,7 @@ void Matrix4x4::setPosition(GLfloat x, GLfloat y, GLfloat z)
     data[11] = z;
 }
 
-Vector3D Matrix4x4::getPosition()
+Vector3D Matrix4x4::getPosition() const
 {
     return gsl::Vector3D(data[3], data[7], data[11]);
 }

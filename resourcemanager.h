@@ -68,7 +68,8 @@ private:
     /**
      * @brief Creates LOD meshes for a given data pair. Only works with OBJ files. Hardcoded to create 2 LODs
      */
-    void addLODs(std::pair<std::vector<Vertex>, std::vector<GLuint> > data, const std::string& name, const std::string& path, GLenum renderType);
+    std::pair<std::shared_ptr<MeshData>, std::shared_ptr<MeshData> > initializeLODs(std::pair<std::vector<Vertex>, std::vector<GLuint> > data, const std::string& name, const std::string& path, GLenum renderType);
+    void setupLODs(std::shared_ptr<MeshData> baseMeshData, std::shared_ptr<MeshData> LOD1 = nullptr, std::shared_ptr<MeshData> LOD2 = nullptr);
 
     std::shared_ptr<MeshData> initializeMeshData(const std::string& name, GLenum renderType, std::pair<std::vector<Vertex>, std::vector<GLuint>> data);
 

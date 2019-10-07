@@ -231,38 +231,6 @@ void Postprocessor::recreateBuffers()
         }
 
 
-        switch (glCheckFramebufferStatus(GL_FRAMEBUFFER))
-        {
-            case GL_FRAMEBUFFER_UNDEFINED:
-            qDebug() << "GL_FRAMEBUFFER_UNDEFINED";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
-            break;
-        case GL_FRAMEBUFFER_UNSUPPORTED:
-            qDebug() << "GL_FRAMEBUFFER_UNSUPPORTED";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-            qDebug() << "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
-            break;
-        case GL_FRAMEBUFFER_COMPLETE:
-            qDebug() << "Framebuffer is complete!";
-            break;
-
-        }
-
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
             std::cout << "Postprocessor framebuffer failed to be created!" << std::endl;

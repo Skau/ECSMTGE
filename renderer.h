@@ -81,9 +81,8 @@ private:
 
     std::shared_ptr<MeshData> mSkybox;
 
-    unsigned int mScreenSpacedQuadVAO;
-    unsigned int mGBuffer, mGPosition{}, mGNormal{}, mGAlbedoSpec{};
-    unsigned int mRboDepth{};
+    GLuint mScreenSpacedQuadVAO;
+    GLuint mGBuffer, mGPosition{}, mGNormal{}, mGAlbedoSpec{}, mRboDepth{};
     std::shared_ptr<Shader> mDirectionalLightShader;
     std::shared_ptr<Shader> mPointLightShader;
     std::shared_ptr<Shader> mSpotLightShader;
@@ -100,6 +99,7 @@ private:
     void renderSkybox(const CameraComponent& camera);
 
     void startOpenGLDebugger();
+    void initGBuffer();
 };
 
 #endif // RENDERER_H

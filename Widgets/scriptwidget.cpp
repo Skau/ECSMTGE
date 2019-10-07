@@ -26,10 +26,10 @@ void ScriptWidget::updateData()
         if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
         {
             isUpdating = true;
-            auto filePath = comp->filePath;
+            auto filePath = comp->getFilePath();
             if(filePath.size())
             {
-                ui->lineEdit->setText(QString::fromStdString(comp->filePath));
+                ui->lineEdit->setText(QString::fromStdString(comp->getFilePath()));
                 ui->button_NewFile->setText("Open file");
             }
             else
@@ -67,7 +67,7 @@ void ScriptWidget::on_toolButton_clicked()
         if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
         {
             ui->lineEdit->setText(fileName);
-            comp->filePath = fileName.toStdString();
+            comp->load(fileName.toStdString());
         }
     }
 }
@@ -100,9 +100,15 @@ void ScriptWidget::on_button_ExecuteJS_clicked()
             stream << text;
             file.close();
 
-            ScriptSystem::get()->call("foo", text, "foo.js", *comp);
+            if(comp->execute("foo", text, "foo.js"))
+            {
+                ui->label_Status->setText("Execute successful");
+            }
+            else
+            {
+                ui->label_Status->setText("Execute failed");
+            }
 
-            //ui->label_Status->setText("Successfully called");
         }
     }
 
@@ -156,15 +162,16 @@ void ScriptWidget::on_button_NewFile_clicked()
                 return;
             }
             QTextStream stream(&file);
+            // Base template for new files. Includes functions beginPlay, tick and endPlay.
             stream << "// This will be run once when play button is pressed\n"
-                   << "function beginPlay()\n{\n\tconsole.log(\"Begin play called on entity \" + entity);\n}\n\n"
+                   << "function beginPlay()\n{\n\tconsole.log(\"Begin play called on entity \" + entityID);\n}\n\n"
                    << "// This will be once run every frame\n"
-                   << "function tick(deltaTime)\n{\n\tconsole.log(\"Tick called on entity \" + entity);\n}\n\n"
+                   << "function tick(deltaTime)\n{\n\tconsole.log(\"Tick called on entity \" + entityID);\n}\n\n"
                    << "// This will be run once when stop button is pressed\n"
-                   << "function endPlay()\n{\n\tconsole.log(\"End play called on entity \" + entity);\n}";
+                   << "function endPlay()\n{\n\tconsole.log(\"End play called on entity \" + entityID);\n}";
             file.close();
             QFileInfo fileInfo(file.fileName());
-            comp->filePath = fileInfo.filePath().toStdString();
+            comp->load(fileInfo.filePath().toStdString());
             ui->lineEdit->setText("Open file");
         }
     }

@@ -5,8 +5,10 @@
 #include "meshdata.h"
 #include <QtMath> // temp for qDegreesRadians in spot light component
 
-// Something like this?
-
+// For ScriptComponent
+#include <QFile>
+#include <QJSEngine>
+#include "scriptsystem.h"
 
 enum class ComponentType
 {
@@ -205,11 +207,41 @@ struct DirectionalLightComponent : public Component
 
 struct ScriptComponent : public Component
 {
+private:
+    QJSEngine* engine;
     std::string filePath;
 
+public:
     ScriptComponent(unsigned int _eID = 0, bool _valid = false)
-        : Component(_eID, _valid, ComponentType::Script)
-    {}
+        : Component(_eID, _valid, ComponentType::Script), filePath("")
+    {
+        engine = new QJSEngine();
+        engine->installExtensions(QJSEngine::ConsoleExtension);
+        engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
+        engine->globalObject().setProperty("entityID", _eID);
+    }
+
+    const std::string& getFilePath() { return filePath; }
+
+    /**
+     * @brief Loads the js file given. Returns true if the file is successfully evaluated and set.
+     */
+    bool load(const std::string& file);
+
+    /**
+     * @brief Calls a JS function on the current file loaded. Returns true if successful.
+     */
+    bool call(const std::string& function);
+
+    /**
+     * @brief Calls a JS function with params on the current file loaded. Returns true if successful.
+     */
+    bool call(const std::string& function, QJSValueList params);
+
+    /**
+     * @brief Executes one off raw js code from the mini editor. Returns true if successfull.
+     */
+    bool execute(QString function, QString contents, QString fileName);
 };
 
 // .. etc

@@ -22,27 +22,23 @@ App::App()
     mRenderer = mMainWindow->getRenderer();
 
     mEventHandler = std::make_shared<InputHandler>(mRenderer);
-
     mRenderer->installEventFilter(mEventHandler.get());
 
     connect(mRenderer, &Renderer::initDone, this, &App::initTheRest);
-
     connect(mMainWindow->ui->actionToggle_wireframe, &QAction::triggered, mRenderer, &Renderer::toggleWireframe);
     connect(mEventHandler.get(), &InputHandler::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
     connect(mMainWindow->ui->actionExit, &QAction::triggered, mMainWindow.get(), &MainWindow::close);
     connect(mRenderer, &Renderer::windowUpdated, this, &App::updatePerspective);
     connect(mRenderer, &Renderer::windowUpdated, mRenderer, &Renderer::resizeGBuffer);
     connect(mEventHandler.get(), &InputHandler::mousePress, this, &App::mousePicking);
+    connect(mMainWindow->ui->actionToggle_shutup, &QAction::toggled, this, &App::toggleMute);
+    connect(mMainWindow.get(), &MainWindow::play, this, &App::onPlay);
+    connect(mMainWindow.get(), &MainWindow::stop, this, &App::onStop);
 }
 
 // Slot called from Renderer when its done with initialization
 void App::initTheRest()
 { 
-    connect(mMainWindow->ui->actionToggle_shutup, &QAction::toggled, this, &App::toggleMute);
-
-    connect(mMainWindow.get(), &MainWindow::play, this, &App::onPlay);
-    connect(mMainWindow.get(), &MainWindow::stop, this, &App::onStop);
-
     mWorld = std::make_unique<World>();
 
     mMainWindow->setEntityManager(mWorld->getEntityManager());
@@ -53,7 +49,6 @@ void App::initTheRest()
     mWorld->initCurrentScene();
 
     connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);
-
     mUpdateTimer.start(16); // Simulates 60ish fps
 
     mDeltaTimer.start();
@@ -211,7 +206,7 @@ void App::calculateFrames()
     double elapsed = mFPSTimer.elapsed();
     if(elapsed >= 100)
     {
-        mMainWindow->showFPS(mTotalDeltaTime / mFrameCounter, mFrameCounter / mTotalDeltaTime);
+        mMainWindow->updateStatusBar(mRenderer->getNumberOfVerticesDrawn(), mTotalDeltaTime / mFrameCounter, mFrameCounter / mTotalDeltaTime);
         mFrameCounter = 0;
         mTotalDeltaTime = 0;
         mFPSTimer.restart();

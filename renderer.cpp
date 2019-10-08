@@ -1,28 +1,11 @@
 #include "innpch.h"
 #include "renderer.h"
-#include <QTimer>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QOpenGLDebugLogger>
-#include <QKeyEvent>
-#include <QStatusBar>
-#include <chrono>
-#include <QTime>
-#include <QCoreApplication>
-#include <QThread>
 
 #include "inputhandler.h"
-
-#include "Renderables/xyz.h"
-#include "Renderables/octahedronball.h"
-#include "Renderables/skybox.h"
-#include "Renderables/billboard.h"
-#include "Renderables/trianglesurface.h"
-#include "Renderables/objmesh.h"
-#include "Renderables/light.h"
-
 #include "resourcemanager.h"
-
 
 Renderer::Renderer()
 {
@@ -160,7 +143,7 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-        // mCurrentCamera->update(deltaTime);
+        mNumberOfVerticesDrawn = 0;
 
         auto transIt = transforms.begin();
         auto renderIt = renders.begin();
@@ -241,6 +224,8 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
+
+                mNumberOfVerticesDrawn += meshData.mVerticesCount;
 
                 if(meshData.mIndicesCount > 0)
                 {
@@ -457,6 +442,8 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    mNumberOfVerticesDrawn = 0;
+
     // cause normal while (true) loops are so outdated
     for ( ;_; )
     {
@@ -536,6 +523,8 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
             glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
             glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
 
+            mNumberOfVerticesDrawn += meshData.mVerticesCounts[index];
+
             if(meshData.mIndicesCounts[index] > 0)
             {
                 glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCounts[index]), GL_UNSIGNED_INT, nullptr);
@@ -597,6 +586,7 @@ void Renderer::directionalLightPass(const std::vector<TransformComponent> &trans
     glUniform1i(glGetUniformLocation(location, "gPosition"),   0);
     glUniform1i(glGetUniformLocation(location, "gNormal"),     1);
     glUniform1i(glGetUniformLocation(location, "gAlbedoSpec"), 2);
+    glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, pos.xP());
 
     auto transIt = transforms.begin();
     auto lightIt = dirLights.begin();
@@ -630,7 +620,6 @@ void Renderer::directionalLightPass(const std::vector<TransformComponent> &trans
         }
         else
         {
-            glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, pos.xP());
             glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, lightIt->color.xP());
             glUniform3fv(glGetUniformLocation(location, "light.Direction"), 1, transIt->rotation.forwardVector().xP());
             renderQuad();
@@ -652,6 +641,7 @@ void Renderer::pointLightPass(const std::vector<TransformComponent> &transforms,
     glUniform1i(glGetUniformLocation(location, "gPosition"),   0);
     glUniform1i(glGetUniformLocation(location, "gNormal"),     1);
     glUniform1i(glGetUniformLocation(location, "gAlbedoSpec"), 2);
+    glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, pos.xP());
 
     auto transIt = transforms.begin();
     auto lightIt = pointLights.begin();
@@ -685,7 +675,6 @@ void Renderer::pointLightPass(const std::vector<TransformComponent> &transforms,
         }
         else
         {
-            glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, pos.xP());
             glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, lightIt->color.xP());
             glUniform3fv(glGetUniformLocation(location, "light.Position"), 1, transIt->position.xP());
             glUniform1f(glGetUniformLocation(location, "light.Linear"), lightIt->linear);
@@ -710,6 +699,7 @@ void Renderer::spotLightPass(const std::vector<TransformComponent> &transforms, 
     glUniform1i(glGetUniformLocation(location, "gPosition"),   0);
     glUniform1i(glGetUniformLocation(location, "gNormal"),     1);
     glUniform1i(glGetUniformLocation(location, "gAlbedoSpec"), 2);
+    glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, pos.xP());
 
     auto transIt = transforms.begin();
     auto lightIt = spotLights.begin();
@@ -743,7 +733,6 @@ void Renderer::spotLightPass(const std::vector<TransformComponent> &transforms, 
         }
         else
         {
-            glUniform3fv(glGetUniformLocation(location, "viewPos"), 1, pos.xP());
             glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, lightIt->color.xP());
             glUniform3fv(glGetUniformLocation(location, "light.Position"), 1, transIt->position.xP());
             glUniform3fv(glGetUniformLocation(location, "light.Direction"), 1, transIt->rotation.forwardVector().xP());

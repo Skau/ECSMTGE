@@ -62,9 +62,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::showFPS(float deltaTime, float frameCounter)
+void MainWindow::updateStatusBar(int vertices, float deltaTime, float frameCounter)
 {
-    statusBar()->showMessage(" Time pr FrameDraw: "
+    statusBar()->showMessage("Vertices drawn: " +
+                             QString::number(vertices) +
+                             " | Time pr FrameDraw: "
                              + QString::number(static_cast<double>(deltaTime), 'g', 4)
                              + " s  |  " + "FPS: "
                              + QString::number(static_cast<double>(frameCounter), 'g', 4));

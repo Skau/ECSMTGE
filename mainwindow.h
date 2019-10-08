@@ -29,7 +29,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void showFPS(float deltaTime, float frameCounter);
+    void updateStatusBar(int vertices, float deltaTime, float frameCounter);
 
     Renderer* getRenderer() { return mRenderer; }
 

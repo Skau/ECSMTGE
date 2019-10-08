@@ -54,6 +54,8 @@ public:
     unsigned int getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms,
                                      const CameraComponent& camera);
 
+    int getNumberOfVerticesDrawn() { return mNumberOfVerticesDrawn; }
+
 private:
     void deferredGeometryPass(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
     void deferredLightningPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
@@ -91,6 +93,8 @@ private:
     bool mWireframe{false};
 
     bool isInitialized{false};
+
+    int mNumberOfVerticesDrawn{0};
 
    // MainWindow *mMainWindow{nullptr};    //points back to MainWindow to be able to put info in StatusBar
 

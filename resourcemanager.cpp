@@ -33,7 +33,6 @@ void ResourceManager::LoadAssetFiles()
             }
             else if(fileInfo.suffix() == "wav")
             {
-                qDebug() << fileInfo.absoluteFilePath();
                 loadWav(baseName, fileInfo.absoluteFilePath().toStdString());
             }
         }
@@ -170,37 +169,37 @@ std::pair<std::shared_ptr<MeshData>, std::shared_ptr<MeshData>> ResourceManager:
 
 void ResourceManager::setupLODs(std::shared_ptr<MeshData> baseMeshData, std::shared_ptr<MeshData> LOD1, std::shared_ptr<MeshData> LOD2)
 {
-    baseMeshData.get()->mVAOs[0] = baseMeshData.get()->mVAO;
-    baseMeshData.get()->mVerticesCounts[0] = baseMeshData.get()->mVerticesCount;
-    baseMeshData.get()->mIndicesCounts[0] = baseMeshData.get()->mIndicesCount;
+    baseMeshData->mVAOs[0]              = baseMeshData->mVAO;
+    baseMeshData->mVerticesCounts[0]    = baseMeshData->mVerticesCount;
+    baseMeshData->mIndicesCounts[0]     = baseMeshData->mIndicesCount;
     if(LOD1)
     {
-        baseMeshData.get()->mVAOs[1] = LOD1.get()->mVAO;
-        baseMeshData.get()->mVerticesCounts[1] = LOD1.get()->mVerticesCount;
-        baseMeshData.get()->mIndicesCounts[1] = LOD1.get()->mIndicesCount;
-        mMeshes.erase(LOD1.get()->mName);
+        baseMeshData->mVAOs[1]              = LOD1->mVAO;
+        baseMeshData->mVerticesCounts[1]    = LOD1->mVerticesCount;
+        baseMeshData->mIndicesCounts[1]     = LOD1->mIndicesCount;
+        mMeshes.erase(LOD1->mName);
         if(LOD2)
         {
-            baseMeshData.get()->mVAOs[2] = LOD2.get()->mVAO;
-            baseMeshData.get()->mVerticesCounts[2] = LOD2.get()->mVerticesCount;
-            baseMeshData.get()->mIndicesCounts[2] = LOD2.get()->mIndicesCount;
-            mMeshes.erase(LOD2.get()->mName);
+            baseMeshData->mVAOs[2]              = LOD2->mVAO;
+            baseMeshData->mVerticesCounts[2]    = LOD2->mVerticesCount;
+            baseMeshData->mIndicesCounts[2]     = LOD2->mIndicesCount;
+            mMeshes.erase(LOD2->mName);
         }
         else
         {
-            baseMeshData.get()->mVAOs[2] = LOD1.get()->mVAO;
-            baseMeshData.get()->mVerticesCounts[2] = LOD1.get()->mVerticesCount;
-            baseMeshData.get()->mIndicesCounts[2] = LOD1.get()->mIndicesCount;
+            baseMeshData->mVAOs[2]              = LOD1->mVAO;
+            baseMeshData->mVerticesCounts[2]    = LOD1->mVerticesCount;
+            baseMeshData->mIndicesCounts[2]     = LOD1->mIndicesCount;
         }
     }
     else
     {
-        baseMeshData.get()->mVAOs[1] = baseMeshData.get()->mVAO;
-        baseMeshData.get()->mVerticesCounts[1] = baseMeshData.get()->mVerticesCount;
-        baseMeshData.get()->mIndicesCounts[1] = baseMeshData.get()->mIndicesCount;
-        baseMeshData.get()->mVAOs[2] = baseMeshData.get()->mVAO;
-        baseMeshData.get()->mVerticesCounts[2] = baseMeshData.get()->mVerticesCount;
-        baseMeshData.get()->mIndicesCounts[2] = baseMeshData.get()->mIndicesCount;
+        baseMeshData->mVAOs[1]              = baseMeshData->mVAO;
+        baseMeshData->mVerticesCounts[1]    = baseMeshData->mVerticesCount;
+        baseMeshData->mIndicesCounts[1]     = baseMeshData->mIndicesCount;
+        baseMeshData->mVAOs[2]              = baseMeshData->mVAO;
+        baseMeshData->mVerticesCounts[2]    = baseMeshData->mVerticesCount;
+        baseMeshData->mIndicesCounts[2]     = baseMeshData->mIndicesCount;
     }
 }
 

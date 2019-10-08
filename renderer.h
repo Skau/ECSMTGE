@@ -79,6 +79,7 @@ private:
     std::unique_ptr<Postprocessor> mPostprocessor;
 
     std::shared_ptr<MeshData> mSkybox;
+    std::shared_ptr<MeshData> mAxis;
 
     unsigned int mScreenSpacedQuadVAO;
     unsigned int mGBuffer, mGPosition{}, mGNormal{}, mGAlbedoSpec{};
@@ -97,6 +98,7 @@ private:
 
     void renderQuad();
     void renderSkybox(const CameraComponent& camera);
+    void renderAxis(const CameraComponent& camera);
 
     void startOpenGLDebugger();
 };

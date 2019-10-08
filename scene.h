@@ -54,11 +54,6 @@ public:
         auto [camTrans, camCam, camInput] = entityManager->addComponent<TransformComponent, CameraComponent, InputComponent>(camera);
         camTrans.setPosition(gsl::vec3{0.f, 0.f, 5.f});
         camInput.isCurrentlyControlled = true;
-
-        // Axis:
-        auto [axisTrans, axisMesh] = entityManager->addComponent<TransformComponent, MeshComponent>(entityManager->createEntity("axis"));
-        axisMesh.meshData = *ResourceManager::instance()->getMesh("axis");
-        axisMesh.isVisible = true;
     }
 };
 

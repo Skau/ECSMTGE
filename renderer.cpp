@@ -142,7 +142,6 @@ void Renderer::init()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
-
     // Called to tell App that it can continue initializing
     initDone();
 }
@@ -239,7 +238,6 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
                 }
 
                 auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
-
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
@@ -313,6 +311,12 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
         // Skybox
         renderSkybox(camera);
+
+        // Axis
+        // Need to disable depth testing, or else the axis will sometimes appear behind other meshes
+        glDisable(GL_DEPTH_TEST);
+        renderAxis(camera);
+        glEnable(GL_DEPTH_TEST);
 
         checkForGLerrors();
 
@@ -783,7 +787,6 @@ void Renderer::renderQuad()
 
 void Renderer::renderSkybox(const CameraComponent &camera)
 {
-
     if (mSkybox->mMaterial.mTexture < 0)
         return;
 
@@ -813,6 +816,22 @@ void Renderer::renderSkybox(const CameraComponent &camera)
 
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mSkybox->mVerticesCount));
     glDepthFunc(GL_LESS);
+}
+
+void Renderer::renderAxis(const CameraComponent& camera)
+{
+    if(!mAxis)
+        return;
+
+    glBindVertexArray(mAxis->mVAO);
+    auto shader = mAxis->mMaterial.mShader;
+    glUseProgram(shader->getProgram());
+
+    auto mMatrix = gsl::mat4(1);
+    glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
+    glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
+    glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
+    glDrawArrays(mAxis->mRenderType, 0, static_cast<GLsizei>(mAxis->mVerticesCount));
 }
 
 void Renderer::exposeEvent(QExposeEvent *)

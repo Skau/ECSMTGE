@@ -63,6 +63,8 @@ void App::initTheRest()
 
     // Send skybox to renderer.
     mRenderer->mSkybox = ResourceManager::instance()->getMesh("skybox");
+    // Send axis to renderer
+    mRenderer->mAxis = ResourceManager::instance()->getMesh("axis");
 }
 
 void App::toggleMute(bool mode)

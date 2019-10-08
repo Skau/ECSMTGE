@@ -319,6 +319,7 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         mContext->makeCurrent(this);
 
         // Setup
+        glClearColor(0.f, 0.f, 0.f, 0.f);
         glStencilMask(0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -327,11 +328,8 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
         checkForGLerrors();
 
-//        glBindFramebuffer(GL_FRAMEBUFFER, mOutlineeffect->input());
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        // Clear postprocessor from last frame and bind to it
+        mPostprocessor->clear();
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -353,12 +351,12 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
         // copy content of geometry's depth buffer to default framebuffer's depth buffer
         glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mPostprocessor->input()); // write to postprocessor framebuffer
 
         // blit to postprocessor framebuffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mPostprocessor->input());
         glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 
-//        // Outline effect needs stencil buffer
+        // Outline effect needs stencil buffer
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
         glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 
@@ -369,27 +367,16 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         renderSkybox(camera);
 
 
-        // Post processing effects
-        // Note: Depth testing not necessary
-        // glDisable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-        glDepthMask(GL_FALSE);
 
+        // Postprocessing
+        glDisable(GL_DEPTH_TEST);
 
         drawEditorOutline();
-
-        // glDisable(GL_STENCIL_TEST);
-        // Pass fragments that are higher than 0
-
-
-        // Note: If postprocessor, which is the last rendering step, doesn't need the
-        // depth buffer there's no really a point in blitting it over.
-
         mPostprocessor->Render();
 
-        // glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-        glDepthMask(GL_TRUE);
+        glEnable(GL_DEPTH_TEST);
+
+
 
         checkForGLerrors();
 
@@ -719,10 +706,9 @@ unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std:
     if(isExposed() && mouseScreenPos.x < width() && mouseScreenPos.y < height())
     {
         mContext->makeCurrent(this);
-        mPostprocessor->clear();
 
         // Using the postprocessor input framebuffer as an offscreen render.
-        glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
+        mPostprocessor->clear();
 
         auto shader = ResourceManager::instance()->getShader("mousepicking");
         if(!shader)

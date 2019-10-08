@@ -85,6 +85,7 @@ public:
     // Send in the loopindex and returns the new loopindex if it looped or the same if it didn't.
     unsigned int RenderStep(unsigned int index);
 
+    // Resets ping pong buffers and binds to postprocessor framebuffer
     void clear();
 
     ~Postprocessor();

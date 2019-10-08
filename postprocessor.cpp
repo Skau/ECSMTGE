@@ -72,7 +72,6 @@ Postprocessor &Postprocessor::add(Postprocessor &other, Postprocessor::BLENDMODE
 
     shader->use();
 
-    glBindVertexArray(mScreenSpacedQuadVAO);
 
     // Bind to framebuffer texture
     glActiveTexture(GL_TEXTURE0);
@@ -85,10 +84,8 @@ Postprocessor &Postprocessor::add(Postprocessor &other, Postprocessor::BLENDMODE
 
     glUniform1i(glGetUniformLocation(shader->getProgram(), "blendmode"), blendmode);
 
-    // renderQuad();
 
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
+    renderQuad();
 
     return *this;
 }
@@ -121,10 +118,7 @@ void Postprocessor::Render()
 
             // If last render, use default framebuffer; else use the one we didn't use last.
             glBindFramebuffer(GL_FRAMEBUFFER, nextFramebuffer);
-            // qDebug() << "Bound to framebuffer: " << ((outputToDefault && setting + 1 == steps.end()) ? 0 : mPingpong[!mLastUsedBuffer]);
 
-//            glEnable(GL_STENCIL_TEST);
-//            // glStencilMask(0x00);
 
 
             auto shader = setting->shader;
@@ -135,7 +129,7 @@ void Postprocessor::Render()
 
             shader->use();
 
-            glBindVertexArray(mScreenSpacedQuadVAO);
+
 
             // Bind to framebuffer texture
             glActiveTexture(GL_TEXTURE0);
@@ -164,10 +158,7 @@ void Postprocessor::Render()
 
             evaluateParams(shader.get(), setting->parameters);
 
-            // renderQuad();
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            glBindVertexArray(0);
+            renderQuad();
         }
     }
     else
@@ -184,7 +175,7 @@ void Postprocessor::Render()
             glBindFramebuffer(GL_READ_FRAMEBUFFER, mPingpong[0]);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
             glBlitFramebuffer(0, 0, mScrWidth, mScrHeight, 0, 0, mScrWidth, mScrHeight,
-                              GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+                              GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
         }
     }
 
@@ -218,7 +209,7 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
 
             // If last render, use default framebuffer; else use the one we didn't use last.
             glBindFramebuffer(GL_FRAMEBUFFER, nextFramebuffer);
-            // qDebug() << "Bound to framebuffer: " << ((outputToDefault && setting + 1 == steps.end()) ? 0 : mPingpong[!mLastUsedBuffer]);
+
 
             auto shader = setting->shader;
             if (!shader) {
@@ -228,11 +219,9 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
 
             shader->use();
 
-            glBindVertexArray(mScreenSpacedQuadVAO);
 
             // Bind to framebuffer texture
             glActiveTexture(GL_TEXTURE0);
-            // qDebug() << "uniform: " << glGetUniformLocation(shader->getProgram(), "fbt");
             glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt"), 0);
             glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
 
@@ -257,10 +246,7 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
 
             evaluateParams(shader.get(), setting->parameters);
 
-            // renderQuad();
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            glBindVertexArray(0);
+            renderQuad();
 
             ++index;
             mLastUsedBuffer = !mLastUsedBuffer;
@@ -300,11 +286,7 @@ void Postprocessor::clear()
         updateRatio();
 
     glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[0]);
-
-    glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Reset so that we start at the first ping-pong buffer
     mLastUsedBuffer = 0;

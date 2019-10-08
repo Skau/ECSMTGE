@@ -381,6 +381,9 @@ void MainWindow::setSelected(EntityInfo* entityInfo)
 
     // Update widgets
     updateComponentArea(currentEntitySelected->entityId);
+
+    if (auto renderer = getRenderer())
+        renderer->EditorCurrentEntitySelected = currentEntitySelected;
 }
 
 void MainWindow::on_treeWidget_ObjectList_itemClicked(QTreeWidgetItem *item, int /*column*/)

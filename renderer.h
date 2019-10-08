@@ -30,6 +30,8 @@ public:
     Renderer();
     ~Renderer() override;
 
+    EntityInfo* EditorCurrentEntitySelected{nullptr};
+
     QOpenGLContext* getContext() { return mContext; }
 
     void init();
@@ -63,6 +65,7 @@ private:
     void directionalLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<DirectionalLightComponent>& dirLights);
     void pointLightPass(const std::vector<TransformComponent>& transforms,const CameraComponent &camera, const std::vector<PointLightComponent>& pointLights);
     void spotLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<SpotLightComponent>& spotLights);
+
 signals:
     void initDone();
     void windowUpdated();
@@ -97,6 +100,7 @@ private:
 
     void renderQuad();
     void renderSkybox(const CameraComponent& camera);
+    void drawEditorOutline();
 
     void startOpenGLDebugger();
     void initGBuffer();

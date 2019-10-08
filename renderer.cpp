@@ -23,6 +23,8 @@
 
 #include "resourcemanager.h"
 
+#include <fstream>
+
 
 Renderer::Renderer()
 {
@@ -48,6 +50,7 @@ Renderer::Renderer()
     }
 
     mPostprocessor = std::make_unique<Postprocessor>(this);
+    mOutlineeffect = std::make_unique<Postprocessor>(this);
 }
 
 Renderer::~Renderer()
@@ -68,7 +71,6 @@ void Renderer::init()
     initializeOpenGLFunctions();
 
     glEnable(GL_DEPTH_TEST);    //enables depth sorting - must use GL_DEPTH_BUFFER_BIT in glClear
-    glEnable(GL_STENCIL_TEST);
     glEnable(GL_CULL_FACE);     //draws only front side of models - usually what you want
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -105,6 +107,7 @@ void Renderer::init()
 
     // Init postprocessor
     mPostprocessor->init();
+    mOutlineeffect->init();
 
     // Called to tell App that it can continue initializing
     initDone();
@@ -317,7 +320,23 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
         deferredGeometryPass(renders, transforms, camera);
 
+//        unsigned char *buffer = new unsigned char[width() * height() * 4];
+//        glReadPixels(0, 0, width(), height(), GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, buffer);
+//        std::ofstream ofs{"depthBuffer", std::ofstream::out | std::ofstream::binary};
+//        if (ofs)
+//        {
+//            ofs.write((char*)buffer, width() * height() * 4);
+//        }
+//        ofs.close();
+
+
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
         checkForGLerrors();
+
+//        glBindFramebuffer(GL_FRAMEBUFFER, mOutlineeffect->input());
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -344,146 +363,44 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mPostprocessor->input()); // write to postprocessor framebuffer
 
-        // blit to default framebuffer
+        // blit to postprocessor framebuffer
         glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
+//        // Outline effect needs stencil buffer
+//        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
+//        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
         glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
         // Draw foward here
-        checkForGLerrors();
-
         // Skybox
         renderSkybox(camera);
 
-        glDisable(GL_DEPTH_TEST);
 
+        // Post processing effects
+        // glDisable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glDepthMask(GL_FALSE);
+
+
+        // drawEditorOutline();
+
+        // glDisable(GL_STENCIL_TEST);
+        // Pass fragments that are higher than 0
+
+
+        // Note: If postprocessor, which is the last rendering step, doesn't need the
+        // depth buffer there's no really a point in blitting it over.
         mPostprocessor->Render();
 
-        glEnable(GL_DEPTH_TEST);
+        // glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glDepthMask(GL_TRUE);
 
         checkForGLerrors();
 
         mContext->swapBuffers(this);
     }
-}
-
-unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms,
-                                           const CameraComponent &camera)
-{
-    if(isExposed() && mouseScreenPos.x < width() && mouseScreenPos.y < height())
-    {
-        mContext->makeCurrent(this);
-        mPostprocessor->clear();
-
-        // Using the postprocessor input framebuffer as an offscreen render.
-        glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
-
-        auto shader = ResourceManager::instance()->getShader("mousepicking");
-        if(!shader)
-        {
-            std::cout << "mouse hover object function failed because it could'nt find mousepicking shader!" << std::endl;
-            return 0;
-        }
-
-        glUseProgram(shader->getProgram());
-
-
-        auto transIt = transforms.begin();
-        auto renderIt = renders.begin();
-
-        bool transformShortest = transforms.size() < renders.size();
-
-        bool _{true};
-
-        // cause normal while (true) loops are so outdated
-        for ( ;_; )
-        {
-            if (transformShortest)
-            {
-                if (transIt == transforms.end())
-                    break;
-            }
-            else
-            {
-                if (renderIt == renders.end())
-                    break;
-            }
-
-            // Increment lowest index
-            if (!transIt->valid || transIt->entityId < renderIt->entityId)
-            {
-                ++transIt;
-            }
-            else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
-            {
-                ++renderIt;
-            }
-            else
-            {
-                // They are the same
-                if(!renderIt->isVisible)
-                {
-                    // Increment all
-                    ++transIt;
-                    ++renderIt;
-                    continue;
-                }
-
-                // Mesh data available
-                auto meshData = renderIt->meshData;
-                if(!meshData.mVerticesCount)
-                {
-                    // Increment all
-                    ++transIt;
-                    ++renderIt;
-                    continue;
-                }
-
-                // Entity can be drawn. Draw.
-
-                glBindVertexArray(meshData.mVAO);
-
-                auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
-                auto MVP = camera.projectionMatrix * camera.viewMatrix * mMatrix;
-                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "MVP"), 1, true, MVP.constData());
-
-
-                // Convert the entity ID, into an RGB color
-                int r = (transIt->entityId & 0x000000FF) >>  0;
-                int g = (transIt->entityId & 0x0000FF00) >>  8;
-                int b = (transIt->entityId & 0x00FF0000) >> 16;
-                gsl::vec3 color{ r / 255.f, g / 255.f, b / 255.f };
-                glUniform3fv(glGetUniformLocation(shader->getProgram(), "idColor"), 1, color.xP());
-
-
-                if(meshData.mIndicesCount > 0)
-                {
-                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
-                }
-                else
-                {
-                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
-                }
-
-                // Increment all
-                ++transIt;
-                ++renderIt;
-            }
-        }
-
-        checkForGLerrors();
-
-
-        // Read color value from framebuffer
-        unsigned char data[4];
-        glReadPixels(mouseScreenPos.x, height() - mouseScreenPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-        unsigned int returnedId = data[0] + data[1] * 256 + data[2] * 256 * 256;
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        return returnedId;
-    }
-
-    return 0;
 }
 
 void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera)
@@ -495,9 +412,16 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
 
     bool _{true};
 
+    GLuint currentlySelectedEID = (EditorCurrentEntitySelected != nullptr) ? EditorCurrentEntitySelected->entityId : 0;
+
     // ** Geometry pass ** //
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+    glEnable(GL_STENCIL_TEST);
+//    // glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // <- default
+    glStencilMask(0xFF);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
     checkForGLerrors();
 
@@ -566,6 +490,10 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
             glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
             glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
 
+            // If selected in editor, change it's stencil value
+            // if (currentlySelectedEID)
+//                 glStencilOp(GL_INCR, GL_INCR, GL_INCR);
+
             if(meshData.mIndicesCount > 0)
             {
                 glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
@@ -574,6 +502,10 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
             {
                 glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
             }
+
+            // Remember to change back so others won't get changed.
+            // if (currentlySelectedEID)
+   //              glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
 
             // Increment all
@@ -791,6 +723,126 @@ void Renderer::spotLightPass(const std::vector<TransformComponent> &transforms, 
     }
 }
 
+unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms,
+                                           const CameraComponent &camera)
+{
+    if(isExposed() && mouseScreenPos.x < width() && mouseScreenPos.y < height())
+    {
+        mContext->makeCurrent(this);
+        mPostprocessor->clear();
+
+        // Using the postprocessor input framebuffer as an offscreen render.
+        glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
+
+        auto shader = ResourceManager::instance()->getShader("mousepicking");
+        if(!shader)
+        {
+            std::cout << "mouse hover object function failed because it could'nt find mousepicking shader!" << std::endl;
+            return 0;
+        }
+
+        glUseProgram(shader->getProgram());
+
+
+        auto transIt = transforms.begin();
+        auto renderIt = renders.begin();
+
+        bool transformShortest = transforms.size() < renders.size();
+
+        bool _{true};
+
+        // cause normal while (true) loops are so outdated
+        for ( ;_; )
+        {
+            if (transformShortest)
+            {
+                if (transIt == transforms.end())
+                    break;
+            }
+            else
+            {
+                if (renderIt == renders.end())
+                    break;
+            }
+
+            // Increment lowest index
+            if (!transIt->valid || transIt->entityId < renderIt->entityId)
+            {
+                ++transIt;
+            }
+            else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
+            {
+                ++renderIt;
+            }
+            else
+            {
+                // They are the same
+                if(!renderIt->isVisible)
+                {
+                    // Increment all
+                    ++transIt;
+                    ++renderIt;
+                    continue;
+                }
+
+                // Mesh data available
+                auto meshData = renderIt->meshData;
+                if(!meshData.mVerticesCount)
+                {
+                    // Increment all
+                    ++transIt;
+                    ++renderIt;
+                    continue;
+                }
+
+                // Entity can be drawn. Draw.
+
+                glBindVertexArray(meshData.mVAO);
+
+                auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
+                auto MVP = camera.projectionMatrix * camera.viewMatrix * mMatrix;
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "MVP"), 1, true, MVP.constData());
+
+
+                // Convert the entity ID, into an RGB color
+                int r = (transIt->entityId & 0x000000FF) >>  0;
+                int g = (transIt->entityId & 0x0000FF00) >>  8;
+                int b = (transIt->entityId & 0x00FF0000) >> 16;
+                gsl::vec3 color{ r / 255.f, g / 255.f, b / 255.f };
+                glUniform3fv(glGetUniformLocation(shader->getProgram(), "idColor"), 1, color.xP());
+
+
+                if(meshData.mIndicesCount > 0)
+                {
+                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
+                }
+                else
+                {
+                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
+                }
+
+                // Increment all
+                ++transIt;
+                ++renderIt;
+            }
+        }
+
+        checkForGLerrors();
+
+
+        // Read color value from framebuffer
+        unsigned char data[4];
+        glReadPixels(mouseScreenPos.x, height() - mouseScreenPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        unsigned int returnedId = data[0] + data[1] * 256 + data[2] * 256 * 256;
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return returnedId;
+    }
+
+    return 0;
+}
+
 void Renderer::resizeGBuffer()
 {
     glBindTexture(GL_TEXTURE_2D, mGPosition);
@@ -847,6 +899,22 @@ void Renderer::renderSkybox(const CameraComponent &camera)
 
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mSkybox->mVerticesCount));
     glDepthFunc(GL_LESS);
+}
+
+void Renderer::drawEditorOutline()
+{
+    glEnable(GL_STENCIL_TEST);
+    // Pass fragments that are higher than 0
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+
+    // Custom loop logic
+    for (unsigned int i{0}; i < mOutlineeffect->steps.size(); ++i)
+    {
+        mOutlineeffect->RenderStep(i);
+//        if (i == 0)
+//            glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    }
+    // mOutlineeffect->Render();
 }
 
 void Renderer::exposeEvent(QExposeEvent *)

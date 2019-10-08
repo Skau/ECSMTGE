@@ -64,6 +64,8 @@ public:
 
     Vector3D getXYZ() const;
 
+    GLfloat* data() { return &x; }
+
     // Iterator class
     class Vector4DIterator {
     private:

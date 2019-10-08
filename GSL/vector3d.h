@@ -60,6 +60,8 @@ public:
     GLfloat *yP();
     GLfloat *zP();
 
+    GLfloat* data() { return &x; }
+
 
     //Friend functions
     friend std::ostream& operator<<(std::ostream &output, const Vector3D &rhs )

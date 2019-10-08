@@ -39,6 +39,8 @@ public:
     GLfloat getY() const;
     void setY(const GLfloat &value);
 
+    GLfloat* data() { return &x; }
+
     //Friend functions
     friend std::ostream& operator<<(std::ostream &output, const Vector2D &rhs)
     {

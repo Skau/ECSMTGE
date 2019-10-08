@@ -38,7 +38,7 @@ App::App()
 
 // Slot called from Renderer when its done with initialization
 void App::initTheRest()
-{ 
+{
     mWorld = std::make_unique<World>();
 
     mMainWindow->setEntityManager(mWorld->getEntityManager());

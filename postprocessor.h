@@ -6,6 +6,7 @@
 #include <vector>
 #include "innpch.h"
 #include "componentdata.h"
+#include <variant>
 
 // Forward declarations
 class Renderer;
@@ -47,7 +48,7 @@ private:
     // Ping pong framebuffers.
     GLuint mPingpong[2];
     GLuint mRenderTextures[2];
-    GLuint depthStencilBuffer[2];
+    GLuint mDepthStencilBuffer[2];
     bool depthStencilUsingRenderbuffer = true;
     int mScrWidth{0}, mScrHeight{0};
     unsigned char mLastUsedBuffer{0};
@@ -57,6 +58,8 @@ private:
     // Returns true if screen sizes has changed.
     bool outdatedRatio() const;
     void updateRatio();
+
+    void evaluateParams(Shader* shader, std::map<std::string, std::variant<int, float, gsl::vec2, gsl::vec3, gsl::vec4> > &params);
 
     // Manually destroys and recreates the framebuffers and textures.
     void recreateBuffers();
@@ -68,9 +71,24 @@ public:
     GLuint input() const;
     GLuint output() const;
 
+    enum BLENDMODE : int {
+        ADDITIVE = 0,
+        MULTIPLY = 1
+    };
+
+    // Blending
+    Postprocessor& add(Postprocessor& other, BLENDMODE blendmode = BLENDMODE::ADDITIVE);
+    Postprocessor& operator+=(Postprocessor& other);
+
+
     // Renders every post process effect over the screen
     void Render();
 
+    // For custom handling of renderloop
+    // Send in the loopindex and returns the new loopindex if it looped or the same if it didn't.
+    unsigned int RenderStep(unsigned int index);
+
+    // Resets ping pong buffers and binds to postprocessor framebuffer
     void clear();
 
     ~Postprocessor();

@@ -31,6 +31,7 @@ Renderer::Renderer()
     }
 
     mPostprocessor = std::make_unique<Postprocessor>(this);
+    mOutlineeffect = std::make_unique<Postprocessor>(this);
 }
 
 Renderer::~Renderer()
@@ -63,47 +64,7 @@ void Renderer::init()
     startOpenGLDebugger();
 
     // Setup deferred shading textures
-    glGenFramebuffers(1, &mGBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-
-    // - position color buffer
-    glGenTextures(1, &mGPosition);
-    glBindTexture(GL_TEXTURE_2D, mGPosition);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width(), height(), 0, GL_RGB, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mGPosition, 0);
-
-    // - normal color buffer
-    glGenTextures(1, &mGNormal);
-    glBindTexture(GL_TEXTURE_2D, mGNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width(), height(), 0, GL_RGB, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, mGNormal, 0);
-
-    // - color + specular color buffer
-    glGenTextures(1, &mGAlbedoSpec);
-    glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width(),  height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, mGAlbedoSpec, 0);
-
-    // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
-    unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-    glDrawBuffers(3, attachments);
-
-    // create and attach depth buffer (renderbuffer)
-    glGenRenderbuffers(1, &mRboDepth);
-    glBindRenderbuffer(GL_RENDERBUFFER, mRboDepth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width(), height());
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRboDepth);
-    // finally check if framebuffer is complete
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        qDebug() << "Framebuffer not complete!";
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+    initGBuffer();
 
     // Create renderquad
     float quadVertices[] = {
@@ -125,8 +86,86 @@ void Renderer::init()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
+    // Init postprocessor
+    mPostprocessor->init();
+    mOutlineeffect->init();
+
     // Called to tell App that it can continue initializing
     initDone();
+}
+
+void Renderer::initGBuffer()
+{
+    glGenFramebuffers(1, &mGBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+
+    // - position color buffer
+    glGenTextures(1, &mGPosition);
+    glBindTexture(GL_TEXTURE_2D, mGPosition);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mGPosition, 0);
+
+    // - normal color buffer
+    glGenTextures(1, &mGNormal);
+    glBindTexture(GL_TEXTURE_2D, mGNormal);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, mGNormal, 0);
+
+    // - color + specular color buffer
+    glGenTextures(1, &mGAlbedoSpec);
+    glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, mGAlbedoSpec, 0);
+
+    // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+    GLenum attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers(3, attachments);
+
+    // create and attach depth and stencil buffer (renderbuffer)
+    glGenRenderbuffers(1, &mRboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, mRboDepth);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRboDepth);
+
+    // Set sizes and storage types of gBuffer
+    resizeGBuffer();
+
+    // finally check if framebuffer is complete
+    switch (glCheckFramebufferStatus(GL_FRAMEBUFFER))
+    {
+        case GL_FRAMEBUFFER_UNDEFINED:
+        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_UNDEFINED";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
+        break;
+    case GL_FRAMEBUFFER_UNSUPPORTED:
+        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_UNSUPPORTED";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
+        break;
+    case GL_FRAMEBUFFER_COMPLETE:
+        // Framebuffer is complete
+        break;
+
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::render(const std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera)
@@ -261,10 +300,18 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     {
         mContext->makeCurrent(this);
 
+        // Setup
+        glClearColor(0.f, 0.f, 0.f, 0.f);
+        glStencilMask(0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
         deferredGeometryPass(renders, transforms, camera);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        checkForGLerrors();
+
+        // Clear postprocessor from last frame and bind to it
+        mPostprocessor->clear();
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -286,14 +333,18 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
 
         // copy content of geometry's depth buffer to default framebuffer's depth buffer
         glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
 
-        // blit to default framebuffer
-        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // blit to postprocessor framebuffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mPostprocessor->input());
+        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
+        // Outline effect needs stencil buffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
+        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
         // Draw foward here
-
         // Skybox
         renderSkybox(camera);
 
@@ -303,130 +354,21 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
         renderAxis(camera);
         glEnable(GL_DEPTH_TEST);
 
+
+        // Postprocessing
+        glDisable(GL_DEPTH_TEST);
+
+        drawEditorOutline();
+        mPostprocessor->Render();
+
+        glEnable(GL_DEPTH_TEST);
+
+
+
         checkForGLerrors();
 
         mContext->swapBuffers(this);
     }
-}
-
-unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms,
-                                           const CameraComponent &camera)
-{
-    if(isExposed() && mouseScreenPos.x < width() && mouseScreenPos.y < height())
-    {
-        mContext->makeCurrent(this);
-        mPostprocessor->clear();
-
-        // Using the postprocessor input framebuffer as an offscreen render.
-        glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
-
-        auto shader = ResourceManager::instance()->getShader("mousepicking");
-        if(!shader)
-        {
-            std::cout << "mouse hover object function failed because it could'nt find mousepicking shader!" << std::endl;
-            return 0;
-        }
-
-        glUseProgram(shader->getProgram());
-
-
-        auto transIt = transforms.begin();
-        auto renderIt = renders.begin();
-
-        bool transformShortest = transforms.size() < renders.size();
-
-        bool _{true};
-
-        // cause normal while (true) loops are so outdated
-        for ( ;_; )
-        {
-            if (transformShortest)
-            {
-                if (transIt == transforms.end())
-                    break;
-            }
-            else
-            {
-                if (renderIt == renders.end())
-                    break;
-            }
-
-            // Increment lowest index
-            if (!transIt->valid || transIt->entityId < renderIt->entityId)
-            {
-                ++transIt;
-            }
-            else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
-            {
-                ++renderIt;
-            }
-            else
-            {
-                // They are the same
-                if(!renderIt->isVisible)
-                {
-                    // Increment all
-                    ++transIt;
-                    ++renderIt;
-                    continue;
-                }
-
-                // Mesh data available
-                auto meshData = renderIt->meshData;
-                if(!meshData.mVerticesCount)
-                {
-                    // Increment all
-                    ++transIt;
-                    ++renderIt;
-                    continue;
-                }
-
-                // Entity can be drawn. Draw.
-
-                glBindVertexArray(meshData.mVAO);
-
-                auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
-                auto MVP = camera.projectionMatrix * camera.viewMatrix * mMatrix;
-                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "MVP"), 1, true, MVP.constData());
-
-
-                // Convert the entity ID, into an RGB color
-                int r = (transIt->entityId & 0x000000FF) >>  0;
-                int g = (transIt->entityId & 0x0000FF00) >>  8;
-                int b = (transIt->entityId & 0x00FF0000) >> 16;
-                gsl::vec3 color{ r / 255.f, g / 255.f, b / 255.f };
-                glUniform3fv(glGetUniformLocation(shader->getProgram(), "idColor"), 1, color.xP());
-
-
-                if(meshData.mIndicesCount > 0)
-                {
-                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
-                }
-                else
-                {
-                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
-                }
-
-                // Increment all
-                ++transIt;
-                ++renderIt;
-            }
-        }
-
-        checkForGLerrors();
-
-
-        // Read color value from framebuffer
-        unsigned char data[4];
-        glReadPixels(mouseScreenPos.x, height() - mouseScreenPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-        unsigned int returnedId = data[0] + data[1] * 256 + data[2] * 256 * 256;
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        return returnedId;
-    }
-
-    return 0;
 }
 
 void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera)
@@ -438,9 +380,14 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
 
     bool _{true};
 
+    GLuint currentlySelectedEID = (EditorCurrentEntitySelected != nullptr) ? EditorCurrentEntitySelected->entityId : 0;
+
     // ** Geometry pass ** //
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_STENCIL_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    checkForGLerrors();
 
     mNumberOfVerticesDrawn = 0;
 
@@ -523,6 +470,10 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
             glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
             glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
 
+            // If selected in editor, change it's stencil value
+            if (currentlySelectedEID == renderIt->entityId)
+                glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+
             mNumberOfVerticesDrawn += meshData.mVerticesCounts[index];
 
             if(meshData.mIndicesCounts[index] > 0)
@@ -533,6 +484,10 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
             {
                 glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCounts[index]));
             }
+
+            // Remember to change back so others won't get changed.
+            if (currentlySelectedEID == renderIt->entityId)
+                glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
 
             // Increment all
@@ -750,6 +705,125 @@ void Renderer::spotLightPass(const std::vector<TransformComponent> &transforms, 
     }
 }
 
+unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms,
+                                           const CameraComponent &camera)
+{
+    if(isExposed() && mouseScreenPos.x < width() && mouseScreenPos.y < height())
+    {
+        mContext->makeCurrent(this);
+
+        // Using the postprocessor input framebuffer as an offscreen render.
+        mPostprocessor->clear();
+
+        auto shader = ResourceManager::instance()->getShader("mousepicking");
+        if(!shader)
+        {
+            std::cout << "mouse hover object function failed because it could'nt find mousepicking shader!" << std::endl;
+            return 0;
+        }
+
+        glUseProgram(shader->getProgram());
+
+
+        auto transIt = transforms.begin();
+        auto renderIt = renders.begin();
+
+        bool transformShortest = transforms.size() < renders.size();
+
+        bool _{true};
+
+        // cause normal while (true) loops are so outdated
+        for ( ;_; )
+        {
+            if (transformShortest)
+            {
+                if (transIt == transforms.end())
+                    break;
+            }
+            else
+            {
+                if (renderIt == renders.end())
+                    break;
+            }
+
+            // Increment lowest index
+            if (!transIt->valid || transIt->entityId < renderIt->entityId)
+            {
+                ++transIt;
+            }
+            else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
+            {
+                ++renderIt;
+            }
+            else
+            {
+                // They are the same
+                if(!renderIt->isVisible)
+                {
+                    // Increment all
+                    ++transIt;
+                    ++renderIt;
+                    continue;
+                }
+
+                // Mesh data available
+                auto meshData = renderIt->meshData;
+                if(!meshData.mVerticesCount)
+                {
+                    // Increment all
+                    ++transIt;
+                    ++renderIt;
+                    continue;
+                }
+
+                // Entity can be drawn. Draw.
+
+                glBindVertexArray(meshData.mVAO);
+
+                auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
+                auto MVP = camera.projectionMatrix * camera.viewMatrix * mMatrix;
+                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "MVP"), 1, true, MVP.constData());
+
+
+                // Convert the entity ID, into an RGB color
+                int r = (transIt->entityId & 0x000000FF) >>  0;
+                int g = (transIt->entityId & 0x0000FF00) >>  8;
+                int b = (transIt->entityId & 0x00FF0000) >> 16;
+                gsl::vec3 color{ r / 255.f, g / 255.f, b / 255.f };
+                glUniform3fv(glGetUniformLocation(shader->getProgram(), "idColor"), 1, color.xP());
+
+
+                if(meshData.mIndicesCount > 0)
+                {
+                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
+                }
+                else
+                {
+                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
+                }
+
+                // Increment all
+                ++transIt;
+                ++renderIt;
+            }
+        }
+
+        checkForGLerrors();
+
+
+        // Read color value from framebuffer
+        unsigned char data[4];
+        glReadPixels(mouseScreenPos.x, height() - mouseScreenPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        unsigned int returnedId = data[0] + data[1] * 256 + data[2] * 256 * 256;
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return returnedId;
+    }
+
+    return 0;
+}
+
 void Renderer::resizeGBuffer()
 {
     glBindTexture(GL_TEXTURE_2D, mGPosition);
@@ -762,7 +836,7 @@ void Renderer::resizeGBuffer()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width(),  height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     glBindRenderbuffer(GL_RENDERBUFFER, mRboDepth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width(), height());
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width(), height());
 
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
@@ -807,6 +881,7 @@ void Renderer::renderSkybox(const CameraComponent &camera)
     glDepthFunc(GL_LESS);
 }
 
+
 void Renderer::renderAxis(const CameraComponent& camera)
 {
     if(!mAxis)
@@ -821,6 +896,34 @@ void Renderer::renderAxis(const CameraComponent& camera)
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
     glDrawArrays(mAxis->mRenderType, 0, static_cast<GLsizei>(mAxis->mVerticesCount));
+}
+
+void Renderer::drawEditorOutline()
+{
+    /* Steps:
+     * 1. Draw a color on fragments that matches stencil
+     * 2. Blur image
+     * 3. Draw only fragments that doesn't cover stencil
+     * additive over main image.
+     */
+
+    glEnable(GL_STENCIL_TEST);
+    // Pass fragments that are 1
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    glStencilFunc(GL_EQUAL, 1, 0xFF);
+
+    // Custom loop logic
+    for (unsigned int i{0}; i < mOutlineeffect->steps.size(); ++i)
+    {
+        mOutlineeffect->RenderStep(i);
+        if (i == 0)
+            glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
+    }
+
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    *mPostprocessor += *mOutlineeffect;
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
 }
 
 void Renderer::exposeEvent(QExposeEvent *)

@@ -30,6 +30,8 @@ public:
     Renderer();
     ~Renderer() override;
 
+    EntityInfo* EditorCurrentEntitySelected{nullptr};
+
     QOpenGLContext* getContext() { return mContext; }
 
     void init();
@@ -65,6 +67,7 @@ private:
     void directionalLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<DirectionalLightComponent>& dirLights);
     void pointLightPass(const std::vector<TransformComponent>& transforms,const CameraComponent &camera, const std::vector<PointLightComponent>& pointLights);
     void spotLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<SpotLightComponent>& spotLights);
+
 signals:
     void initDone();
     void windowUpdated();
@@ -79,13 +82,13 @@ private:
     float mTimeSinceStart{0};
 
     std::unique_ptr<Postprocessor> mPostprocessor;
+    std::unique_ptr<Postprocessor> mOutlineeffect;
 
     std::shared_ptr<MeshData> mSkybox;
     std::shared_ptr<MeshData> mAxis;
 
-    unsigned int mScreenSpacedQuadVAO;
-    unsigned int mGBuffer, mGPosition{}, mGNormal{}, mGAlbedoSpec{};
-    unsigned int mRboDepth{};
+    GLuint mScreenSpacedQuadVAO;
+    GLuint mGBuffer, mGPosition{}, mGNormal{}, mGAlbedoSpec{}, mRboDepth{};
     std::shared_ptr<Shader> mDirectionalLightShader;
     std::shared_ptr<Shader> mPointLightShader;
     std::shared_ptr<Shader> mSpotLightShader;
@@ -103,8 +106,10 @@ private:
     void renderQuad();
     void renderSkybox(const CameraComponent& camera);
     void renderAxis(const CameraComponent& camera);
+    void drawEditorOutline();
 
     void startOpenGLDebugger();
+    void initGBuffer();
 };
 
 #endif // RENDERER_H

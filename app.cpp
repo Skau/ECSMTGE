@@ -38,7 +38,7 @@ App::App()
 
 // Slot called from Renderer when its done with initialization
 void App::initTheRest()
-{ 
+{
     mWorld = std::make_unique<World>();
 
     mMainWindow->setEntityManager(mWorld->getEntityManager());
@@ -60,6 +60,26 @@ void App::initTheRest()
     mRenderer->mSkybox = ResourceManager::instance()->getMesh("skybox");
     // Send axis to renderer
     mRenderer->mAxis = ResourceManager::instance()->getMesh("axis");
+
+
+    // mRenderer->mPostprocessor->steps.push_back({ResourceManager::instance()->getShader("passthrough")});
+    mRenderer->mOutlineeffect->outputToDefault = false;
+    mRenderer->mOutlineeffect->steps.push_back(
+    {
+        ResourceManager::instance()->getShader("singleColor"),
+        0,
+        {
+            {"color", gsl::vec3{1.f, 1.f, 0.f}}
+        }
+    });
+    mRenderer->mOutlineeffect->steps.push_back(
+    {
+        ResourceManager::instance()->getShader("blur"),
+        0,
+        {
+            {"radius", 2}
+        }
+    });
 }
 
 void App::toggleMute(bool mode)

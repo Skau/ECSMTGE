@@ -60,6 +60,33 @@ void App::initTheRest()
     mRenderer->mSkybox = ResourceManager::instance()->getMesh("skybox");
     // Send axis to renderer
     mRenderer->mAxis = ResourceManager::instance()->getMesh("axis");
+
+
+    // mRenderer->mPostprocessor->steps.push_back({ResourceManager::instance()->getShader("passthrough")});
+    mRenderer->mOutlineeffect->outputToDefault = false;
+
+    auto singleColor = ResourceManager::instance()->getShader("singleColor");
+    singleColor->parameters =
+    {
+        {"color", gsl::vec3{1.f, 1.f, 0.f}}
+    };
+
+    mRenderer->mOutlineeffect->steps.push_back(
+    {
+        singleColor,
+        0
+    });
+
+    auto blur = ResourceManager::instance()->getShader("blur");
+    blur->parameters =
+    {
+        {"radius", 2}
+    };
+    mRenderer->mOutlineeffect->steps.push_back(
+    {
+        blur,
+        0
+    });
 }
 
 void App::toggleMute(bool mode)

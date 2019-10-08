@@ -236,6 +236,34 @@ GLuint Shader::getProgram() const
     return program;
 }
 
+void Shader::evaluateParams()
+{
+    for (auto it = parameters.begin(); it != parameters.end(); ++it)
+    {
+        GLint uniform = glGetUniformLocation(program, it->first.c_str());
+        if (uniform < 0)
+            continue;
+
+        try {
+            if (std::holds_alternative<int>(it->second))
+                glUniform1i(uniform, std::get<int>(it->second));
+            else if (std::holds_alternative<float>(it->second))
+                glUniform1f(uniform, std::get<float>(it->second));
+            else if (std::holds_alternative<gsl::vec2>(it->second))
+                glUniform2fv(uniform, 1, std::get<gsl::vec2>(it->second).data());
+            else if (std::holds_alternative<gsl::vec3>(it->second))
+                glUniform3fv(uniform, 1, std::get<gsl::vec3>(it->second).data());
+            else
+                glUniform4fv(uniform, 1, std::get<gsl::vec4>(it->second).data());
+        }
+        catch(...)
+        {
+            std::cout << "Logical error!" << std::endl;
+            return;
+        }
+    }
+}
+
 //void Shader::transmitUniformData(gsl::Matrix4x4 *modelMatrix, MaterialClass *material)
 //{
 //    glUniformMatrix4fv( vMatrixUniform, 1, GL_TRUE, mCurrentCamera->mViewMatrix.constData());

@@ -7,6 +7,8 @@
 #include "entitymanager.h"
 #include "resourcemanager.h"
 #include "texture.h"
+#include <QLabel>
+#include <QSpinBox>
 
 MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
     : ComponentWidget(mainWindow, parent), ui(new Ui::Mesh)
@@ -31,6 +33,9 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
         ui->comboBox_Textures->addItem(QString::fromStdString(name));
     }
 
+    ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    ui->scrollArea->setWidgetResizable(true);
+
     isUpdating = true;
     if(auto entity = mMainWindow->currentEntitySelected)
     {
@@ -49,6 +54,100 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
             if(auto shader = comp->meshData.mMaterial.mShader)
             {
                 ui->comboBox_Shaders->setCurrentText(QString::fromStdString(shader->mName));
+
+                QWidget* widget = new QWidget();
+                ui->scrollArea->setWidget(widget);
+                QVBoxLayout* layout = new QVBoxLayout(widget);
+                widget->setLayout(layout);
+                layout->setMargin(0);
+
+                for(auto& param : shader->parameters)
+                {
+                    QHBoxLayout* hLayout = new QHBoxLayout(widget);
+                    QLabel* label = new QLabel(QString::fromStdString(param.first));
+                    hLayout->addWidget(label);
+                    if (std::holds_alternative<int>(param.second))
+                    {
+                        QSpinBox* spinBox = new QSpinBox(widget);
+                        spinBox->setValue(std::get<int>(param.second));
+                        hLayout->addWidget(spinBox);
+                    }
+                    else if (std::holds_alternative<float>(param.second))
+                    {
+                        QDoubleSpinBox* doubleSpinBox = new QDoubleSpinBox(widget);
+                        doubleSpinBox->setValue(static_cast<double>(std::get<float>(param.second)));
+                        hLayout->addWidget(doubleSpinBox);
+                    }
+                    else if (std::holds_alternative<gsl::vec2>(param.second))
+                    {
+                        float value = 0;
+                        for(int i = 0; i <= 1; ++i)
+                        {
+                            switch (i)
+                            {
+                            case 0:
+                                value = std::get<gsl::vec2>(param.second).x;
+                                break;
+                            case 1:
+                                value = std::get<gsl::vec2>(param.second).y;
+                                break;
+                            }
+
+                            QDoubleSpinBox* doubleSpinBox = new QDoubleSpinBox(widget);
+                            doubleSpinBox->setValue(static_cast<double>(std::get<float>(param.second)));
+                            hLayout->addWidget(doubleSpinBox);
+                        }
+                    }
+                    else if (std::holds_alternative<gsl::vec3>(param.second))
+                    {
+                        float value = 0;
+                        for(int i = 0; i <= 2; ++i)
+                        {
+                            switch (i)
+                            {
+                            case 0:
+                                value = std::get<gsl::vec3>(param.second).x;
+                                break;
+                            case 1:
+                                value = std::get<gsl::vec3>(param.second).y;
+                                break;
+                            case 2:
+                                value = std::get<gsl::vec3>(param.second).z;
+                                break;
+                            }
+
+                            QDoubleSpinBox* doubleSpinBox = new QDoubleSpinBox(widget);
+                            doubleSpinBox->setValue(static_cast<double>(std::get<float>(param.second)));
+                            hLayout->addWidget(doubleSpinBox);
+                        }
+                    }
+                    else if (std::holds_alternative<gsl::vec4>(param.second))
+                    {
+                        float value = 0;
+                        for(int i = 0; i <= 3; ++i)
+                        {
+                            switch (i)
+                            {
+                            case 0:
+                                value = std::get<gsl::vec4>(param.second).x;
+                                break;
+                            case 1:
+                                value = std::get<gsl::vec4>(param.second).y;
+                                break;
+                            case 2:
+                                value = std::get<gsl::vec4>(param.second).z;
+                                break;
+                            case 3:
+                                value = std::get<gsl::vec4>(param.second).w;
+                                break;
+                            }
+
+                            QDoubleSpinBox* doubleSpinBox = new QDoubleSpinBox(widget);
+                            doubleSpinBox->setValue(static_cast<double>(std::get<float>(param.second)));
+                            hLayout->addWidget(doubleSpinBox);
+                        }
+                    }
+                }
             }
 
             ui->checkBox_Visible->setCheckState(comp->isVisible ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);

@@ -83,6 +83,33 @@ void Postprocessor::Render()
             // Send relevant uniforms.
             // F.eks. Time.
 
+
+            // Bind to framebuffer texture
+            glActiveTexture(GL_TEXTURE0);
+            // qDebug() << "uniform: " << glGetUniformLocation(shader->getProgram(), "fbt");
+            glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt"), 0);
+            glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
+
+            /** NB: Depth sampling in shadercode won't work unless in OpenGL 4.4 because of how they're stored.
+             * Should be possible to implement a depth/stencil sampling if they are implemented as
+             * separate buffers.
+             */
+            if (depthSampling)
+            {
+                glActiveTexture(GL_TEXTURE1);
+                glUniform1i(glGetUniformLocation(shader->getProgram(), "depthBuffer"), 1);
+                glBindTexture(GL_TEXTURE_2D, mDepthStencilBuffer[mLastUsedBuffer]);
+            }
+
+            int uniform = glGetUniformLocation(shader->getProgram(), "sResolution");
+            if (0 <= uniform)
+                glUniform2i(uniform, mScrWidth, mScrHeight);
+
+            uniform = glGetUniformLocation(shader->getProgram(), "sTime");
+            if (0 <= uniform)
+                glUniform1f(uniform, mRenderer->mTimeSinceStart);
+
+            shader->evaluateParams();
             renderQuad();
         }
     }
@@ -104,6 +131,102 @@ void Postprocessor::Render()
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+unsigned int Postprocessor::RenderStep(unsigned int index)
+{
+    if (index == 0)
+    {
+        if (!mInitialized)
+            init();
+        else if (outdatedRatio())
+            updateRatio();
+
+        // Reset so that we start at the first ping-pong buffer
+        mLastUsedBuffer = 0;
+    }
+
+    if (!steps.empty() && !passThroughShader)
+    {
+        auto setting = steps.begin() + index;
+        if (setting != steps.end())
+        {
+            auto nextFramebuffer = (outputToDefault && setting + 1 == steps.end()) ? 0 : mPingpong[!mLastUsedBuffer];
+            // First, blit over depth and stencil buffer
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, mPingpong[mLastUsedBuffer]);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, nextFramebuffer);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            glBlitFramebuffer(0, 0, mScrWidth, mScrHeight, 0, 0, mScrWidth, mScrHeight, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
+            // If last render, use default framebuffer; else use the one we didn't use last.
+            glBindFramebuffer(GL_FRAMEBUFFER, nextFramebuffer);
+
+
+            auto shader = setting->shader;
+            if (!shader) {
+                qDebug() << "using pass through shader";
+                shader = passThroughShader;
+            }
+
+            shader->use();
+
+
+            // Bind to framebuffer texture
+            glActiveTexture(GL_TEXTURE0);
+            glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt"), 0);
+            glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
+
+            /** NB: Depth sampling in shadercode won't work unless in OpenGL 4.4 because of how they're stored.
+             * Should be possible to implement a depth/stencil sampling if they are implemented as
+             * separate buffers.
+             */
+            if (depthSampling)
+            {
+                glActiveTexture(GL_TEXTURE1);
+                glUniform1i(glGetUniformLocation(shader->getProgram(), "depthBuffer"), 1);
+                glBindTexture(GL_TEXTURE_2D, mDepthStencilBuffer[mLastUsedBuffer]);
+            }
+
+            int uniform = glGetUniformLocation(shader->getProgram(), "sResolution");
+            if (0 <= uniform)
+                glUniform2i(uniform, mScrWidth, mScrHeight);
+
+            uniform = glGetUniformLocation(shader->getProgram(), "sTime");
+            if (0 <= uniform)
+                glUniform1f(uniform, mRenderer->mTimeSinceStart);
+
+            shader->evaluateParams();
+
+            renderQuad();
+
+            ++index;
+            mLastUsedBuffer = !mLastUsedBuffer;
+
+            return index;
+        }
+        else
+        {
+            return index;
+        }
+    }
+    else
+    {
+        if (!passThroughShader)
+        {
+            if (!(passThroughShader = ResourceManager::instance()->getShader("passthrough")))
+                std::cout << "Postprocessor render step skipped because of missing default shader" << std::endl;
+        }
+
+        if (outputToDefault)
+        {
+            // If no postprocess steps, just blit framebuffer onto default framebuffer.
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, mPingpong[0]);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            glBlitFramebuffer(0, 0, mScrWidth, mScrHeight, 0, 0, mScrWidth, mScrHeight,
+                              GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |  GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+        }
+        return index;
+    }
 }
 
 void Postprocessor::clear()

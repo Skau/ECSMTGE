@@ -15,7 +15,12 @@ class Postprocessor : protected QOpenGLFunctions_4_1_Core
 public:
     struct Setting {
         std::shared_ptr<Shader> shader;
+
         // Other probs useful data
+
+        // bool useStencil = false;
+        unsigned char stencilValue{0};
+
     };
 
 

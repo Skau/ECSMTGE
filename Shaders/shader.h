@@ -30,7 +30,9 @@ public:
 
 
     std::string mName{};
+    std::map<std::string, std::variant<int, float, gsl::vec2, gsl::vec3, gsl::vec4>> parameters;
 
+    void evaluateParams();
 protected:
     GLuint program{0};
     GLint mMatrixUniform{-1};

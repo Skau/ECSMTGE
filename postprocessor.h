@@ -68,6 +68,16 @@ public:
     GLuint input() const;
     GLuint output() const;
 
+    enum BLENDMODE : int {
+        ADDITIVE = 0,
+        MULTIPLY = 1
+    };
+
+    // Blending
+    Postprocessor& add(Postprocessor& other, BLENDMODE blendmode = BLENDMODE::ADDITIVE);
+    Postprocessor& operator+=(Postprocessor& other);
+
+
     // Renders every post process effect over the screen
     void Render();
 

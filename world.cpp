@@ -21,6 +21,7 @@ World::World()
     ResourceManager::instance()->addShader("passthrough",       std::make_shared<Shader>("pass.vert", "pass.frag"));
     ResourceManager::instance()->addShader("blur",              std::make_shared<Shader>("pass.vert", "blur.frag"));
     ResourceManager::instance()->addShader("singleColor",       std::make_shared<Shader>("pass.vert", "singleColor.frag"));
+    ResourceManager::instance()->addShader("blend",             std::make_shared<Shader>("pass.vert", "blend.frag"));
 
     // This function is troublesome...
     // ResourceManager::instance()->LoadAssetFiles();

@@ -57,7 +57,7 @@ void App::initTheRest()
     // Send skybox to renderer.
     mRenderer->mSkybox = ResourceManager::instance()->getMesh("skybox");
 
-    mRenderer->mPostprocessor->steps.push_back({ResourceManager::instance()->getShader("passthrough")});
+    // mRenderer->mPostprocessor->steps.push_back({ResourceManager::instance()->getShader("passthrough")});
 //    mRenderer->mPostprocessor->steps.push_back({
 //       ResourceManager::instance()->getShader("singleColor"),
 //       0,
@@ -65,7 +65,7 @@ void App::initTheRest()
 //           {"color", gsl::vec3{1.f, 1.f, 0.f}}
 //       }
 //    });
-    // mRenderer->mOutlineeffect->outputToDefault = false;
+    mRenderer->mOutlineeffect->outputToDefault = false;
     mRenderer->mOutlineeffect->steps.push_back(
     {
         ResourceManager::instance()->getShader("singleColor"),
@@ -82,7 +82,10 @@ void App::initTheRest()
             {"radius", 2}
         }
     });
-
+//    mRenderer->mOutlineeffect->steps.push_back(
+//    {
+//        ResourceManager::instance()->getShader("passthrough")
+//    });
 }
 
 void App::toggleMute(bool mode)

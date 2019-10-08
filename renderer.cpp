@@ -318,24 +318,12 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
     {
         mContext->makeCurrent(this);
 
+        // Setup
         glStencilMask(0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
         deferredGeometryPass(renders, transforms, camera);
-
-//        unsigned char *buffer = new unsigned char[width() * height() * 4];
-//        glReadPixels(0, 0, width(), height(), GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, buffer);
-//        std::ofstream ofs{"depthBuffer", std::ofstream::out | std::ofstream::binary};
-//        if (ofs)
-//        {
-//            ofs.write((char*)buffer, width() * height() * 4);
-//        }
-//        ofs.close();
-
-
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
         checkForGLerrors();
 
@@ -382,6 +370,7 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
 
         // Post processing effects
+        // Note: Depth testing not necessary
         // glDisable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         glDepthMask(GL_FALSE);
@@ -396,7 +385,7 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         // Note: If postprocessor, which is the last rendering step, doesn't need the
         // depth buffer there's no really a point in blitting it over.
 
-        // mPostprocessor->Render();
+        mPostprocessor->Render();
 
         // glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
@@ -423,7 +412,6 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
     glEnable(GL_STENCIL_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
 
     checkForGLerrors();
 
@@ -905,10 +893,17 @@ void Renderer::renderSkybox(const CameraComponent &camera)
 
 void Renderer::drawEditorOutline()
 {
+    /* Steps:
+     * 1. Draw a color on fragments that matches stencil
+     * 2. Blur image
+     * 3. Draw only fragments that doesn't cover stencil
+     * additive over main image.
+     */
+
     glEnable(GL_STENCIL_TEST);
-    // Pass fragments that are higher than 0
+    // Pass fragments that are 1
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-    glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
+    glStencilFunc(GL_EQUAL, 1, 0xFF);
 
     // Custom loop logic
     for (unsigned int i{0}; i < mOutlineeffect->steps.size(); ++i)
@@ -916,8 +911,12 @@ void Renderer::drawEditorOutline()
         mOutlineeffect->RenderStep(i);
         if (i == 0)
             glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
     }
-    // mOutlineeffect->Render();
+
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    *mPostprocessor += *mOutlineeffect;
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
 }
 
 void Renderer::exposeEvent(QExposeEvent *)

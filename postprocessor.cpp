@@ -59,6 +59,45 @@ GLuint Postprocessor::output() const
     return mPingpong[mLastUsedBuffer];
 }
 
+Postprocessor &Postprocessor::add(Postprocessor &other, Postprocessor::BLENDMODE blendmode)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[mLastUsedBuffer]);
+
+    auto shader = ResourceManager::instance()->getShader("blend");
+    if (!shader)
+    {
+        std::cout << "blending shader is missing!" << std::endl;
+        return *this;
+    }
+
+    shader->use();
+
+    glBindVertexArray(mScreenSpacedQuadVAO);
+
+    // Bind to framebuffer texture
+    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt"), 0);
+    glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
+
+    glActiveTexture(GL_TEXTURE1);
+    glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt2"), 1);
+    glBindTexture(GL_TEXTURE_2D, other.mRenderTextures[other.mLastUsedBuffer]);
+
+    glUniform1i(glGetUniformLocation(shader->getProgram(), "blendmode"), blendmode);
+
+    // renderQuad();
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    return *this;
+}
+
+Postprocessor &Postprocessor::operator+=(Postprocessor &other)
+{
+    return add(other);
+}
+
 void Postprocessor::Render()
 {
     if (!mInitialized)
@@ -136,7 +175,7 @@ void Postprocessor::Render()
         if (!passThroughShader)
         {
             if (!(passThroughShader = ResourceManager::instance()->getShader("passthrough")))
-                std::cout << "Postprocessor render step skipped because of missing default shader" << std::endl;
+                std::cout << "Postprocessor render step skipped because of missing passthrough shader" << std::endl;
         }
 
         if (outputToDefault)

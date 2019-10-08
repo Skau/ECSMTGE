@@ -86,8 +86,7 @@ void Postprocessor::Render()
 
 //            glEnable(GL_STENCIL_TEST);
 //            // glStencilMask(0x00);
-//            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-//            glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
+
 
             auto shader = setting->shader;
             if (!shader) {
@@ -171,8 +170,15 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
         auto setting = steps.begin() + index;
         if (setting != steps.end())
         {
+            auto nextFramebuffer = (outputToDefault && setting + 1 == steps.end()) ? 0 : mPingpong[!mLastUsedBuffer];
+            // First, blit over depth and stencil buffer
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, mPingpong[mLastUsedBuffer]);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, nextFramebuffer);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            glBlitFramebuffer(0, 0, mScrWidth, mScrHeight, 0, 0, mScrWidth, mScrHeight, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
             // If last render, use default framebuffer; else use the one we didn't use last.
-            glBindFramebuffer(GL_FRAMEBUFFER, (outputToDefault && setting + 1 == steps.end()) ? 0 : mPingpong[!mLastUsedBuffer]);
+            glBindFramebuffer(GL_FRAMEBUFFER, nextFramebuffer);
             // qDebug() << "Bound to framebuffer: " << ((outputToDefault && setting + 1 == steps.end()) ? 0 : mPingpong[!mLastUsedBuffer]);
 
             auto shader = setting->shader;
@@ -190,6 +196,17 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
             // qDebug() << "uniform: " << glGetUniformLocation(shader->getProgram(), "fbt");
             glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt"), 0);
             glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
+
+            /** NB: Depth sampling in shadercode won't work unless in OpenGL 4.4 because of how they're stored.
+             * Should be possible to implement a depth/stencil sampling if they are implemented as
+             * separate buffers.
+             */
+            if (depthSampling)
+            {
+                glActiveTexture(GL_TEXTURE1);
+                glUniform1i(glGetUniformLocation(shader->getProgram(), "depthBuffer"), 1);
+                glBindTexture(GL_TEXTURE_2D, mDepthStencilBuffer[mLastUsedBuffer]);
+            }
 
             int uniform = glGetUniformLocation(shader->getProgram(), "sResolution");
             if (0 <= uniform)

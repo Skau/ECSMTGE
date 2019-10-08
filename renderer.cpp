@@ -318,6 +318,10 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
     {
         mContext->makeCurrent(this);
 
+        glStencilMask(0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
         deferredGeometryPass(renders, transforms, camera);
 
 //        unsigned char *buffer = new unsigned char[width() * height() * 4];
@@ -367,8 +371,8 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 
 //        // Outline effect needs stencil buffer
-//        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
-//        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
+        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 
         glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
@@ -383,7 +387,7 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
         glDepthMask(GL_FALSE);
 
 
-        // drawEditorOutline();
+        drawEditorOutline();
 
         // glDisable(GL_STENCIL_TEST);
         // Pass fragments that are higher than 0
@@ -391,7 +395,8 @@ void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const s
 
         // Note: If postprocessor, which is the last rendering step, doesn't need the
         // depth buffer there's no really a point in blitting it over.
-        mPostprocessor->Render();
+
+        // mPostprocessor->Render();
 
         // glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
@@ -417,11 +422,8 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
     // ** Geometry pass ** //
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
     glEnable(GL_STENCIL_TEST);
-//    // glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // <- default
-    glStencilMask(0xFF);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
 
     checkForGLerrors();
 
@@ -491,8 +493,8 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
             glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
 
             // If selected in editor, change it's stencil value
-            // if (currentlySelectedEID)
-//                 glStencilOp(GL_INCR, GL_INCR, GL_INCR);
+            if (currentlySelectedEID == renderIt->entityId)
+                glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
             if(meshData.mIndicesCount > 0)
             {
@@ -504,8 +506,8 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
             }
 
             // Remember to change back so others won't get changed.
-            // if (currentlySelectedEID)
-   //              glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+            if (currentlySelectedEID == renderIt->entityId)
+                glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
 
             // Increment all
@@ -905,14 +907,15 @@ void Renderer::drawEditorOutline()
 {
     glEnable(GL_STENCIL_TEST);
     // Pass fragments that are higher than 0
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
 
     // Custom loop logic
     for (unsigned int i{0}; i < mOutlineeffect->steps.size(); ++i)
     {
         mOutlineeffect->RenderStep(i);
-//        if (i == 0)
-//            glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        if (i == 0)
+            glStencilFunc(GL_ALWAYS, 1, 0xFF);
     }
     // mOutlineeffect->Render();
 }

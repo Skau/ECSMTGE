@@ -96,6 +96,7 @@ private:
     bool mWireframe{false};
 
     bool isInitialized{false};
+    bool mDepthStencilAttachmentSupported{true};
 
     int mNumberOfVerticesDrawn{0};
 

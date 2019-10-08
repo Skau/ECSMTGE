@@ -88,7 +88,8 @@ void Renderer::init()
 
     // Init postprocessor
     mPostprocessor->init();
-    mOutlineeffect->init();
+    if (mDepthStencilAttachmentSupported)
+        mOutlineeffect->init();
 
     // Called to tell App that it can continue initializing
     initDone();
@@ -96,74 +97,97 @@ void Renderer::init()
 
 void Renderer::initGBuffer()
 {
-    glGenFramebuffers(1, &mGBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+    bool framebufferComplete = false;
+    bool buffersInitialized = false;
 
-    // - position color buffer
-    glGenTextures(1, &mGPosition);
-    glBindTexture(GL_TEXTURE_2D, mGPosition);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mGPosition, 0);
+    do {
+        if (buffersInitialized)
+        {
+            glDeleteRenderbuffers(1, &mRboDepth);
+            glDeleteTextures(1, &mGAlbedoSpec);
+            glDeleteTextures(1, &mGNormal);
+            glDeleteTextures(1, &mGPosition);
+            glDeleteFramebuffers(1, &mGBuffer);
+        }
 
-    // - normal color buffer
-    glGenTextures(1, &mGNormal);
-    glBindTexture(GL_TEXTURE_2D, mGNormal);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, mGNormal, 0);
+        glGenFramebuffers(1, &mGBuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
 
-    // - color + specular color buffer
-    glGenTextures(1, &mGAlbedoSpec);
-    glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, mGAlbedoSpec, 0);
+        // - position color buffer
+        glGenTextures(1, &mGPosition);
+        glBindTexture(GL_TEXTURE_2D, mGPosition);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mGPosition, 0);
 
-    // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
-    GLenum attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-    glDrawBuffers(3, attachments);
+        // - normal color buffer
+        glGenTextures(1, &mGNormal);
+        glBindTexture(GL_TEXTURE_2D, mGNormal);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, mGNormal, 0);
 
-    // create and attach depth and stencil buffer (renderbuffer)
-    glGenRenderbuffers(1, &mRboDepth);
-    glBindRenderbuffer(GL_RENDERBUFFER, mRboDepth);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRboDepth);
+        // - color + specular color buffer
+        glGenTextures(1, &mGAlbedoSpec);
+        glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, mGAlbedoSpec, 0);
 
-    // Set sizes and storage types of gBuffer
-    resizeGBuffer();
+        // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+        GLenum attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+        glDrawBuffers(3, attachments);
 
-    // finally check if framebuffer is complete
-    switch (glCheckFramebufferStatus(GL_FRAMEBUFFER))
-    {
-        case GL_FRAMEBUFFER_UNDEFINED:
-        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_UNDEFINED";
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
-        break;
-    case GL_FRAMEBUFFER_UNSUPPORTED:
-        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_UNSUPPORTED";
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-        qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
-        break;
-    case GL_FRAMEBUFFER_COMPLETE:
-        // Framebuffer is complete
-        break;
+        // create and attach depth and stencil buffer (renderbuffer)
+        glGenRenderbuffers(1, &mRboDepth);
+        glBindRenderbuffer(GL_RENDERBUFFER, mRboDepth);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, mDepthStencilAttachmentSupported ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRboDepth);
 
-    }
+        // Set sizes and storage types of gBuffer
+        resizeGBuffer();
+
+        buffersInitialized = true;
+
+        // finally check if framebuffer is complete
+        switch (glCheckFramebufferStatus(GL_FRAMEBUFFER))
+        {
+            case GL_FRAMEBUFFER_UNDEFINED:
+            qDebug() << "Framebuffer error: GL_FRAMEBUFFER_UNDEFINED";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+            qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT\n"
+                     << "GL_DEPTH_STENCIL_ATTACHMENT is probably not supported. Attempting to recreate framebuffer.";
+            mDepthStencilAttachmentSupported = false;
+            framebufferComplete = false;
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+            qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+            qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+            qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
+            break;
+        case GL_FRAMEBUFFER_UNSUPPORTED:
+            qDebug() << "Framebuffer error: GL_FRAMEBUFFER_UNSUPPORTED";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+            qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+            qDebug() << "Framebuffer error: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
+            break;
+        case GL_FRAMEBUFFER_COMPLETE:
+            // Framebuffer is complete
+            framebufferComplete = true;
+            break;
+
+        }
+
+        if (!framebufferComplete)
+            qDebug() << "Framebuffer didn't get created. Attempting to recreate.";
+    } while (!framebufferComplete);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -278,8 +302,6 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
                 // Increment all
                 ++transIt;
                 ++renderIt;
-
-
             }
         }
 
@@ -338,9 +360,12 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mPostprocessor->input());
         glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 
-        // Outline effect needs stencil buffer
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
-        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+        if (mDepthStencilAttachmentSupported)
+        {
+            // Outline effect needs stencil buffer
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
+            glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+        }
 
         glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
@@ -352,13 +377,11 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
         // Need to disable depth testing, or else the axis will sometimes appear behind other meshes
         glDisable(GL_DEPTH_TEST);
         renderAxis(camera);
-        glEnable(GL_DEPTH_TEST);
 
 
         // Postprocessing
-        glDisable(GL_DEPTH_TEST);
-
-        drawEditorOutline();
+        if (mDepthStencilAttachmentSupported)
+            drawEditorOutline();
         mPostprocessor->Render();
 
         glEnable(GL_DEPTH_TEST);

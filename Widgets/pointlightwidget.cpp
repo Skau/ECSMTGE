@@ -8,21 +8,36 @@ PointLightWidget::PointLightWidget(MainWindow *mainWindow, QWidget *parent) :
      ComponentWidget(mainWindow, parent), ui(new Ui::PointLightWidget)
 {
     ui->setupUi(this);
-}
+    initialColor = Qt::white;
 
-void PointLightWidget::updateData()
-{
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
         if(auto comp = mMainWindow->getEntityManager()->getComponent<PointLightComponent>(entity->entityId))
         {
             isUpdating = true;
-            initialColor =  QColor(comp->color.x*255, comp->color.y*255, comp->color.z*255);
+            initialColor =  QColor(
+                                static_cast<int>(comp->color.x)*255,
+                                static_cast<int>(comp->color.y)*255,
+                                static_cast<int>(comp->color.z)*255);
+
             ui->textEdit_Color->setStyleSheet("background-color: " + initialColor.name());
             isUpdating = false;
         }
     }
+}
+
+void PointLightWidget::updateData()
+{
+//    auto entity = mMainWindow->currentEntitySelected;
+//    if(entity)
+//    {
+//        if(auto comp = mMainWindow->getEntityManager()->getComponent<PointLightComponent>(entity->entityId))
+//        {
+//            isUpdating = true;
+//            isUpdating = false;
+//        }
+//    }
 }
 
 void PointLightWidget::Remove()

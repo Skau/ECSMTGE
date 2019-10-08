@@ -16,11 +16,35 @@ SoundWidget::SoundWidget(MainWindow* mainWindow, QWidget* parent)
     {
         ui->comboBox_AvailableSounds->addItem(QString::fromStdString(name));
     }
+
+    if(auto sound = getSoundComponent())
+    {
+        auto name = sound->name;
+        if(name.size())
+        {
+            ui->label_CurrentSound->setText(QString::fromStdString(name));
+            ui->comboBox_AvailableSounds->setCurrentText(QString::fromStdString(name));
+        }
+
+        float value = sound->gain;
+        ui->horizontalSlider_Gain->setValue(static_cast<int>(value*10.f));
+        ui->label_GainValue->setText(QString::number(static_cast<double>(value)));
+
+        ui->doubleSpinBox_Pitch->setValue(static_cast<double>(sound->pitch));
+
+        ui->checkBox_Loop->setCheckState(sound->isLooping ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+        ui->checkBox_Mute->setCheckState(sound->isMuted ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    }
 }
 
 
 void SoundWidget::updateData()
 {
+//    if(auto sound = getSoundComponent())
+//    {
+//        isUpdating = true;
+//        isUpdating = false;
+//    }
 }
 
 void SoundWidget::Remove()
@@ -37,6 +61,9 @@ void SoundWidget::Remove()
 
 void SoundWidget::on_horizontalSlider_Gain_valueChanged(int value)
 {
+    if(isUpdating)
+        return;
+
     if(auto sound = getSoundComponent())
     {
         if(sound->mSource != -1)
@@ -51,6 +78,9 @@ void SoundWidget::on_horizontalSlider_Gain_valueChanged(int value)
 
 void SoundWidget::on_checkBox_Loop_toggled(bool checked)
 {
+    if(isUpdating)
+        return;
+
     if(auto sound = getSoundComponent())
     {
         if(sound->mSource != -1)
@@ -64,6 +94,9 @@ void SoundWidget::on_checkBox_Loop_toggled(bool checked)
 
 void SoundWidget::on_checkBox_Mute_toggled(bool checked)
 {
+    if(isUpdating)
+        return;
+
     if(auto sound = getSoundComponent())
     {
         if(sound->mSource != -1)
@@ -77,6 +110,9 @@ void SoundWidget::on_checkBox_Mute_toggled(bool checked)
 
 void SoundWidget::on_pushButton_Start_clicked()
 {
+    if(isUpdating)
+        return;
+
     if(auto sound = getSoundComponent())
     {
         if(sound->mSource != -1)
@@ -89,6 +125,9 @@ void SoundWidget::on_pushButton_Start_clicked()
 
 void SoundWidget::on_pushButton_Pause_clicked()
 {
+    if(isUpdating)
+        return;
+
     if(auto sound = getSoundComponent())
     {
         if(sound->mSource != -1)
@@ -133,6 +172,7 @@ void SoundWidget::on_pushButton_ChangeSound_clicked()
             ui->label_GainValue->setText(QString::number(static_cast<double>(sound->gain)));
             ui->horizontalSlider_Gain->setValue(static_cast<int>(sound->gain*10.f));
             ui->doubleSpinBox_Pitch->setValue(static_cast<double>(sound->pitch));
+
             if(isPlaying)
             {
                 SoundManager::play(static_cast<unsigned>(sound->mSource));
@@ -210,6 +250,8 @@ void SoundWidget::on_pushButton_soundFromFile_clicked()
             ui->label_GainValue->setText(QString::number(static_cast<double>(sound->gain)));
             ui->horizontalSlider_Gain->setValue(static_cast<int>(sound->gain*10.f));
             ui->doubleSpinBox_Pitch->setValue(static_cast<double>(sound->pitch));
+            ui->comboBox_AvailableSounds->setCurrentText(QString::fromStdString(sound->name));
+
             if(isPlaying)
             {
                 SoundManager::play(static_cast<unsigned>(sound->mSource));

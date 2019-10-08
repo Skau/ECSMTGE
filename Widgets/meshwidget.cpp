@@ -30,41 +30,44 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
     {
         ui->comboBox_Textures->addItem(QString::fromStdString(name));
     }
-}
 
-void MeshWidget::updateData()
-{
-    auto entity = mMainWindow->currentEntitySelected;
-    if(entity)
+    isUpdating = true;
+    if(auto entity = mMainWindow->currentEntitySelected)
     {
-        if(auto mesh = getRenderComponent(entity->entityId))
+        if(auto comp = getRenderComponent(entity->entityId))
         {
-            auto name = entity->name;
-            isUpdating = true;
+            auto name = comp->meshData.mName;
             if(name.size())
             {
                 ui->label_Name->setText(QString::fromStdString(name));
+                ui->comboBox_Meshes->setCurrentText(QString::fromStdString(comp->meshData.mName));
             }
             else
             {
                 ui->label_Name->setText("None");
             }
-
-            if(auto render = getRenderComponent(mMainWindow->currentEntitySelected->entityId))
+            if(auto shader = comp->meshData.mMaterial.mShader)
             {
-                if(render->isVisible)
-                {
-                     ui->checkBox_Visible->setCheckState(Qt::CheckState::Checked);
-                }
-                else
-                {
-                    ui->checkBox_Visible->setCheckState(Qt::CheckState::Unchecked);
-                }
+                ui->comboBox_Shaders->setCurrentText(QString::fromStdString(shader->mName));
             }
 
-            isUpdating = false;
+            ui->checkBox_Visible->setCheckState(comp->isVisible ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
         }
     }
+    isUpdating = false;
+}
+
+void MeshWidget::updateData()
+{
+//    auto entity = mMainWindow->currentEntitySelected;
+//    if(entity)
+//    {
+//        if(auto mesh = getRenderComponent(entity->entityId))
+//        {
+//            isUpdating = true;
+//            isUpdating = false;
+//        }
+//    }
 }
 
 void MeshWidget::on_button_ChangeMesh_clicked()

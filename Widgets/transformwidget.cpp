@@ -8,6 +8,19 @@ TransformWidget::TransformWidget(MainWindow* mainWindow, QWidget *parent)
     : ComponentWidget(mainWindow, parent), ui(new Ui::Transform)
 {
     ui->setupUi(this);
+
+    auto entity = mMainWindow->currentEntitySelected;
+    if(entity)
+    {
+        if(auto transform = mMainWindow->getEntityManager()->getComponent<TransformComponent>(entity->entityId))
+        {
+                isUpdating = true;
+                setPosition(transform->position);
+                setRotation(transform->rotation.toEuler());
+                setScale(transform->scale);
+                isUpdating = false;
+        }
+    }
 }
 
 void TransformWidget::updateData()
@@ -17,11 +30,14 @@ void TransformWidget::updateData()
     {
         if(auto transform = mMainWindow->getEntityManager()->getComponent<TransformComponent>(entity->entityId))
         {
-            isUpdating = true;
-            setPosition(transform->position);
-            setRotation(transform->rotation.toEuler());
-            setScale(transform->scale);
-            isUpdating = false;
+            if(transform->updated)
+            {
+                isUpdating = true;
+                setPosition(transform->position);
+                setRotation(transform->rotation.toEuler());
+                setScale(transform->scale);
+                isUpdating = false;
+            }
         }
     }
 }
@@ -45,33 +61,6 @@ void TransformWidget::setScale(const gsl::vec3 &scale)
     ui->spinBox_Scale_X->setValue(static_cast<double>(scale.x));
     ui->spinBox_Scale_Y->setValue(static_cast<double>(scale.y));
     ui->spinBox_Scale_Z->setValue(static_cast<double>(scale.z));
-}
-
-gsl::vec3 TransformWidget::getPosition()
-{
-    gsl::vec3 returnVec;
-    returnVec.x = static_cast<float>(ui->spinBox_Position_X->value());
-    returnVec.y = static_cast<float>(ui->spinBox_Position_Y->value());
-    returnVec.z = static_cast<float>(ui->spinBox_Position_Z->value());
-    return returnVec;
-}
-
-gsl::vec3 TransformWidget::getRotation()
-{
-    gsl::vec3 returnVec;
-    returnVec.x = static_cast<float>(ui->spinBox_Rotation_X->value());
-    returnVec.y = static_cast<float>(ui->spinBox_Rotation_Y->value());
-    returnVec.z = static_cast<float>(ui->spinBox_Rotation_Z->value());
-    return returnVec;
-}
-
-gsl::vec3 TransformWidget::getScale()
-{
-    gsl::vec3 returnVec;
-    returnVec.x = static_cast<float>(ui->spinBox_Scale_X->value());
-    returnVec.y = static_cast<float>(ui->spinBox_Scale_Y->value());
-    returnVec.z = static_cast<float>(ui->spinBox_Scale_Z->value());
-    return returnVec;
 }
 
 void TransformWidget::on_spinBox_Position_X_valueChanged(double arg1)

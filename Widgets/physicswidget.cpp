@@ -40,32 +40,9 @@ void PhysicsWidget::setAcceleration(const gsl::vec3 &acc)
     ui->spinBox_Acceleration_Z->setValue(static_cast<double>(acc.z));
 }
 
-void PhysicsWidget::setMass(float ass)
+void PhysicsWidget::setMass(float mass)
 {
-    ui->spinBox_Mass->setValue(static_cast<double>(ass));
-}
-
-gsl::vec3 PhysicsWidget::getVelocity()
-{
-    gsl::vec3 returnVec;
-    returnVec.x = static_cast<float>(ui->spinBox_Velocity_X->value());
-    returnVec.y = static_cast<float>(ui->spinBox_Velocity_Y->value());
-    returnVec.z = static_cast<float>(ui->spinBox_Velocity_Z->value());
-    return returnVec;
-}
-
-gsl::vec3 PhysicsWidget::getAcceleration()
-{
-    gsl::vec3 returnVec;
-    returnVec.x = static_cast<float>(ui->spinBox_Acceleration_X->value());
-    returnVec.y = static_cast<float>(ui->spinBox_Acceleration_Y->value());
-    returnVec.z = static_cast<float>(ui->spinBox_Acceleration_Z->value());
-    return returnVec;
-}
-
-float PhysicsWidget::getMass()
-{
-    return static_cast<float>(ui->spinBox_Mass->value());
+    ui->spinBox_Mass->setValue(static_cast<double>(mass));
 }
 
 void PhysicsWidget::on_spinBox_Velocity_X_valueChanged(double arg1)

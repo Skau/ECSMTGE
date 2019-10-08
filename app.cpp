@@ -145,7 +145,7 @@ void App::update()
     mMainWindow->updateComponentWidgets();
 
     // Rendering:
-    const auto& renders = mWorld->getEntityManager()->getMeshComponents();
+    auto& renders = mWorld->getEntityManager()->getMeshComponents();
 
 
     auto usedTrans = CameraSystem::updateCameras(transforms, cameras);

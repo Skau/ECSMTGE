@@ -11,21 +11,12 @@ ScriptWidget::ScriptWidget(MainWindow* mainWindow, QWidget *parent) :
    ComponentWidget(mainWindow, parent), ui(new Ui::ScriptWidget)
 {
     ui->setupUi(this);
-}
 
-ScriptWidget::~ScriptWidget()
-{
-    delete ui;
-}
-
-void ScriptWidget::updateData()
-{
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
         if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
         {
-            isUpdating = true;
             auto filePath = comp->getFilePath();
             if(filePath.size())
             {
@@ -36,9 +27,26 @@ void ScriptWidget::updateData()
             {
                 ui->button_NewFile->setText("Create file");
             }
-            isUpdating = false;
         }
     }
+}
+
+ScriptWidget::~ScriptWidget()
+{
+    delete ui;
+}
+
+void ScriptWidget::updateData()
+{
+//    auto entity = mMainWindow->currentEntitySelected;
+//    if(entity)
+//    {
+//        if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
+//        {
+//            isUpdating = true;
+//            isUpdating = false;
+//        }
+//    }
 }
 
 void ScriptWidget::Remove()

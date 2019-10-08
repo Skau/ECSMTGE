@@ -20,14 +20,6 @@ public:
 
     void updateData() override;
 
-    void setPosition(const gsl::vec3& pos);
-    void setRotation(const gsl::vec3 &rot);
-    void setScale(const gsl::vec3& scale);
-
-    gsl::vec3 getPosition();
-    gsl::vec3 getRotation();
-    gsl::vec3 getScale();
-
 private slots:
     void on_spinBox_Position_X_valueChanged(double arg1);
 
@@ -51,5 +43,9 @@ private slots:
 
 private:
     Ui::Transform* ui;
+
+    void setPosition(const gsl::vec3& pos);
+    void setRotation(const gsl::vec3 &rot);
+    void setScale(const gsl::vec3& scale);
 };
 #endif // TRANSFORMWIDGET_H

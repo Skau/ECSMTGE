@@ -252,7 +252,7 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
     }
 }
 
-void Renderer::renderDeferred(const std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera,
+void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera,
                               const std::vector<DirectionalLightComponent>& dirLights,
                               const std::vector<SpotLightComponent>& spotLights,
                               const std::vector<PointLightComponent>& pointLights)
@@ -429,7 +429,7 @@ unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std:
     return 0;
 }
 
-void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera)
+void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera)
 {
     auto transIt = transforms.begin();
     auto renderIt = renders.begin();
@@ -479,7 +479,7 @@ void Renderer::deferredGeometryPass(const std::vector<MeshComponent> &renders, c
             }
 
             // Mesh data available
-            auto meshData = renderIt->meshData;
+            auto& meshData = renderIt->meshData;
             if(!meshData.mVerticesCount)
             {
                 // Increment all

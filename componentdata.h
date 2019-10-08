@@ -131,7 +131,7 @@ struct SoundComponent : public Component
     bool isMuted = false;
     int mSource;
     float pitch = 1.f;
-    float gain = .4f;
+    float gain = .7f;
     std::string name;
 
     SoundComponent(unsigned int _eID = 0, bool _valid = false)

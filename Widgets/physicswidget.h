@@ -19,14 +19,6 @@ public:
 
     void updateData() override;
 
-    void setVelocity(const gsl::vec3& vel);
-    void setAcceleration(const gsl::vec3& acc);
-    void setMass(float ass); // ;)
-
-    gsl::vec3 getVelocity();
-    gsl::vec3 getAcceleration();
-    float getMass();
-
 private slots:
     void on_spinBox_Velocity_X_valueChanged(double arg1);
 
@@ -46,5 +38,9 @@ private slots:
 
 private:
     Ui::Physics* ui;
+
+    void setVelocity(const gsl::vec3& vel);
+    void setAcceleration(const gsl::vec3& acc);
+    void setMass(float mass);
 };
 #endif // PhysicsWIDGET_H

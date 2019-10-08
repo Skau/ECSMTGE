@@ -8,21 +8,36 @@ SpotLightWidget::SpotLightWidget(MainWindow *mainWindow, QWidget *parent) :
     ComponentWidget(mainWindow, parent), ui(new Ui::SpotLightWidget)
 {
     ui->setupUi(this);
-}
+    initialColor = Qt::white;
 
-void SpotLightWidget::updateData()
-{
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
         if(auto comp = mMainWindow->getEntityManager()->getComponent<SpotLightComponent>(entity->entityId))
         {
             isUpdating = true;
-            initialColor =  QColor(comp->color.x*255, comp->color.y*255, comp->color.z*255);
+            initialColor =  QColor(
+                                static_cast<int>(comp->color.x)*255,
+                                static_cast<int>(comp->color.y)*255,
+                                static_cast<int>(comp->color.z)*255);
+
             ui->textEdit_Color->setStyleSheet("background-color: " + initialColor.name());
             isUpdating = false;
         }
     }
+}
+
+void SpotLightWidget::updateData()
+{
+//    auto entity = mMainWindow->currentEntitySelected;
+//    if(entity)
+//    {
+//        if(auto comp = mMainWindow->getEntityManager()->getComponent<SpotLightComponent>(entity->entityId))
+//        {
+//            isUpdating = true;
+//            isUpdating = false;
+//        }
+//    }
 }
 
 void SpotLightWidget::Remove()

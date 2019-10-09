@@ -5,7 +5,9 @@ CONFIG      += c++17
 
 TARGET      = INNgine2019
 
-PRECOMPILED_HEADER = innpch.h
+PRECOMPILED_HEADER += \
+                    innpch.h \
+                    simplify.h
 
 INCLUDEPATH +=  ./GSL
 INCLUDEPATH += ./include

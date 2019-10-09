@@ -98,3 +98,9 @@ gsl::vec3 EntityManager::getTransformScale(unsigned int eID)
     auto comp = getComponent<TransformComponent>(eID);
     return (comp != nullptr) ? comp->scale : gsl::vec3{};
 }
+
+MeshComponent::Bounds EntityManager::CalculateBounds(unsigned int eID)
+{
+    auto [meshComp, transComp] = getComponents<MeshComponent, TransformComponent>(eID);
+
+}

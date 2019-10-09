@@ -90,14 +90,20 @@ struct PhysicsComponent : public Component
 };
 
 struct MeshComponent : public Component
-{
+{   
     bool isVisible : 1;
     MeshData meshData{};
+    struct Bounds
+    {
+        gsl::vec3 centre;
+        float radius;
+    } bounds;
 
     MeshComponent(unsigned int _eID = 0, bool _valid = false,
            const MeshData& _meshData = MeshData{}, bool _visible = false)
         : Component (_eID, _valid, ComponentType::Mesh), isVisible{_visible}, meshData{_meshData}
     {}
+
 };
 
 struct CameraComponent : public Component

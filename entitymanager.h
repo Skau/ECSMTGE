@@ -221,6 +221,12 @@ public:
         return {addComponents<componentTypes>(entity)...};
     }
 
+    template<typename... componentTypes>
+    std::tuple<componentTypes*...> getComponents(unsigned int entity)
+    {
+        return {getComponent<componentTypes>(entity)...};
+    }
+
     void addComponent(unsigned int entity, ComponentType type)
     {
         switch (type)
@@ -467,6 +473,8 @@ public:
     gsl::vec3 getTransformPos(unsigned int eID);
     gsl::quat getTransformRot(unsigned int eID);
     gsl::vec3 getTransformScale(unsigned int eID);
+
+    MeshComponent::Bounds CalculateBounds(unsigned int eID);
 };
 
 #endif // COMPONENTMANAGER_H

@@ -15,7 +15,7 @@ class Postprocessor : protected QOpenGLFunctions_4_1_Core
 {
 public:
     struct Setting {
-        std::shared_ptr<Shader> shader;
+        std::shared_ptr<Material> material;
 
         // Other probs useful data
 
@@ -26,7 +26,7 @@ public:
 
 
     // Postprocessor settings
-    std::shared_ptr<Shader> passThroughShader;
+    std::shared_ptr<Material> passThroughMaterial;
     std::vector<Setting> steps;
     /* Whether or not to output to default framebuffer after renderprocess
      * or to output to "output" framebuffer.

@@ -7,19 +7,25 @@
     <x>0</x>
     <y>0</y>
     <width>329</width>
-    <height>253</height>
+    <height>410</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>329</height>
+    <height>16777215</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -29,15 +35,21 @@
    <item>
     <widget class="QFrame" name="frame">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>235</height>
+       <height>16777215</height>
       </size>
      </property>
      <property name="frameShape">
@@ -267,26 +279,31 @@
        </layout>
       </item>
       <item>
-       <widget class="QScrollArea" name="scrollArea">
-        <property name="widgetResizable">
-         <bool>true</bool>
+       <widget class="QWidget" name="widget_Parameters" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>301</width>
-           <height>18</height>
-          </rect>
-         </property>
-        </widget>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>76</height>
+         </size>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_5"/>
        </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
          <widget class="QPushButton" name="pushButton_ChangeTextureDropdown">
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>Change texture (dropdown) -&gt;</string>
           </property>

@@ -46,6 +46,10 @@ public:
                 render.meshData = *meshData;
                 render.isVisible = true;
             }
+            render.mMaterial.mParameters =
+            {
+                {"color", gsl::vec3(1.f, 0, 0)}
+            };
             transform.setPosition(gsl::vec3(i*2.f, 0, 0));
         }
 

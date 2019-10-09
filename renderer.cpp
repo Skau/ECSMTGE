@@ -6,6 +6,7 @@
 
 #include "inputhandler.h"
 #include "resourcemanager.h"
+#include "texture.h"
 
 Renderer::Renderer()
 {
@@ -168,7 +169,7 @@ void Renderer::initGBuffer()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Renderer::render(const std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera)
+void Renderer::render(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera)
 {
     /* Note: For å gjøre dette enda raskere kunne det vært
      * mulig å gjøre at dataArraysene alltid resizer til nærmeste
@@ -225,9 +226,21 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
                     continue;
                 }
 
+                auto camPos = camera.viewMatrix.getPosition();
+                auto distance = std::abs((camPos - transIt->position).length());
+                unsigned index = 0;
+                if(distance > 10.f)
+                {
+                    index = 1;
+                }
+                else if(distance > 20.f)
+                {
+                    index = 2;
+                }
+
                 // Mesh data available
                 auto meshData = renderIt->meshData;
-                if(!meshData.mVerticesCount)
+                if(!meshData.mVerticesCounts[index])
                 {
                     // Increment all
                     ++transIt;
@@ -237,42 +250,46 @@ void Renderer::render(const std::vector<MeshComponent>& renders, const std::vect
 
                 // Entity can be drawn. Draw.
 
-                glBindVertexArray(meshData.mVAO);
+                glBindVertexArray(meshData.mVAOs[index]);
 
-                auto shader = meshData.mMaterial.mShader;
+                auto shader = renderIt->mMaterial.mShader;
                 if(!shader)
                 {
                     shader = ResourceManager::instance()->getShader("color");
-                    meshData.mMaterial.mShader = shader;
+                    renderIt->mMaterial.mShader = shader;
                 }
 
                 glUseProgram(shader->getProgram());
 
-                if(meshData.mMaterial.mShader && meshData.mMaterial.mShader->mName.length())
+                if(shader->mName.length())
                 {
-                    if(meshData.mMaterial.mShader->mName == "texture" && meshData.mMaterial.mTexture > -1)
+                    if(shader->mName == "texture" && renderIt->mMaterial.mTextures.size())
                     {
-                        glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(meshData.mMaterial.mTexture));
-                        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(meshData.mMaterial.mTexture));
-
-                        glUniform1i(glGetUniformLocation(shader->getProgram(), "textureSampler"), meshData.mMaterial.mTexture);
+                        for(unsigned i = 0; i < renderIt->mMaterial.mTextures.size(); ++i)
+                        {
+                            glActiveTexture(GL_TEXTURE0 + i);
+                            glBindTexture(renderIt->mMaterial.mTextures[i].second, renderIt->mMaterial.mTextures[i].first);
+                            glUniform1i(glGetUniformLocation(shader->getProgram(), "textureSampler"), static_cast<int>(renderIt->mMaterial.mTextures[i].first));
+                        }
                     }
                 }
+
+                evaluateParams(renderIt->mMaterial);
 
                 auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
                 glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
 
-                mNumberOfVerticesDrawn += meshData.mVerticesCount;
+                mNumberOfVerticesDrawn += meshData.mVerticesCounts[index];
 
-                if(meshData.mIndicesCount > 0)
+                if(meshData.mIndicesCounts[index] > 0)
                 {
-                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
+                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCounts[index]), GL_UNSIGNED_INT, nullptr);
                 }
                 else
                 {
-                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
+                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCounts[index]));
                 }
 
                 // Increment all
@@ -363,8 +380,6 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
 
         glEnable(GL_DEPTH_TEST);
 
-
-
         checkForGLerrors();
 
         mContext->swapBuffers(this);
@@ -425,21 +440,8 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
                 continue;
             }
 
-            // Mesh data available
-            auto& meshData = renderIt->meshData;
-            if(!meshData.mVerticesCount)
-            {
-                // Increment all
-                ++transIt;
-                ++renderIt;
-                continue;
-            }
-
-            // Entity can be drawn. Draw.
-
             auto camPos = camera.viewMatrix.getPosition();
             auto distance = std::abs((camPos - transIt->position).length());
-
             unsigned index = 0;
             if(distance > 10.f)
             {
@@ -450,20 +452,43 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
                 index = 2;
             }
 
+            // Mesh data available
+            auto& meshData = renderIt->meshData;
+            if(!meshData.mVerticesCounts[index])
+            {
+                // Increment all
+                ++transIt;
+                ++renderIt;
+                continue;
+            }
+
+            // Entity can be drawn. Draw.
 
             glBindVertexArray(meshData.mVAOs[index]);
 
 
             // ** NEEDS TO BE A DEFERRED SHADER ** //
 
-            auto shader = meshData.mMaterial.mShader;
+            auto shader = renderIt->mMaterial.mShader;
             if(!shader)
             {
                 shader = ResourceManager::instance()->getShader("defaultDeferred");
-                meshData.mMaterial.mShader = shader;
+                renderIt->mMaterial.mShader = shader;
             }
 
             glUseProgram(shader->getProgram());
+
+            evaluateParams(renderIt->mMaterial);
+
+            if(renderIt->mMaterial.mTextures.size())
+            {
+                for(unsigned i = 0; i < renderIt->mMaterial.mTextures.size(); ++i)
+                {
+                    glActiveTexture(GL_TEXTURE0 + i);
+                    glBindTexture(renderIt->mMaterial.mTextures[i].second, renderIt->mMaterial.mTextures[i].first);
+                    glUniform1i(glGetUniformLocation(shader->getProgram(), "textureSampler"), static_cast<int>(renderIt->mMaterial.mTextures[i].first));
+                }
+            }
 
             auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
             glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
@@ -766,9 +791,21 @@ unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std:
                     continue;
                 }
 
+                auto camPos = camera.viewMatrix.getPosition();
+                auto distance = std::abs((camPos - transIt->position).length());
+                unsigned index = 0;
+                if(distance > 10.f)
+                {
+                    index = 1;
+                }
+                else if(distance > 20.f)
+                {
+                    index = 2;
+                }
+
                 // Mesh data available
                 auto meshData = renderIt->meshData;
-                if(!meshData.mVerticesCount)
+                if(!meshData.mVerticesCounts[index])
                 {
                     // Increment all
                     ++transIt;
@@ -778,7 +815,7 @@ unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std:
 
                 // Entity can be drawn. Draw.
 
-                glBindVertexArray(meshData.mVAO);
+                glBindVertexArray(meshData.mVAOs[index]);
 
                 auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
                 auto MVP = camera.projectionMatrix * camera.viewMatrix * mMatrix;
@@ -793,13 +830,13 @@ unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std:
                 glUniform3fv(glGetUniformLocation(shader->getProgram(), "idColor"), 1, color.xP());
 
 
-                if(meshData.mIndicesCount > 0)
+                if(meshData.mIndicesCounts[index] > 0)
                 {
-                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCount), GL_UNSIGNED_INT, nullptr);
+                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCounts[index]), GL_UNSIGNED_INT, nullptr);
                 }
                 else
                 {
-                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCount));
+                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCounts[index]));
                 }
 
                 // Increment all
@@ -841,6 +878,41 @@ void Renderer::resizeGBuffer()
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
+void Renderer::evaluateParams(Material& material)
+{
+    if(auto shader = material.mShader)
+    {
+        auto params = material.mParameters;
+        if(params.size())
+        {
+            for (auto it = params.begin(); it != params.end(); ++it)
+            {
+                GLint uniform = glGetUniformLocation(shader->getProgram(), it->first.c_str());
+                if (uniform < 0)
+                    continue;
+
+                try {
+                    if (std::holds_alternative<int>(it->second))
+                        glUniform1i(uniform, std::get<int>(it->second));
+                    else if (std::holds_alternative<float>(it->second))
+                        glUniform1f(uniform, std::get<float>(it->second));
+                    else if (std::holds_alternative<gsl::vec2>(it->second))
+                        glUniform2fv(uniform, 1, std::get<gsl::vec2>(it->second).data());
+                    else if (std::holds_alternative<gsl::vec3>(it->second))
+                        glUniform3fv(uniform, 1, std::get<gsl::vec3>(it->second).data());
+                    else
+                        glUniform4fv(uniform, 1, std::get<gsl::vec4>(it->second).data());
+                }
+                catch(...)
+                {
+                    std::cout << "Logical error!" << std::endl;
+                    return;
+                }
+            }
+        }
+    }
+}
+
 void Renderer::renderQuad()
 {
     glBindVertexArray(mScreenSpacedQuadVAO);
@@ -850,21 +922,18 @@ void Renderer::renderQuad()
 
 void Renderer::renderSkybox(const CameraComponent &camera)
 {
-    if (mSkybox->mMaterial.mTexture < 0)
-        return;
-
     glDepthFunc(GL_LEQUAL);
-    glBindVertexArray(mSkybox->mVAO);
+    glBindVertexArray(mSkyboxMesh->mVAOs[0]);
 
-    auto shader = mSkybox->mMaterial.mShader;
+    auto shader = mSkyboxMaterial->mShader;
     glUseProgram(shader->getProgram());
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, static_cast<unsigned int>(mSkybox->mMaterial.mTexture));
+    glBindTexture(mSkyboxMaterial->mTextures[0].second, static_cast<unsigned int>(mSkyboxMaterial->mTextures[0].first));
 
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
-    glUniform1i(glGetUniformLocation(shader->getProgram(), "cubemap"), 0);
+    glUniform1i(glGetUniformLocation(shader->getProgram(), "cubemap"), static_cast<int>(mSkyboxMaterial->mTextures[0].first));
 
     int uniform = glGetUniformLocation(shader->getProgram(), "sTime");
     if (0 <= uniform)
@@ -877,25 +946,24 @@ void Renderer::renderSkybox(const CameraComponent &camera)
         glUniform2iv(uniform, 1, &res.x);
     }
 
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mSkybox->mVerticesCount));
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mSkyboxMesh->mVerticesCounts[0]));
     glDepthFunc(GL_LESS);
+
+    checkForGLerrors();
 }
 
 
 void Renderer::renderAxis(const CameraComponent& camera)
 {
-    if(!mAxis)
-        return;
-
-    glBindVertexArray(mAxis->mVAO);
-    auto shader = mAxis->mMaterial.mShader;
+    glBindVertexArray(mAxisMesh->mVAOs[0]);
+    auto shader = mAxisMaterial->mShader;
     glUseProgram(shader->getProgram());
 
     auto mMatrix = gsl::mat4(1);
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
-    glDrawArrays(mAxis->mRenderType, 0, static_cast<GLsizei>(mAxis->mVerticesCount));
+    glDrawArrays(mAxisMesh->mRenderType, 0, static_cast<GLsizei>(mAxisMesh->mVerticesCounts[0]));
 }
 
 void Renderer::drawEditorOutline()

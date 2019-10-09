@@ -105,7 +105,7 @@ void Postprocessor::Render()
     // Reset so that we start at the first ping-pong buffer
     mLastUsedBuffer = 0;
 
-    if (!steps.empty() && !passThroughShader)
+    if (!steps.empty() && !passThroughMaterial)
     {
         for (auto setting = steps.begin(); setting != steps.end(); ++setting, mLastUsedBuffer = !mLastUsedBuffer)
         {
@@ -121,20 +121,20 @@ void Postprocessor::Render()
 
 
 
-            auto shader = setting->shader;
-            if (!shader) {
+            auto material = setting->material;
+            if (!material || !material->mShader) {
                 qDebug() << "using pass through shader";
-                shader = passThroughShader;
+                material = passThroughMaterial;
             }
 
-            shader->use();
+            material->mShader->use();
 
 
 
             // Bind to framebuffer texture
             glActiveTexture(GL_TEXTURE0);
             // qDebug() << "uniform: " << glGetUniformLocation(shader->getProgram(), "fbt");
-            glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt"), 0);
+            glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "fbt"), 0);
             glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
 
             /** NB: Depth sampling in shadercode won't work unless in OpenGL 4.4 because of how they're stored.
@@ -144,25 +144,24 @@ void Postprocessor::Render()
             if (depthSampling)
             {
                 glActiveTexture(GL_TEXTURE1);
-                glUniform1i(glGetUniformLocation(shader->getProgram(), "depthBuffer"), 1);
+                glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "depthBuffer"), 1);
                 glBindTexture(GL_TEXTURE_2D, mDepthStencilBuffer[mLastUsedBuffer]);
             }
 
-            int uniform = glGetUniformLocation(shader->getProgram(), "sResolution");
+            int uniform = glGetUniformLocation(material->mShader->getProgram(), "sResolution");
             if (0 <= uniform)
                 glUniform2i(uniform, mScrWidth, mScrHeight);
 
-            uniform = glGetUniformLocation(shader->getProgram(), "sTime");
+            uniform = glGetUniformLocation(material->mShader->getProgram(), "sTime");
             if (0 <= uniform)
                 glUniform1f(uniform, mRenderer->mTimeSinceStart);
 
-            evaluateParams(shader.get(), setting->parameters);
-
+            mRenderer->evaluateParams(*material);
 
             // Bind to framebuffer texture
             glActiveTexture(GL_TEXTURE0);
             // qDebug() << "uniform: " << glGetUniformLocation(shader->getProgram(), "fbt");
-            glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt"), 0);
+            glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "fbt"), 0);
             glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
 
             /** NB: Depth sampling in shadercode won't work unless in OpenGL 4.4 because of how they're stored.
@@ -172,27 +171,28 @@ void Postprocessor::Render()
             if (depthSampling)
             {
                 glActiveTexture(GL_TEXTURE1);
-                glUniform1i(glGetUniformLocation(shader->getProgram(), "depthBuffer"), 1);
+                glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "depthBuffer"), 1);
                 glBindTexture(GL_TEXTURE_2D, mDepthStencilBuffer[mLastUsedBuffer]);
             }
 
-            int uniform = glGetUniformLocation(shader->getProgram(), "sResolution");
+            uniform = glGetUniformLocation(material->mShader->getProgram(), "sResolution");
             if (0 <= uniform)
                 glUniform2i(uniform, mScrWidth, mScrHeight);
 
-            uniform = glGetUniformLocation(shader->getProgram(), "sTime");
+            uniform = glGetUniformLocation(material->mShader->getProgram(), "sTime");
             if (0 <= uniform)
                 glUniform1f(uniform, mRenderer->mTimeSinceStart);
 
-            shader->evaluateParams();
+            mRenderer->evaluateParams(*material);
             renderQuad();
         }
     }
     else
     {
-        if (!passThroughShader)
+        if (!passThroughMaterial)
         {
-            if (!(passThroughShader = ResourceManager::instance()->getShader("passthrough")))
+            passThroughMaterial = std::make_shared<Material>(ResourceManager::instance()->getShader("passthrough"));
+            if (!passThroughMaterial->mShader)
                 std::cout << "Postprocessor render step skipped because of missing passthrough shader" << std::endl;
         }
 
@@ -222,7 +222,7 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
         mLastUsedBuffer = 0;
     }
 
-    if (!steps.empty() && !passThroughShader)
+    if (!steps.empty() && !passThroughMaterial)
     {
         auto setting = steps.begin() + index;
         if (setting != steps.end())
@@ -238,18 +238,18 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
             glBindFramebuffer(GL_FRAMEBUFFER, nextFramebuffer);
 
 
-            auto shader = setting->shader;
-            if (!shader) {
+            auto material = setting->material;
+            if (!material || !material->mShader) {
                 qDebug() << "using pass through shader";
-                shader = passThroughShader;
+                material = passThroughMaterial;
             }
 
-            shader->use();
+            material->mShader->use();
 
 
             // Bind to framebuffer texture
             glActiveTexture(GL_TEXTURE0);
-            glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt"), 0);
+            glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "fbt"), 0);
             glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
 
             /** NB: Depth sampling in shadercode won't work unless in OpenGL 4.4 because of how they're stored.
@@ -259,19 +259,19 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
             if (depthSampling)
             {
                 glActiveTexture(GL_TEXTURE1);
-                glUniform1i(glGetUniformLocation(shader->getProgram(), "depthBuffer"), 1);
+                glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "depthBuffer"), 1);
                 glBindTexture(GL_TEXTURE_2D, mDepthStencilBuffer[mLastUsedBuffer]);
             }
 
-            int uniform = glGetUniformLocation(shader->getProgram(), "sResolution");
+            int uniform = glGetUniformLocation(material->mShader->getProgram(), "sResolution");
             if (0 <= uniform)
                 glUniform2i(uniform, mScrWidth, mScrHeight);
 
-            uniform = glGetUniformLocation(shader->getProgram(), "sTime");
+            uniform = glGetUniformLocation(material->mShader->getProgram(), "sTime");
             if (0 <= uniform)
                 glUniform1f(uniform, mRenderer->mTimeSinceStart);
 
-            shader->evaluateParams();
+            mRenderer->evaluateParams(*material);
 
             renderQuad();
 
@@ -287,9 +287,10 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
     }
     else
     {
-        if (!passThroughShader)
+        if (!passThroughMaterial)
         {
-            if (!(passThroughShader = ResourceManager::instance()->getShader("passthrough")))
+            passThroughMaterial = std::make_shared<Material>(ResourceManager::instance()->getShader("passthrough"));
+            if (!passThroughMaterial->mShader)
                 std::cout << "Postprocessor render step skipped because of missing default shader" << std::endl;
         }
 

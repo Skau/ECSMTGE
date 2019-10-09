@@ -44,7 +44,7 @@ public:
     void render(const std::vector<VisualObject*>& objects, double deltaTime);
 
     // Should only need renders, materials and transforms
-    void render(const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
+    void render(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
     void renderDeferred(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
                         const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                         const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
@@ -57,6 +57,8 @@ public:
                                      const CameraComponent& camera);
 
     int getNumberOfVerticesDrawn() { return mNumberOfVerticesDrawn; }
+
+    void evaluateParams(Material& material);
 
 private:
     void deferredGeometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
@@ -84,14 +86,18 @@ private:
     std::unique_ptr<Postprocessor> mPostprocessor;
     std::unique_ptr<Postprocessor> mOutlineeffect;
 
-    std::shared_ptr<MeshData> mSkybox;
-    std::shared_ptr<MeshData> mAxis;
+    std::shared_ptr<MeshData> mSkyboxMesh;
+    std::shared_ptr<Material> mSkyboxMaterial;
+    std::shared_ptr<MeshData> mAxisMesh;
+    std::shared_ptr<Material> mAxisMaterial;
 
     GLuint mScreenSpacedQuadVAO;
     GLuint mGBuffer, mGPosition{}, mGNormal{}, mGAlbedoSpec{}, mRboDepth{};
     std::shared_ptr<Shader> mDirectionalLightShader;
     std::shared_ptr<Shader> mPointLightShader;
     std::shared_ptr<Shader> mSpotLightShader;
+
+
 
     bool mWireframe{false};
 

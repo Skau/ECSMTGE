@@ -60,7 +60,7 @@ std::shared_ptr<Shader> ResourceManager::getShader(const std::string &name)
     return nullptr;
 }
 
-void ResourceManager::addTexture(const std::string &name, const std::string &path)
+void ResourceManager::addTexture(const std::string &name, const std::string &path, GLenum type)
 {
     if(mTextures.find(name) == mTextures.end())
     {
@@ -70,32 +70,18 @@ void ResourceManager::addTexture(const std::string &name, const std::string &pat
             mIsInitialized = true;
         }
 
-        mTextures[name] = std::make_shared<Texture>(path);
+        mTextures[name] = std::make_shared<Texture>(path, type);
     }
 }
 
-void ResourceManager::addCubemapTexture(const std::string &name, const std::string &path)
-{
-    if(mTextures.find(name) == mTextures.end())
-    {
-        if(!mIsInitialized)
-        {
-            initializeOpenGLFunctions();
-            mIsInitialized = true;
-        }
-
-        mTextures[name] = std::make_shared<Texture>(path, Texture::Cube_Map_Texture);
-    }
-}
-
-int ResourceManager::getTexture(const std::string &name)
+std::shared_ptr<Texture> ResourceManager::getTexture(const std::string &name)
 {
     if(mTextures.find(name) != mTextures.end())
     {
-        return static_cast<int>(mTextures[name]->id());
+        return mTextures[name];
     }
 
-    return -1;
+    return nullptr;
 }
 
 std::shared_ptr<MeshData> ResourceManager::addMesh(const std::string& name, const std::string& path, GLenum renderType)
@@ -169,37 +155,34 @@ std::pair<std::shared_ptr<MeshData>, std::shared_ptr<MeshData>> ResourceManager:
 
 void ResourceManager::setupLODs(std::shared_ptr<MeshData> baseMeshData, std::shared_ptr<MeshData> LOD1, std::shared_ptr<MeshData> LOD2)
 {
-    baseMeshData->mVAOs[0]              = baseMeshData->mVAO;
-    baseMeshData->mVerticesCounts[0]    = baseMeshData->mVerticesCount;
-    baseMeshData->mIndicesCounts[0]     = baseMeshData->mIndicesCount;
     if(LOD1)
     {
-        baseMeshData->mVAOs[1]              = LOD1->mVAO;
-        baseMeshData->mVerticesCounts[1]    = LOD1->mVerticesCount;
-        baseMeshData->mIndicesCounts[1]     = LOD1->mIndicesCount;
+        baseMeshData->mVAOs[1]              = LOD1->mVAOs[0];
+        baseMeshData->mVerticesCounts[1]    = LOD1->mVerticesCounts[0];
+        baseMeshData->mIndicesCounts[1]     = LOD1->mIndicesCounts[0];
         mMeshes.erase(LOD1->mName);
         if(LOD2)
         {
-            baseMeshData->mVAOs[2]              = LOD2->mVAO;
-            baseMeshData->mVerticesCounts[2]    = LOD2->mVerticesCount;
-            baseMeshData->mIndicesCounts[2]     = LOD2->mIndicesCount;
+            baseMeshData->mVAOs[2]              = LOD2->mVAOs[0];
+            baseMeshData->mVerticesCounts[2]    = LOD2->mVerticesCounts[0];
+            baseMeshData->mIndicesCounts[2]     = LOD2->mIndicesCounts[0];
             mMeshes.erase(LOD2->mName);
         }
         else
         {
-            baseMeshData->mVAOs[2]              = LOD1->mVAO;
-            baseMeshData->mVerticesCounts[2]    = LOD1->mVerticesCount;
-            baseMeshData->mIndicesCounts[2]     = LOD1->mIndicesCount;
+            baseMeshData->mVAOs[2]              = LOD1->mVAOs[0];
+            baseMeshData->mVerticesCounts[2]    = LOD1->mVerticesCounts[0];
+            baseMeshData->mIndicesCounts[2]     = LOD1->mIndicesCounts[0];
         }
     }
     else
     {
-        baseMeshData->mVAOs[1]              = baseMeshData->mVAO;
-        baseMeshData->mVerticesCounts[1]    = baseMeshData->mVerticesCount;
-        baseMeshData->mIndicesCounts[1]     = baseMeshData->mIndicesCount;
-        baseMeshData->mVAOs[2]              = baseMeshData->mVAO;
-        baseMeshData->mVerticesCounts[2]    = baseMeshData->mVerticesCount;
-        baseMeshData->mIndicesCounts[2]     = baseMeshData->mIndicesCount;
+        baseMeshData->mVAOs[1]              = baseMeshData->mVAOs[0];
+        baseMeshData->mVerticesCounts[1]    = baseMeshData->mVerticesCounts[0];
+        baseMeshData->mIndicesCounts[1]     = baseMeshData->mIndicesCounts[0];
+        baseMeshData->mVAOs[2]              = baseMeshData->mVAOs[0];
+        baseMeshData->mVerticesCounts[2]    = baseMeshData->mVerticesCounts[0];
+        baseMeshData->mIndicesCounts[2]     = baseMeshData->mIndicesCounts[0];
     }
 }
 
@@ -211,8 +194,8 @@ std::shared_ptr<MeshData> ResourceManager::initializeMeshData(const std::string&
     meshData.mRenderType = renderType;
 
     //Vertex Array Object - VAO
-    glGenVertexArrays( 1, &meshData.mVAO );
-    glBindVertexArray(meshData.mVAO);
+    glGenVertexArrays( 1, &meshData.mVAOs[0] );
+    glBindVertexArray(meshData.mVAOs[0]);
 
     //Vertex Buffer Object to hold vertices - VBO
     GLuint vbo;
@@ -233,16 +216,16 @@ std::shared_ptr<MeshData> ResourceManager::initializeMeshData(const std::string&
     glVertexAttribPointer(2, 2,  GL_FLOAT, GL_FALSE, sizeof( Vertex ), (GLvoid*)( 6 * sizeof( GLfloat ) ));
     glEnableVertexAttribArray(2);
 
-    meshData.mVerticesCount = static_cast<unsigned>(data.first.size());
-    meshData.mIndicesCount = static_cast<unsigned>(data.second.size());
+    meshData.mVerticesCounts[0] = static_cast<unsigned>(data.first.size());
+    meshData.mIndicesCounts[0] = static_cast<unsigned>(data.second.size());
 
-    if(meshData.mIndicesCount)
+    if(meshData.mIndicesCounts[0])
     {
         //Second buffer - holds the indices (Element Array Buffer - EAB):
         GLuint eab;
         glGenBuffers(1, &eab);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eab);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.mIndicesCount * sizeof(GLuint), data.second.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.mIndicesCounts[0] * sizeof(GLuint), data.second.data(), GL_STATIC_DRAW);
     }
 
     auto mesh = std::make_shared<MeshData>(meshData);

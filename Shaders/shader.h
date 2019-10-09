@@ -12,12 +12,22 @@
 
 //must inherit from QOpenGLFunctions_4_1_Core, since we use that instead of glfw/glew/glad
 
+enum class ShaderType
+{
+    Forward,
+    Deferred,
+    PostProcessing,
+    WeirdStuff
+};
+
 class Shader : protected QOpenGLFunctions_4_1_Core
 {
 public:
     // Constructor generates the shader on the fly
-    Shader(const std::string shaderName);
-    Shader(const std::string vertexPath, const std::string fragmentPath, const std::string geometryPath = std::string{});
+    Shader(const std::string shaderName, ShaderType type);
+    Shader(const std::string vertexPath, const std::string fragmentPath, ShaderType type);
+    Shader(const std::string vertexPath, const std::string fragmentPath, const std::string geometryPath, ShaderType type);
+
     virtual ~Shader();
 
     // Use the current shader
@@ -30,6 +40,7 @@ public:
 
 
     std::string mName{};
+    ShaderType mRenderingType{};
 
 protected:
     GLuint program{0};

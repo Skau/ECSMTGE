@@ -47,9 +47,8 @@ public:
 
     // Textures
 
-    void addTexture(const std::string& name, const std::string& path);
-    void addCubemapTexture(const std::string& name, const std::string& path);
-    int getTexture(const std::string& name);
+    void addTexture(const std::string& name, const std::string& path, GLenum type = GL_TEXTURE_2D);
+    std::shared_ptr<Texture> getTexture(const std::string& name);
 
     // Meshes
 

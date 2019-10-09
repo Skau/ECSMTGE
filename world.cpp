@@ -6,22 +6,27 @@
 
 World::World()
 {
-    ResourceManager::instance()->addShader("color",             std::make_shared<Shader>("colorshader"));
-    ResourceManager::instance()->addShader("texture",           std::make_shared<Shader>("textureshader"));
-    ResourceManager::instance()->addShader("phong",             std::make_shared<Shader>("phongshader"));
-    ResourceManager::instance()->addShader("axis",              std::make_shared<Shader>("axisshader.vert", "colorshader.frag"));
-    ResourceManager::instance()->addShader("defaultDeferred",   std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag"));
-    ResourceManager::instance()->addShader("directionalLight",  std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/directionallight.frag"));
-    ResourceManager::instance()->addShader("pointLight",        std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/pointlight.frag"));
-    ResourceManager::instance()->addShader("spotLight",         std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/spotlight.frag"));
-    ResourceManager::instance()->addShader("skybox",            std::make_shared<Shader>("skybox.vert", "skybox.frag"));
-    ResourceManager::instance()->addShader("mousepicking",      std::make_shared<Shader>("mousepicking.vert", "mousepicking.frag"));
+    // Forward
+    ResourceManager::instance()->addShader("color",             std::make_shared<Shader>("colorshader", ShaderType::Forward));
+    ResourceManager::instance()->addShader("texture",           std::make_shared<Shader>("textureshader", ShaderType::Forward));
+    ResourceManager::instance()->addShader("phong",             std::make_shared<Shader>("phongshader", ShaderType::Forward));
+    ResourceManager::instance()->addShader("axis",              std::make_shared<Shader>("axisshader.vert", "colorshader.frag", ShaderType::Forward));
+    ResourceManager::instance()->addShader("skybox",            std::make_shared<Shader>("skybox.vert", "skybox.frag", ShaderType::Forward));
 
-    // Post prosessing shaders
-    ResourceManager::instance()->addShader("passthrough",       std::make_shared<Shader>("pass.vert", "pass.frag"));
-    ResourceManager::instance()->addShader("blur",              std::make_shared<Shader>("pass.vert", "blur.frag"));
-    ResourceManager::instance()->addShader("singleColor",       std::make_shared<Shader>("pass.vert", "singleColor.frag"));
-    ResourceManager::instance()->addShader("blend",             std::make_shared<Shader>("pass.vert", "blend.frag"));
+    // Deferred
+    ResourceManager::instance()->addShader("defaultDeferred",   std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag", ShaderType::Deferred));
+    ResourceManager::instance()->addShader("directionalLight",  std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/directionallight.frag", ShaderType::Deferred));
+    ResourceManager::instance()->addShader("pointLight",        std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/pointlight.frag", ShaderType::Deferred));
+    ResourceManager::instance()->addShader("spotLight",         std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/spotlight.frag", ShaderType::Deferred));
+
+    // Post prosessing
+    ResourceManager::instance()->addShader("passthrough",       std::make_shared<Shader>("pass.vert", "pass.frag", ShaderType::PostProcessing));
+    ResourceManager::instance()->addShader("blur",              std::make_shared<Shader>("pass.vert", "blur.frag", ShaderType::PostProcessing));
+    ResourceManager::instance()->addShader("singleColor",       std::make_shared<Shader>("pass.vert", "singleColor.frag", ShaderType::PostProcessing));
+    ResourceManager::instance()->addShader("blend",             std::make_shared<Shader>("pass.vert", "blend.frag", ShaderType::PostProcessing));
+
+    // Other..
+    ResourceManager::instance()->addShader("mousepicking",      std::make_shared<Shader>("mousepicking.vert", "mousepicking.frag", ShaderType::WeirdStuff));
 
     // This function is troublesome...
     // ResourceManager::instance()->LoadAssetFiles();
@@ -36,12 +41,7 @@ World::World()
     ResourceManager::instance()->loadWav("laser", std::string{gsl::soundsFilePath}.append("laser.wav"));
     ResourceManager::instance()->loadWav("stereo", std::string{gsl::soundsFilePath}.append("stereo.wav"));
 
-    ResourceManager::instance()->getMesh("axis")->mRenderType = GL_LINES;
-    ResourceManager::instance()->getMesh("axis")->mMaterial.mShader = ResourceManager::instance()->getShader("axis");
-
-    ResourceManager::instance()->getMesh("skybox")->mMaterial.mShader = ResourceManager::instance()->getShader("skybox");
-    ResourceManager::instance()->addCubemapTexture("skybox", "skyboxSpaceBoring.bmp");
-    ResourceManager::instance()->getMesh("skybox")->mMaterial.mTexture = ResourceManager::instance()->getTexture("skybox");
+    ResourceManager::instance()->addTexture("skybox", "skyboxSpaceBoring.bmp", GL_TEXTURE_CUBE_MAP);
 
     entityManager = std::make_shared<EntityManager>();
 

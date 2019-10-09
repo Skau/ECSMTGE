@@ -56,29 +56,53 @@ void App::initTheRest()
 
     SoundManager::checkOpenALError();
 
-    // Send skybox to renderer.
-    mRenderer->mSkybox = ResourceManager::instance()->getMesh("skybox");
-    // Send axis to renderer
-    mRenderer->mAxis = ResourceManager::instance()->getMesh("axis");
+    // Send skybox data to renderer
 
+    auto skyboxMesh = ResourceManager::instance()->getMesh("skybox");
+
+    auto skyboxMaterial = std::make_shared<Material>();
+    auto skyShader = ResourceManager::instance()->getShader("skybox");
+    skyboxMaterial->mShader = skyShader;
+    auto texture = ResourceManager::instance()->getTexture("skybox");
+    skyboxMaterial->mTextures.push_back({texture->id(), texture->mType});
+
+    mRenderer->mSkyboxMesh = skyboxMesh;
+    mRenderer->mSkyboxMaterial = skyboxMaterial;
+
+    // Send axis data to renderer
+
+    auto axisMesh = ResourceManager::instance()->getMesh("axis");
+    axisMesh->mRenderType = GL_LINES;
+
+    auto axisMaterial = std::make_shared<Material>();
+    axisMaterial->mShader = ResourceManager::instance()->getShader("axis");
+
+    mRenderer->mAxisMesh = axisMesh;
+    mRenderer->mAxisMaterial = axisMaterial;
 
     // mRenderer->mPostprocessor->steps.push_back({ResourceManager::instance()->getShader("passthrough")});
     mRenderer->mOutlineeffect->outputToDefault = false;
+
+    auto material = std::make_shared<Material>(ResourceManager::instance()->getShader("singleColor"));
+    material->mParameters =
+    {
+        {"color", gsl::vec3{1.f, 1.f, 0.f}}
+    };
     mRenderer->mOutlineeffect->steps.push_back(
     {
-        ResourceManager::instance()->getShader("singleColor"),
-        0,
-        {
-            {"color", gsl::vec3{1.f, 1.f, 0.f}}
-        }
+        material,
+        0
     });
+
+    material = std::make_shared<Material>(ResourceManager::instance()->getShader("blur"));
+    material->mParameters =
+    {
+        {"radius", 2}
+    };
     mRenderer->mOutlineeffect->steps.push_back(
     {
-        ResourceManager::instance()->getShader("blur"),
-        0,
-        {
-            {"radius", 2}
-        }
+        material,
+        0
     });
 }
 

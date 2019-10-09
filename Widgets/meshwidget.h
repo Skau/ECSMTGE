@@ -2,12 +2,15 @@
 #define MESHWIDGET_H
 
 #include "componentwidget.h"
+#include <memory>
+#include "meshdata.h"
 
 namespace Ui{
     class Mesh;
 }
 
 class MeshComponent;
+class Shader;
 
 class MeshWidget : public ComponentWidget
 {
@@ -36,7 +39,9 @@ private slots:
     void on_pushButton_ChangeTextureDropdown_clicked();
 
 private:
-    MeshComponent* getRenderComponent(unsigned int entity);
+    MeshComponent* getRenderComponent();
+
+    void updateShaderParameters(Material& material);
 
     Ui::Mesh* ui;
 };

@@ -7,7 +7,7 @@ in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 Normal;
 
-uniform vec4 color;
+uniform vec3 color;
 uniform sampler2D diffuse;
 uniform sampler2D specular;
 uniform bool usingTextures = false;
@@ -19,5 +19,5 @@ void main()
 
     gNormal = normalize(Normal);
 
-    gAlbedoSpec = vec4(1, 0, 0, 1);
+    gAlbedoSpec = vec4(color, 1);
 }

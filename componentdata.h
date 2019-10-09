@@ -58,6 +58,7 @@ struct TransformComponent : public Component
     gsl::Vector3D position{};
     gsl::Quaternion rotation{};
     gsl::Vector3D scale{1,1,1};
+    bool boundsOutdated{true};
 
     TransformComponent(unsigned int _eID = 0, bool _valid = false,
                     const gsl::vec3& _pos = gsl::vec3{},
@@ -93,12 +94,13 @@ struct MeshComponent : public Component
 {
     bool isVisible : 1;
     MeshData meshData{};
-    struct Bounds
-    {
-        gsl::vec3 centre;
-        float radius;
-    } bounds;
     Material mMaterial{};
+    /* World Space Bounds of meshComponent
+     * If transform component is missing,
+     * bounds will be the same meshdata's
+     * local bounds.
+     */
+    MeshData::Bounds bounds{};
 
     MeshComponent(unsigned int _eID = 0, bool _valid = false,
                   const MeshData& _meshData = MeshData{}, const Material& _material = Material{}, bool _visible = false)

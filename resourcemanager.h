@@ -96,6 +96,12 @@ private:
      */
     std::shared_ptr<MeshData> initializeMeshData(const std::string& name, GLenum renderType, std::pair<std::vector<Vertex>, std::vector<GLuint>> data);
 
+    /**
+     * @brief Calculates bounds for the mesh based on vertices
+     * @param vertices - list of vertices for mesh
+     * @return A bounding sphere in local space
+     */
+    static MeshData::Bounds CalculateBounds(const std::vector<Vertex>& vertices);
 
     // Data
 

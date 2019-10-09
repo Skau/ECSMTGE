@@ -29,6 +29,12 @@ struct MeshData
     std::array<unsigned, 3> mVerticesCounts{};
     std::array<unsigned, 3> mIndicesCounts{};
     std::string mName{};
+    // The bounds for the mesh in local space
+    struct Bounds
+    {
+        gsl::vec3 centre;
+        float radius;
+    } bounds;
 
     MeshData(const std::string& name = "", GLenum renderType = GL_TRIANGLES)
         : mRenderType(renderType), mName(name) {}

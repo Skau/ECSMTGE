@@ -95,6 +95,31 @@ void Vertex::set_uv(GLfloat u, GLfloat v)
     mST.setY(v);
 }
 
+gsl::vec3 Vertex::get_xyz() const
+{
+    return mXYZ;
+}
+
+gsl::vec3 Vertex::get_rgb() const
+{
+    return mNormal;
+}
+
+gsl::vec3 Vertex::get_normal() const
+{
+    return mNormal;
+}
+
+gsl::vec2 Vertex::get_uv() const
+{
+    return mST;
+}
+
+gsl::vec2 Vertex::get_st() const
+{
+    return mST;
+}
+
 //std::ostream& operator<<(std::ostream& os, const Vertex& v)
 //{
 //   os << "(" << v.mXYZ.getX() << ", " << v.mXYZ.getY() << ", " << v.mXYZ.getZ() << ") ";

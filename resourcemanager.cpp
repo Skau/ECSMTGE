@@ -218,6 +218,7 @@ std::shared_ptr<MeshData> ResourceManager::initializeMeshData(const std::string&
 
     meshData.mVerticesCounts[0] = static_cast<unsigned>(data.first.size());
     meshData.mIndicesCounts[0] = static_cast<unsigned>(data.second.size());
+    meshData.bounds = CalculateBounds(data.first);
 
     if(meshData.mIndicesCounts[0])
     {
@@ -233,6 +234,31 @@ std::shared_ptr<MeshData> ResourceManager::initializeMeshData(const std::string&
     glBindVertexArray(0);
 
     return mesh;
+}
+
+MeshData::Bounds ResourceManager::CalculateBounds(const std::vector<Vertex> &vertices)
+{
+    float minx{0.f}, miny{0.f}, minz{0.f},
+    maxx{0.f}, maxy{0.f}, maxz{0.f};
+
+    for (auto vertex : vertices)
+    {
+        minx = (vertex.get_xyz().x < minx) ? vertex.get_xyz().x : minx;
+        miny = (vertex.get_xyz().y < miny) ? vertex.get_xyz().y : miny;
+        minz = (vertex.get_xyz().z < minz) ? vertex.get_xyz().z : minz;
+
+        maxx = (maxx < vertex.get_xyz().x) ? vertex.get_xyz().x : maxx;
+        maxy = (maxy < vertex.get_xyz().y) ? vertex.get_xyz().y : maxy;
+        maxz = (maxz < vertex.get_xyz().z) ? vertex.get_xyz().z : maxz;
+    }
+
+    MeshData::Bounds b;
+    b.centre.x = (minx + maxx) / 2.0f;
+    b.centre.y = (miny + maxy) / 2.0f;
+    b.centre.z = (minz + maxz) / 2.0f;
+
+    b.radius = static_cast<float>(std::sqrt(std::pow((maxx - b.centre.x), 2) + std::pow((maxy - b.centre.y), 2) + std::pow((maxz - b.centre.z), 2)));
+    return b;
 }
 
 std::shared_ptr<MeshData> ResourceManager::getMesh(const std::string& name)

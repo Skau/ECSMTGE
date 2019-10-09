@@ -474,7 +474,9 @@ public:
     gsl::quat getTransformRot(unsigned int eID);
     gsl::vec3 getTransformScale(unsigned int eID);
 
-    MeshComponent::Bounds CalculateBounds(unsigned int eID);
+    // Updates all transformcomponents bounds
+    void UpdateBounds();
+    // static MeshData::Bounds CalculateBounds(const std::vector<Vertex> &vertices);
 };
 
 #endif // COMPONENTMANAGER_H

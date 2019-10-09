@@ -29,6 +29,11 @@ public:
     void set_st(GLfloat *st);
     void set_st(GLfloat s, GLfloat t);
     void set_uv(GLfloat u, GLfloat v);
+    gsl::vec3 get_xyz() const;
+    gsl::vec3 get_rgb() const;
+    gsl::vec3 get_normal() const;
+    gsl::vec2 get_uv() const;
+    gsl::vec2 get_st() const;
 
 private:
     gsl::Vector3D mXYZ;

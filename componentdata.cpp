@@ -18,6 +18,7 @@ void TransformComponent::addScale(const gsl::vec3 &scl)
 {
     scale += scl;
     updated = true;
+    boundsOutdated = true;
 }
 
 void TransformComponent::setPosition(const gsl::vec3 &pos)
@@ -36,6 +37,7 @@ void TransformComponent::setScale(const gsl::vec3 &scl)
 {
     scale = scl;
     updated = true;
+    boundsOutdated = true;
 }
 
 bool ScriptComponent::load(const std::string& file)

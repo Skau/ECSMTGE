@@ -198,6 +198,10 @@ void App::update()
     for (auto index : usedTrans)
         transforms[index].updated = false;
 
+    // Calculate mesh bounds
+    mWorld->getEntityManager()->UpdateBounds();
+    // -------- Frustum culling here -----------
+
 
     for (const auto& camera : cameras)
     {

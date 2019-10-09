@@ -99,8 +99,32 @@ gsl::vec3 EntityManager::getTransformScale(unsigned int eID)
     return (comp != nullptr) ? comp->scale : gsl::vec3{};
 }
 
-MeshComponent::Bounds EntityManager::CalculateBounds(unsigned int eID)
+void EntityManager::UpdateBounds()
 {
-    auto [meshComp, transComp] = getComponents<MeshComponent, TransformComponent>(eID);
+    auto meshIt = mMeshComponents.begin();
+    for (auto transIt = mTransformComponents.begin(); transIt != mTransformComponents.end(); ++transIt)
+    {
+        if (transIt->boundsOutdated)
+        {
+            while (transIt->entityId > meshIt->entityId)
+                ++meshIt;
 
+            // Transform doesn't have mesh
+            if (transIt->entityId != meshIt->entityId)
+            {
+                transIt->boundsOutdated = false;
+                continue;
+            }
+            else
+            {
+                // Find which axis it scales the most in and use it as a uniform scale.
+                float biggestScale = 0.f;
+                for (auto i{0}; i < 3; ++i)
+                    biggestScale = (biggestScale < *(&transIt->scale.x + i)) ? *(&transIt->scale.x + i) : biggestScale;
+
+                meshIt->bounds = {meshIt->meshData.bounds.centre, meshIt->meshData.bounds.radius * biggestScale};
+                transIt->boundsOutdated = false;
+            }
+        }
+    }
 }

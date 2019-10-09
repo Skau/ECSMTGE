@@ -120,6 +120,7 @@ class EntityManager : public QObject
     REGISTER(SpotLightComponent)
     REGISTER(PointLightComponent)
     REGISTER(ScriptComponent)
+    REGISTER(ColliderComponent)
     REGISTER(EntityInfo)
 
 private:

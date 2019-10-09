@@ -22,13 +22,14 @@ enum class ComponentType
     LightDirectional,
     LightSpot,
     Script,
+    Collider,
     Other
 };
 
 // Used by UI so it knows what components are available to add if the entity doesnt have one.
 const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, ComponentType::Transform, ComponentType::Physics,
                                                    ComponentType::Input, ComponentType::Sound, ComponentType::LightPoint,
-                                                   ComponentType::LightDirectional, ComponentType::LightSpot, ComponentType::Script};
+                                                   ComponentType::LightDirectional, ComponentType::LightSpot, ComponentType::Script, ComponentType::Collider};
 
 
 struct Component
@@ -251,6 +252,21 @@ public:
      * @brief Executes one off raw js code from the mini editor. Returns true if successfull.
      */
     bool execute(QString function, QString contents, QString fileName);
+};
+
+struct ColliderComponent : public Component
+{
+    enum Type
+    {
+        AABB,
+        Box,
+        Sphere,
+        Capsule
+    };
+
+    Type collisionType{AABB};
+    std::variant<gsl::vec3, float, std::pair<float, float>> extents;
+
 };
 
 // .. etc

@@ -5,17 +5,19 @@ PhysicsSystem::PhysicsSystem()
 
 }
 
-void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, std::vector<PhysicsComponent> &physics, float deltaTime)
+void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, std::vector<PhysicsComponent> &physics,
+                                  std::vector<ColliderComponent> &colliders, float deltaTime)
 {
     // 1. Update positions and velocities
     updatePosVel(transforms, physics, deltaTime);
 
     std::vector<HitInfo> hitInfos;
     // 2. Collision detection
-    for (const auto &item : transforms)
-    {
-        hitInfos.push_back(getHitInfo(item));
-    }
+//    for (const auto &item : transforms)
+//    {
+//        hitInfos.push_back(getHitInfo(item));
+//    }
+    HandleCollisions(transforms, colliders);
 
     // 3. Handle collisions
     for (const auto &item : hitInfos)
@@ -55,9 +57,8 @@ void PhysicsSystem::updatePosVel(std::vector<TransformComponent> &transforms, st
                 continue;
             }
 
-            // Update transforms with physics
-
-            // TODO: Implement physics...
+            // Apply acceleration to velocity and then velocity to position
+            physIt->velocity += physIt->acceleration * deltaTime;
             transIt->position += physIt->velocity * deltaTime;
             transIt->updated = true;
 
@@ -76,7 +77,12 @@ void PhysicsSystem::updatePosVel(std::vector<TransformComponent> &transforms, st
     }
 }
 
-PhysicsSystem::HitInfo PhysicsSystem::getHitInfo(const TransformComponent &transform)
+void PhysicsSystem::HandleCollisions(std::vector<TransformComponent> &transform, std::vector<ColliderComponent> &collider)
+{
+
+}
+
+PhysicsSystem::HitInfo PhysicsSystem::getHitInfo(const TransformComponent &transform, const ColliderComponent &collider)
 {
     return HitInfo{};
 }

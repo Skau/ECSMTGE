@@ -31,11 +31,12 @@ public:
     };
 
     PhysicsSystem();
-    static void UpdatePhysics(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent>& physics, float deltaTime);
+    static void UpdatePhysics(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent>& physics, std::vector<ColliderComponent>& colliders, float deltaTime);
 
 private:
     static void updatePosVel(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent> &physics, float deltaTime);
-    static HitInfo getHitInfo(const TransformComponent& transform);
+    static void HandleCollisions(std::vector<TransformComponent>& transform, std::vector<ColliderComponent>& collider);
+    static HitInfo getHitInfo(const TransformComponent& transform, const ColliderComponent& collider);
     static void handleHitInfo(HitInfo info);
 };
 

@@ -10,14 +10,6 @@
  */
 class Texture : protected QOpenGLFunctions_4_1_Core
 {
-public:
-    enum TEXTURETYPE
-    {
-        Texture_1D,
-        Texture_2D,
-        Cube_Map_Texture
-    };
-
 private:
     GLubyte pixels[16];
     GLuint mId{0};
@@ -31,11 +23,11 @@ private:
     void initCubeMap(GLuint textureUnit = 0);
 public:
     Texture(GLuint textureUnit = 0);  //basic texture from code
-    Texture(const std::string &filename, GLuint textureUnit = 0);
     // More general constructor
-    Texture(const std::string& filename, TEXTURETYPE type, GLuint textureUnit = 0);
+    Texture(const std::string& filename, GLenum type, GLuint textureUnit = 0);
     GLuint id() const;
 
+    GLenum mType;
     static Texture cubeMap(const std::string &filename, GLuint textureUnit = 0);
 
 private:

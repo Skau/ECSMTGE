@@ -93,10 +93,11 @@ struct MeshComponent : public Component
 {
     bool isVisible : 1;
     MeshData meshData{};
+    Material mMaterial{};
 
     MeshComponent(unsigned int _eID = 0, bool _valid = false,
-           const MeshData& _meshData = MeshData{}, bool _visible = false)
-        : Component (_eID, _valid, ComponentType::Mesh), isVisible{_visible}, meshData{_meshData}
+                  const MeshData& _meshData = MeshData{}, const Material& _material = Material{}, bool _visible = false)
+        : Component (_eID, _valid, ComponentType::Mesh), isVisible{_visible}, meshData{_meshData}, mMaterial{_material}
     {}
 };
 

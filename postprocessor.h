@@ -15,15 +15,18 @@ class Postprocessor : protected QOpenGLFunctions_4_1_Core
 {
 public:
     struct Setting {
-        std::shared_ptr<Shader> shader;
+        std::shared_ptr<Material> material;
+
+        // Other probs useful data
+
         // bool useStencil = false;
         unsigned char stencilValue{0};
-        std::map<std::string, std::variant<int, float, gsl::vec2, gsl::vec3, gsl::vec4>> parameters;
+
     };
 
 
     // Postprocessor settings
-    std::shared_ptr<Shader> passThroughShader;
+    std::shared_ptr<Material> passThroughMaterial;
     std::vector<Setting> steps;
     /* Whether or not to output to default framebuffer after renderprocess
      * or to output to "output" framebuffer.

@@ -20,6 +20,8 @@ Texture::Texture(GLuint textureUnit) : QOpenGLFunctions_4_1_Core()
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+    mType = GL_TEXTURE_2D;
+
     glGenTextures(1, &mId);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mId);
@@ -31,39 +33,23 @@ Texture::Texture(GLuint textureUnit) : QOpenGLFunctions_4_1_Core()
     setTexture(textureUnit);
 }
 
-/**
- \brief Texture::Texture() Read a bitmap file and create a texture with standard parameters
- \param filename The name of the bmp file containing a texture
- First one 2D texture is generated from
- - glGenTextures()
- Then the OpenGL functions
- - glBindTexture()
- - glTexParameteri()
- - glTexImage2D()
- are used. The texture can be retrieved later by using the function id()
- */
-Texture::Texture(const std::string& filename, GLuint textureUnit): QOpenGLFunctions_4_1_Core()
+Texture::Texture(const std::string &filename, GLenum type, GLuint textureUnit)
 {
     initializeOpenGLFunctions();
-    readBitmap(filename);
-    setTexture(textureUnit);
-}
 
-Texture::Texture(const std::string &filename, Texture::TEXTURETYPE type, GLuint textureUnit)
-{
-    initializeOpenGLFunctions();
+    mType = type;
 
     readBitmap(filename);
 
     switch (type)
     {
-        case Texture_1D:
+        case GL_TEXTURE_1D:
             // Idk how to do that yet
             break;
-        case Texture_2D:
+        case GL_TEXTURE_2D:
             setTexture(textureUnit);
             break;
-        case Cube_Map_Texture:
+        case GL_TEXTURE_CUBE_MAP:
             initCubeMap(textureUnit);
             break;
     }

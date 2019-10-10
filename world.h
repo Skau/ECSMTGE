@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <memory>
+#include "scene.h"
 
-class Scene;
 class EntityManager;
 
 class World : public QObject
@@ -13,19 +13,18 @@ class World : public QObject
 
 public:
     World();
-
-    Scene* getCurrentScene() { return mCurrentScene; }
+    ~World();
 
     std::shared_ptr<EntityManager> getEntityManager() { return entityManager; }
 
-    ~World();
-
     void initCurrentScene();
 
-private:
-    std::vector<Scene*> mScenes;
+public slots:
+    void saveScene(const std::string& path);
+    void loadScene(const std::string& path);
 
-    Scene* mCurrentScene;
+private:
+    std::unique_ptr<Scene> mCurrentScene;
 
     std::shared_ptr<EntityManager> entityManager;
 };

@@ -2,63 +2,40 @@
 #define SCENE_H
 
 #include "resourcemanager.h"
-#include "world.h"
 #include "entitymanager.h"
+
+class World;
 
 class Scene : public QObject
 {
     Q_OBJECT
 public:
-    Scene();
+    Scene(World* world);
+    Scene(World* world, const std::string& path);
     virtual ~Scene();
-    virtual void initObjects(World* mWorld)=0;
+
+    /**
+     * @brief Creates an empty scene with only a camera
+     */
+    void initBlankScene();
+
+    /**
+     * @brief Derive from this class and override this to add entities on startup via C++
+     */
+    virtual void initCustomObjects(){}
 
     void LoadFromFile(const std::string& path);
     void SaveToFile(const std::string& path);
-};
 
-class EmptyScene : public Scene
-{
-public:
-    void initObjects(World* mWorld) override
-    {
-        auto entityManager = mWorld->getEntityManager();
-        // Camera:
-        auto camera = entityManager->createEntity("mainCam");
-        auto [trans, cam] = entityManager->addComponent<TransformComponent, CameraComponent>(camera);
-        trans.position = gsl::vec3{0.f, 0.f, 5.f};
-        trans.updated = true;
-    }
+protected:
+    World* mWorld;
 };
 
 class TestScene : public Scene
 {
 public:
-    void initObjects(World* mWorld) override
-    {
-        auto entityManager = mWorld->getEntityManager();
-        for(int i = 0; i < 10; ++i)
-        {
-            auto entity = entityManager->createEntity();
-            auto [transform, render] = entityManager->addComponent<TransformComponent, MeshComponent>(entity);
-            if(auto meshData = ResourceManager::instance()->getMesh("box2"))
-            {
-                render.meshData = *meshData;
-                render.isVisible = true;
-            }
-            render.mMaterial.mParameters =
-            {
-                {"color", gsl::vec3(1.f, 0, 0)}
-            };
-            transform.setPosition(gsl::vec3(i*2.f, 0, 0));
-        }
-
-        // Camera:
-        auto camera = entityManager->createEntity("mainCam");
-        auto [camTrans, camCam, camInput] = entityManager->addComponent<TransformComponent, CameraComponent, InputComponent>(camera);
-        camTrans.setPosition(gsl::vec3{0.f, 0.f, 5.f});
-        camInput.isCurrentlyControlled = true;
-    }
+    TestScene(World* world);
+    void initCustomObjects() override;
 };
 
 

@@ -48,6 +48,10 @@ public:
 signals:
     void play();
     void stop();
+    void toggleWireframe(bool value);
+    void shutUp(bool value);
+    void save();
+    void load();
 public slots:
     void updateUI(const std::vector<EntityInfo>& entityData);
     void onWidgetRemoved(ComponentWidget* widget);
@@ -68,6 +72,16 @@ private slots:
     void on_treeWidget_ObjectList_itemChanged(QTreeWidgetItem *item, int);
 
     void on_treeWidget_ObjectList_itemClicked(QTreeWidgetItem *item, int);
+
+    void on_actionToggle_wireframe_triggered(bool checked);
+
+    void on_actionExit_triggered();
+
+    void on_actionToggle_shutup_triggered(bool checked);
+
+    void on_actionSave_triggered();
+
+    void on_actionLoad_triggered();
 
 private:
     void updateComponentArea(unsigned int entityID);

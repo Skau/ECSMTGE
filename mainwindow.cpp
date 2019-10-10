@@ -420,3 +420,28 @@ void MainWindow::on_treeWidget_ObjectList_itemClicked(QTreeWidgetItem *item, int
         setSelected(&mTreeDataCache[item]);
     }
 }
+
+void MainWindow::on_actionToggle_wireframe_triggered(bool checked)
+{
+    toggleWireframe(checked);
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    close();
+}
+
+void MainWindow::on_actionToggle_shutup_triggered(bool checked)
+{
+    shutUp(checked);
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+    save();
+}
+
+void MainWindow::on_actionLoad_triggered()
+{
+    load();
+}

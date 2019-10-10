@@ -1,8 +1,6 @@
 #include "world.h"
 #include "resourcemanager.h"
 #include "entitymanager.h"
-#include "scene.h"
-
 
 World::World()
 {
@@ -10,8 +8,9 @@ World::World()
     ResourceManager::instance()->addShader("color",             std::make_shared<Shader>("colorshader", ShaderType::Forward));
     ResourceManager::instance()->addShader("texture",           std::make_shared<Shader>("textureshader", ShaderType::Forward));
     ResourceManager::instance()->addShader("phong",             std::make_shared<Shader>("phongshader", ShaderType::Forward));
+    ResourceManager::instance()->addShader("skybox",            std::make_shared<Shader>("skybox", ShaderType::Forward));
+    ResourceManager::instance()->addShader("white",             std::make_shared<Shader>("white", ShaderType::Forward));
     ResourceManager::instance()->addShader("axis",              std::make_shared<Shader>("axisshader.vert", "colorshader.frag", ShaderType::Forward));
-    ResourceManager::instance()->addShader("skybox",            std::make_shared<Shader>("skybox.vert", "skybox.frag", ShaderType::Forward));
 
     // Deferred
     ResourceManager::instance()->addShader("defaultDeferred",   std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag", ShaderType::Deferred));
@@ -45,8 +44,7 @@ World::World()
 
     entityManager = std::make_shared<EntityManager>();
 
-    mCurrentScene = new TestScene();
-    //mCurrentScene = new EmptyScene();
+    mCurrentScene = std::make_unique<TestScene>(this);
 }
 
 World::~World()
@@ -55,5 +53,16 @@ World::~World()
 
 void World::initCurrentScene()
 {
-    mCurrentScene->initObjects(this);
+    mCurrentScene->initCustomObjects();
+}
+
+void World::saveScene(const std::string& path)
+{
+    mCurrentScene->SaveToFile(path);
+}
+
+void World::loadScene(const std::string& path)
+{
+    mCurrentScene.reset();
+    mCurrentScene = std::make_unique<Scene>(this, path);
 }

@@ -101,6 +101,9 @@ gsl::vec3 EntityManager::getTransformScale(unsigned int eID)
 
 void EntityManager::UpdateBounds()
 {
+    if (mTransformComponents.empty() || mMeshComponents.empty())
+        return;
+
     auto meshIt = mMeshComponents.begin();
     for (auto transIt = mTransformComponents.begin(); transIt != mTransformComponents.end(); ++transIt)
     {

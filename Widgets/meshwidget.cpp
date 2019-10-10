@@ -54,6 +54,7 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
         }
 
         ui->checkBox_Visible->setCheckState(comp->isVisible ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+        ui->checkBox_Wireframe->setCheckState(comp->renderWireframe ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     }
     isUpdating = false;
 }
@@ -104,6 +105,7 @@ void MeshWidget::on_button_ChangeMesh_clicked()
                 {
                     render->isVisible = true;
                     ui->checkBox_Visible->setCheckState(Qt::CheckState::Checked);
+                    ui->checkBox_Wireframe->setCheckState(Qt::CheckState::Unchecked);
                     ui->label_Name->setText(name);
                     ui->comboBox_Meshes->addItem(name);
                 }
@@ -416,8 +418,8 @@ void MeshWidget::updateShaderParameters(Material& material)
                 minimumHeight += 25.33f;
             }
             layout->addLayout(hLayout);
-            ui->widget_Parameters->setMinimumHeight(static_cast<int>(minimumHeight));
         }
+        ui->widget_Parameters->setMinimumHeight(static_cast<int>(minimumHeight));
     }
     else
     {
@@ -438,6 +440,7 @@ void MeshWidget::on_pushButton_ChangeMeshDropdown_clicked()
         render->meshData = *ResourceManager::instance()->getMesh(name.toStdString());
         render->isVisible = true;
         ui->checkBox_Visible->setCheckState(Qt::CheckState::Checked);
+        ui->checkBox_Wireframe->setCheckState(Qt::CheckState::Unchecked);
         ui->label_Name->setText(name);
     }
 }
@@ -467,5 +470,16 @@ void MeshWidget::on_pushButton_ChangeTextureDropdown_clicked()
     {
         auto texture = ResourceManager::instance()->getTexture(name.toStdString());
         render->mMaterial.mTextures[0] = {texture->id(), texture->mType};
+    }
+}
+
+void MeshWidget::on_checkBox_Wireframe_toggled(bool checked)
+{
+    if(isUpdating)
+        return;
+
+    if(auto render = getRenderComponent())
+    {
+        render->renderWireframe = checked;
     }
 }

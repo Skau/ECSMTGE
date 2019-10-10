@@ -132,6 +132,18 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkBox_Wireframe">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Wireframe</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>

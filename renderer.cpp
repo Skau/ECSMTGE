@@ -193,144 +193,7 @@ void Renderer::initGBuffer()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Renderer::render(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera)
-{
-    /* Note: For å gjøre dette enda raskere kunne det vært
-     * mulig å gjøre at dataArraysene alltid resizer til nærmeste
-     * tall delelig på 8, også kan man unwrappe denne loopen til å
-     * gjøre 8 parallelle handlinger. Kan mulig gjøre prosessen raskere.
-     */
-
-    if(isExposed())
-    {
-        mContext->makeCurrent(this);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-        mNumberOfVerticesDrawn = 0;
-
-        auto transIt = transforms.begin();
-        auto renderIt = renders.begin();
-
-        bool transformShortest = transforms.size() < renders.size();
-
-        bool _{true};
-
-        // cause normal while (true) loops are so outdated
-        for ( ;_; )
-        {
-            if (transformShortest)
-            {
-                if (transIt == transforms.end())
-                    break;
-            }
-            else
-            {
-                if (renderIt == renders.end())
-                    break;
-            }
-
-            // Increment lowest index
-            if (!transIt->valid || transIt->entityId < renderIt->entityId)
-            {
-                ++transIt;
-            }
-            else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
-            {
-                ++renderIt;
-            }
-            else
-            {
-                // They are the same
-                if(!renderIt->isVisible)
-                {
-                    // Increment all
-                    ++transIt;
-                    ++renderIt;
-                    continue;
-                }
-
-                auto camPos = camera.viewMatrix.getPosition();
-                auto distance = std::abs((camPos - transIt->position).length());
-                unsigned index = 0;
-                if(distance > 10.f)
-                {
-                    index = 1;
-                }
-                else if(distance > 20.f)
-                {
-                    index = 2;
-                }
-
-                // Mesh data available
-                auto meshData = renderIt->meshData;
-                if(!meshData.mVerticesCounts[index])
-                {
-                    // Increment all
-                    ++transIt;
-                    ++renderIt;
-                    continue;
-                }
-
-                // Entity can be drawn. Draw.
-
-                glBindVertexArray(meshData.mVAOs[index]);
-
-                auto shader = renderIt->mMaterial.mShader;
-                if(!shader)
-                {
-                    shader = ResourceManager::instance()->getShader("color");
-                    renderIt->mMaterial.mShader = shader;
-                }
-
-                glUseProgram(shader->getProgram());
-
-                if(shader->mName.length())
-                {
-                    if(shader->mName == "texture" && renderIt->mMaterial.mTextures.size())
-                    {
-                        for(unsigned i = 0; i < renderIt->mMaterial.mTextures.size(); ++i)
-                        {
-                            glActiveTexture(GL_TEXTURE0 + i);
-                            glBindTexture(renderIt->mMaterial.mTextures[i].second, renderIt->mMaterial.mTextures[i].first);
-                            glUniform1i(glGetUniformLocation(shader->getProgram(), "textureSampler"), static_cast<int>(renderIt->mMaterial.mTextures[i].first));
-                        }
-                    }
-                }
-
-                evaluateParams(renderIt->mMaterial);
-
-                auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
-                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
-                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
-                glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
-
-                mNumberOfVerticesDrawn += meshData.mVerticesCounts[index];
-
-                if(meshData.mIndicesCounts[index] > 0)
-                {
-                    glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCounts[index]), GL_UNSIGNED_INT, nullptr);
-                }
-                else
-                {
-                    glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCounts[index]));
-                }
-
-                // Increment all
-                ++transIt;
-                ++renderIt;
-            }
-        }
-
-        renderSkybox(camera);
-
-        checkForGLerrors();
-
-        mContext->swapBuffers(this);
-    }
-}
-
-void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera,
+void Renderer::render(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera,
                               const std::vector<DirectionalLightComponent>& dirLights,
                               const std::vector<SpotLightComponent>& spotLights,
                               const std::vector<PointLightComponent>& pointLights)
@@ -339,69 +202,14 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     {
         mContext->makeCurrent(this);
 
-        // Setup
-        glClearColor(0.f, 0.f, 0.f, 0.f);
-        glStencilMask(0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-
-        deferredGeometryPass(renders, transforms, camera);
-
-        checkForGLerrors();
-
-        // Clear postprocessor from last frame and bind to it
-        mPostprocessor->clear();
-
-        glDisable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, mGPosition);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, mGNormal);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
-
-        deferredLightningPass(transforms, camera, dirLights, spotLights, pointLights);
-
-        glEnable(GL_DEPTH_TEST);
-        glDisable(GL_BLEND);
-
-        // ** Forward shading ** //
-
-        // copy content of geometry's depth buffer to default framebuffer's depth buffer
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
-
-        // blit to postprocessor framebuffer
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mPostprocessor->input());
-        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
-
-        if (mDepthStencilAttachmentSupported)
+        if(mGlobalWireframe)
         {
-            // Outline effect needs stencil buffer
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
-            glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+            renderGlobalWireframe(renders, transforms, camera);
         }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
-
-        // Draw foward here
-        // Skybox
-        renderSkybox(camera);
-
-        // Axis
-        // Need to disable depth testing, or else the axis will sometimes appear behind other meshes
-        glDisable(GL_DEPTH_TEST);
-        renderAxis(camera);
-
-
-        // Postprocessing
-        if (mDepthStencilAttachmentSupported)
-            drawEditorOutline();
-        mPostprocessor->Render();
-
-        glEnable(GL_DEPTH_TEST);
+        else
+        {
+            renderDeferred(renders, transforms, camera, dirLights, spotLights, pointLights);
+        }
 
         checkForGLerrors();
 
@@ -409,7 +217,176 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     }
 }
 
-void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera)
+void Renderer::renderGlobalWireframe(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    /* Note: For å gjøre dette enda raskere kunne det vært
+     * mulig å gjøre at dataArraysene alltid resizer til nærmeste
+     * tall delelig på 8, også kan man unwrappe denne loopen til å
+     * gjøre 8 parallelle handlinger. Kan mulig gjøre prosessen raskere.
+     */
+    mNumberOfVerticesDrawn = 0;
+
+    auto transIt = transforms.begin();
+    auto renderIt = renders.begin();
+
+    bool transformShortest = transforms.size() < renders.size();
+
+    bool _{true};
+
+    // cause normal while (true) loops are so outdated
+    for ( ;_; )
+    {
+        if (transformShortest)
+        {
+            if (transIt == transforms.end())
+                break;
+        }
+        else
+        {
+            if (renderIt == renders.end())
+                break;
+        }
+
+        // Increment lowest index
+        if (!transIt->valid || transIt->entityId < renderIt->entityId)
+        {
+            ++transIt;
+        }
+        else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
+        {
+            ++renderIt;
+        }
+        else
+        {
+            // They are the same
+            if(!renderIt->isVisible)
+            {
+                // Increment all
+                ++transIt;
+                ++renderIt;
+                continue;
+            }
+
+            // Mesh data available
+            auto meshData = renderIt->meshData;
+            if(!meshData.mVerticesCounts[0])
+            {
+                // Increment all
+                ++transIt;
+                ++renderIt;
+                continue;
+            }
+
+            // Entity can be drawn. Draw.
+            glBindVertexArray(meshData.mVAOs[0]);
+
+            auto shader = ResourceManager::instance()->getShader("white");
+
+            glUseProgram(shader->getProgram());
+
+            auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
+            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
+            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
+            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
+
+            mNumberOfVerticesDrawn += meshData.mVerticesCounts[0];
+
+            if(meshData.mIndicesCounts[0] > 0)
+            {
+                glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCounts[0]), GL_UNSIGNED_INT, nullptr);
+            }
+            else
+            {
+                glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCounts[0]));
+            }
+
+            // Increment all
+            ++transIt;
+            ++renderIt;
+        }
+    }
+
+    // Skybox
+    renderSkybox(camera);
+
+    // Axis
+    glDisable(GL_DEPTH_TEST);
+    renderAxis(camera);
+    glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera, const std::vector<DirectionalLightComponent>& dirLights, const std::vector<SpotLightComponent>& spotLights, const std::vector<PointLightComponent>& pointLights)
+{
+    // Setup
+    glClearColor(0.f, 0.f, 0.f, 0.f);
+    glStencilMask(0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
+    deferredGeometryPass(renders, transforms, camera);
+
+    checkForGLerrors();
+
+    // Clear postprocessor from last frame and bind to it
+    mPostprocessor->clear();
+
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mGPosition);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, mGNormal);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    deferredLightningPass(transforms, camera, dirLights, spotLights, pointLights);
+
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+
+    // ** Forward shading ** //
+
+    // copy content of geometry's depth buffer to default framebuffer's depth buffer
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
+
+    // blit to postprocessor framebuffer
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mPostprocessor->input());
+    glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
+    if (mDepthStencilAttachmentSupported)
+    {
+        // Outline effect needs stencil buffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
+        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
+
+    // Draw foward here
+    // Skybox
+    renderSkybox(camera);
+
+    // Axis
+    // Need to disable depth testing, or else the axis will sometimes appear behind other meshes
+    glDisable(GL_DEPTH_TEST);
+    renderAxis(camera);
+
+    // Postprocessing
+    if (mDepthStencilAttachmentSupported)
+        drawEditorOutline();
+    mPostprocessor->Render();
+
+    glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera)
 {
     auto transIt = transforms.begin();
     auto renderIt = renders.begin();
@@ -463,8 +440,8 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
                 continue;
             }
 
-            auto camPos = camera.viewMatrix.getPosition();
-            auto distance = std::abs((camPos - transIt->position).length());
+            float distance = distanceFromCamera(camera, *transIt);
+
             unsigned index = 0;
             if(distance > 10.f)
             {
@@ -753,6 +730,11 @@ void Renderer::spotLightPass(const std::vector<TransformComponent> &transforms, 
     }
 }
 
+float Renderer::distanceFromCamera(const CameraComponent& camera, const TransformComponent& transform)
+{
+    return std::abs((camera.viewMatrix.getPosition() - transform.position).length());
+}
+
 unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms,
                                            const CameraComponent &camera)
 {
@@ -1027,23 +1009,24 @@ void Renderer::exposeEvent(QExposeEvent *)
 
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, static_cast<GLint>(width() * retinaScale), static_cast<GLint>(height() * retinaScale));
+    resizeGBuffer();
     windowUpdated();
 }
 
 //Simple way to turn on/off wireframe mode
 //Not totally accurate, but draws the objects with
 //lines instead of filled polygons
-void Renderer::toggleWireframe()
+void Renderer::toggleWireframe(bool value)
 {
-    mWireframe = !mWireframe;
-    if (mWireframe)
+    mGlobalWireframe = value;
+    if (mGlobalWireframe)
     {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);    //turn on wireframe mode
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDisable(GL_CULL_FACE);
     }
     else
     {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);    //turn off wireframe mode
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glEnable(GL_CULL_FACE);
     }
 }

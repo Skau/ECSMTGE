@@ -41,7 +41,7 @@ public:
         {
             auto entity = entityManager->createEntity();
             auto [transform, render] = entityManager->addComponent<TransformComponent, MeshComponent>(entity);
-            if(auto meshData = ResourceManager::instance()->getMesh("box2"))
+            if(auto meshData = ResourceManager::instance()->getMesh("suzanne"))
             {
                 render.meshData = *meshData;
                 render.isVisible = true;

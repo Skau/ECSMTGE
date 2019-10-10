@@ -208,7 +208,7 @@ void App::update()
         if(camera.isCurrentActive)
         {
             // mRenderer->render(renders, transforms, camera);
-            mRenderer->renderDeferred(renders, transforms, camera,
+            mRenderer->render(renders, transforms, camera,
                                       mWorld->getEntityManager()->getDirectionalLightComponents(),
                                       mWorld->getEntityManager()->getSpotLightComponents(),
                                       mWorld->getEntityManager()->getPointLightComponents());

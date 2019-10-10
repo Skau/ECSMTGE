@@ -41,11 +41,10 @@ public:
 
     void checkForGLerrors();
 
-    void render(const std::vector<VisualObject*>& objects, double deltaTime);
+    void renderGlobalWireframe(const std::vector<VisualObject*>& objects, double deltaTime);
 
     // Should only need renders, materials and transforms
-    void render(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
-    void renderDeferred(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
+    void render(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
                         const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                         const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
                         const std::vector<PointLightComponent>& pointLights = std::vector<PointLightComponent>());
@@ -61,7 +60,12 @@ public:
     void evaluateParams(Material& material);
 
 private:
-    void deferredGeometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
+    void renderGlobalWireframe(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
+    void renderDeferred(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
+                        const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
+                        const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
+                        const std::vector<PointLightComponent>& pointLights = std::vector<PointLightComponent>());
+    void deferredGeometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera);
     void deferredLightningPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
                                const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                                const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
@@ -69,7 +73,6 @@ private:
     void directionalLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<DirectionalLightComponent>& dirLights);
     void pointLightPass(const std::vector<TransformComponent>& transforms,const CameraComponent &camera, const std::vector<PointLightComponent>& pointLights);
     void spotLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<SpotLightComponent>& spotLights);
-
 signals:
     void initDone();
     void windowUpdated();
@@ -97,10 +100,7 @@ private:
     std::shared_ptr<Shader> mPointLightShader;
     std::shared_ptr<Shader> mSpotLightShader;
 
-
-
-    bool mWireframe{false};
-
+    bool mGlobalWireframe{false};
     bool isInitialized{false};
     bool mDepthStencilAttachmentSupported{true};
 

@@ -95,6 +95,8 @@ struct MeshComponent : public Component
     bool isVisible : 1;
     MeshData meshData{};
     Material mMaterial{};
+    bool renderWireframe{};
+
     /* World Space Bounds of meshComponent
      * If transform component is missing,
      * bounds will be the same meshdata's

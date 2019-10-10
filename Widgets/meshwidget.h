@@ -38,6 +38,8 @@ private slots:
 
     void on_pushButton_ChangeTextureDropdown_clicked();
 
+    void on_checkBox_Wireframe_toggled(bool checked);
+
 private:
     MeshComponent* getRenderComponent();
 

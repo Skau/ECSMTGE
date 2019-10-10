@@ -28,6 +28,29 @@ void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, s
     // 4. Recursive update
 }
 
+Octree<std::vector<unsigned int> > PhysicsSystem::generateSceneTree(std::vector<TransformComponent> &trans, std::vector<ColliderComponent> &colliders)
+{
+    struct BoundsSet
+    {
+        unsigned int eID;
+        // Min and max of the bounding AABB box
+        gsl::vec3 min;
+        gsl::vec3 max;
+    };
+
+    Octree<std::vector<BoundsSet>> tree{static_cast<int>(2 * trans.size())};
+
+    /* The tree defines squares reaching from the last square until
+     * the coordinate at the specified key.
+     * Example: tree(1, 0, 1) will be the square between (1, 0, 1) and (0, 0, 0),
+     * unless theres a coordinate at (0.5, 0, 0.5), in which case the square
+     * is half the size.
+     */
+
+
+
+}
+
 void PhysicsSystem::updatePosVel(std::vector<TransformComponent> &transforms, std::vector<PhysicsComponent> &physics, float deltaTime)
 {
     auto transIt = transforms.begin();

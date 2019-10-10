@@ -266,6 +266,13 @@ struct ColliderComponent : public Component
 
     Type collisionType{AABB};
     std::variant<gsl::vec3, float, std::pair<float, float>> extents;
+    struct Bounds
+    {
+        gsl::vec3 centre;
+        gsl::vec3 extents;
+
+        std::pair<gsl::vec3, gsl::vec3> minMax() const;
+    } bounds;
 
 };
 

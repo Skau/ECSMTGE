@@ -178,8 +178,9 @@ void App::update()
      * and then later apply those copies to the original lists.
      */
     auto& physics = mWorld->getEntityManager()->getPhysicsComponents();
+    auto& colliders = mWorld->getEntityManager()->getColliderComponents();
 
-    PhysicsSystem::UpdatePhysics(transforms, physics, mDeltaTime);
+    PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
 
     auto& sounds = mWorld->getEntityManager()->getSoundComponents();
 

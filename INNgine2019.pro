@@ -101,6 +101,7 @@ HEADERS += \
     Renderables/octahedronball.h \
     Renderables/trianglesurface.h \
     objecttreewidget.h \
+    octree.h \
     physicssystem.h \
     postprocessor.h \
     renderer.h \
@@ -188,4 +189,5 @@ DISTFILES += \
     Shaders/Deferred/directionallight.frag \
     Shaders/Deferred/gbuffer.frag \
     Shaders/Deferred/gbuffer.vert \
-    Shaders/Deferred/light.vert
+    Shaders/Deferred/light.vert \
+    octree.tcc

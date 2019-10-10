@@ -119,3 +119,7 @@ bool ScriptComponent::execute(QString function, QString contents, QString fileNa
     value.call();
     return true;
 }
+
+std::pair<gsl::vec3, gsl::vec3> ColliderComponent::Bounds::minMax() const {
+    return {centre - extents * 0.5f, centre + extents * 0.5f};
+}

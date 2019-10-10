@@ -2,6 +2,7 @@
 #define PHYSICSSYSTEM_H
 
 #include "componentdata.h"
+#include "octree.h"
 
 /** Physics system
  * The idea is to later move this system to
@@ -34,6 +35,7 @@ public:
     static void UpdatePhysics(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent>& physics, std::vector<ColliderComponent>& colliders, float deltaTime);
 
 private:
+    static Octree<std::vector<unsigned int>> generateSceneTree(std::vector<TransformComponent>& trans, std::vector<ColliderComponent>& colliders);
     static void updatePosVel(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent> &physics, float deltaTime);
     static void HandleCollisions(std::vector<TransformComponent>& transform, std::vector<ColliderComponent>& collider);
     static HitInfo getHitInfo(const TransformComponent& transform, const ColliderComponent& collider);

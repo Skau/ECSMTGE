@@ -5,6 +5,12 @@ PhysicsSystem::PhysicsSystem()
 
 }
 
+PhysicsSystem::CollisionEntity::CollisionEntity(unsigned int id, const ColliderComponent::Bounds &b)
+    : eID{id}, bounds{b}
+{
+
+}
+
 void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, std::vector<PhysicsComponent> &physics,
                                   std::vector<ColliderComponent> &colliders, float deltaTime)
 {
@@ -13,6 +19,7 @@ void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, s
 
     std::vector<HitInfo> hitInfos;
     // 2. Collision detection
+    // auto sceneTree = generateSceneTree(transforms, colliders);
 //    for (const auto &item : transforms)
 //    {
 //        hitInfos.push_back(getHitInfo(item));
@@ -30,19 +37,45 @@ void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, s
 
 Octree<PhysicsSystem::CubeNode> PhysicsSystem::generateSceneTree(std::vector<TransformComponent> &trans, std::vector<ColliderComponent> &colliders)
 {
-
-
-    Octree<CubeNode> tree{static_cast<int>(2 * trans.size())};
-
     /* The tree defines squares reaching from the last square until
      * the coordinate at the specified key.
      * Example: tree(1, 0, 1) will be the square between (1, 0, 1) and (0, 0, 0),
      * unless theres a coordinate at (0.5, 0, 0.5), in which case the square
      * is half the size.
+     *
+     * Note: Tree should always be dividible by 2 since we subdivide into a power of 2.
      */
+    Octree<CubeNode> tree{static_cast<int>(512)};
 
-    // typedef std::pair<gsl::ivec3, std::vector<CollisionEntity>> Node;
+    // Create first 8 nodes:
+    gsl::ivec3 centre{128, 128, 128};
 
+    for (int z = 0; z < 3; z += 2)
+        for (int y = 0; y < 3; y += 2)
+            for (int x = 0; x < 3; x += 2)
+            {
+                gsl::ivec3 to{centre.x * x, centre.y * y, centre.z * z};
+                CubeNode node
+                {
+                    {},
+                    centre
+                };
+                node.entities.reserve(colliders.size());
+
+                for (auto it = colliders.begin(); it != colliders.end(); ++it)
+                    if (AABBAABB(it->bounds.minMax(), {to, centre}))
+                        node.entities.emplace_back(it->entityId, it->bounds);
+
+                // A little optimization
+                node.entities.shrink_to_fit();
+
+                tree(to.x, to.y, to.z) = node;
+            }
+
+    // Subdivide tree
+
+    qDebug() << "scenetree nodes: " << tree.nodes();
+    return tree;
 }
 
 std::vector<std::pair<gsl::ivec3, PhysicsSystem::CubeNode> > PhysicsSystem::subdivide(const std::pair<gsl::ivec3, CubeNode> &node)

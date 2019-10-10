@@ -35,6 +35,8 @@ public:
     {
         unsigned int eID;
         ColliderComponent::Bounds bounds;
+
+        CollisionEntity(unsigned int id, const ColliderComponent::Bounds& b);
     };
     struct CubeNode
     {
@@ -47,8 +49,7 @@ public:
 
 private:
     static Octree<CubeNode> generateSceneTree(std::vector<TransformComponent>& trans, std::vector<ColliderComponent>& colliders);
-    // Need to know the min pos of the square defined by the node or else we will make duplicate nodes
-    std::vector<std::pair<gsl::ivec3, PhysicsSystem::CubeNode>> subdivide(const std::pair<gsl::ivec3, CubeNode> &node);
+    static std::vector<std::pair<gsl::ivec3, PhysicsSystem::CubeNode>> subdivide(const std::pair<gsl::ivec3, CubeNode> &node);
     static void updatePosVel(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent> &physics, float deltaTime);
     static void HandleCollisions(std::vector<TransformComponent>& transform, std::vector<ColliderComponent>& collider);
     static HitInfo getHitInfo(const TransformComponent& transform, const ColliderComponent& collider);

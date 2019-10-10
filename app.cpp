@@ -141,7 +141,7 @@ void App::update()
     mDeltaTime = mDeltaTimer.restart() / 1000.f;
     mRenderer->mTimeSinceStart += mDeltaTime;
 
-    updateStatusBar();
+    calculateFrames();
 
     // Tick scripts if playing
     if(mCurrentlyPlaying)
@@ -243,7 +243,7 @@ void App::onStop()
     SoundManager::stop(sounds);
 }
 
-void App::updateStatusBar()
+void App::calculateFrames()
 {
     ++mFrameCounter;
     mTotalDeltaTime += mDeltaTime;

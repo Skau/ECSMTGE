@@ -19,6 +19,7 @@ public:
     Vector3D(GLfloat x_in = 0.f, GLfloat y_in = 0.f, GLfloat z_in = 0.f);
     Vector3D(const int v);
     Vector3D(const double v);
+    Vector3D(const gsl::ivec3& v);
 
     //Operators
     const Vector3D& operator= (const Vector3D &rhs);     // v = v
@@ -83,6 +84,24 @@ public:
     GLfloat x;
     GLfloat y;
     GLfloat z;
+};
+
+
+
+// Integer version of vec3
+class IVector3D
+{
+public:
+    IVector3D(GLint x_in = 0, GLint y_in = 0, GLint z_in = 0);
+
+    gsl::ivec3 operator+ (const gsl::ivec3& rhs) const;
+    gsl::ivec3 operator- (const gsl::ivec3& rhs) const;
+    gsl::ivec3 operator* (const gsl::ivec3& rhs) const;
+    gsl::ivec3 operator/ (const gsl::ivec3& rhs) const;
+
+    GLint x;
+    GLint y;
+    GLint z;
 };
 
 } //namespace

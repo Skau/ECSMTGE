@@ -25,6 +25,12 @@ namespace gsl
 
     }
 
+    Vector3D::Vector3D(const ivec3 &v)
+        : x{static_cast<float>(v.x)}, y{static_cast<float>(v.y)}, z{static_cast<float>(v.z)}
+    {
+
+    }
+
 
     const Vector3D& Vector3D::operator=(const Vector3D &rhs)
     {
@@ -258,6 +264,32 @@ namespace gsl
     void Vector3D::setZ(const GLfloat &value)
     {
         z = value;
+    }
+
+    IVector3D::IVector3D(GLint x_in, GLint y_in, GLint z_in)
+        : x{x_in}, y{y_in}, z{z_in}
+    {
+
+    }
+
+    ivec3 IVector3D::operator+(const ivec3 &rhs) const
+    {
+        return {x + rhs.x, y + rhs.y, z + rhs.z};
+    }
+
+    ivec3 IVector3D::operator-(const ivec3 &rhs) const
+    {
+        return {x - rhs.x, y - rhs.y, z - rhs.z};
+    }
+
+    ivec3 IVector3D::operator*(const ivec3 &rhs) const
+    {
+        return {x * rhs.x, y * rhs.y, z * rhs.z};
+    }
+
+    ivec3 IVector3D::operator/(const ivec3 &rhs) const
+    {
+        return {x / rhs.x, y / rhs.y, z / rhs.z};
     }
 
 } //namespace

@@ -2,6 +2,7 @@
 #define VECTOR2D_H
 
 #include "gltypes.h"
+#include "mathfwd.h"
 #include <cmath>
 #include <iostream>
 
@@ -15,6 +16,7 @@ public:
     Vector2D(GLfloat x_in = 0.f, GLfloat y_in = 0.f);
     Vector2D(const int v);
     Vector2D(const double v);
+    Vector2D(const gsl::ivec2& v);
 
     //Operators
     Vector2D operator+(const Vector2D &rhs) const;      // v + v
@@ -55,9 +57,6 @@ public:
 
 
 
-
-class IVector2D;
-typedef IVector2D ivec2;
 
 // Integer version of vec2
 class IVector2D

@@ -19,6 +19,12 @@ namespace gsl
 
     }
 
+    Vector2D::Vector2D(const ivec2 &v)
+        : x{static_cast<float>(v.x)}, y{static_cast<float>(v.y)}
+    {
+
+    }
+
     const Vector2D& Vector2D::operator=(const Vector2D &rhs)
     {
         x = rhs.getX();

@@ -1,12 +1,9 @@
 #include "innpch.h"
 #include "camerasystem.h"
 
-std::vector<unsigned int> CameraSystem::updateCameras(std::vector<TransformComponent> transforms, std::vector<CameraComponent>& cameras)
+void CameraSystem::updateCameras(std::vector<TransformComponent>& transforms, std::vector<CameraComponent>& cameras)
 {
-    std::vector<unsigned int> usedTransforms{};
-    usedTransforms.reserve(cameras.size());
-
-    unsigned int transIt{0};
+    auto transIt = transforms.begin();
     auto camIt = cameras.begin();
 
     bool transformShortest = transforms.size() < cameras.size();
@@ -18,7 +15,7 @@ std::vector<unsigned int> CameraSystem::updateCameras(std::vector<TransformCompo
     {
         if (transformShortest)
         {
-            if (transIt == transforms.size())
+            if (transIt == transforms.end())
                 break;
         }
         else
@@ -28,11 +25,11 @@ std::vector<unsigned int> CameraSystem::updateCameras(std::vector<TransformCompo
         }
 
         // Increment lowest index
-        if (!transforms[transIt].valid || transforms[transIt].entityId < camIt->entityId)
+        if (!transIt->valid || transIt->entityId < camIt->entityId)
         {
             ++transIt;
         }
-        else if (!camIt->valid || camIt->entityId < transforms[transIt].entityId)
+        else if (!camIt->valid || camIt->entityId < transIt->entityId)
         {
             ++camIt;
         }
@@ -40,7 +37,7 @@ std::vector<unsigned int> CameraSystem::updateCameras(std::vector<TransformCompo
         {
             // If transform isn't updated,
             // matrices doesn't need to be updated
-            if(!transforms[transIt].updated)
+            if(!transIt->updated)
             {
                 // Increment all
                 ++transIt;
@@ -48,16 +45,14 @@ std::vector<unsigned int> CameraSystem::updateCameras(std::vector<TransformCompo
                 continue;
             }
 
-            camIt->viewMatrix = transforms[transIt].rotation.toMat() * gsl::mat4::translation(-transforms[transIt].position);
-
-            usedTransforms.push_back(transIt);
+            camIt->viewMatrix = transIt->rotation.toMat() * gsl::mat4::translation(-transIt->position);
+            transIt->updated = false;
 
             // Increment all
             ++transIt;
             ++camIt;
         }
     }
-    return usedTransforms;
 }
 
 void CameraSystem::updateCameras(std::vector<CameraComponent>& cameras, const gsl::mat4 &projectionMatrix)

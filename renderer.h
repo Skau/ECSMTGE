@@ -37,7 +37,7 @@ public:
     void init();
 
     void exposeEvent(QExposeEvent *) override;
-    void toggleWireframe();
+    void toggleWireframe(bool value);
 
     void checkForGLerrors();
 
@@ -77,10 +77,6 @@ signals:
     void initDone();
     void windowUpdated();
 
-public slots:
-    void resizeGBuffer();
-
-
 private:
     QOpenGLContext *mContext{nullptr};
 
@@ -110,6 +106,8 @@ private:
 
     class QOpenGLDebugLogger *mOpenGLDebugLogger{nullptr};
 
+    float distanceFromCamera(const CameraComponent& camera, const TransformComponent& transform);
+    void resizeGBuffer();
     void renderQuad();
     void renderSkybox(const CameraComponent& camera);
     void renderAxis(const CameraComponent& camera);

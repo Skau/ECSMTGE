@@ -11,8 +11,6 @@
 #include "physicssystem.h"
 #include "scriptsystem.h"
 
-#include "ui_mainwindow.h"
-
 App::App()
 {
     mSoundManager = std::make_unique<SoundManager>();
@@ -21,19 +19,18 @@ App::App()
     mMainWindow = std::make_unique<MainWindow>();
     mRenderer = mMainWindow->getRenderer();
 
-    mEventHandler = std::make_shared<InputHandler>(mRenderer);
-    mRenderer->installEventFilter(mEventHandler.get());
-
-    connect(mRenderer, &Renderer::initDone, this, &App::initTheRest);
-    connect(mMainWindow->ui->actionToggle_wireframe, &QAction::triggered, mRenderer, &Renderer::toggleWireframe);
-    connect(mEventHandler.get(), &InputHandler::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
-    connect(mMainWindow->ui->actionExit, &QAction::triggered, mMainWindow.get(), &MainWindow::close);
-    connect(mRenderer, &Renderer::windowUpdated, this, &App::updatePerspective);
-    connect(mRenderer, &Renderer::windowUpdated, mRenderer, &Renderer::resizeGBuffer);
-    connect(mEventHandler.get(), &InputHandler::mousePress, this, &App::mousePicking);
-    connect(mMainWindow->ui->actionToggle_shutup, &QAction::toggled, this, &App::toggleMute);
+    connect(mMainWindow.get(), &MainWindow::toggleWireframe, mRenderer, &Renderer::toggleWireframe);
+    connect(mMainWindow.get(), &MainWindow::shutUp, this, &App::toggleMute);
     connect(mMainWindow.get(), &MainWindow::play, this, &App::onPlay);
     connect(mMainWindow.get(), &MainWindow::stop, this, &App::onStop);
+
+    connect(mRenderer, &Renderer::initDone, this, &App::initTheRest);
+    connect(mRenderer, &Renderer::windowUpdated, this, &App::updatePerspective);
+
+    mEventHandler = std::make_shared<InputHandler>(mRenderer);
+    connect(mEventHandler.get(), &InputHandler::escapeKeyPressed, mMainWindow.get(), &MainWindow::close);
+    connect(mEventHandler.get(), &InputHandler::mousePress, this, &App::mousePicking);
+    mRenderer->installEventFilter(mEventHandler.get());
 }
 
 // Slot called from Renderer when its done with initialization
@@ -140,12 +137,11 @@ void App::update()
         return;
     currentlyUpdating = true;
 
-
     // Time since last frame in seconds
     mDeltaTime = mDeltaTimer.restart() / 1000.f;
     mRenderer->mTimeSinceStart += mDeltaTime;
 
-    calculateFrames();
+    updateStatusBar();
 
     // Tick scripts if playing
     if(mCurrentlyPlaying)
@@ -154,15 +150,26 @@ void App::update()
         ScriptSystem::get()->tick(mDeltaTime, scripts);
     }
 
-    // Input:
+    // Get all necessary components that are reused for systems
     const auto& inputs = mWorld->getEntityManager()->getInputComponents();
     auto& transforms = mWorld->getEntityManager()->getTransformComponents();
     auto& cameras = mWorld->getEntityManager()->getCameraComponents();
+    auto& physics = mWorld->getEntityManager()->getPhysicsComponents();
+    auto& sounds = mWorld->getEntityManager()->getSoundComponents();
 
+    // Input:
     mEventHandler->updateMouse();
     InputSystem::HandleInput(mDeltaTime, inputs, transforms);
     InputSystem::HandleCameraInput(mDeltaTime, inputs, transforms, cameras);
 
+    // Physics:
+    /* Note: Physics calculation should be happening on a separate thread
+     * and instead of sending references to the lists we should take copies
+     * and then later apply those copies to the original lists.
+     */
+    PhysicsSystem::UpdatePhysics(transforms, physics, mDeltaTime);
+
+    // Sound
     // Sound listener is using the active camera view matrix (for directions) and transform (for position)
     for (const auto& camera : cameras)
     {
@@ -171,43 +178,26 @@ void App::update()
             mSoundListener->update(camera, *mWorld->getEntityManager()->getComponent<TransformComponent>(camera.entityId));
         }
     }
-
-    // Physics:
-    /* Note: Physics calculation should be happening on a separate thread
-     * and instead of sending references to the lists we should take copies
-     * and then later apply those copies to the original lists.
-     */
-    auto& physics = mWorld->getEntityManager()->getPhysicsComponents();
-
-    PhysicsSystem::UpdatePhysics(transforms, physics, mDeltaTime);
-
-    auto& sounds = mWorld->getEntityManager()->getSoundComponents();
-
     SoundManager::UpdatePositions(transforms, sounds);
     SoundManager::UpdateVelocities(physics, sounds);
 
+    // UI
     mMainWindow->updateComponentWidgets();
 
-    // Rendering:
-    auto& renders = mWorld->getEntityManager()->getMeshComponents();
-
-
-    auto usedTrans = CameraSystem::updateCameras(transforms, cameras);
-    // Set all used transforms's "updated" to false so that updateCameras
-    // won't need to calculate more viewmatrixes than it needs to.
-    for (auto index : usedTrans)
-        transforms[index].updated = false;
+    // Cameras
+    CameraSystem::updateCameras(transforms, cameras);
 
     // Calculate mesh bounds
     mWorld->getEntityManager()->UpdateBounds();
     // -------- Frustum culling here -----------
 
 
+    // Rendering
     for (const auto& camera : cameras)
     {
         if(camera.isCurrentActive)
         {
-            // mRenderer->render(renders, transforms, camera);
+            auto& renders = mWorld->getEntityManager()->getMeshComponents();
             mRenderer->render(renders, transforms, camera,
                                       mWorld->getEntityManager()->getDirectionalLightComponents(),
                                       mWorld->getEntityManager()->getSpotLightComponents(),
@@ -237,6 +227,9 @@ void App::onPlay()
     mCurrentlyPlaying = true;
     auto& scripts = mWorld->getEntityManager()->getScriptComponents();
     ScriptSystem::get()->beginPlay(scripts);
+
+    auto sounds = mWorld->getEntityManager()->getSoundComponents();
+    SoundManager::play(sounds);
 }
 
 // Called when play action is pressed while playing in UI
@@ -245,9 +238,12 @@ void App::onStop()
     mCurrentlyPlaying = false;
     auto& scripts = mWorld->getEntityManager()->getScriptComponents();
     ScriptSystem::get()->endPlay(scripts);
+
+    auto sounds = mWorld->getEntityManager()->getSoundComponents();
+    SoundManager::stop(sounds);
 }
 
-void App::calculateFrames()
+void App::updateStatusBar()
 {
     ++mFrameCounter;
     mTotalDeltaTime += mDeltaTime;

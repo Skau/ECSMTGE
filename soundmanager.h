@@ -30,8 +30,10 @@ public:
 
    static void createSource(SoundComponent* comp, const std::string& wav);
    static void play(unsigned source);
+   static void play(std::vector<SoundComponent> comps);
    static void pause(unsigned source);
    static void stop(unsigned source);
+   static void stop(std::vector<SoundComponent> comps);
    static void changeGain(unsigned source, float value);
    static void changePitch(unsigned source, float value);
    static void setLooping(unsigned source, bool value);

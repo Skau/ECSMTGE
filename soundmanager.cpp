@@ -148,6 +148,17 @@ void SoundManager::play(unsigned source)
     SoundManager::checkOpenALError();
 }
 
+void SoundManager::play(std::vector<SoundComponent> comps)
+{
+    for(auto comp : comps)
+    {
+        if(comp.mSource > -1)
+        {
+            play(static_cast<unsigned>(comp.mSource));
+        }
+    }
+}
+
 void SoundManager::pause(unsigned source)
 {
     alSourcePause(source);
@@ -158,6 +169,17 @@ void SoundManager::stop(unsigned source)
 {
     alSourceStop(source);
     checkOpenALError();
+}
+
+void SoundManager::stop(std::vector<SoundComponent> comps)
+{
+    for(auto comp : comps)
+    {
+        if(comp.mSource > -1)
+        {
+            stop(static_cast<unsigned>(comp.mSource));
+        }
+    }
 }
 
 void SoundManager::changeGain(unsigned source, float value)

@@ -440,9 +440,8 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
                 continue;
             }
 
+            float distance = distanceFromCamera(camera, *transIt);
 
-            auto camPos = camera.viewMatrix.getPosition();
-            auto distance = std::abs((camPos - transIt->position).length());
             unsigned index = 0;
             if(distance > 10.f)
             {
@@ -731,6 +730,11 @@ void Renderer::spotLightPass(const std::vector<TransformComponent> &transforms, 
     }
 }
 
+float Renderer::distanceFromCamera(const CameraComponent& camera, const TransformComponent& transform)
+{
+    return std::abs((camera.viewMatrix.getPosition() - transform.position).length());
+}
+
 unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms,
                                            const CameraComponent &camera)
 {
@@ -1005,15 +1009,16 @@ void Renderer::exposeEvent(QExposeEvent *)
 
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, static_cast<GLint>(width() * retinaScale), static_cast<GLint>(height() * retinaScale));
+    resizeGBuffer();
     windowUpdated();
 }
 
 //Simple way to turn on/off wireframe mode
 //Not totally accurate, but draws the objects with
 //lines instead of filled polygons
-void Renderer::toggleWireframe()
+void Renderer::toggleWireframe(bool value)
 {
-    mGlobalWireframe = !mGlobalWireframe;
+    mGlobalWireframe = value;
     if (mGlobalWireframe)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

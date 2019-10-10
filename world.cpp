@@ -1,8 +1,6 @@
 #include "world.h"
 #include "resourcemanager.h"
 #include "entitymanager.h"
-#include "scene.h"
-
 
 World::World()
 {
@@ -46,8 +44,7 @@ World::World()
 
     entityManager = std::make_shared<EntityManager>();
 
-    mCurrentScene = new TestScene();
-    //mCurrentScene = new EmptyScene();
+    mCurrentScene = std::make_unique<TestScene>(this);
 }
 
 World::~World()
@@ -56,5 +53,16 @@ World::~World()
 
 void World::initCurrentScene()
 {
-    mCurrentScene->initObjects(this);
+    mCurrentScene->initCustomObjects();
+}
+
+void World::saveScene(const std::string& path)
+{
+    mCurrentScene->SaveToFile(path);
+}
+
+void World::loadScene(const std::string& path)
+{
+    mCurrentScene.reset();
+    mCurrentScene = std::make_unique<Scene>(this, path);
 }

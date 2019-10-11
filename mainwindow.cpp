@@ -22,6 +22,10 @@
 
 #include <QSplitter>
 
+#include "constants.h"
+#include <QFileDialog>
+#include <QMessageBox>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -438,10 +442,51 @@ void MainWindow::on_actionToggle_shutup_triggered(bool checked)
 
 void MainWindow::on_actionSave_triggered()
 {
-    save();
+    if(!QDir(QString::fromStdString(gsl::assetFilePath + "/Scenes")).exists())
+    {
+        QDir().mkdir(QString::fromStdString(gsl::assetFilePath + "/Scenes"));
+    }
+
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::AnyFile);
+
+    auto filepath = dialog.getOpenFileName(this, tr("Save to disk"), QString::fromStdString(gsl::assetFilePath + "/Scenes"), tr("*.json"));
+
+    saveScene(filepath.toStdString());
 }
 
 void MainWindow::on_actionLoad_triggered()
 {
-    load();
+    if(!QDir(QString::fromStdString(gsl::assetFilePath + "/Scenes")).exists())
+    {
+        QDir().mkdir(QString::fromStdString(gsl::assetFilePath + "/Scenes"));
+    }
+
+    auto fileName = QFileDialog::getOpenFileName(this, tr("Choose scene"), QString::fromStdString(gsl::assetFilePath + "/Scenes"), tr("JSON files (*.json)"));
+    if(fileName.size())
+    {
+        loadScene(fileName.toStdString());
+    }
+}
+
+void MainWindow::on_actionNew_triggered()
+{
+    QMessageBox messageBox;
+    messageBox.setText("Creating a new scene will overwrite the current one");
+    messageBox.setInformativeText("Save current scene to disk?");
+    messageBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    messageBox.setDefaultButton(QMessageBox::Save);
+    int ret = messageBox.exec();
+
+    switch (ret)
+    {
+      case QMessageBox::Save:
+          on_actionSave_triggered();
+          break;
+      case QMessageBox::Discard:
+           newScene();
+          break;
+      case QMessageBox::Cancel:
+          return;
+    }
 }

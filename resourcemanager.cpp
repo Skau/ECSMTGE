@@ -46,7 +46,7 @@ void ResourceManager::addShader(const std::string &name, std::shared_ptr<Shader>
         shader->mName = name;
         mShaders[name] = shader;
 
-        qDebug() << "ResourceManager: Added shader " << QString::fromStdString(name) << " (id: " << shader->getProgram() << ")";
+        //qDebug() << "ResourceManager: Added shader " << QString::fromStdString(name) << " (id: " << shader->getProgram() << ")";
     }
 }
 
@@ -124,13 +124,13 @@ std::pair<std::shared_ptr<MeshData>, std::shared_ptr<MeshData>> ResourceManager:
 
     // Load original mesh
     Simplify::load_obj((gsl::assetFilePath + "Meshes/" + path).c_str());
-    qDebug() << "LOD0 vertices count: " << data.first.size();
+    //qDebug() << "LOD0 vertices count: " << data.first.size();
 
     // LOD1
 
     // Simplify (Target is 30% triangle count)
     Simplify::simplify_mesh(static_cast<int>((data.first.size() * 3) * 0.3f));
-    qDebug() << "LOD1 vertices count: " << Simplify::vertices.size();
+    //qDebug() << "LOD1 vertices count: " << Simplify::vertices.size();
     // Create new path (this will be in working directory)
     auto pathName = firstSplit + "_LOD1.obj";
     // Create new OBJ file in path
@@ -142,7 +142,7 @@ std::pair<std::shared_ptr<MeshData>, std::shared_ptr<MeshData>> ResourceManager:
 
     // Simplify (Target is 1/3 of triangles)
     Simplify::simplify_mesh(static_cast<int>(Simplify::triangles.size() / 3));
-    qDebug() << "LOD2 vertices count: " << Simplify::vertices.size();
+    //qDebug() << "LOD2 vertices count: " << Simplify::vertices.size();
     // Create new path (this will be in working directory)
     pathName = firstSplit + "_LOD2.obj";
     // Create new OBJ file in path
@@ -267,7 +267,7 @@ std::shared_ptr<MeshData> ResourceManager::getMesh(const std::string& name)
     {
         return mMeshes[name];
     }
-    qDebug() << "No mesh named " << QString::fromStdString(name) << " could be found";
+    qDebug() << "Error ResourceManager: No mesh named " << QString::fromStdString(name) << " could be found";
     return nullptr;
 }
 
@@ -276,17 +276,13 @@ void ResourceManager::loadWav(const std::string& name, const std::string& path)
     auto waveData = new wave_t();
     if (!WavFileHandler::loadWave(path, waveData))
     {
-        qDebug() << "Error loading wave file " << QString::fromStdString(name) << "!";
+        qDebug() << "Error ResourceManager: Failed loading wave file " << QString::fromStdString(name) << "!";
         return;
     }
 
     std::ostringstream i2s;
     i2s << waveData->dataSize;
-    qDebug() << "DataSize: " << QString::fromStdString(i2s.str()) << " bytes";
-
     mWavFiles[name] = waveData;
-
-    qDebug() << "Loaded " << QString::fromStdString(path);
 }
 
 wave_t* ResourceManager::getWav(const std::string& name)
@@ -376,7 +372,10 @@ std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readObjFile
     }
 
     if(!fileIn)
-        qDebug() << "Could not open file for reading: " << QString::fromStdString(filename);
+    {
+        qDebug() << "Error ResourceManager: Could not open file for reading: " << QString::fromStdString(filename);
+        return {};
+    }
 
     //One line at a time-variable
     std::string oneLine;
@@ -533,7 +532,6 @@ std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readObjFile
 
     //beeing a nice boy and closing the file after use
     fileIn.close();
-    qDebug() << "Obj file read: " << QString::fromStdString(filename);
 
     return {mVertices, mIndices};
 }
@@ -558,11 +556,10 @@ std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readTxtFile
             mVertices.push_back(vertex);
         }
         inn.close();
-        qDebug() << "TriangleSurface file read: " << QString::fromStdString(filename);
     }
     else
     {
-        qDebug() << "Could not open file for reading: " << QString::fromStdString(filename);
+        qDebug() << "Error ResourceManager: Could not open file for reading: " << QString::fromStdString(filename);
     }
 
     return {mVertices, mIndices};

@@ -1,16 +1,14 @@
 #include "scene.h"
 #include "world.h"
 
+#include <QFileInfo>
+
+#include <QJsonDocument>
+#include <QJsonObject>
+
 Scene::Scene(World* world)
     : mWorld(world)
-{
-    initBlankScene();
-}
-
-Scene::Scene(World* world, const std::string& path)
-    : mWorld(world)
-{
-    path.size() != 0 ? LoadFromFile(path) : initBlankScene();
+{   
 }
 
 Scene::~Scene()
@@ -32,12 +30,108 @@ void Scene::initBlankScene()
 
 void Scene::LoadFromFile(const std::string& path)
 {
+    QFile file(QString::fromStdString(path));
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "ERROR Scene.save(): Failed to open file at specified path!";
+        return;
+    }
 
+   QFileInfo info(QString::fromStdString(path));
+   name = info.baseName().toStdString();
+
+    QJsonDocument document = QJsonDocument::fromJson(file.readAll());
+    if(!document.isObject())
+    {
+        qDebug() << "Load Error: Wrong formatting";
+        return;
+    }
+
+    QJsonObject mainObject = document.object();
+    if(mainObject.isEmpty())
+    {
+        qDebug() << "Load Error: File is empty.";
+        return;
+    }
+
+    mWorld->clearEntities();
+    auto entityManager = mWorld->getEntityManager();
+
+    // Iterate all entities
+    for(auto entityRef : mainObject["Entities"].toArray())
+    {
+        // Current entity
+        auto entityObj = entityRef.toObject();
+
+        // Create the entity
+        auto entity = entityManager->createEntity(entityObj["Name"].toString().toStdString());
+
+        // Iterate all components
+        for(auto compRef : entityObj["Components"].toArray())
+        {
+            // Current component
+            auto compObject = compRef.toObject();
+
+            // Add the component
+            auto comp = entityManager->addComponent(entity, static_cast<ComponentType>(compObject["ComponentType"].toInt()));
+
+            // Inititalize the component
+            comp->fromJSON(compObject);
+        }
+    }
 }
 
 void Scene::SaveToFile(const std::string& path)
 {
+    QFile file(QString::fromStdString(path));
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qDebug() << "Save error: Failed to open file at specified path!";
+        return;
+    }
 
+    const auto& entityManager = mWorld->getEntityManager();
+    const auto& entityInfos = entityManager->getEntityInfos();
+
+
+    QJsonObject mainObject;
+
+    QJsonArray entityArray;
+    for(auto& entityInfo : entityInfos)
+    {
+        std::vector<Component*> components;
+        if(!entityManager->getAllComponents(entityInfo.entityId, components))
+        {
+            // No components found
+            continue;
+        }
+
+        QJsonObject entityObject;
+
+        // Entity info is "outside" the other components
+        entityObject.insert("Name", QJsonValue(entityInfo.name.c_str()));
+
+        QJsonArray compArray;
+        for(auto comp : components)
+        {
+            // Skip entity info
+            if(comp->type == ComponentType::Other)
+                continue;
+            compArray.push_back(comp->toJSON());
+        }
+
+        entityObject.insert("Components", compArray);
+
+        entityArray.push_back(entityObject);
+    }
+
+    mainObject.insert("Entities", entityArray);
+
+    QJsonDocument document(mainObject);
+    file.write(document.toJson());
+    file.close();
+
+    qDebug() << "Saved successfully";
 }
 
 

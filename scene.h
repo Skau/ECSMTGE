@@ -11,8 +11,9 @@ class Scene : public QObject
     Q_OBJECT
 public:
     Scene(World* world);
-    Scene(World* world, const std::string& path);
     virtual ~Scene();
+
+    std::string name = "Scene";
 
     /**
      * @brief Creates an empty scene with only a camera
@@ -26,6 +27,9 @@ public:
 
     void LoadFromFile(const std::string& path);
     void SaveToFile(const std::string& path);
+
+signals:
+    void loadingFromFile();
 
 protected:
     World* mWorld;

@@ -41,8 +41,6 @@ public slots:
 private:
     ScriptSystem(){}
 
-    QJSEngine mJSEngine;
-    QJSValue mGlobalObject;
     std::shared_ptr<EntityManager> entityManager;
 };
 

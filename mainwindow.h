@@ -50,8 +50,9 @@ signals:
     void stop();
     void toggleWireframe(bool value);
     void shutUp(bool value);
-    void save();
-    void load();
+    void saveScene(const std::string& filePath);
+    void loadScene(const std::string& filePath);
+    void newScene();
 public slots:
     void updateUI(const std::vector<EntityInfo>& entityData);
     void onWidgetRemoved(ComponentWidget* widget);
@@ -82,6 +83,8 @@ private slots:
     void on_actionSave_triggered();
 
     void on_actionLoad_triggered();
+
+    void on_actionNew_triggered();
 
 private:
     void updateComponentArea(unsigned int entityID);

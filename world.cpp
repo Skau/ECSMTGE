@@ -43,26 +43,45 @@ World::World()
     ResourceManager::instance()->addTexture("skybox", "skyboxSpaceBoring.bmp", GL_TEXTURE_CUBE_MAP);
 
     entityManager = std::make_shared<EntityManager>();
-
-    mCurrentScene = std::make_unique<TestScene>(this);
 }
 
 World::~World()
 {
 }
 
-void World::initCurrentScene()
+void World::initScene()
 {
+    mCurrentScene = std::make_unique<Scene>(this);
+
+    mCurrentScene->initBlankScene();
     mCurrentScene->initCustomObjects();
 }
 
 void World::saveScene(const std::string& path)
 {
-    mCurrentScene->SaveToFile(path);
+    if(mCurrentScene)
+    {
+        mCurrentScene->SaveToFile(path);
+    }
 }
 
 void World::loadScene(const std::string& path)
 {
-    mCurrentScene.reset();
-    mCurrentScene = std::make_unique<Scene>(this, path);
+    if(mCurrentScene)
+    {
+        mCurrentScene.reset();
+    }
+    mCurrentScene = std::make_unique<Scene>(this);
+    mCurrentScene->LoadFromFile(path);
+}
+
+void World::newScene()
+{
+    entityManager->clear();
+    initScene();
+}
+
+void World::clearEntities()
+{
+    entityManager->clear();
 }

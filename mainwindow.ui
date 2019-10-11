@@ -469,6 +469,7 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="actionNew"/>
     <addaction name="actionSave"/>
     <addaction name="actionLoad"/>
     <addaction name="actionExit"/>
@@ -510,7 +511,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSave">
    <property name="text">
-    <string>Save</string>
+    <string>Save scene</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -518,7 +519,7 @@
   </action>
   <action name="actionLoad">
    <property name="text">
-    <string>Load</string>
+    <string>Load scene</string>
    </property>
   </action>
   <action name="actionExit">
@@ -572,6 +573,11 @@
    </property>
    <property name="text">
     <string>Play</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>New scene</string>
    </property>
   </action>
  </widget>

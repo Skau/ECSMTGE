@@ -77,14 +77,11 @@ bool removeComponent(unsigned int entity) \
             if (!comp.valid) \
             { \
                 comp.valid = true; \
-                if (comp.entityId != entity) \
+                comp.entityId = entity; \
+                std::sort(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(),[](const K& t1, const K& t2) \
                 { \
-                    comp.entityId = entity; \
-                    std::sort(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(),[](const K& t1, const K& t2) \
-                    { \
-                        return t1.entityId < t2.entityId; \
-                    }); \
-                } \
+                    return t1.entityId < t2.entityId; \
+                }); \
                 return comp; \
             } \
         } \
@@ -135,6 +132,35 @@ public:
     EntityManager()
     {
 
+    }
+
+    void clear()
+    {
+        for(auto info : mEntityInfos)
+        {
+            std::vector<Component*> components;
+            getAllComponents(info.entityId, components);
+            for(auto& comp : components)
+            {
+                comp->valid = false;
+                comp->reset();
+            }
+        }
+
+        idCounter = 0;
+        mEntityInfos.clear();
+//        mTransformComponents.clear();
+//        mMeshComponents.clear();
+//        mPhysicsComponents.clear();
+//        mCameraComponents.clear();
+//        mInputComponents.clear();
+//        mSoundComponents.clear();
+//        mDirectionalLightComponents.clear();
+//        mSpotLightComponents.clear();
+//        mPointLightComponents.clear();
+//        mScriptComponents.clear();
+//        mColliderComponents.cleear();
+        updateUI({});
     }
 
     void createObject(int index)
@@ -228,58 +254,70 @@ public:
         return {getComponent<componentTypes>(entity)...};
     }
 
-    void addComponent(unsigned int entity, ComponentType type)
+    Component* addComponent(unsigned int entity, ComponentType type)
     {
+        Component* returnComp;
         switch (type)
         {
         case ComponentType::Mesh:
         {
-            addComponent<MeshComponent>(entity);
+            auto [component] = addComponent<MeshComponent>(entity);
+            returnComp = &component;
             break;
         }
         case ComponentType::Transform:
         {
-            addComponent<TransformComponent>(entity);
+            auto [component] = addComponent<TransformComponent>(entity);
+            returnComp = &component;
             break;
         }
         case ComponentType::Physics:
         {
-            addComponent<PhysicsComponent>(entity);
+            auto [component] = addComponent<PhysicsComponent>(entity);
+            returnComp = &component;
             break;
         }
         case ComponentType::Input:
         {
-            addComponent<InputComponent>(entity);
+            auto [component] = addComponent<InputComponent>(entity);
+            returnComp = &component;
             break;
         }
         case ComponentType::Sound:
         {
-            addComponent<SoundComponent>(entity);
+            auto [component] = addComponent<SoundComponent>(entity);
+            returnComp = &component;
             break;
         }
         case ComponentType::LightSpot:
         {
-            addComponent<SpotLightComponent>(entity);
+            auto [component] = addComponent<SpotLightComponent>(entity);
+            returnComp = &component;
             break;
         }
         case ComponentType::LightDirectional:
         {
-            addComponent<DirectionalLightComponent>(entity);
+            auto [component] = addComponent<DirectionalLightComponent>(entity);
+            returnComp = &component;
             break;
         }
         case ComponentType::LightPoint:
         {
-            addComponent<PointLightComponent>(entity);
+            auto [component] = addComponent<PointLightComponent>(entity);
+            returnComp = &component;
             break;
         }
         case ComponentType::Script:
         {
-            addComponent<ScriptComponent>(entity);
+            auto [component] = addComponent<ScriptComponent>(entity);
+            returnComp = &component;
             break;
         }
         default:
             break;
         }
+
+        return returnComp;
     }
 
     /**

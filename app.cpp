@@ -37,13 +37,15 @@ App::App()
 void App::initTheRest()
 {
     mWorld = std::make_unique<World>();
-
+    connect(mMainWindow.get(), &MainWindow::newScene, mWorld.get(), &World::newScene);
+    connect(mMainWindow.get(), &MainWindow::saveScene, mWorld.get(), &World::saveScene);
+    connect(mMainWindow.get(), &MainWindow::loadScene, mWorld.get(), &World::loadScene);
     mMainWindow->setEntityManager(mWorld->getEntityManager());
 
     // Script System needs the entity manager so data is available in scripts
     ScriptSystem::get()->setEntityManager(mWorld->getEntityManager());
 
-    mWorld->initCurrentScene();
+    mWorld->initScene();
 
     connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);
     mUpdateTimer.start(16); // Simulates 60ish fps

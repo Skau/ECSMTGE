@@ -138,4 +138,9 @@ namespace gsl
 
     }
 
+    bool IVector2D::operator==(const ivec2 &rhs) const
+    {
+        return x == rhs.x && y == rhs.y;
+    }
+
 } //namespace

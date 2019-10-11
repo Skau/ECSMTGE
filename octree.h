@@ -1,178 +1,167 @@
-/*
- *  Copyright (C) 2007  Simon Perreault
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #ifndef OCTREE_H
 #define OCTREE_H
 
-#include <algorithm>
-#include <cassert>
-#include <istream>
-#include <ostream>
+#include "innpch.h"
+#include <memory>
 
-template< typename T, int AS = 1 >
+namespace gsl {
+template <typename T>
 class Octree
 {
+    friend class PhysicsSystem;
 public:
-    Octree( int size, const T& emptyValue = T(0) );
-    Octree( const Octree<T,AS>& o );
-    ~Octree();
+    Octree(const T& value, gsl::ivec3 key = {0, 0, 0})
+    : mKey{key}, mValue{value}
+    {
 
-    // Accessors
-    int size() const;
-    const T& emptyValue() const;
+    }
 
-    static unsigned long branchBytes();
-    static unsigned long aggregateBytes();
-    static unsigned long leafBytes();
-    unsigned long bytes() const;
+    gsl::ivec3 key() const { return mKey; }
+    // Amount of nodes in branch, including this node
+    unsigned int size() const { return mBranchSize; }
 
-    int nodes() const;
-    int nodesAtSize( int size ) const;
+    // Searches for node with specified key. Returns a pair containing the node (if found) and the parent.
+    Octree<T>* find(gsl::ivec3 pos)
+    {
+        if (pos == mKey)
+            return this;
+        // if pos < mKey then place it to the left of the current node. Right otherwise.
+        gsl::ivec3 index{!(pos.x < mKey.x), !(pos.y < mKey.y), !(pos.z < mKey.z)};
 
-    // Mutators
-    void setEmptyValue( const T& emptyValue );
+        auto& nodePtr = mChild[index.x][index.y][index.z];
+        if (nodePtr)
+            return nodePtr->find(pos);
+        else
+            return nullptr;
+    }
 
-    void swap( Octree<T,AS>& o );
-    Octree<T,AS>& operator= ( Octree<T,AS> o );
+    Octree<T>* insert(ivec3 key, const T& value)
+    {
+        if (key == mKey)
+            return nullptr;
 
-    // Indexing operators
-    T& operator() ( int x, int y, int z );
-    const T& operator() ( int x, int y, int z ) const;
-    const T& at( int x, int y, int z ) const;
+        // if pos < mKey then place it to the left of the current node. Right otherwise.
+        ivec3 index{!(key.x < mKey.x), !(key.y < mKey.y), !(key.z < mKey.z)};
 
-    void set( int x, int y, int z, const T& value );
-    void erase( int x, int y, int z );
+        std::unique_ptr<Octree<T>>& nodePtr = mChild[index.x][index.y][index.z];
+        if (nodePtr)
+        {
+            auto result = nodePtr->insert(key, value);
+            if (result)
+                ++mBranchSize;
+            return result;
+        }
+        else
+        {
+            nodePtr = std::make_unique<Octree<T>>(value, key);
+            return nodePtr.get();
+        }
+    }
 
-    // Array2D<T> zSlice( int z ) const;
+    // returns a list of pointers to all nodes in preorder depth first order
+    std::vector<Octree<T>*> preIt()
+    {
+        std::vector<Octree<T>*> list{};
+        list.reserve(mBranchSize);
 
-    // I/O functions
-    void writeBinary( std::ostream& out ) const;
-    void readBinary( std::istream& in );
+        preItAdd(list);
+
+        return list;
+    }
+
+    std::vector<Octree<T>*> roots()
+    {
+        std::vector<Octree<T>*> list{};
+        list.reserve(mBranchSize - 1);
+
+        rootsAdd(list);
+
+        return list;
+    }
+
+    void updateCount()
+    {
+        unsigned int newCount{1};
+        for (int z{0}; z < 2; ++z)
+            for (int y{0}; y < 2; ++y)
+                for (int x{0}; x < 2; ++x)
+                {
+                    auto& node = mChild[x][y][z];
+                    if (node)
+                        newCount += node->size();
+                }
+
+        mBranchSize = newCount;
+    }
+
+    T mValue;
 
 protected:
-
-    // Octree node types
-    class Node;
-    class Branch;
-    class Aggregate;
-    class Leaf;
-    enum NodeType { BranchNode, AggregateNode, LeafNode };
-
-    Node*& root();
-    const Node* root() const;
-
-    static void deleteNode( Node** node );
-
-private:
-    // Recursive helper functions
-    void eraseRecursive( Node** node, int size, int x, int y, int z );
-    static unsigned long bytesRecursive( const Node* node );
-    static int nodesRecursive( const Node* node );
-    static int nodesAtSizeRecursive( int targetSize, int size, Node* node );
-//    void zSliceRecursive( Array2D<T> slice, const Node* node, int size,
-//            int x, int y, int z, int targetZ ) const;
-    static void writeBinaryRecursive( std::ostream& out, const Node* node );
-    static void readBinaryRecursive( std::istream& in, Node** node );
-
-protected:
-    // Node classes
-
-    class Node
+    std::unique_ptr<Octree<T>>& findPtr(gsl::ivec3 pos)
     {
-    public:
-        NodeType type() const;
+        // if pos < mKey then place it to the left of the current node. Right otherwise.
+        gsl::ivec3 index{!(pos.x < mKey.x), !(pos.y < mKey.y), !(pos.z < mKey.z)};
 
-    protected:
-        Node( NodeType type );
-        ~Node() {};
+        auto& nodePtr = mChild[index.x][index.y][index.z];
+        if (nodePtr)
+            if (pos == nodePtr->mKey)
+                return nodePtr;
+            else
+                return nodePtr->findPtr(pos);
+        else
+            return nodePtr;
+    }
 
-    private:
-        NodeType type_ : 2;
-    };
-
-    class Branch : public Node
+    void preItAdd(std::vector<Octree<T>*>& t)
     {
-    public:
-        Branch();
-        Branch( const Branch& b );
-        ~Branch();
+        // First everyone to the left, and then everyone to the right.
+        for (int z{0}; z < 2; ++z)
+        {
+            for (int y{0}; y < 2; ++y)
+            {
+                for (int x{0}; x < 2; ++x)
+                {
+                    auto& node = mChild[x][y][z];
+                    if (node)
+                        node->preItAdd(t);
+                }
+            }
 
-        const Node* child( int x, int y, int z ) const;
-        Node*& child( int x, int y, int z );
-        const Node* child( int index ) const;
-        Node*& child( int index );
+            if (z == 0)
+                t.push_back(this);
+        }
+    }
 
-        friend void Octree<T,AS>::deleteNode( Node** node );
-
-    private:
-        Branch& operator= ( Branch b );
-
-    private:
-        Node* children[2][2][2];
-    };
-
-    class Aggregate : public Node
+    void rootsAdd(std::vector<Octree<T>*>& t)
     {
-    public:
-        Aggregate( const T& v );
+        bool wentDeeper = false;
+        // First everyone to the left, and then everyone to the right.
+        for (int z{0}; z < 2; ++z)
+        {
+            for (int y{0}; y < 2; ++y)
+            {
+                for (int x{0}; x < 2; ++x)
+                {
+                    auto& node = mChild[x][y][z];
+                    if (node)
+                    {
+                        wentDeeper = true;
+                        node->preItAdd(t);
+                    }
+                }
+            }
+        }
 
-        const T& value( int x, int y, int z ) const;
-        T& value( int x, int y, int z );
-        void setValue( int x, int y, int z, const T& v );
+        if (!wentDeeper)
+            t.push_back(this);
+    }
 
-        const T& value( int i ) const;
-        T& value( int i );
-        void setValue( int i, const T& v );
-
-        friend void Octree<T,AS>::deleteNode( Node** node );
-
-    private:
-        ~Aggregate() {};
-
-    private:
-        T value_[AS][AS][AS];
-    };
-
-    class Leaf : public Node
-    {
-    public:
-        Leaf( const T& v );
-
-        const T& value() const;
-        T& value();
-        void setValue( const T& v );
-
-        friend void Octree<T,AS>::deleteNode( Node** node );
-
-    private:
-        ~Leaf() {};
-
-    private:
-        T value_;
-    };
-
-    static const int aggregateSize_ = AS;
-
-private:
-    Node* root_;
-    T emptyValue_;
-    int size_;
+    // Left and right of x, y and z
+    gsl::ivec3 mKey{};
+    std::unique_ptr<Octree<T>> mChild[2][2][2];
+    unsigned int mBranchSize{1};
 };
 
-#include "octree.tcc"
+}
 
 #endif

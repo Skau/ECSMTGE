@@ -292,4 +292,9 @@ namespace gsl
         return {x / rhs.x, y / rhs.y, z / rhs.z};
     }
 
+    bool IVector3D::operator==(const ivec3 &rhs) const
+    {
+        return x == rhs.x && y == rhs.y && z == rhs.z;
+    }
+
 } //namespace

@@ -98,6 +98,7 @@ public:
     gsl::ivec3 operator- (const gsl::ivec3& rhs) const;
     gsl::ivec3 operator* (const gsl::ivec3& rhs) const;
     gsl::ivec3 operator/ (const gsl::ivec3& rhs) const;
+    bool operator== (const gsl::ivec3& rhs) const;
 
     GLint x;
     GLint y;

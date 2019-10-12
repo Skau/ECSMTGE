@@ -319,7 +319,7 @@ void MeshComponent::fromJSON(QJsonObject object)
     auto shaderName = materialObj["Shader"].toString();
     if(shaderName.size() && shaderName != "None")
     {
-        mMaterial.mShader = ResourceManager::instance()->getShader(shaderName.toStdString());
+        mMaterial.setShader(ResourceManager::instance()->getShader(shaderName.toStdString()));
     }
 
     auto parametersArray = materialObj["Parameters"].toArray();
@@ -333,42 +333,46 @@ void MeshComponent::fromJSON(QJsonObject object)
 
                 for(auto it = parameterObj.begin(); it != parameterObj.end(); ++it)
                 {
-                    if(it.value().isDouble())
+                    auto name = it.key().toStdString();
+                    if(mMaterial.mParameters.find(name) != mMaterial.mParameters.end())
                     {
-                        mMaterial.mParameters[it.key().toStdString()] = static_cast<float>(it.value().toDouble());
-                    }
-                    else if(it.value().isArray())
-                    {
-                        auto array = it.value().toArray();
-                        if(array.size() == 2)
+                        if(it.value().isDouble())
                         {
-                            gsl::vec2 vector;
-                            vector.x = static_cast<float>(array[0].toDouble());
-                            vector.y = static_cast<float>(array[1].toDouble());
-                            mMaterial.mParameters[it.key().toStdString()] = vector;
+                            mMaterial.mParameters[name] = static_cast<float>(it.value().toDouble());
                         }
-                        else if(array.size() == 3)
+                        else if(it.value().isArray())
                         {
-                            gsl::vec3 vector;
-                            vector.x = static_cast<float>(array[0].toDouble());
-                            vector.y = static_cast<float>(array[1].toDouble());
-                            vector.z = static_cast<float>(array[2].toDouble());
-                            mMaterial.mParameters[it.key().toStdString()] = vector;
+                            auto array = it.value().toArray();
+                            if(array.size() == 2)
+                            {
+                                gsl::vec2 vector;
+                                vector.x = static_cast<float>(array[0].toDouble());
+                                vector.y = static_cast<float>(array[1].toDouble());
+                                mMaterial.mParameters[name] = vector;
+                            }
+                            else if(array.size() == 3)
+                            {
+                                gsl::vec3 vector;
+                                vector.x = static_cast<float>(array[0].toDouble());
+                                vector.y = static_cast<float>(array[1].toDouble());
+                                vector.z = static_cast<float>(array[2].toDouble());
+                                mMaterial.mParameters[name] = vector;
+                            }
+                            else if(array.size() == 4)
+                            {
+                                gsl::vec4 vector;
+                                vector.x = static_cast<float>(array[0].toDouble());
+                                vector.y = static_cast<float>(array[1].toDouble());
+                                vector.z = static_cast<float>(array[2].toDouble());
+                                vector.w = static_cast<float>(array[2].toDouble());
+                                mMaterial.mParameters[name] = vector;
+                            }
                         }
-                        else if(array.size() == 4)
+                        else
                         {
-                            gsl::vec4 vector;
-                            vector.x = static_cast<float>(array[0].toDouble());
-                            vector.y = static_cast<float>(array[1].toDouble());
-                            vector.z = static_cast<float>(array[2].toDouble());
-                            vector.w = static_cast<float>(array[2].toDouble());
-                            mMaterial.mParameters[it.key().toStdString()] = vector;
+                            // For now just choose int if it wasn't one of the others (float, vec2, vec3 or vec4).
+                            mMaterial.mParameters[name] = it.value().toInt();
                         }
-                    }
-                    else
-                    {
-                        // For now just choose int if it wasn't one of the others (float, vec2, vec3 or vec4).
-                        mMaterial.mParameters[it.key().toStdString()] = it.value().toInt();
                     }
                 }
             }

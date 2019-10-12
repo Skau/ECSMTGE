@@ -61,7 +61,7 @@ void App::initTheRest()
 
     auto skyboxMaterial = std::make_shared<Material>();
     auto skyShader = ResourceManager::instance()->getShader("skybox");
-    skyboxMaterial->mShader = skyShader;
+    skyboxMaterial->setShader(skyShader);
     auto texture = ResourceManager::instance()->getTexture("skybox");
     skyboxMaterial->mTextures.push_back({texture->id(), texture->mType});
 
@@ -74,7 +74,7 @@ void App::initTheRest()
     axisMesh->mRenderType = GL_LINES;
 
     auto axisMaterial = std::make_shared<Material>();
-    axisMaterial->mShader = ResourceManager::instance()->getShader("axis");
+    axisMaterial->setShader(ResourceManager::instance()->getShader("axis"));
 
     mRenderer->mAxisMesh = axisMesh;
     mRenderer->mAxisMaterial = axisMaterial;

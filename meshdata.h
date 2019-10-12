@@ -14,15 +14,30 @@ typedef std::variant<int, float, gsl::vec2, gsl::vec3, gsl::vec4> ShaderParamTyp
 
 struct Material
 {
-    std::shared_ptr<Shader> mShader{nullptr};
     std::map<std::string, ShaderParamType> mParameters;
     std::vector<std::pair<uint, GLenum>> mTextures;
 
     Material(std::shared_ptr<Shader> shader = std::shared_ptr<Shader>{},
              std::map<std::string, ShaderParamType> parameters = std::map<std::string, ShaderParamType>{},
              std::vector<std::pair<uint, GLenum>> textures = std::vector<std::pair<uint, GLenum>>{})
-        : mShader{shader}, mParameters{parameters}, mTextures{textures}
+        : mParameters{parameters}, mTextures{textures}, mShader{shader}
     {}
+
+    std::shared_ptr<Shader> getShader() { return mShader; }
+
+    void setShader(std::shared_ptr<Shader> shader)
+    {
+        if(shader)
+        {
+            mShader = shader;
+            mParameters = mShader->params;
+        }
+        else
+        {
+            mShader = nullptr;
+            mParameters.clear();
+        }
+    }
 
     QJsonObject toJSON()
     {
@@ -89,6 +104,9 @@ struct Material
 
         return returnObject;
     }
+
+private:
+    std::shared_ptr<Shader> mShader{nullptr};
 };
 
 struct MeshData

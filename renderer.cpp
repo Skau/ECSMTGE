@@ -469,11 +469,11 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
 
             // ** NEEDS TO BE A DEFERRED SHADER ** //
 
-            auto shader = renderIt->mMaterial.mShader;
+            auto shader = renderIt->mMaterial.getShader();
             if(!shader)
             {
                 shader = ResourceManager::instance()->getShader("defaultDeferred");
-                renderIt->mMaterial.mShader = shader;
+                renderIt->mMaterial.setShader(shader);
             }
 
             glUseProgram(shader->getProgram());
@@ -885,14 +885,16 @@ void Renderer::resizeGBuffer()
 
 void Renderer::evaluateParams(Material& material)
 {
-    if(auto shader = material.mShader)
+    if(auto shader = material.getShader())
     {
         auto params = material.mParameters;
         if(params.size())
         {
             for (auto it = params.begin(); it != params.end(); ++it)
             {
-                GLint uniform = glGetUniformLocation(shader->getProgram(), it->first.c_str());
+                QString name =it->first.c_str();
+                name.prepend("p_");
+                GLint uniform = glGetUniformLocation(shader->getProgram(), name.toStdString().c_str());
                 if (uniform < 0)
                     continue;
 
@@ -930,7 +932,7 @@ void Renderer::renderSkybox(const CameraComponent &camera)
     glDepthFunc(GL_LEQUAL);
     glBindVertexArray(mSkyboxMesh->mVAOs[0]);
 
-    auto shader = mSkyboxMaterial->mShader;
+    auto shader = mSkyboxMaterial->getShader();
     glUseProgram(shader->getProgram());
 
     glActiveTexture(GL_TEXTURE0);
@@ -961,7 +963,7 @@ void Renderer::renderSkybox(const CameraComponent &camera)
 void Renderer::renderAxis(const CameraComponent& camera)
 {
     glBindVertexArray(mAxisMesh->mVAOs[0]);
-    auto shader = mAxisMaterial->mShader;
+    auto shader = mAxisMaterial->getShader();
     glUseProgram(shader->getProgram());
 
     auto mMatrix = gsl::mat4(1);

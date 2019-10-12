@@ -20,6 +20,8 @@ enum class ShaderType
     WeirdStuff
 };
 
+typedef std::variant<int, float, gsl::vec2, gsl::vec3, gsl::vec4> ShaderParamType;
+
 class Shader : protected QOpenGLFunctions_4_1_Core
 {
 public:
@@ -42,12 +44,17 @@ public:
     std::string mName{};
     ShaderType mRenderingType{};
 
+    std::map<std::string, ShaderParamType> params;
+
 protected:
     GLuint program{0};
     GLint mMatrixUniform{-1};
     GLint vMatrixUniform{-1};
     GLint pMatrixUniform{-1};
 
+private:
+    void updateParams(const std::string& path);
+    void addParam(const std::string& name, const std::string& type, const std::string& value = "");
 };
 
 #endif // SHADER_H

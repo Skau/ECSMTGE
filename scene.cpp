@@ -97,8 +97,11 @@ void Scene::SaveToFile(const std::string& path)
     QJsonObject mainObject;
 
     QJsonArray entityArray;
+
+    // Iterate all entities
     for(auto& entityInfo : entityInfos)
     {
+        // Get entit
         std::vector<Component*> components;
         if(!entityManager->getAllComponents(entityInfo.entityId, components))
         {
@@ -106,10 +109,6 @@ void Scene::SaveToFile(const std::string& path)
             continue;
         }
 
-        QJsonObject entityObject;
-
-        // Entity info is "outside" the other components
-        entityObject.insert("Name", QJsonValue(entityInfo.name.c_str()));
 
         QJsonArray compArray;
         for(auto comp : components)
@@ -120,8 +119,10 @@ void Scene::SaveToFile(const std::string& path)
             compArray.push_back(comp->toJSON());
         }
 
-        entityObject.insert("Components", compArray);
 
+        QJsonObject entityObject;
+        entityObject.insert("Components", compArray);
+        entityObject.insert("Name", QJsonValue(entityInfo.name.c_str()));
         entityArray.push_back(entityObject);
     }
 
@@ -154,10 +155,6 @@ void TestScene::initCustomObjects()
             render.meshData = *meshData;
             render.isVisible = true;
         }
-        render.mMaterial.mParameters =
-        {
-            {"color", gsl::vec3(1.f, 0, 0)}
-        };
         transform.setPosition(gsl::vec3(i*2.f, 0, 0));
     }
 }

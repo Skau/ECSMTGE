@@ -46,7 +46,7 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
         {
             ui->label_Name->setText("None");
         }
-        if(auto shader = comp->mMaterial.getShader())
+        if(auto shader = comp->mMaterial.mShader)
         {
             ui->comboBox_Shaders->setCurrentText(QString::fromStdString(shader->mName));
 
@@ -454,7 +454,7 @@ void MeshWidget::on_pushButton_ChangeShaderDropdown_clicked()
 
     if(auto render = getRenderComponent())
     {
-        render->mMaterial.setShader(ResourceManager::instance()->getShader(name.toStdString()));
+        render->mMaterial.loadShaderWithParameters(ResourceManager::instance()->getShader(name.toStdString()));
         updateShaderParameters(render->mMaterial);
     }
 }

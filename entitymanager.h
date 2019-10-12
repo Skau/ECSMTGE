@@ -202,7 +202,7 @@ public:
         auto id = createEntity();
         addComponent<MeshComponent, TransformComponent>(id);
         auto render = getComponent<MeshComponent>(id);
-        if(auto mesh = ResourceManager::instance()->getMesh("monkey"))
+        if(auto mesh = ResourceManager::instance()->getMesh("suzanne"))
         {
             render->meshData = *mesh;
             render->isVisible = true;

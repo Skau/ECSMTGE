@@ -14,19 +14,20 @@ typedef std::variant<int, float, gsl::vec2, gsl::vec3, gsl::vec4> ShaderParamTyp
 
 struct Material
 {
+    std::shared_ptr<Shader> mShader{nullptr};
     std::map<std::string, ShaderParamType> mParameters;
     std::vector<std::pair<uint, GLenum>> mTextures;
 
     Material(std::shared_ptr<Shader> shader = std::shared_ptr<Shader>{},
              std::map<std::string, ShaderParamType> parameters = std::map<std::string, ShaderParamType>{},
              std::vector<std::pair<uint, GLenum>> textures = std::vector<std::pair<uint, GLenum>>{})
-        : mParameters{parameters}, mTextures{textures}, mShader{shader}
+        : mShader{shader}, mParameters{parameters}, mTextures{textures}
     {}
 
-    std::shared_ptr<Shader> getShader() { return mShader; }
-
-    void setShader(std::shared_ptr<Shader> shader)
+    void loadShaderWithParameters(std::shared_ptr<Shader> shader)
     {
+        mParameters.clear();
+
         if(shader)
         {
             mShader = shader;
@@ -35,7 +36,6 @@ struct Material
         else
         {
             mShader = nullptr;
-            mParameters.clear();
         }
     }
 
@@ -104,9 +104,6 @@ struct Material
 
         return returnObject;
     }
-
-private:
-    std::shared_ptr<Shader> mShader{nullptr};
 };
 
 struct MeshData

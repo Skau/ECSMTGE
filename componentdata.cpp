@@ -319,7 +319,7 @@ void MeshComponent::fromJSON(QJsonObject object)
     auto shaderName = materialObj["Shader"].toString();
     if(shaderName.size() && shaderName != "None")
     {
-        mMaterial.setShader(ResourceManager::instance()->getShader(shaderName.toStdString()));
+        mMaterial.loadShaderWithParameters(ResourceManager::instance()->getShader(shaderName.toStdString()));
     }
 
     auto parametersArray = materialObj["Parameters"].toArray();

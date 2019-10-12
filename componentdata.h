@@ -69,19 +69,20 @@ struct EntityInfo : public Component
 
 struct TransformComponent : public Component
 {
-    bool updated{true};
+    bool updated : 1;
     std::vector<unsigned int> children;
     gsl::Vector3D position{};
     gsl::Quaternion rotation{};
     gsl::Vector3D scale{1,1,1};
-    bool boundsOutdated{true};
+    bool meshBoundsOutdated : 1;
+    bool colliderBoundsOutdated : 1;
 
     TransformComponent(unsigned int _eID = 0, bool _valid = false,
                     const gsl::vec3& _pos = gsl::vec3{},
                     const gsl::vec3& _scale = gsl::vec3{1.f, 1.f, 1.f},
                     const gsl::quat& _rot = gsl::quat{})
         : Component (_eID, _valid, ComponentType::Transform), updated{true}, position{_pos},
-          rotation{_rot}, scale{_scale}
+          rotation{_rot}, scale{_scale}, meshBoundsOutdated{true}, colliderBoundsOutdated{true}
     {}
 
     virtual void reset() override
@@ -91,7 +92,8 @@ struct TransformComponent : public Component
         position = gsl::vec3{};
         rotation = gsl::Quaternion{};
         scale = gsl::vec3{1};
-        boundsOutdated = true;
+        meshBoundsOutdated = true;
+        colliderBoundsOutdated = true;
     }
 
     void addPosition(const gsl::vec3& pos);

@@ -59,8 +59,6 @@ private:
     bool outdatedRatio() const;
     void updateRatio();
 
-    void evaluateParams(Shader* shader, std::map<std::string, std::variant<int, float, gsl::vec2, gsl::vec3, gsl::vec4> > &params);
-
     // Manually destroys and recreates the framebuffers and textures.
     void recreateBuffers();
 

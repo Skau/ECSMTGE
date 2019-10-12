@@ -119,17 +119,14 @@ void Postprocessor::Render()
             // If last render, use default framebuffer; else use the one we didn't use last.
             glBindFramebuffer(GL_FRAMEBUFFER, nextFramebuffer);
 
-
-
             auto material = setting->material;
-            if (!material || !material->mShader) {
+            if (!material || !material->mShader)
+            {
                 qDebug() << "using pass through shader";
                 material = passThroughMaterial;
             }
 
             material->mShader->use();
-
-
 
             // Bind to framebuffer texture
             glActiveTexture(GL_TEXTURE0);
@@ -149,33 +146,6 @@ void Postprocessor::Render()
             }
 
             int uniform = glGetUniformLocation(material->mShader->getProgram(), "sResolution");
-            if (0 <= uniform)
-                glUniform2i(uniform, mScrWidth, mScrHeight);
-
-            uniform = glGetUniformLocation(material->mShader->getProgram(), "sTime");
-            if (0 <= uniform)
-                glUniform1f(uniform, mRenderer->mTimeSinceStart);
-
-            mRenderer->evaluateParams(*material);
-
-            // Bind to framebuffer texture
-            glActiveTexture(GL_TEXTURE0);
-            // qDebug() << "uniform: " << glGetUniformLocation(shader->getProgram(), "fbt");
-            glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "fbt"), 0);
-            glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
-
-            /** NB: Depth sampling in shadercode won't work unless in OpenGL 4.4 because of how they're stored.
-             * Should be possible to implement a depth/stencil sampling if they are implemented as
-             * separate buffers.
-             */
-            if (depthSampling)
-            {
-                glActiveTexture(GL_TEXTURE1);
-                glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "depthBuffer"), 1);
-                glBindTexture(GL_TEXTURE_2D, mDepthStencilBuffer[mLastUsedBuffer]);
-            }
-
-            uniform = glGetUniformLocation(material->mShader->getProgram(), "sResolution");
             if (0 <= uniform)
                 glUniform2i(uniform, mScrWidth, mScrHeight);
 
@@ -424,36 +394,5 @@ Postprocessor::~Postprocessor()
         glDeleteTextures(2, mRenderTextures);
         glDeleteVertexArrays(1, &mScreenSpacedQuadVAO);
         mInitialized = false;
-    }
-}
-
-void Postprocessor::evaluateParams(Shader *shader, std::map<std::string, std::variant<int, float, gsl::vec2, gsl::vec3, gsl::vec4> > &params)
-{
-    if (shader == nullptr)
-        return;
-
-    for (auto it = params.begin(); it != params.end(); ++it)
-    {
-        GLint uniform = glGetUniformLocation(shader->getProgram(), it->first.c_str());
-        if (uniform < 0)
-            continue;
-
-        try {
-            if (std::holds_alternative<int>(it->second))
-                glUniform1i(uniform, std::get<int>(it->second));
-            else if (std::holds_alternative<float>(it->second))
-                glUniform1f(uniform, std::get<float>(it->second));
-            else if (std::holds_alternative<gsl::vec2>(it->second))
-                glUniform2fv(uniform, 1, std::get<gsl::vec2>(it->second).data());
-            else if (std::holds_alternative<gsl::vec3>(it->second))
-                glUniform3fv(uniform, 1, std::get<gsl::vec3>(it->second).data());
-            else
-                glUniform4fv(uniform, 1, std::get<gsl::vec4>(it->second).data());
-        }
-        catch(...)
-        {
-            std::cout << "Logical error!" << std::endl;
-            return;
-        }
     }
 }

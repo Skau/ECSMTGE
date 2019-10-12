@@ -174,7 +174,9 @@ void MeshWidget::updateShaderParameters(Material& material)
         for(auto& param : material.mParameters)
         {
             QHBoxLayout* hLayout = new QHBoxLayout();
-            QLabel* label = new QLabel(QString::fromStdString(param.first), widget);
+            auto name = QString::fromStdString(param.first);
+            name = name.replace("p_", "");
+            QLabel* label = new QLabel(name, widget);
             hLayout->addWidget(label);
             if (std::holds_alternative<int>(param.second))
             {

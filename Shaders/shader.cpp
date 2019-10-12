@@ -348,7 +348,6 @@ void Shader::updateParams(const std::string& path)
                 if(name.startsWith("p_"))
                 {
                     name = name.replace(';', "");
-                    name = name.replace("p_", "");
 
                     QString value = "";
                     if(line.contains('='))

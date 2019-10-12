@@ -892,9 +892,8 @@ void Renderer::evaluateParams(Material& material)
         {
             for (auto it = params.begin(); it != params.end(); ++it)
             {
-                QString name =it->first.c_str();
-                name.prepend("p_");
-                GLint uniform = glGetUniformLocation(shader->getProgram(), name.toStdString().c_str());
+                auto name = it->first;
+                GLint uniform = glGetUniformLocation(shader->getProgram(), name.c_str());
                 if (uniform < 0)
                     continue;
 

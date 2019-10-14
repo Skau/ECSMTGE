@@ -1,4 +1,4 @@
-#include "innpch.h"
+﻿#include "innpch.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -111,6 +111,14 @@ void MainWindow::onWidgetRemoved(ComponentWidget* widget)
 {
     mCurrentComponentWidgets.erase(std::remove(mCurrentComponentWidgets.begin(), mCurrentComponentWidgets.end(), widget), mCurrentComponentWidgets.end());
     updateComponentArea(currentEntitySelected->entityId);
+}
+
+void MainWindow::refreshWidgets()
+{
+    if(currentEntitySelected)
+    {
+        updateComponentArea(currentEntitySelected->entityId);
+    }
 }
 
 void MainWindow::on_actionEmpty_Object_triggered()

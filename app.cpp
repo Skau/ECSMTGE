@@ -42,6 +42,9 @@ void App::initTheRest()
     connect(mMainWindow.get(), &MainWindow::loadScene, mWorld.get(), &World::loadScene);
     mMainWindow->setEntityManager(mWorld->getEntityManager());
 
+    // Temp solution, this is just for script system experimentation
+    connect(mWorld->getEntityManager().get(), &EntityManager::refreshWidgets, mMainWindow.get(), &MainWindow::refreshWidgets);
+
     // Script System needs the entity manager so data is available in scripts
     ScriptSystem::get()->setEntityManager(mWorld->getEntityManager());
 

@@ -3,6 +3,7 @@
 #include <QJsonArray>
 #include "resourcemanager.h"
 #include "soundmanager.h"
+#include "qentity.h"
 
 void TransformComponent::addPosition(const gsl::vec3 &pos)
 {
@@ -127,6 +128,7 @@ bool ScriptComponent::load(const std::string& file)
     if(!updatedEntityID)
     {
         engine->globalObject().setProperty("entityID", entityId);
+        engine->globalObject().setProperty("entity", engine->newQObject(ScriptSystem::get()->getEntityWrapper(entityId)));
         updatedEntityID = true;
     }
 
@@ -193,6 +195,7 @@ bool ScriptComponent::execute(QString function, QString contents, QString fileNa
     if(!updatedEntityID)
     {
         engine->globalObject().setProperty("entityID", entityId);
+        engine->globalObject().setProperty("entity", engine->newQObject(ScriptSystem::get()->getEntityWrapper(entityId)));
         updatedEntityID = true;
     }
 
@@ -211,7 +214,13 @@ bool ScriptComponent::execute(QString function, QString contents, QString fileNa
         return false;
     }
 
-    value.call();
+    auto v = value.call();
+    if(v.isError())
+    {
+        ScriptSystem::get()->checkError(v);
+        return false;
+    }
+
     return true;
 }
 

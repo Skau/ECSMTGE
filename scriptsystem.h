@@ -9,6 +9,7 @@
 class EntityManager;
 class QJSEngine;
 class ScriptComponent;
+class QEntity;
 
 /**
  * The instance of this class is given to all engines (all script components have one each)
@@ -35,8 +36,12 @@ public:
 
     QString checkError(QJSValue value);
 
+    QEntity* getEntityWrapper(unsigned int entity);
+
 public slots:
     void setPosition(unsigned int entity, float x, float y, float z);
+
+    QObject* spawnCube(float x, float y, float z);
 
 private:
     ScriptSystem(){}

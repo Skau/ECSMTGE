@@ -3,6 +3,7 @@
 #include <QTextStream>
 #include "entitymanager.h"
 #include "componentdata.h"
+#include "qentity.h"
 
 void ScriptSystem::beginPlay(std::vector<ScriptComponent>& comps)
 {
@@ -39,6 +40,11 @@ QString ScriptSystem::checkError(QJSValue value)
     return error;
 }
 
+QEntity* ScriptSystem::getEntityWrapper(unsigned int entity)
+{
+    return new QEntity(entity, entityManager.get(), this);
+}
+
 
 void ScriptSystem::setPosition(unsigned int entity, float x, float y, float z)
 {
@@ -46,6 +52,16 @@ void ScriptSystem::setPosition(unsigned int entity, float x, float y, float z)
         return;
 
     entityManager->setTransformPos(entity, gsl::vec3(x, y, z));
+}
+
+QObject* ScriptSystem::spawnCube(float x, float y, float z)
+{
+    auto entity = entityManager->createCube();
+    if(x != 0.f || y != 0.f || z != 0.f)
+    {
+        entityManager->setTransformPos(entity, gsl::vec3(x, y, z));
+    }
+    return getEntityWrapper(entity);
 }
 
 

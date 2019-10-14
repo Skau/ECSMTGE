@@ -126,6 +126,7 @@ private:
 
 signals:
     void updateUI(const std::vector<EntityInfo>& entityData);
+    void refreshWidgets();
 
     // ------------------------- Member functions ---------------
 public:
@@ -185,7 +186,7 @@ public:
         }
     }
 
-    void createCube()
+    unsigned createCube()
     {
         auto id = createEntity();
         addComponent<MeshComponent, TransformComponent>(id);
@@ -195,9 +196,10 @@ public:
             render->meshData = *mesh;
             render->isVisible = true;
         }
+        return id;
     }
 
-    void createMonkey()
+    unsigned createMonkey()
     {
         auto id = createEntity();
         addComponent<MeshComponent, TransformComponent>(id);
@@ -207,6 +209,7 @@ public:
             render->meshData = *mesh;
             render->isVisible = true;
         }
+        return id;
     }
 
     /**

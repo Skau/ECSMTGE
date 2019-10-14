@@ -208,7 +208,7 @@ struct SoundComponent : public Component
     bool isMuted = false;
     int mSource;
     float pitch = 1.f;
-    float gain = .7f;
+    float gain = .7f; //JT was here, Savner deg Ole, 3D er bra men vi mangler deg. *Smask*
     std::string name;
 
     SoundComponent(unsigned int _eID = 0, bool _valid = false)

@@ -110,13 +110,14 @@ void ScriptWidget::on_button_ExecuteJS_clicked()
 
             if(comp->execute("foo", text, "foo.js"))
             {
-                ui->label_Status->setText("Execute successful");
+                if(ui->label_Status)
+                    ui->label_Status->setText("Execute successful");
             }
             else
             {
-                ui->label_Status->setText("Execute failed");
+                if(ui->label_Status)
+                    ui->label_Status->setText("Execute failed");
             }
-
         }
     }
 

@@ -51,7 +51,7 @@ World::~World()
 
 void World::initScene()
 {
-    mCurrentScene = std::make_unique<TestScene>(this);
+    mCurrentScene = std::make_unique<Scene>(this);
 
     mCurrentScene->initBlankScene();
     mCurrentScene->initCustomObjects();

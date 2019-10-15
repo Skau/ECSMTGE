@@ -125,17 +125,18 @@ void ScriptComponent::fromJSON(QJsonObject object)
 
 bool ScriptComponent::load(const std::string& file)
 {
-    if(!updatedEntityID)
+    if(!JSEntity)
     {
-        engine->globalObject().setProperty("entityID", entityId);
-        engine->globalObject().setProperty("entity", engine->newQObject(ScriptSystem::get()->getEntityWrapper(entityId)));
-        updatedEntityID = true;
+        JSEntity = ScriptSystem::get()->getEntityWrapper(entityId);
+        engine->globalObject().setProperty("entity", engine->newQObject(JSEntity));
+        engine->globalObject().setProperty("accessedComponents", engine->newArray());
     }
 
     if(!file.size())
     {
         return false;
     }
+
     QFile scriptFile(QString::fromStdString(file));
     if (!scriptFile.open(QIODevice::ReadOnly))
     {
@@ -160,6 +161,13 @@ bool ScriptComponent::call(const std::string& function)
     if(!filePath.size())
         return false;
 
+    if(!JSEntity)
+    {
+        JSEntity = ScriptSystem::get()->getEntityWrapper(entityId);
+        engine->globalObject().setProperty("entity", engine->newQObject(JSEntity));
+        engine->globalObject().setProperty("accessedComponents", engine->newArray());
+    }
+
     QJSValue value = engine->evaluate(QString::fromStdString(function), QString::fromStdString(filePath));
     if(value.isError())
     {
@@ -168,6 +176,8 @@ bool ScriptComponent::call(const std::string& function)
     }
 
     value.call();
+
+    checkForModifiedComponents();
     return true;
 }
 
@@ -175,6 +185,13 @@ bool ScriptComponent::call(const std::string& function, QJSValueList params)
 {
     if(!filePath.size())
         return false;
+
+    if(!JSEntity)
+    {
+        JSEntity = ScriptSystem::get()->getEntityWrapper(entityId);
+        engine->globalObject().setProperty("entity", engine->newQObject(JSEntity));
+        engine->globalObject().setProperty("accessedComponents", engine->newArray());
+    }
 
     QJSValue value = engine->evaluate(QString::fromStdString(function), QString::fromStdString(filePath));
     if(value.isError())
@@ -184,6 +201,8 @@ bool ScriptComponent::call(const std::string& function, QJSValueList params)
     }
 
     value.call(params);
+
+    checkForModifiedComponents();
     return true;
 }
 
@@ -192,13 +211,12 @@ bool ScriptComponent::execute(QString function, QString contents, QString fileNa
     if(!function.size() || !contents.size() || !fileName.size())
         return false;
 
-    if(!updatedEntityID)
+    if(!JSEntity)
     {
-        engine->globalObject().setProperty("entityID", entityId);
-        engine->globalObject().setProperty("entity", engine->newQObject(ScriptSystem::get()->getEntityWrapper(entityId)));
-        updatedEntityID = true;
+        JSEntity = ScriptSystem::get()->getEntityWrapper(entityId);
+        engine->globalObject().setProperty("entity", engine->newQObject(JSEntity));
+        engine->globalObject().setProperty("accessedComponents", engine->newArray());
     }
-
 
     QJSValue value = engine->evaluate(contents, fileName);
     if(value.isError())
@@ -221,7 +239,28 @@ bool ScriptComponent::execute(QString function, QString contents, QString fileNa
         return false;
     }
 
+    checkForModifiedComponents();
+
     return true;
+}
+
+void ScriptComponent::checkForModifiedComponents()
+{
+    std::vector<QJsonObject> objects;
+    auto componentArray = engine->globalObject().property("accessedComponents");
+    if(!componentArray.isUndefined() && !componentArray.isNull())
+    {
+        auto length = componentArray.property("length").toInt();
+        if(length > 0)
+        {
+            for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
+            {
+                objects.push_back(QJsonValue::fromVariant(engine->globalObject().property("accessedComponents").property(i).toVariant()).toObject());
+            }
+            engine->globalObject().setProperty("accessedComponents", engine->newArray());
+            JSEntity->updateComponents(objects);
+        }
+    }
 }
 
 std::pair<gsl::vec3, gsl::vec3> ColliderComponent::Bounds::minMax() const {

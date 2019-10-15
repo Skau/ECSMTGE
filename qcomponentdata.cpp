@@ -5,7 +5,7 @@ void QMeshComponent::setMesh(const QString& name)
 {
     auto mesh = ResourceManager::instance()->getMesh(name.toStdString());
     if(mesh)
-    {
+    {        
         mComp.meshData = *mesh;
         mComp.isVisible = true;
     }

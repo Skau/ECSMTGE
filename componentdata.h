@@ -69,11 +69,12 @@ struct EntityInfo : public Component
 
 struct TransformComponent : public Component
 {
+
     bool updated{true};
     std::vector<unsigned int> children;
     gsl::Vector3D position{};
-    gsl::Quaternion rotation{};
     gsl::Vector3D scale{1,1,1};
+    gsl::Quaternion rotation{};
     bool boundsOutdated{true};
 
     TransformComponent(unsigned int _eID = 0, bool _valid = false,
@@ -331,15 +332,9 @@ struct DirectionalLightComponent : public Component
 
 struct ScriptComponent : public Component
 {
-private:
-    QJSEngine* engine;
-    std::string filePath;
-    bool updatedEntityID{false};
-
-
 public:
     ScriptComponent(unsigned int _eID = 0, bool _valid = false)
-        : Component(_eID, _valid, ComponentType::Script), filePath("")
+        : Component(_eID, _valid, ComponentType::Script), filePath(""), JSEntity{nullptr}
     {
         engine = new QJSEngine();
         engine->installExtensions(QJSEngine::ConsoleExtension);
@@ -355,6 +350,8 @@ public:
         engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
         filePath = "";
     }
+
+    QJSEngine* getEngine() { return engine; }
 
     virtual QJsonObject toJSON() override;
     virtual void fromJSON(QJsonObject object) override;
@@ -380,6 +377,16 @@ public:
      * @brief Executes one off raw js code from the mini editor. Returns true if successfull.
      */
     bool execute(QString function, QString contents, QString fileName);
+
+private:
+    QJSEngine* engine;
+    std::string filePath;
+    QEntity* JSEntity{nullptr};
+
+    /**
+     * @brief Gets components accessed during the JS script and checks if anything was modified
+     */
+    void checkForModifiedComponents();
 };
 
 struct ColliderComponent : public Component

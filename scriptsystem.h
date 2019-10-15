@@ -39,8 +39,6 @@ public:
     QEntity* getEntityWrapper(unsigned int entity);
 
 public slots:
-    void setPosition(unsigned int entity, float x, float y, float z);
-
     QObject* spawnCube(float x, float y, float z);
 
 private:

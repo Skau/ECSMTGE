@@ -10,20 +10,19 @@ class QEntity : public QObject
     Q_OBJECT
 
 public:
-    QEntity(unsigned int _ID, EntityManager* _entityManager, QObject* parent = nullptr);
+    QEntity(unsigned int _ID, QJSEngine* engine, EntityManager* _entityManager, QObject* parent = nullptr);
 
     Q_PROPERTY(unsigned int ID MEMBER mID)
 
-public slots:
-    void setPosition(float x, float y, float z);
-    void setScale(float x, float y, float z);
-    void setScale(float value);
-    void setVelocity(float x, float y, float z);
+    void updateComponents(std::vector<QJsonObject> objects);
 
-    QObject* getComponent(const QString& name);
+public slots:
+    QJSValue getComponent(const QString& name);
+
 
 private:
     EntityManager* entityManager;
+    QJSEngine* mEngine;
     unsigned int mID;
 };
 

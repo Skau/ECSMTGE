@@ -18,4 +18,18 @@ private:
     MeshComponent& mComp;
 };
 
+
+struct QTransformComponent : public QObject
+{
+    Q_OBJECT
+public:
+    QTransformComponent(TransformComponent& comp) : mComp(comp) {}
+
+public slots:
+
+
+private:
+    TransformComponent& mComp;
+};
+
 #endif // QCOMPONENTDATA_H

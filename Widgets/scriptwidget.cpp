@@ -100,6 +100,16 @@ void ScriptWidget::on_button_ExecuteJS_clicked()
             * 2. Create a temp file in the working directory (here called foo.js) and add the text
             * After the two steps are done, we can call the function
             */
+
+            QString s =
+            "function getComponent(name)"\
+            "{"\
+            "var comp = entity.getComponent(name);"\
+            "accessedComponents.push(comp);"\
+            "return comp"\
+            "}";
+
+            text.prepend(s);
             text.prepend("function foo(){");
             text.append("}");
             QFile file("foo.js");
@@ -172,7 +182,11 @@ void ScriptWidget::on_button_NewFile_clicked()
             }
             QTextStream stream(&file);
             // Base template for new files. Includes functions beginPlay, tick and endPlay.
-            stream << "// This will be run once when play button is pressed\n"
+            stream << "//Helper function. Use this to get modifiable components belonging to this entity from JavaScript.\n"
+                   << "function getComponent(name)\n"
+                   << "{\n\tvar comp = entity.getComponent(name);\n"
+                   << "\taccessedComponents.push(comp)\n\treturn comp;\n};\n\n\n"
+                   << "// This will be run once when play button is pressed\n"
                    << "function beginPlay()\n{\n\tconsole.log(\"Begin play called on entity \" + entityID);\n}\n\n"
                    << "// This will be once run every frame\n"
                    << "function tick(deltaTime)\n{\n\tconsole.log(\"Tick called on entity \" + entityID);\n}\n\n"
@@ -181,7 +195,8 @@ void ScriptWidget::on_button_NewFile_clicked()
             file.close();
             QFileInfo fileInfo(file.fileName());
             comp->load(fileInfo.filePath().toStdString());
-            ui->lineEdit->setText("Open file");
+            ui->lineEdit->setText(QString::fromStdString(comp->getFilePath()));
+            ui->button_NewFile->setText("Open file");
         }
     }
 }

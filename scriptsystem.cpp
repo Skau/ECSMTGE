@@ -42,16 +42,8 @@ QString ScriptSystem::checkError(QJSValue value)
 
 QEntity* ScriptSystem::getEntityWrapper(unsigned int entity)
 {
-    return new QEntity(entity, entityManager.get(), this);
-}
-
-
-void ScriptSystem::setPosition(unsigned int entity, float x, float y, float z)
-{
-    if(!entityManager)
-        return;
-
-    entityManager->setTransformPos(entity, gsl::vec3(x, y, z));
+    auto engine = entityManager->getComponent<ScriptComponent>(entity)->getEngine();
+    return new QEntity(entity, engine, entityManager.get(), this);
 }
 
 QObject* ScriptSystem::spawnCube(float x, float y, float z)

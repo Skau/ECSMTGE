@@ -51,7 +51,7 @@ World::~World()
 
 void World::initScene()
 {
-    mCurrentScene = std::make_unique<Scene>(this);
+    mCurrentScene = std::make_unique<TestScene>(this);
 
     mCurrentScene->initBlankScene();
     mCurrentScene->initCustomObjects();
@@ -84,4 +84,23 @@ void World::newScene()
 void World::clearEntities()
 {
     entityManager->clear();
+}
+
+void World::loadTemp()
+{
+    if(mCurrentScene)
+    {
+        auto name = mCurrentScene->name;
+        mCurrentScene.reset();
+        mCurrentScene = std::make_unique<Scene>(this);
+        mCurrentScene->LoadFromFile("temp" + name + ".json");
+    }
+}
+
+void World::saveTemp()
+{
+    if(mCurrentScene)
+    {
+        mCurrentScene->SaveToFile("temp" + mCurrentScene->name + ".json");
+    }
 }

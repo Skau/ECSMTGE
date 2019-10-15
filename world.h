@@ -21,6 +21,10 @@ public:
 
     void clearEntities();
 
+    void loadTemp();
+
+    void saveTemp();
+
 public slots:
     void saveScene(const std::string& path);
     void loadScene(const std::string& path);

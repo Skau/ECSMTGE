@@ -1,5 +1,6 @@
 #include "qentity.h"
-#include "qcomponentdata.h"
+#include "entitymanager.h"
+#include "componentdata.h"
 #include <QJsonDocument>
 
 QEntity::QEntity(unsigned int _ID, QJSEngine* engine, EntityManager* _entityManager, QObject* parent)

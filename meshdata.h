@@ -43,6 +43,7 @@ struct Material
     {
         QJsonObject returnObject;
 
+
         returnObject.insert("Shader", QJsonValue(mShader ? mShader->mName.c_str() : "None"));
 
         QJsonArray parameterArray;

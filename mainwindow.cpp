@@ -140,11 +140,14 @@ void MainWindow::on_actionPlay_triggered(bool value)
 {
     if(value)
     {
+        ui->stackedWidget->hide();
+        updateComponentArea(0);
         play();
         ui->actionPlay->setText("Stop");
     }
     else
     {
+        ui->stackedWidget->show();
         stop();
         ui->actionPlay->setText("Play");
     }
@@ -181,10 +184,14 @@ void MainWindow::updateComponentArea(unsigned int entityID)
     if(ui->scrollArea->widget())
         delete ui->scrollArea->widget();
 
+    // Delete cached widgets
+    mCurrentComponentWidgets.clear();
+
+    if(!entityID)
+        return;
+
     // Get all available components
     mAvailableComponentsToAddCache = ComponentTypes;
-
-    mCurrentComponentWidgets.clear();
 
     // Get the components for this entity
     std::vector<Component*> components;

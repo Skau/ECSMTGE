@@ -105,7 +105,10 @@ void ScriptWidget::on_button_ExecuteJS_clicked()
             "function getComponent(name)"\
             "{"\
             "var comp = entity.getComponent(name);"\
+            "if(comp)"\
+            "{"\
             "accessedComponents.push(comp);"\
+            "}"\
             "return comp"\
             "}";
 
@@ -150,6 +153,11 @@ void ScriptWidget::on_button_NewFile_clicked()
                 return;
             }
 
+            if(!QDir(QString::fromStdString(gsl::scriptsFilePath)).exists())
+            {
+                QDir().mkdir(QString::fromStdString(gsl::scriptsFilePath));
+            }
+
             // Simple way to append a unique number to the end of the file, so it doesn't overwrite existing files
             QString fileName = "NewScript";
             if(QFile::exists(QString::fromStdString(gsl::scriptsFilePath) + fileName + ".js"))
@@ -182,16 +190,12 @@ void ScriptWidget::on_button_NewFile_clicked()
             }
             QTextStream stream(&file);
             // Base template for new files. Includes functions beginPlay, tick and endPlay.
-            stream << "//Helper function. Use this to get modifiable components belonging to this entity from JavaScript.\n"
-                   << "function getComponent(name)\n"
-                   << "{\n\tvar comp = entity.getComponent(name);\n"
-                   << "\taccessedComponents.push(comp)\n\treturn comp;\n};\n\n\n"
-                   << "// This will be run once when play button is pressed\n"
-                   << "function beginPlay()\n{\n\tconsole.log(\"Begin play called on entity \" + entityID);\n}\n\n"
+            stream << "// This will be run once when play button is pressed\n"
+                   << "function beginPlay()\n{\n\tconsole.log(\"Begin play called on entity \" + entity.ID);\n}\n\n"
                    << "// This will be once run every frame\n"
-                   << "function tick(deltaTime)\n{\n\tconsole.log(\"Tick called on entity \" + entityID);\n}\n\n"
+                   << "function tick(deltaTime)\n{\n\tconsole.log(\"Tick called on entity \" + entity.ID);\n}\n\n"
                    << "// This will be run once when stop button is pressed\n"
-                   << "function endPlay()\n{\n\tconsole.log(\"End play called on entity \" + entityID);\n}";
+                   << "function endPlay()\n{\n\tconsole.log(\"End play called on entity \" + entity.ID);\n}";
             file.close();
             QFileInfo fileInfo(file.fileName());
             comp->load(fileInfo.filePath().toStdString());

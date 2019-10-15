@@ -144,6 +144,17 @@ bool ScriptComponent::load(const std::string& file)
     }
     QTextStream stream(&scriptFile);
     QString contents = stream.readAll();
+    QString s =
+    "function getComponent(name)"\
+    "{"\
+    "var comp = entity.getComponent(name);"\
+    "if(comp)"\
+    "{"\
+    "accessedComponents.push(comp);"\
+    "}"\
+    "return comp"\
+    "}";
+    contents.prepend(s);
     scriptFile.close();
     auto value = engine->evaluate(contents, QString::fromStdString(file));
     if(value.isError())
@@ -197,6 +208,7 @@ bool ScriptComponent::call(const std::string& function, QJSValueList params)
     if(value.isError())
     {
         ScriptSystem::get()->checkError(value);
+        engine->globalObject().setProperty("accessedComponents", engine->newArray());
         return false;
     }
 
@@ -222,6 +234,7 @@ bool ScriptComponent::execute(QString function, QString contents, QString fileNa
     if(value.isError())
     {
         ScriptSystem::get()->checkError(value);
+        engine->globalObject().setProperty("accessedComponents", engine->newArray());
         return false;
     }
 
@@ -229,6 +242,7 @@ bool ScriptComponent::execute(QString function, QString contents, QString fileNa
     if(value.isError())
     {
         ScriptSystem::get()->checkError(value);
+        engine->globalObject().setProperty("accessedComponents", engine->newArray());
         return false;
     }
 
@@ -236,6 +250,7 @@ bool ScriptComponent::execute(QString function, QString contents, QString fileNa
     if(v.isError())
     {
         ScriptSystem::get()->checkError(v);
+        engine->globalObject().setProperty("accessedComponents", engine->newArray());
         return false;
     }
 

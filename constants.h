@@ -10,6 +10,7 @@ namespace gsl  //Game School Lib
     const std::string shaderFilePath{projectFolderName + "Shaders/"};
     const std::string soundsFilePath{assetFilePath + "Sounds/"};
     const std::string scriptsFilePath{assetFilePath + "Scripts/"};
+    const std::string scenesFilePath{assetFilePath + "Scenes/"};
 }
 
 #endif // CONSTANTS_H

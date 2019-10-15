@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QJSEngine>
 #include "scriptsystem.h"
+#include "qentity.h"
 
 #include <QJsonObject>
 
@@ -343,11 +344,8 @@ public:
 
     virtual void reset() override
     {
-        engine->collectGarbage();
-        delete engine;
-        engine = new QJSEngine();
-        engine->installExtensions(QJSEngine::ConsoleExtension);
-        engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
+        delete JSEntity;
+        JSEntity = nullptr;
         filePath = "";
     }
 

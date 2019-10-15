@@ -2,8 +2,10 @@
 #define QENTITY_H
 
 #include <QObject>
-#include "entitymanager.h"
-#include "componentdata.h"
+#include <QJSValue>
+
+class EntityManager;
+class QJSEngine;
 
 class QEntity : public QObject
 {

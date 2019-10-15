@@ -104,7 +104,6 @@ HEADERS += \
     octree.h \
     physicssystem.h \
     postprocessor.h \
-    qcomponentdata.h \
     qentity.h \
     renderer.h \
     resourcemanager.h \
@@ -160,7 +159,6 @@ SOURCES += \
     objecttreewidget.cpp \
     physicssystem.cpp \
     postprocessor.cpp \
-    qcomponentdata.cpp \
     qentity.cpp \
     renderer.cpp \
     resourcemanager.cpp \

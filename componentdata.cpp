@@ -4,6 +4,7 @@
 #include "resourcemanager.h"
 #include "soundmanager.h"
 #include "qentity.h"
+#include <QFileInfo>
 
 void TransformComponent::addPosition(const gsl::vec3 &pos)
 {
@@ -119,7 +120,8 @@ void ScriptComponent::fromJSON(QJsonObject object)
     if(file.size())
     {
         engine->globalObject().setProperty("entityID", entityId);
-        load(file.toStdString());
+        QFileInfo info(file);
+        load(gsl::scriptsFilePath + info.baseName().toStdString() + ".js");
     }
 }
 
@@ -138,6 +140,11 @@ bool ScriptComponent::load(const std::string& file)
     }
 
     QFile scriptFile(QString::fromStdString(file));
+    if(!scriptFile.exists())
+    {
+        qDebug() << "Script file (" + QString::fromStdString(file) + ") does not exist!";
+        return false;
+    }
     if (!scriptFile.open(QIODevice::ReadOnly))
     {
         qDebug() << "Failed to open script: " << QString::fromStdString(file);
@@ -163,7 +170,8 @@ bool ScriptComponent::load(const std::string& file)
         return false;
     }
 
-    filePath = file;
+    QFileInfo info(QString::fromStdString(file));
+    filePath = gsl::scriptsFilePath + info.baseName().toStdString() + ".js";
     return true;
 }
 

@@ -74,7 +74,9 @@ void ScriptWidget::on_toolButton_clicked()
     {
         if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
         {
-            ui->lineEdit->setText(fileName);
+            QFileInfo info(fileName);
+            auto name = QString::fromStdString(gsl::scriptsFilePath) + info.baseName() + ".js";
+            ui->lineEdit->setText(name);
             comp->load(fileName.toStdString());
         }
     }

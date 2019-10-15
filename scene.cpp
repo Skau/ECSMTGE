@@ -131,8 +131,6 @@ void Scene::SaveToFile(const std::string& path)
     QJsonDocument document(mainObject);
     file.write(document.toJson());
     file.close();
-
-    qDebug() << "Saved successfully";
 }
 
 

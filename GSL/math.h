@@ -29,6 +29,7 @@ namespace gsl
     GLfloat rad2degf(GLfloat rad);
     GLfloat deg2radf(GLfloat deg);
     GLfloat clamp(GLfloat x, GLfloat min, GLfloat max);
+    Vector3D abs(const Vector3D& v);
 
     //Interpolation
     //Remember time can only be between 0 and 1

@@ -1,5 +1,6 @@
 #include "physicssystem.h"
 #include <chrono>
+#include "entitymanager.h"
 
 PhysicsSystem::PhysicsSystem()
 {
@@ -18,14 +19,39 @@ void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, s
     // 1. Update positions and velocities
     updatePosVel(transforms, physics, deltaTime);
 
+    // 2. Calculate bounds
+    // auto sceneTree = generateSceneTree(transforms, colliders);
+    auto bounds = updateBounds(transforms, colliders);
+
     std::vector<HitInfo> hitInfos;
+    // 3. Collision detection
+    for (unsigned int i{0}; i < bounds.size(); ++i)
+    {
+        for (unsigned int j{i + 1}; j < bounds.size(); ++j)
+        {
+            if (AABBAABB(bounds.at(i).bounds.minMax(), bounds.at(j).bounds.minMax()))
+            {
+                auto ieID{bounds.at(i).eID}, jeID{bounds.at(j).eID};
+
+                auto collisions = collisionCheck(
+                {*gsl::find(transforms.begin(), transforms.end(), ieID), *gsl::find(colliders.begin(), colliders.end(), ieID)},
+                {*gsl::find(transforms.begin(), transforms.end(), jeID), *gsl::find(colliders.begin(), colliders.end(), jeID)});
+
+                if (collisions)
+                {
+                    hitInfos.push_back(collisions->at(0));
+                    hitInfos.push_back(collisions->at(1));
+                }
+            }
+        }
+    }
+
     // 2. Collision detection
-    auto sceneTree = generateSceneTree(transforms, colliders);
 //    for (const auto &item : transforms)
 //    {
 //        hitInfos.push_back(getHitInfo(item));
 //    }
-    HandleCollisions(transforms, colliders);
+//    HandleCollisions(transforms, colliders);
 
     // 3. Handle collisions
     for (const auto &item : hitInfos)
@@ -34,6 +60,93 @@ void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, s
     }
 
     // 4. Recursive update
+}
+
+std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vector<TransformComponent> &trans, std::vector<ColliderComponent> &colliders)
+{
+    auto transIt = trans.begin();
+    auto collIt = colliders.begin();
+
+    bool collEnd{collIt == colliders.end()}; // For short circuit evaluation
+    std::vector<PhysicsSystem::CollisionEntity> boundsList;
+    boundsList.reserve(colliders.size());
+
+    while (static_cast<bool>("we didn't start the fire"))
+    {
+        if (collIt == colliders.end())
+            break;
+
+        if (!collIt->valid)
+        {
+            ++collIt;
+            continue;
+        }
+
+        if (!transIt->valid || transIt->entityId < collIt->entityId)
+        {
+            ++transIt;
+
+            continue;
+        }
+
+        if (!collEnd)
+        {
+            if (!collIt->valid || collIt->entityId < transIt->entityId)
+            {
+                ++collIt;
+                if (collIt == colliders.end())
+                    collEnd = true;
+                continue;
+            }
+
+            if (collIt->entityId == transIt->entityId)
+            {
+                if (transIt->colliderBoundsOutdated)
+                {
+                    // Calculate bounds
+                    switch (collIt->collisionType)
+                    {
+                        float radius;
+
+                        case ColliderComponent::SPHERE:
+                            collIt->bounds.centre = gsl::vec3{0.f, 0.f, 0.f};
+                            radius = std::get<float>(collIt->extents);
+                            collIt->bounds.extents = gsl::vec3{radius * transIt->scale.x, radius * transIt->scale.y, radius * transIt->scale.z};
+                            break;
+                        case ColliderComponent::AABB:
+                            gsl::vec3 min{};
+                            gsl::vec3 max{};
+                            auto mMatrix = gsl::mat4::modelMatrix(gsl::vec3{}, transIt->rotation, transIt->scale);
+                            std::array<gsl::vec3, 2> points{(mMatrix * collIt->bounds.minMax().first).toVector3D(),
+                                                            (mMatrix * collIt->bounds.minMax().second).toVector3D()};
+                            for (const auto &p : points)
+                            {
+                                min.x = (p.x < min.x) ? p.x : min.x;
+                                min.y = (p.y < min.y) ? p.y : min.y;
+                                min.z = (p.z < min.z) ? p.z : min.z;
+
+                                max.x = (max.x < p.x) ? p.x : max.x;
+                                max.y = (max.y < p.y) ? p.y : max.y;
+                                max.z = (max.z < p.z) ? p.z : max.z;
+                            }
+                            collIt->bounds.centre = (max - min) * 0.5f + min;
+                            collIt->bounds.extents = gsl::abs(max - collIt->bounds.centre);
+                            break;
+                    }
+                }
+
+                auto relativeBounds = collIt->bounds;
+                relativeBounds.centre += transIt->position;
+                boundsList.emplace_back(collIt->entityId, relativeBounds);
+            }
+        }
+
+        transIt->colliderBoundsOutdated = false;
+        ++collIt;
+        ++transIt;
+    }
+
+    return boundsList;
 }
 
 gsl::Octree<PhysicsSystem::CubeNode> PhysicsSystem::generateSceneTree(std::vector<TransformComponent> &trans, std::vector<ColliderComponent> &colliders)
@@ -239,9 +352,10 @@ void PhysicsSystem::updatePosVel(std::vector<TransformComponent> &transforms, st
     }
 }
 
-void PhysicsSystem::HandleCollisions(std::vector<TransformComponent> &transform, std::vector<ColliderComponent> &collider)
+std::optional<std::array<PhysicsSystem::HitInfo, 2>> PhysicsSystem::collisionCheck(std::pair<const TransformComponent &, const ColliderComponent &> a,
+                                                                    std::pair<const TransformComponent &, const ColliderComponent &> b)
 {
-
+    return std::nullopt;
 }
 
 PhysicsSystem::HitInfo PhysicsSystem::getHitInfo(const TransformComponent &transform, const ColliderComponent &collider)
@@ -254,13 +368,33 @@ void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info)
 
 }
 
+TransformComponent *PhysicsSystem::findInTransforms(std::vector<TransformComponent> &t, unsigned int eID)
+{
+    for (auto it{t.begin()}; it != t.end(); ++it)
+    {
+        if (it->entityId == eID)
+            return &(*it);
+    }
+    return nullptr;
+}
+
+ColliderComponent *PhysicsSystem::findInColliders(std::vector<ColliderComponent> &t, unsigned int eID)
+{
+    for (auto it{t.begin()}; it != t.end(); ++it)
+    {
+        if (it->entityId == eID)
+            return &(*it);
+    }
+    return nullptr;
+}
+
 bool PhysicsSystem::AABBAABB(const std::pair<gsl::vec3, gsl::vec3> &a, const std::pair<gsl::vec3, gsl::vec3> &b)
 {
     // min = first, max = second
     // return A.min <= B.max && a.max >= b.min
     return
-        (a.first.x <= b.second.x && a.second.x >= b.first.x) &&
-        (a.first.y <= b.second.y && a.second.y >= b.first.y) &&
+            (a.first.x <= b.second.x && a.second.x >= b.first.x) &&
+            (a.first.y <= b.second.y && a.second.y >= b.first.y) &&
         (a.first.z <= b.second.z && a.second.z >= b.first.z);
 
 }

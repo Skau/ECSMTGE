@@ -48,13 +48,18 @@ public:
     static void UpdatePhysics(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent>& physics, std::vector<ColliderComponent>& colliders, float deltaTime);
 
 private:
+    static std::vector<PhysicsSystem::CollisionEntity> updateBounds(std::vector<TransformComponent>& trans, std::vector<ColliderComponent>& colliders);
     static gsl::Octree<CubeNode> generateSceneTree(std::vector<TransformComponent>& trans, std::vector<ColliderComponent>& colliders);
     static void subdivideBranch(gsl::Octree<CubeNode>& branch);
     static std::vector<std::pair<gsl::ivec3, PhysicsSystem::CubeNode>> subdivide(const std::pair<gsl::ivec3, CubeNode> &node);
     static void updatePosVel(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent> &physics, float deltaTime);
-    static void HandleCollisions(std::vector<TransformComponent>& transform, std::vector<ColliderComponent>& collider);
+    static std::optional<std::array<HitInfo, 2>> collisionCheck(std::pair<const TransformComponent&, const ColliderComponent&> a,
+                                                 std::pair<const TransformComponent&, const ColliderComponent&> b);
     static HitInfo getHitInfo(const TransformComponent& transform, const ColliderComponent& collider);
     static void handleHitInfo(HitInfo info);
+
+    static TransformComponent* findInTransforms(std::vector<TransformComponent> &t, unsigned int eID);
+    static ColliderComponent* findInColliders(std::vector<ColliderComponent> &t, unsigned int eID);
 
 public:
     // --------- Collision checks --------------

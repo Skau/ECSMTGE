@@ -389,9 +389,9 @@ struct ColliderComponent : public Component
     enum Type
     {
         AABB,
-        Box,
-        Sphere,
-        Capsule
+        BOX,
+        SPHERE,
+        CAPSULE
     };
 
     Type collisionType;

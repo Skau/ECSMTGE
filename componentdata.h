@@ -338,9 +338,9 @@ public:
     ScriptComponent(unsigned int _eID = 0, bool _valid = false)
         : Component(_eID, _valid, ComponentType::Script), filePath(""), JSEntity{nullptr}
     {
-//        engine = new QJSEngine();
-//        engine->installExtensions(QJSEngine::ConsoleExtension);
-//        engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
+        engine = new QJSEngine();
+        engine->installExtensions(QJSEngine::ConsoleExtension);
+        engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
     }
 
     virtual void reset() override
@@ -350,12 +350,42 @@ public:
         filePath = "";
     }
 
-    //QJSEngine* engine;
-    std::string filePath;
-    QEntity* JSEntity{nullptr};
+    QJSEngine* getEngine() { return engine; }
 
     virtual QJsonObject toJSON() override;
     virtual void fromJSON(QJsonObject object) override;
+
+    const std::string& getFilePath() { return filePath; }
+
+    /**
+     * @brief Loads the js file given. Returns true if the file is successfully evaluated and set.
+     */
+    bool load(const std::string& file);
+
+    /**
+     * @brief Calls a JS function on the current file loaded. Returns true if successful.
+     */
+    bool call(const std::string& function);
+
+    /**
+     * @brief Calls a JS function with params on the current file loaded. Returns true if successful.
+     */
+    bool call(const std::string& function, QJSValueList params);
+
+    /**
+     * @brief Executes one off raw js code from the mini editor. Returns true if successfull.
+     */
+    bool execute(QString function, QString contents, QString fileName);
+
+private:
+    QJSEngine* engine;
+    std::string filePath;
+    QEntity* JSEntity{nullptr};
+
+    /**
+     * @brief Gets components accessed during the JS script and checks if anything was modified
+     */
+    void checkForModifiedComponents();
 };
 
 struct ColliderComponent : public Component

@@ -191,5 +191,4 @@ DISTFILES += \
     Shaders/Deferred/directionallight.frag \
     Shaders/Deferred/gbuffer.frag \
     Shaders/Deferred/gbuffer.vert \
-    Shaders/Deferred/light.vert \
-    octree.tcc
+    Shaders/Deferred/light.vert

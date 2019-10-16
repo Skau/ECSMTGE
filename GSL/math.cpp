@@ -185,4 +185,10 @@ namespace gsl
         else
             return false;
     }
+
+    Vector3D abs(const Vector3D &v)
+    {
+        return {std::abs(v.x), std::abs(v.y), std::abs(v.z)};
+    }
+
 } //namespace

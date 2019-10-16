@@ -15,6 +15,8 @@ namespace gsl
     class Vector2D;
     class Vector3D;
     class Vector4D;
+    class IVector2D;
+    class IVector3D;
 
     class Matrix2x2;
     class Matrix3x3;
@@ -28,6 +30,8 @@ namespace gsl
     typedef Vector3D vec3;
     typedef Vector4D vec4;
     typedef Vector4D vec;
+    typedef IVector2D ivec2;
+    typedef IVector3D ivec3;
     typedef Matrix2x2 mat2;
     typedef Matrix3x3 mat3;
     typedef Matrix4x4 mat4;

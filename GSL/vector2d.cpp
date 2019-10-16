@@ -19,6 +19,12 @@ namespace gsl
 
     }
 
+    Vector2D::Vector2D(const ivec2 &v)
+        : x{static_cast<float>(v.x)}, y{static_cast<float>(v.y)}
+    {
+
+    }
+
     const Vector2D& Vector2D::operator=(const Vector2D &rhs)
     {
         x = rhs.getX();
@@ -130,6 +136,11 @@ namespace gsl
     IVector2D::IVector2D(int _x, int _y) : x{_x}, y{_y}
     {
 
+    }
+
+    bool IVector2D::operator==(const ivec2 &rhs) const
+    {
+        return x == rhs.x && y == rhs.y;
     }
 
 } //namespace

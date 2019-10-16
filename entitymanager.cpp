@@ -107,7 +107,7 @@ void EntityManager::UpdateBounds()
     auto meshIt = mMeshComponents.begin();
     for (auto transIt = mTransformComponents.begin(); transIt != mTransformComponents.end(); ++transIt)
     {
-        if (transIt->boundsOutdated)
+        if (transIt->meshBoundsOutdated)
         {
             while (transIt->entityId > meshIt->entityId)
                 ++meshIt;
@@ -115,7 +115,7 @@ void EntityManager::UpdateBounds()
             // Transform doesn't have mesh
             if (transIt->entityId != meshIt->entityId)
             {
-                transIt->boundsOutdated = false;
+                transIt->meshBoundsOutdated = false;
                 continue;
             }
             else
@@ -126,7 +126,7 @@ void EntityManager::UpdateBounds()
                     biggestScale = (biggestScale < *(&transIt->scale.x + i)) ? *(&transIt->scale.x + i) : biggestScale;
 
                 meshIt->bounds = {meshIt->meshData.bounds.centre, meshIt->meshData.bounds.radius * biggestScale};
-                transIt->boundsOutdated = false;
+                transIt->meshBoundsOutdated = false;
             }
         }
     }

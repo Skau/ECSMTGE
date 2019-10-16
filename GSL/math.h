@@ -15,6 +15,8 @@ namespace gsl
     typedef Vector3D vec3;
     typedef Vector4D vec4;
     typedef Vector4D vec;
+    typedef IVector2D ivec2;
+    typedef IVector3D ivec3;
     typedef Matrix2x2 mat2;
     typedef Matrix3x3 mat3;
     typedef Matrix4x4 mat4;
@@ -27,6 +29,7 @@ namespace gsl
     GLfloat rad2degf(GLfloat rad);
     GLfloat deg2radf(GLfloat deg);
     GLfloat clamp(GLfloat x, GLfloat min, GLfloat max);
+    Vector3D abs(const Vector3D& v);
 
     //Interpolation
     //Remember time can only be between 0 and 1

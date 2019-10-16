@@ -46,20 +46,19 @@ void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, s
         }
     }
 
-    // 2. Collision detection
-//    for (const auto &item : transforms)
-//    {
-//        hitInfos.push_back(getHitInfo(item));
-//    }
-//    HandleCollisions(transforms, colliders);
-
-    // 3. Handle collisions
+    // 4. Handle collisions
     for (const auto &item : hitInfos)
     {
         handleHitInfo(item);
     }
 
-    // 4. Recursive update
+    // 5. Recursive update (probably not going to do this step)
+
+    // 6. Run Collision Delegates
+    for (const auto &item : hitInfos)
+    {
+        fireHitEvent(item);
+    }
 }
 
 std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vector<TransformComponent> &trans, std::vector<ColliderComponent> &colliders)
@@ -358,12 +357,12 @@ std::optional<std::array<PhysicsSystem::HitInfo, 2>> PhysicsSystem::collisionChe
     return std::nullopt;
 }
 
-PhysicsSystem::HitInfo PhysicsSystem::getHitInfo(const TransformComponent &transform, const ColliderComponent &collider)
+void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info)
 {
-    return HitInfo{};
+
 }
 
-void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info)
+void PhysicsSystem::fireHitEvent(PhysicsSystem::HitInfo info)
 {
 
 }

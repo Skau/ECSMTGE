@@ -45,7 +45,8 @@ public:
     };
 
     PhysicsSystem();
-    static void UpdatePhysics(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent>& physics, std::vector<ColliderComponent>& colliders, float deltaTime);
+    static void UpdatePhysics(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent>& physics,
+                              std::vector<ColliderComponent>& colliders, float deltaTime);
 
 private:
     static std::vector<PhysicsSystem::CollisionEntity> updateBounds(std::vector<TransformComponent>& trans, std::vector<ColliderComponent>& colliders);
@@ -55,8 +56,8 @@ private:
     static void updatePosVel(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent> &physics, float deltaTime);
     static std::optional<std::array<HitInfo, 2>> collisionCheck(std::pair<const TransformComponent&, const ColliderComponent&> a,
                                                  std::pair<const TransformComponent&, const ColliderComponent&> b);
-    static HitInfo getHitInfo(const TransformComponent& transform, const ColliderComponent& collider);
     static void handleHitInfo(HitInfo info);
+    static void fireHitEvent(HitInfo info);
 
     static TransformComponent* findInTransforms(std::vector<TransformComponent> &t, unsigned int eID);
     static ColliderComponent* findInColliders(std::vector<ColliderComponent> &t, unsigned int eID);

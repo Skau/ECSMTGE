@@ -17,10 +17,10 @@ ScriptWidget::ScriptWidget(MainWindow* mainWindow, QWidget *parent) :
     {
         if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
         {
-            auto filePath = comp->getFilePath();
+            auto filePath = comp->filePath;
             if(filePath.size())
             {
-                ui->lineEdit->setText(QString::fromStdString(comp->getFilePath()));
+                ui->lineEdit->setText(QString::fromStdString(comp->filePath));
                 ui->button_NewFile->setText("Open file");
             }
             else
@@ -77,7 +77,7 @@ void ScriptWidget::on_toolButton_clicked()
             QFileInfo info(fileName);
             auto name = QString::fromStdString(gsl::scriptsFilePath) + info.baseName() + ".js";
             ui->lineEdit->setText(name);
-            comp->load(fileName.toStdString());
+            ScriptSystem::get()->load(*comp, fileName.toStdString());
         }
     }
 }
@@ -102,19 +102,7 @@ void ScriptWidget::on_button_ExecuteJS_clicked()
             * 2. Create a temp file in the working directory (here called foo.js) and add the text
             * After the two steps are done, we can call the function
             */
-
-            QString s =
-            "function getComponent(name)"\
-            "{"\
-            "var comp = entity.getComponent(name);"\
-            "if(comp)"\
-            "{"\
-            "accessedComponents.push(comp);"\
-            "}"\
-            "return comp"\
-            "}";
-
-            text.prepend(s);
+            text.prepend(ScriptSystem::get()->getEntityHelperFunctions());
             text.prepend("function foo(){");
             text.append("}");
             QFile file("foo.js");
@@ -123,7 +111,7 @@ void ScriptWidget::on_button_ExecuteJS_clicked()
             stream << text;
             file.close();
 
-            if(comp->execute("foo", text, "foo.js"))
+            if(ScriptSystem::get()->execute(*comp, "foo", text, "foo.js"))
             {
                 if(ui->label_Status)
                     ui->label_Status->setText("Execute successful");
@@ -200,8 +188,8 @@ void ScriptWidget::on_button_NewFile_clicked()
                    << "function endPlay()\n{\n\tconsole.log(\"End play called on entity \" + entity.ID);\n}";
             file.close();
             QFileInfo fileInfo(file.fileName());
-            comp->load(fileInfo.filePath().toStdString());
-            ui->lineEdit->setText(QString::fromStdString(comp->getFilePath()));
+            ScriptSystem::get()->load(*comp, fileInfo.filePath().toStdString());
+            ui->lineEdit->setText(QString::fromStdString(comp->filePath));
             ui->button_NewFile->setText("Open file");
         }
     }

@@ -148,7 +148,9 @@ void MainWindow::on_actionPlay_triggered(bool value)
     else
     {
         ui->stackedWidget->show();
+        updateComponentArea(0);
         stop();
+        ui->lineEdit_SelectedObject->setText("");
         ui->actionPlay->setText("Play");
     }
 }

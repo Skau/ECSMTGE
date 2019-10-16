@@ -231,6 +231,7 @@ void App::updatePerspective()
 void App::onPlay()
 {
     mCurrentlyPlaying = true;
+
     mWorld->saveTemp();
 
     auto& scripts = mWorld->getEntityManager()->getScriptComponents();
@@ -244,10 +245,15 @@ void App::onPlay()
 void App::onStop()
 {
     mCurrentlyPlaying = false;
+
     auto& scripts = mWorld->getEntityManager()->getScriptComponents();
     ScriptSystem::get()->endPlay(scripts);
+
     auto sounds = mWorld->getEntityManager()->getSoundComponents();
     SoundManager::stop(sounds);
+
+    mRenderer->EditorCurrentEntitySelected = nullptr;
+
     mWorld->loadTemp();
 }
 

@@ -72,6 +72,11 @@ bool removeComponent(unsigned int entity) \
     template<class T, typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
     T& addComponents(unsigned int entity) \
     { \
+        auto component = getComponent<K>(entity);\
+        if(component)\
+        {\
+            return *component;\
+        }\
         for (auto& comp : CONCATENATE(m, K, s)) \
         { \
             if (!comp.valid) \

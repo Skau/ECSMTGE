@@ -6,131 +6,136 @@
 QEntity::QEntity(unsigned int _ID, QJSEngine* engine, EntityManager* _entityManager, QObject* parent)
     :  QObject(parent), entityManager(_entityManager), mEngine(engine), mID(_ID)
 {
-
 }
 
-void QEntity::updateComponents(std::vector<QJsonObject> objects)
+QJSValue QEntity::getComponent(const QString &name)
 {
-    if(!objects.size())
-        return;
+    QJSValueList list;
+    list << name;
+    list << mID;
+    return ScriptSystem::get()->call("getComponent", list);
+}
 
-    // Iterate through accessed components
+QJSValue QEntity::addComponent(const QString &name)
+{
+    QJSValueList list;
+    list << name;
+    list << mID;
+    return ScriptSystem::get()->call("addComponent", list);
+}
 
-    for(auto object : objects)
+QJSValue QEntity::_getComponent(const QString& name, unsigned id)
+{
+    if(!id)
     {
-        // Get component that matches the type
-       Component* comp;
-       switch (static_cast<ComponentType>(object["ComponentType"].toInt()))
-       {
-       case ComponentType::Other:
-       {
-            comp = entityManager->getComponent<EntityInfo>(mID);
-            break;
-       }
-       case ComponentType::Mesh:
-       {
-            comp = entityManager->getComponent<MeshComponent>(mID);
-            break;
-       }
-       case ComponentType::Transform:
-       {
-           comp = entityManager->getComponent<TransformComponent>(mID);
-           break;
-       }
-       case ComponentType::Camera:
-       {
-           comp = entityManager->getComponent<CameraComponent>(mID);
-           break;
-       }
-       case ComponentType::Physics:
-       {
-           comp = entityManager->getComponent<PhysicsComponent>(mID);
-           break;
-       }
-       case ComponentType::Input:
-       {
-           comp = entityManager->getComponent<InputComponent>(mID);
-           break;
-       }
-       case ComponentType::Sound:
-       {
-           comp = entityManager->getComponent<SoundComponent>(mID);
-           break;
-       }
-       case ComponentType::LightSpot:
-       {
-           comp = entityManager->getComponent<SpotLightComponent>(mID);
-           break;
-       }
-       case ComponentType::LightPoint:
-       {
-           comp = entityManager->getComponent<PointLightComponent>(mID);
-           break;
-       }
-       case ComponentType::LightDirectional:
-       {
-           comp = entityManager->getComponent<DirectionalLightComponent>(mID);
-           break;
-       }
-       case ComponentType::Script:
-       {
-           comp = entityManager->getComponent<ScriptComponent>(mID);
-           break;
-       }
-       case ComponentType::Collider:
-       {
-           comp = entityManager->getComponent<ColliderComponent>(mID);
-           break;
-       }
-       }
-
-       if(comp)
-       {
-           // Check if they are different
-           // If they are different this component was modified in JS
-           // and we need to update it
-           auto oldJson = comp->toJSON();
-           if(object != oldJson)
-           {
-               comp->fromJSON(object);
-           }
-       }
+        id = mID;
     }
-}
 
-QJSValue QEntity::getComponent(const QString& name)
-{
     Component* component = nullptr;
 
     if(name == "info")
-        component = entityManager->getComponent<EntityInfo>(mID);
+        component = entityManager->getComponent<EntityInfo>(id);
     else if(name == "transform")
-        component = entityManager->getComponent<TransformComponent>(mID);
+        component = entityManager->getComponent<TransformComponent>(id);
     else if(name == "mesh")
-        component = entityManager->getComponent<MeshComponent>(mID);
+        component = entityManager->getComponent<MeshComponent>(id);
     else if(name == "physics")
-        component = entityManager->getComponent<PhysicsComponent>(mID);
+        component = entityManager->getComponent<PhysicsComponent>(id);
     else if(name == "camera")
-        component = entityManager->getComponent<CameraComponent>(mID);
+        component = entityManager->getComponent<CameraComponent>(id);
     else if(name == "input")
-        component = entityManager->getComponent<InputComponent>(mID);
+        component = entityManager->getComponent<InputComponent>(id);
     else if(name == "sound")
-        component = entityManager->getComponent<SoundComponent>(mID);
+        component = entityManager->getComponent<SoundComponent>(id);
     else if(name == "pointLight")
         component = entityManager->getComponent<PointLightComponent>(mID);
     else if(name == "directionalLight")
-        component = entityManager->getComponent<DirectionalLightComponent>(mID);
+        component = entityManager->getComponent<DirectionalLightComponent>(id);
     else if(name == "spotLight")
-        component = entityManager->getComponent<SpotLightComponent>(mID);
+        component = entityManager->getComponent<SpotLightComponent>(id);
     else if(name == "script")
-        component = entityManager->getComponent<ScriptComponent>(mID);
+        component = entityManager->getComponent<ScriptComponent>(id);
     else if(name == "collider")
-        component = entityManager->getComponent<ColliderComponent>(mID);
+        component = entityManager->getComponent<ColliderComponent>(id);
 
     // Return 0 if nothing was found
     if(!component)
         return 0;
 
-    return mEngine->toScriptValue(component->toJSON());
+    auto JSON = component->toJSON();
+    JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+    return mEngine->toScriptValue(JSON);
 }
 
+QJSValue QEntity::_addComponent(const QString &name, unsigned id)
+{
+    if(!id)
+    {
+        id = mID;
+    }
+
+    Component* component = nullptr;
+
+    if(name == "transform")
+        component = entityManager->addComponent(id, ComponentType::Transform);
+    else if(name == "mesh")
+        component = entityManager->addComponent(id, ComponentType::Mesh);
+    else if(name == "physics")
+        component = entityManager->addComponent(id, ComponentType::Physics);
+    else if(name == "camera")
+        component = entityManager->addComponent(id, ComponentType::Camera);
+    else if(name == "input")
+        component = entityManager->addComponent(id, ComponentType::Input);
+    else if(name == "sound")
+        component = entityManager->addComponent(id, ComponentType::Sound);
+    else if(name == "pointLight")
+        component = entityManager->addComponent(id, ComponentType::LightPoint);
+    else if(name == "directionalLight")
+        component = entityManager->addComponent(id, ComponentType::LightDirectional);
+    else if(name == "spotLight")
+        component = entityManager->addComponent(id, ComponentType::LightSpot);
+    else if(name == "script")
+        component = entityManager->addComponent(id, ComponentType::Script);
+    else if(name == "collider")
+        component = entityManager->addComponent(id, ComponentType::Collider);
+
+    // Return 0 if nothing was found
+    if(!component)
+        return 0;
+
+    auto JSON = component->toJSON();
+    JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+    return mEngine->toScriptValue(JSON);
+}
+
+void QEntity::setMesh(const QString &name)
+{
+    if(!name.size())
+        return;
+
+    auto meshComp = entityManager->getComponent<MeshComponent>(mID);
+    if(!meshComp)
+        return;
+
+    auto meshData = ResourceManager::instance()->getMesh(name.toStdString());
+    if(!meshData)
+        return;
+
+    meshComp->meshData = *meshData;
+}
+
+void QEntity::setShader(const QString &name)
+{
+    if(!name.size())
+        return;
+
+    auto meshComp = entityManager->getComponent<MeshComponent>(mID);
+    if(!meshComp)
+        return;
+
+    auto shader = ResourceManager::instance()->getShader(name.toStdString());
+    if(!shader)
+        return;
+
+    meshComp->mMaterial.loadShaderWithParameters(shader);
+}

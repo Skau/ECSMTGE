@@ -89,22 +89,23 @@ void TransformComponent::fromJSON(QJsonObject object)
     }
 
     auto positionArray = object["Position"].toArray();
-    position.x = static_cast<float>(positionArray[0].toDouble());
-    position.y = static_cast<float>(positionArray[1].toDouble());
-    position.z = static_cast<float>(positionArray[2].toDouble());
+    setPosition({static_cast<float>(positionArray[0].toDouble()),
+                 static_cast<float>(positionArray[1].toDouble()),
+                 static_cast<float>(positionArray[2].toDouble())});
+
 
     auto rotationArray = object["Rotation"].toArray();
-    rotation.i = static_cast<float>(rotationArray[0].toDouble());
-    rotation.j = static_cast<float>(rotationArray[1].toDouble());
-    rotation.k = static_cast<float>(rotationArray[2].toDouble());
-    rotation.s = static_cast<float>(rotationArray[3].toDouble());
+    setRotation({static_cast<float>(rotationArray[0].toDouble()),
+                 static_cast<float>(rotationArray[1].toDouble()),
+                 static_cast<float>(rotationArray[2].toDouble()),
+                 static_cast<float>(rotationArray[3].toDouble())});
+
+
 
     auto scaleArray = object["Scale"].toArray();
-    scale.x = static_cast<float>(scaleArray[0].toDouble());
-    scale.y = static_cast<float>(scaleArray[1].toDouble());
-    scale.z = static_cast<float>(scaleArray[2].toDouble());
-
-    updated = true;
+    setScale({static_cast<float>(scaleArray[0].toDouble()),
+              static_cast<float>(scaleArray[1].toDouble()),
+              static_cast<float>(scaleArray[2].toDouble())});
 }
 
 QJsonObject ScriptComponent::toJSON()
@@ -160,6 +161,20 @@ void EntityInfo::fromJSON(QJsonObject object)
     name = object["Name"].toString().toStdString();
 }
 
+void PhysicsComponent::setVelocity(gsl::vec3 newVel)
+{
+    velocity.x = gsl::equal(velocity.x, newVel.x) ? velocity.x : newVel.x;
+    velocity.y = gsl::equal(velocity.y, newVel.y) ? velocity.y : newVel.y;
+    velocity.z = gsl::equal(velocity.z, newVel.z) ? velocity.z : newVel.z;
+}
+
+void PhysicsComponent::setAcceleration(gsl::vec3 newAcc)
+{
+    acceleration.x = gsl::equal(acceleration.x, newAcc.x) ? acceleration.x : newAcc.x;
+    acceleration.y = gsl::equal(acceleration.y, newAcc.y) ? acceleration.y : newAcc.y;
+    acceleration.z = gsl::equal(acceleration.z, newAcc.z) ? acceleration.z : newAcc.z;
+}
+
 QJsonObject PhysicsComponent::toJSON()
 {
     auto parentObj = Component::toJSON();
@@ -186,14 +201,14 @@ void PhysicsComponent::fromJSON(QJsonObject object)
     Component::fromJSON(object);
 
     auto velocityArr = object["Velocity"].toArray();
-    velocity.x = static_cast<float>(velocityArr[0].toDouble());
-    velocity.y = static_cast<float>(velocityArr[1].toDouble());
-    velocity.z = static_cast<float>(velocityArr[2].toDouble());
+    setVelocity({static_cast<float>(velocityArr[0].toDouble()),
+                 static_cast<float>(velocityArr[1].toDouble()),
+                 static_cast<float>(velocityArr[2].toDouble())});
 
     auto accelerationArr = object["Acceleration"].toArray();
-    acceleration.x = static_cast<float>(velocityArr[0].toDouble());
-    acceleration.y = static_cast<float>(velocityArr[1].toDouble());
-    acceleration.z = static_cast<float>(velocityArr[2].toDouble());
+    setAcceleration({static_cast<float>(velocityArr[0].toDouble()),
+                     static_cast<float>(velocityArr[1].toDouble()),
+                     static_cast<float>(velocityArr[2].toDouble())});
 
     mass = static_cast<float>(object["Mass"].toDouble());
 }

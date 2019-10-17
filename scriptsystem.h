@@ -15,7 +15,7 @@ class QEntity;
  * The instance of this class is given to all engines (all script components have one each)
  * as a global object under the name engine.
  * This means that any public slots or Q_INVOKABLE public functions in this class are callable from JS.
- * Example JS code: var entity = engine.spawnCube(2, 0, 5);
+ * Example JS code: let entity = engine.spawnCube();
  */
 class ScriptSystem : public QObject
 {
@@ -73,16 +73,43 @@ public:
     bool execute(ScriptComponent& comp, QString function, QString contents, QString fileName);
 
 
-    void checkForModifiedComponents();
-
 public slots:
-    QObject* spawnCube(float x, float y, float z);
+    /**
+     * @brief Spawns and returns a cube at (0,0,0). This includes a transform- and mesh component. Mesh is set to a cube. Defaults to visible.
+     * Example: let cube = engine.spawnCube();
+     */
+    QObject* spawnCube();
+    /**
+     * @brief Spawns and returns an entity with no components.
+     * Example: let spawnedEntity = engine.spawnEntity();
+     */
     QObject* spawnEntity();
+
+    /**
+     * @brief Returns an array of all entity IDs that has the given component.
+     * Example: let entityIDs = engine.getAllEntityIDsByComponent("mesh");
+     */
+    QJSValue getAllEntityIDsByComponent(const QString& name);
+
+    /**
+     * @brief Returns an array of all entityIDs.
+     * Example: let entityIDs = engine.getAllEntityIDs();
+     */
+    QJSValue getAllEntityIDs();
+
+    /**
+     * @brief Returns an entity with the given ID.
+     * Example: let entity = getEntity(2);
+     */
+    QObject* getEntity(unsigned int id);
 
 private:
     ScriptSystem(){}
 
     std::shared_ptr<EntityManager> entityManager;
+
+    void updateComponents();
+    void updateJSComponents(ScriptComponent& comp);
 
     // Cached
     ScriptComponent* currentComp;
@@ -91,7 +118,7 @@ private:
 
     const QString addCompFunc = "function addComponent(name, id = 0)"
                                 "{\n"
-                                "var comp = entity._addComponent(name, id);\n"
+                                "let comp = me._addComponent(name, id);\n"
                                 "if(comp != null)\n"
                                 "{\n"
                                 "accessedComponents.push(comp);\n"
@@ -101,7 +128,7 @@ private:
 
     const QString getCompFunc = "function getComponent(name, id = 0)"
                                 "{\n"
-                                "var comp = entity._getComponent(name, id);\n"
+                                "let comp = me._getComponent(name, id);\n"
                                 "if(comp != null)\n"
                                 "{\n"
                                 "accessedComponents.push(comp);\n"

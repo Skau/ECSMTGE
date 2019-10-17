@@ -574,6 +574,12 @@
    <property name="text">
     <string>Play</string>
    </property>
+   <property name="toolTip">
+    <string>Toggle with F5</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
   </action>
   <action name="actionNew">
    <property name="text">

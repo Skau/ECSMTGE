@@ -181,11 +181,11 @@ void ScriptWidget::on_button_NewFile_clicked()
             QTextStream stream(&file);
             // Base template for new files. Includes functions beginPlay, tick and endPlay.
             stream << "// This will be run once when play button is pressed\n"
-                   << "function beginPlay()\n{\n\tconsole.log(\"Begin play called on entity \" + entity.ID);\n}\n\n"
+                   << "function beginPlay()\n{\n\tconsole.log(\"Begin play called on entity \" + me.ID);\n}\n\n"
                    << "// This will be once run every frame\n"
-                   << "function tick(deltaTime)\n{\n\tconsole.log(\"Tick called on entity \" + entity.ID);\n}\n\n"
+                   << "function tick(deltaTime)\n{\n\tconsole.log(\"Tick called on entity \" + me.ID);\n}\n\n"
                    << "// This will be run once when stop button is pressed\n"
-                   << "function endPlay()\n{\n\tconsole.log(\"End play called on entity \" + entity.ID);\n}";
+                   << "function endPlay()\n{\n\tconsole.log(\"End play called on entity \" + me.ID);\n}";
             file.close();
             QFileInfo fileInfo(file.fileName());
             ScriptSystem::get()->load(*comp, fileInfo.filePath().toStdString());

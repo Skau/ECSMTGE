@@ -50,6 +50,8 @@ namespace gsl
     float distanceToPlane(const Vector3D &point, const Vector3D &normal, const Vector3D &pointInPlane);
     bool withinPlane(const Vector3D &point, Matrix4x4 &modelMatrix, Vector2D upright, Vector2D downleft);
 
+    bool equal(float v1, float v2);
+
 } //namespace
 
 #endif // GSL_MATH_H

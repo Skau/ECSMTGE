@@ -8,6 +8,7 @@
 #include "math_constants.h"
 #include "matrix3x3.h"
 #include "matrix4x4.h"
+#include <numeric>
 
 namespace gsl
 {
@@ -189,6 +190,11 @@ namespace gsl
     Vector3D abs(const Vector3D &v)
     {
         return {std::abs(v.x), std::abs(v.y), std::abs(v.z)};
+    }
+
+    bool equal(float v1, float v2)
+    {
+        return std::abs(v1 - v2) < std::numeric_limits<float>::epsilon();
     }
 
 } //namespace

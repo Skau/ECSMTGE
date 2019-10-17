@@ -7,6 +7,11 @@
 class EntityManager;
 class QJSEngine;
 
+/**
+ * @brief The wrapper used to reference itself in scripts.
+ * To access this wrapper use 'me'.
+ * Example: me.setMesh("suzanne");
+ */
 class QEntity : public QObject
 {
     Q_OBJECT

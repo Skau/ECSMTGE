@@ -126,6 +126,10 @@ struct PhysicsComponent : public Component
         acceleration = gsl::vec3{};
         mass = 1.f;
     }
+
+    void setVelocity(gsl::vec3 newVel);
+    void setAcceleration(gsl::vec3 newAcc);
+
     virtual QJsonObject toJSON() override;
     virtual void fromJSON(QJsonObject object) override;
 };

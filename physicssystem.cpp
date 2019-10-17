@@ -33,9 +33,23 @@ void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, s
             {
                 auto ieID{bounds.at(i).eID}, jeID{bounds.at(j).eID};
 
+                gsl::vec3 iVel{}, jVel{};
+                if (auto iPhys = EntityManager::find(physics.begin(), physics.end(), ieID))
+                    iVel = iPhys->velocity;
+                if (auto jPhys = EntityManager::find(physics.begin(), physics.end(), jeID))
+                    jVel = jPhys->velocity;
+
                 auto collisions = collisionCheck(
-                {*gsl::find(transforms.begin(), transforms.end(), ieID), *gsl::find(colliders.begin(), colliders.end(), ieID)},
-                {*gsl::find(transforms.begin(), transforms.end(), jeID), *gsl::find(colliders.begin(), colliders.end(), jeID)});
+                {
+                    *EntityManager::find(transforms.begin(), transforms.end(), ieID),
+                    *EntityManager::find(colliders.begin(), colliders.end(), ieID),
+                    iVel
+                },
+                {
+                    *EntityManager::find(transforms.begin(), transforms.end(), jeID),
+                    *EntityManager::find(colliders.begin(), colliders.end(), jeID),
+                    jVel
+                });
 
                 if (collisions)
                 {
@@ -351,9 +365,126 @@ void PhysicsSystem::updatePosVel(std::vector<TransformComponent> &transforms, st
     }
 }
 
-std::optional<std::array<PhysicsSystem::HitInfo, 2>> PhysicsSystem::collisionCheck(std::pair<const TransformComponent &, const ColliderComponent &> a,
-                                                                    std::pair<const TransformComponent &, const ColliderComponent &> b)
+std::optional<std::array<PhysicsSystem::HitInfo, 2>>
+PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const ColliderComponent&, const gsl::vec3&> a,
+                                std::tuple<const TransformComponent&, const ColliderComponent&, const gsl::vec3&> b)
 {
+    const auto& [aTrans, aColl, aVel] = a;
+    const auto& [bTrans, bColl, bVel] = b;
+
+    // Initialize return values
+    std::optional<std::array<HitInfo, 2>> hitInfos{std::array<HitInfo, 2>{}};
+    HitInfo &aOut = hitInfos.value().at(0);
+    HitInfo &bOut = hitInfos.value().at(1);
+
+    aOut.eID = aTrans.entityId;
+    bOut.eID = bTrans.entityId;
+    aOut.collidingEID = bOut.eID;
+    bOut.collidingEID = aOut.eID;
+    aOut.velocity = aVel;
+    bOut.velocity = bVel;
+
+    bool result = false;
+
+    switch (aColl.collisionType)
+    {
+    case ColliderComponent::AABB:
+        if (bColl.collisionType == ColliderComponent::AABB)
+        {
+            /* Note: Optimalization step
+             * It is possible to save both the world space and local space colliders
+             * in the colliderComponent to save (quite alot) computational power.
+             * Therefore making the colliderComponent 3 * 2 * sizeof(float) bytes bigger.
+             * Currently the computer needs to dereference a bunch of varying types,
+             * construct a model matrix, multiply said model matrix with
+             */
+
+            auto aMat = gsl::mat4::modelMatrix(aTrans.position, aTrans.rotation, aTrans.scale);
+            auto aMin = (aMat * ( -std::get<gsl::vec3>(aColl.extents) * 0.5f)).toVector3D();
+            auto aMax = (aMat * std::get<gsl::vec3>(aColl.extents) * 0.5f).toVector3D();
+            auto bMat = gsl::mat4::modelMatrix(bTrans.position, bTrans.rotation, bTrans.scale);
+            auto bMin = (bMat * ( -std::get<gsl::vec3>(bColl.extents) * 0.5f)).toVector3D();
+            auto bMax = (bMat * std::get<gsl::vec3>(bColl.extents) * 0.5f).toVector3D();
+
+            result = AABBAABB({aMin, aMax}, {bMin, bMax}, hitInfos.value());
+        }
+        else if (bColl.collisionType == ColliderComponent::BOX)
+        {
+
+        }
+        else if (bColl.collisionType == ColliderComponent::SPHERE)
+        {
+
+        }
+        else if (bColl.collisionType == ColliderComponent::CAPSULE)
+        {
+
+        }
+        break;
+
+
+    case ColliderComponent::BOX:
+        if (bColl.collisionType == ColliderComponent::AABB)
+        {
+
+        }
+        else if (bColl.collisionType == ColliderComponent::BOX)
+        {
+
+        }
+        else if (bColl.collisionType == ColliderComponent::SPHERE)
+        {
+
+        }
+        else if (bColl.collisionType == ColliderComponent::CAPSULE)
+        {
+
+        }
+        break;
+
+
+    case ColliderComponent::SPHERE:
+        if (bColl.collisionType == ColliderComponent::AABB)
+        {
+
+        }
+        else if (bColl.collisionType == ColliderComponent::BOX)
+        {
+
+        }
+        else if (bColl.collisionType == ColliderComponent::SPHERE)
+        {
+
+        }
+        else if (bColl.collisionType == ColliderComponent::CAPSULE)
+        {
+
+        }
+        break;
+
+
+    case ColliderComponent::CAPSULE:
+        if (bColl.collisionType == ColliderComponent::AABB)
+        {
+
+        }
+        else if (bColl.collisionType == ColliderComponent::BOX)
+        {
+
+        }
+        else if (bColl.collisionType == ColliderComponent::SPHERE)
+        {
+
+        }
+        else if (bColl.collisionType == ColliderComponent::CAPSULE)
+        {
+
+        }
+        break;
+
+
+    }
+
     return std::nullopt;
 }
 
@@ -402,3 +533,16 @@ bool PhysicsSystem::AABBSphere(const std::pair<gsl::vec3, gsl::vec3> &a, const s
 {
     return false;
 }
+
+bool PhysicsSystem::AABBAABB(const std::pair<gsl::vec3, gsl::vec3> &a, const std::pair<gsl::vec3, gsl::vec3> &b, std::array<PhysicsSystem::HitInfo, 2> &out)
+{
+    (a.first.x <= b.second.x && a.second.x >= b.first.x) &&
+    (a.first.y <= b.second.y && a.second.y >= b.first.y) &&
+(a.first.z <= b.second.z && a.second.z >= b.first.z);
+}
+
+bool PhysicsSystem::AABBSphere(const std::pair<gsl::vec3, gsl::vec3> &a, const std::pair<gsl::vec3, float> &b, std::array<PhysicsSystem::HitInfo, 2> &out)
+{
+
+}
+

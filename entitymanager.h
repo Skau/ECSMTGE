@@ -419,6 +419,17 @@ public:
         std::cout << std::endl;
     }
 
+    // TODO: Find should use binary search
+    template <typename iterator>
+    static typename iterator::value_type* find(const iterator& begin, const iterator& end, unsigned int eID)
+    {
+        for (auto it{begin}; it != end; ++it)
+            if (it->entityId == eID)
+                return &(*it);
+
+        return nullptr;
+    }
+
     /** Breadth first search iterator for iterating through
      * a tree.
      * @brief Breadth first search iterator
@@ -520,17 +531,5 @@ public:
     void UpdateBounds();
     // static MeshData::Bounds CalculateBounds(const std::vector<Vertex> &vertices);
 };
-
-namespace gsl {
-    template <typename iterator>
-    typename iterator::value_type* find(const iterator& begin, const iterator& end, unsigned int eID)
-    {
-        for (auto it{begin}; it != end; ++it)
-            if (it->entityId == eID)
-                return &(*it);
-
-        return nullptr;
-    }
-}
 
 #endif // COMPONENTMANAGER_H

@@ -27,6 +27,8 @@ class PhysicsSystem
 public:
     struct HitInfo
     {
+        unsigned int eID;
+        unsigned int collidingEID;
         gsl::vec3 hitPoint;
         gsl::vec3 velocity;
         gsl::vec3 normal;
@@ -54,8 +56,8 @@ private:
     static void subdivideBranch(gsl::Octree<CubeNode>& branch);
     static std::vector<std::pair<gsl::ivec3, PhysicsSystem::CubeNode>> subdivide(const std::pair<gsl::ivec3, CubeNode> &node);
     static void updatePosVel(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent> &physics, float deltaTime);
-    static std::optional<std::array<HitInfo, 2>> collisionCheck(std::pair<const TransformComponent&, const ColliderComponent&> a,
-                                                 std::pair<const TransformComponent&, const ColliderComponent&> b);
+    static std::optional<std::array<HitInfo, 2>> collisionCheck(std::tuple<const TransformComponent&, const ColliderComponent&, const gsl::vec3&> a,
+                                                                std::tuple<const TransformComponent&, const ColliderComponent&, const gsl::vec3&> b);
     static void handleHitInfo(HitInfo info);
     static void fireHitEvent(HitInfo info);
 
@@ -79,6 +81,24 @@ public:
      * @return true if sphere and box overlap, false otherwise
      */
     static bool AABBSphere(const std::pair<gsl::vec3, gsl::vec3>& a, const std::pair<gsl::vec3, float>& b);
+
+    // ---------- Collision checks with hit info ---------------
+    /**
+     * @brief AABB vs AABB collision check using pairs of min and max coordinates, verbose edition
+     * @param a - Axis Aligned Bounding Box as a pair of min and max coordinates
+     * @param b - Axis Aligned Bounding Box as a pair of min and max coordinates
+     * @param out - Outwards reference for more information about the hit
+     * @return true if boxes overlap, false otherwise
+     */
+    static bool AABBAABB(const std::pair<gsl::vec3, gsl::vec3>& a, const std::pair<gsl::vec3, gsl::vec3>& b, std::array<HitInfo, 2>& out);
+    /**
+     * @brief AABB vs Sphere collision check using pairs of min and max coordinates and centre and radius, verbose edition
+     * @param a - Axis Aligned Bounding Box as a pair of min and max coordinates
+     * @param b - Sphere as a pair of centre point and radius
+     * @param out - Outwards reference for more information about the hit
+     * @return true if sphere and box overlap, false otherwise
+     */
+    static bool AABBSphere(const std::pair<gsl::vec3, gsl::vec3>& a, const std::pair<gsl::vec3, float>& b, std::array<HitInfo, 2>& out);
 };
 
 #endif // PHYSICSSYSTEM_H

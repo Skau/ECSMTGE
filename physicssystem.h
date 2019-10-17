@@ -31,7 +31,7 @@ public:
         unsigned int collidingEID;
         gsl::vec3 hitPoint;
         gsl::vec3 velocity;
-        gsl::vec3 normal;
+        gsl::vec3 collidingNormal;
     };
     struct CollisionEntity
     {
@@ -58,13 +58,15 @@ private:
     static void updatePosVel(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent> &physics, float deltaTime);
     static std::optional<std::array<HitInfo, 2>> collisionCheck(std::tuple<const TransformComponent&, const ColliderComponent&, const gsl::vec3&> a,
                                                                 std::tuple<const TransformComponent&, const ColliderComponent&, const gsl::vec3&> b);
-    static void handleHitInfo(HitInfo info);
+    static void handleHitInfo(HitInfo info, TransformComponent *transform = nullptr, PhysicsComponent *physics = nullptr);
     static void fireHitEvent(HitInfo info);
 
     static TransformComponent* findInTransforms(std::vector<TransformComponent> &t, unsigned int eID);
     static ColliderComponent* findInColliders(std::vector<ColliderComponent> &t, unsigned int eID);
 
 public:
+    static gsl::vec3 ClosestPoint(const std::pair<gsl::vec3, gsl::vec3>& box, gsl::vec3 p);
+
     // --------- Collision checks --------------
 
     /**
@@ -81,6 +83,8 @@ public:
      * @return true if sphere and box overlap, false otherwise
      */
     static bool AABBSphere(const std::pair<gsl::vec3, gsl::vec3>& a, const std::pair<gsl::vec3, float>& b);
+
+    static bool SphereSphere(const std::pair<gsl::vec3, float>& a, const std::pair<gsl::vec3, float>& b);
 
     // ---------- Collision checks with hit info ---------------
     /**
@@ -99,6 +103,8 @@ public:
      * @return true if sphere and box overlap, false otherwise
      */
     static bool AABBSphere(const std::pair<gsl::vec3, gsl::vec3>& a, const std::pair<gsl::vec3, float>& b, std::array<HitInfo, 2>& out);
+
+    static bool SphereSphere(const std::pair<gsl::vec3, float>& a, const std::pair<gsl::vec3, float>& b, std::array<HitInfo, 2>& out);
 };
 
 #endif // PHYSICSSYSTEM_H

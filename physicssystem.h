@@ -1,9 +1,12 @@
 #ifndef PHYSICSSYSTEM_H
 #define PHYSICSSYSTEM_H
 
+#include <QObject>
 #include "componentdata.h"
 #include "octree.h"
 #include <utility>
+#include <QMutex>
+
 
 /** Physics system
  * The idea is to later move this system to
@@ -22,8 +25,9 @@
  * @authors Skau, andesyv
  */
 
-class PhysicsSystem
+class PhysicsSystem : public QObject
 {
+    Q_OBJECT
 public:
     struct HitInfo
     {
@@ -44,23 +48,46 @@ public:
         gsl::ivec3 from;
     };
 
-    PhysicsSystem();
-    static void UpdatePhysics(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent>& physics,
-                              std::vector<ColliderComponent>& colliders, float deltaTime);
+    std::vector<TransformComponent> mTransforms;
+    std::vector<PhysicsComponent> mPhysics;
+    std::vector<ColliderComponent> mColliders;
+
+    PhysicsSystem(QObject* parent = nullptr);
+    virtual ~PhysicsSystem();
+
+signals:
+    void finished(std::vector<TransformComponent> transforms, std::vector<PhysicsComponent> physics, std::vector<ColliderComponent> colliders);
+
+public slots:
+  void UpdatePhysics();
+  void updateComponents(std::vector<TransformComponent> transforms, std::vector<PhysicsComponent> physics, std::vector<ColliderComponent> colliders);
 
 private:
-    static std::vector<PhysicsSystem::CollisionEntity> updateBounds(std::vector<TransformComponent>& trans, std::vector<ColliderComponent>& colliders);
-    static gsl::Octree<CubeNode> generateSceneTree(std::vector<TransformComponent>& trans, std::vector<ColliderComponent>& colliders);
-    static void subdivideBranch(gsl::Octree<CubeNode>& branch);
-    static std::vector<std::pair<gsl::ivec3, PhysicsSystem::CubeNode>> subdivide(const std::pair<gsl::ivec3, CubeNode> &node);
-    static void updatePosVel(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent> &physics, float deltaTime);
-    static std::optional<std::array<HitInfo, 2>> collisionCheck(std::pair<const TransformComponent&, const ColliderComponent&> a,
+    std::vector<PhysicsSystem::CollisionEntity> updateBounds(std::vector<TransformComponent>& trans, std::vector<ColliderComponent>& colliders);
+    gsl::Octree<CubeNode> generateSceneTree(std::vector<TransformComponent>& trans, std::vector<ColliderComponent>& colliders);
+    void subdivideBranch(gsl::Octree<CubeNode>& branch);
+    std::vector<std::pair<gsl::ivec3, PhysicsSystem::CubeNode>> subdivide(const std::pair<gsl::ivec3, CubeNode> &node);
+    void updatePosVel(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent> &physics, float deltaTime);
+    std::optional<std::array<HitInfo, 2>> collisionCheck(std::pair<const TransformComponent&, const ColliderComponent&> a,
                                                  std::pair<const TransformComponent&, const ColliderComponent&> b);
-    static void handleHitInfo(HitInfo info);
-    static void fireHitEvent(HitInfo info);
+    void handleHitInfo(HitInfo info);
+    void fireHitEvent(HitInfo info);
 
-    static TransformComponent* findInTransforms(std::vector<TransformComponent> &t, unsigned int eID);
-    static ColliderComponent* findInColliders(std::vector<ColliderComponent> &t, unsigned int eID);
+    TransformComponent* findInTransforms(std::vector<TransformComponent> &t, unsigned int eID);
+    ColliderComponent* findInColliders(std::vector<ColliderComponent> &t, unsigned int eID);
+
+
+
+    float tickRate = 1.f / 30.f;
+
+    bool updatedComponents = true;
+    std::vector<TransformComponent> newTransform;
+    std::vector<PhysicsComponent> newPhysics;
+    std::vector<ColliderComponent> newColliders;
+
+    QMutex mMutex;
+protected:
+
 
 public:
     // --------- Collision checks --------------

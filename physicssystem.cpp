@@ -1,8 +1,15 @@
 #include "physicssystem.h"
-#include <chrono>
 #include "entitymanager.h"
+#include <QThread>
+#include <QElapsedTimer>
+#include <QTimer>
 
-PhysicsSystem::PhysicsSystem()
+PhysicsSystem::PhysicsSystem(QObject *parent) : QObject(parent)
+{
+
+}
+
+PhysicsSystem::~PhysicsSystem()
 {
 
 }
@@ -13,15 +20,17 @@ PhysicsSystem::CollisionEntity::CollisionEntity(unsigned int id, const ColliderC
 
 }
 
-void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, std::vector<PhysicsComponent> &physics,
-                                  std::vector<ColliderComponent> &colliders, float deltaTime)
+void PhysicsSystem::UpdatePhysics()
 {
+    QElapsedTimer timer;
+
+    timer.start();
     // 1. Update positions and velocities
-    updatePosVel(transforms, physics, deltaTime);
+    updatePosVel(mTransforms, mPhysics, tickRate);
 
     // 2. Calculate bounds
     // auto sceneTree = generateSceneTree(transforms, colliders);
-    auto bounds = updateBounds(transforms, colliders);
+    auto bounds = updateBounds(mTransforms, mColliders);
 
     std::vector<HitInfo> hitInfos;
     // 3. Collision detection
@@ -34,8 +43,8 @@ void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, s
                 auto ieID{bounds.at(i).eID}, jeID{bounds.at(j).eID};
 
                 auto collisions = collisionCheck(
-                {*gsl::find(transforms.begin(), transforms.end(), ieID), *gsl::find(colliders.begin(), colliders.end(), ieID)},
-                {*gsl::find(transforms.begin(), transforms.end(), jeID), *gsl::find(colliders.begin(), colliders.end(), jeID)});
+                {*gsl::find(mTransforms.begin(), mTransforms.end(), ieID), *gsl::find(mColliders.begin(), mColliders.end(), ieID)},
+                {*gsl::find(mTransforms.begin(), mTransforms.end(), jeID), *gsl::find(mColliders.begin(), mColliders.end(), jeID)});
 
                 if (collisions)
                 {
@@ -59,6 +68,31 @@ void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, s
     {
         fireHitEvent(item);
     }
+
+    finished(mTransforms, mPhysics, mColliders);
+
+    auto time = timer.elapsed();
+    auto diff = tickRate - (float)time;
+    QTimer::singleShot(diff, this, &PhysicsSystem::UpdatePhysics);
+
+    mMutex.lock();
+    if(updatedComponents)
+    {
+        mTransforms = newTransform;
+        mPhysics = newPhysics;
+        mColliders = newColliders;
+        updatedComponents = false;
+    }
+    mMutex.unlock();
+}
+
+void PhysicsSystem::updateComponents(std::vector<TransformComponent> transforms, std::vector<PhysicsComponent> physics, std::vector<ColliderComponent> colliders)
+{
+    QMutexLocker lock(&mMutex);
+    updatedComponents = true;
+    newTransform = transforms;
+    newPhysics = physics;
+    newColliders = colliders;
 }
 
 std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vector<TransformComponent> &trans, std::vector<ColliderComponent> &colliders)

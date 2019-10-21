@@ -4,8 +4,10 @@
 #include <memory>
 
 #include <QObject>
+#include <QMetaType>
 #include <QElapsedTimer>
 #include <QTimer>
+#include <QThread>
 
 #include "mainwindow.h"
 #include "renderer.h"
@@ -17,6 +19,11 @@
 
 class InputHandler;
 class InputSystem;
+class PhysicsSystem;
+
+Q_DECLARE_METATYPE(std::vector<TransformComponent>);
+Q_DECLARE_METATYPE(std::vector<PhysicsComponent>);
+Q_DECLARE_METATYPE(std::vector<ColliderComponent>);
 
 /**
  * @brief The creator of all things.
@@ -35,6 +42,7 @@ public:
 
 signals:
     void initScene();
+    void updatePhysicsComponents(std::vector<TransformComponent> transforms, std::vector<PhysicsComponent> physics, std::vector<ColliderComponent> colliders);
 
 public slots:
     void initTheRest();
@@ -49,6 +57,7 @@ private slots:
     void onPlay();
     void onStop();
 
+    void onPhysicsFinished(std::vector<TransformComponent> transforms, std::vector<PhysicsComponent> physics, std::vector<ColliderComponent> colliders);
 private:
 
     void calculateFrames();
@@ -57,6 +66,8 @@ private:
 
     Renderer* mRenderer;
     InputSystem* mInputSystem;
+    PhysicsSystem* mPhysicsSystem;
+    QThread* mPhysicsThread;
 
     std::unique_ptr<SoundManager> mSoundManager;
     std::unique_ptr<SoundListener> mSoundListener;
@@ -80,6 +91,8 @@ private:
     char padding[3]; // to get rid of annoying alignment boundary issue (and because I'm too lazy to remove the warning)
 
     bool mCurrentlyPlaying = false;
+
+    bool physicsUpdated = false;
 };
 
 #endif // APP_H

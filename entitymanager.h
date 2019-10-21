@@ -32,11 +32,31 @@
     std::vector<K> CONCATENATE(m, K, s); \
     public: \
     std::vector<K>& CONCATENATE(get, K, s)() { return CONCATENATE(m, K, s); } \
+    void CONCATENATE(set, K, s)(std::vector<K>&& components) \
+    { \
+      if(!components.size() || !CONCATENATE(m, K, s).size()) return; \
+      unsigned localAdj{0}; \
+      unsigned externalAdj{0}; \
+      for(unsigned i = 0; i < components.size(); ++i) \
+      {  \
+        if (components[i + externalAdj].entityId < CONCATENATE(m, K, s)[i + localAdj].entityId) \
+        { \
+            localAdj++; \
+            continue; \
+        } \
+        else if (components[i + externalAdj].entityId > CONCATENATE(m, K, s)[i + localAdj].entityId) \
+        { \
+            externalAdj++; \
+            continue; \
+        } \
+        CONCATENATE(m, K, s)[i + localAdj] = components[i + externalAdj]; \
+        ++i; \
+      } \
+    } \
     GETCOMPONENT(K) \
     REMOVECOMPONENT(K) \
     private: \
     ADDCOMPONENTS(K) \
-
 
 #define GETCOMPONENT(K) \
 template<class T, \

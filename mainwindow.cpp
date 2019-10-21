@@ -18,6 +18,7 @@
 #include "Widgets/pointlightwidget.h"
 #include "Widgets/spotlightwidget.h"
 #include "Widgets/scriptwidget.h"
+#include "Widgets/colliderwidget.h"
 #include "componentdata.h"
 
 #include <QSplitter>
@@ -260,6 +261,11 @@ void MainWindow::updateComponentArea(unsigned int entityID)
                 componentWidget = new ScriptWidget(this);
                 break;
             }
+            case ComponentType::Collider:
+            {
+                componentWidget = new ColliderWidget(this);
+                break;
+            }
             default:
                 break;
             }
@@ -342,6 +348,11 @@ void MainWindow::updateAvailableComponents(std::vector<ComponentType> types)
         case ComponentType::Script:
         {
             ui->comboBox_Components->addItem("Script");
+            break;
+        }
+        case ComponentType::Collider:
+        {
+            ui->comboBox_Components->addItem("Collider");
             break;
         }
         default:

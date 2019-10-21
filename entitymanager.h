@@ -404,6 +404,14 @@ public:
                 addedAnyComponents = true;
             }
         }
+        if(auto comp = getComponent<ColliderComponent>(entity))
+        {
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
+        }
         return addedAnyComponents;
     }
 

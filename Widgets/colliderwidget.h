@@ -20,8 +20,15 @@ private slots:
 
     void Remove() override;
 
+    void on_comboBox_Colliders_currentIndexChanged(int index);
+
+    void on_comboBox_Colliders_highlighted(int index);
+
 private:
     Ui::Collider* ui;
+
+    int lastHighlighted{0};
+    int currentIndex{0};
 };
 
 #endif // COLLIDERWIDGET_H

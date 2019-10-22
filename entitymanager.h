@@ -316,6 +316,12 @@ public:
             returnComp = &component;
             break;
         }
+        case ComponentType::Collider:
+        {
+            auto [component] = addComponent<ColliderComponent>(entity);
+            returnComp = &component;
+            break;
+        }
         default:
             break;
         }

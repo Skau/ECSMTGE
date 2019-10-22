@@ -4,22 +4,30 @@
 #include "entitymanager.h"
 #include <memory>
 
+#define STRINGIFY(s) #s
+
 ColliderWidget::ColliderWidget(MainWindow *mainWindow, QWidget *parent)
     : ComponentWidget(mainWindow, parent), ui(new Ui::Collider)
 {
     ui->setupUi(this);
+
+    ui->comboBox_Colliders->addItem("None");
+    for (auto type : ColliderComponent::allTypes)
+    {
+       ui->comboBox_Colliders->addItem(STRINGIFY(type));
+    }
 }
 
 void ColliderWidget::updateData()
 {
-    auto entity = mMainWindow->currentEntitySelected;
-    if(entity)
-    {
-        if(auto physics = mMainWindow->getEntityManager()->getComponent<ColliderComponent>(entity->entityId))
-        {
+//    auto entity = mMainWindow->currentEntitySelected;
+//    if(entity)
+//    {
+//        if(auto physics = mMainWindow->getEntityManager()->getComponent<ColliderComponent>(entity->entityId))
+//        {
 
-        }
-    }
+//        }
+//    }
 }
 
 void ColliderWidget::Remove()

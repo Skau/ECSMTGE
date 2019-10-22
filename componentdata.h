@@ -32,7 +32,8 @@ enum class ComponentType
 // Used by UI so it knows what components are available to add if the entity doesnt have one.
 const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, ComponentType::Transform, ComponentType::Physics,
                                                    ComponentType::Input, ComponentType::Sound, ComponentType::LightPoint,
-                                                   ComponentType::LightDirectional, ComponentType::LightSpot, ComponentType::Script, ComponentType::Collider};
+                                                   ComponentType::LightDirectional, ComponentType::LightSpot, ComponentType::Script,
+                                                   ComponentType::Collider};
 
 
 struct Component
@@ -367,10 +368,11 @@ struct ColliderComponent : public Component
         CAPSULE
     };
 
+
     Type collisionType;
 
     ColliderComponent(unsigned int _eID = 0, bool _valid = false)
-        : Component(_eID, _valid), collisionType(AABB)
+        : Component(_eID, _valid, ComponentType::Collider), collisionType(AABB)
     {}
 
     virtual void reset() override

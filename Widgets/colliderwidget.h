@@ -29,6 +29,8 @@ private:
 
     int lastHighlighted{0};
     int currentIndex{0};
+
+    void updateParameters();
 };
 
 #endif // COLLIDERWIDGET_H

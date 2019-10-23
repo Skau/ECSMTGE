@@ -40,7 +40,7 @@ struct Component
 {
     unsigned int entityId;
     bool valid : 1;
-    const ComponentType type;
+    ComponentType type;
 
     Component(unsigned int _eID = 0, bool _valid = false, ComponentType typeIn = ComponentType::Other)
         : entityId{_eID}, valid(_valid), type(typeIn)
@@ -58,9 +58,6 @@ struct EntityInfo : public Component
 
     EntityInfo(unsigned int _eID = 0, bool _valid = false)
         : Component(_eID, _valid, ComponentType::Other)
-    {}
-    EntityInfo(const EntityInfo& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, name{comp.name}
     {}
 
     virtual void reset() override
@@ -88,11 +85,6 @@ struct TransformComponent : public Component
                     const gsl::quat& _rot = gsl::quat{})
         : Component (_eID, _valid, ComponentType::Transform), updated{true}, position{_pos},
           rotation{_rot}, scale{_scale}, meshBoundsOutdated{true}, colliderBoundsOutdated{true}
-    {}
-    TransformComponent(const TransformComponent& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, updated{comp.updated}, position{comp.position},
-          rotation{comp.rotation}, scale{comp.scale}, meshBoundsOutdated{comp.meshBoundsOutdated},
-          colliderBoundsOutdated{comp.colliderBoundsOutdated}
     {}
 
     virtual void reset() override
@@ -128,10 +120,6 @@ struct PhysicsComponent : public Component
                      const gsl::vec3& _velocity = gsl::vec3{})
         : Component (_eID, _valid, ComponentType::Physics), velocity{_velocity}
     {}
-    PhysicsComponent(const PhysicsComponent& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, velocity{comp.velocity},
-          acceleration{comp.acceleration}, mass{comp.mass}
-    {}
 
     virtual void reset() override
     {
@@ -161,10 +149,6 @@ struct MeshComponent : public Component
                   const MeshData& _meshData = MeshData{}, const Material& _material = Material{}, bool _visible = false)
         : Component (_eID, _valid, ComponentType::Mesh), isVisible{_visible}, meshData{_meshData}, mMaterial{_material}
     {}
-    MeshComponent(const MeshComponent& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, isVisible{comp.isVisible},
-          meshData{comp.meshData}, mMaterial{comp.mMaterial}, renderWireframe{comp.renderWireframe}
-    {}
 
     virtual void reset() override
     {
@@ -192,11 +176,6 @@ struct CameraComponent : public Component
         : Component (_eID, _valid), isCurrentActive{currentActive},
           framebufferTarget{fbTarget}, viewMatrix{vMat}, projectionMatrix{pMat}
     {}
-    CameraComponent(const CameraComponent& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, isCurrentActive{comp.isCurrentActive},
-          framebufferTarget{comp.framebufferTarget}, pitch{comp.pitch}, yaw{comp.yaw},
-          viewMatrix{comp.viewMatrix}, projectionMatrix{comp.projectionMatrix}
-    {}
 
     virtual void reset() override
     {
@@ -218,9 +197,6 @@ struct InputComponent : public Component
     InputComponent(unsigned int _eID = 0, bool _valid = false)
         : Component(_eID, _valid, ComponentType::Input)
     {}
-    InputComponent(const InputComponent& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, isCurrentlyControlled{comp.isCurrentlyControlled}
-    {}
 
     virtual void reset() override
     {
@@ -241,10 +217,6 @@ struct SoundComponent : public Component
 
     SoundComponent(unsigned int _eID = 0, bool _valid = false)
         : Component(_eID, _valid, ComponentType::Sound), mSource{-1}
-    {}
-    SoundComponent(const SoundComponent& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, isLooping{comp.isLooping}, isMuted{comp.isMuted},
-          mSource{comp.mSource}, pitch{comp.pitch}, gain{comp.gain}, name{comp.name}
     {}
 
     virtual void reset() override
@@ -278,10 +250,6 @@ struct PointLightComponent : public Component
         : Component(_eID, _valid, ComponentType::LightPoint),
           color(_color), intensity(_intensity),
           linear(_linear), quadratic(_quadratic), maxBrightness(_maxBrightness)
-    {}
-    PointLightComponent(const PointLightComponent& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, color{comp.color}, intensity{comp.intensity},
-          linear{comp.linear}, quadratic{comp.quadratic}, maxBrightness{comp.maxBrightness}
     {}
 
     virtual void reset() override
@@ -327,11 +295,6 @@ struct SpotLightComponent : public Component
           cutOff(_cutOff), outerCutOff(_outerCutOff), linear(_linear),
           quadratic(_quadratic), constant(_constant)
     {}
-    SpotLightComponent(const SpotLightComponent& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, color(comp.color), intensity(comp.intensity),
-          cutOff(comp.cutOff), outerCutOff(comp.outerCutOff), linear(comp.linear),
-          quadratic(comp.quadratic), constant(comp.constant)
-    {}
 
     virtual void reset() override
     {
@@ -359,9 +322,6 @@ struct DirectionalLightComponent : public Component
         : Component(_eID, _valid, ComponentType::LightDirectional),
           color(_color), intensity(_intensity)
     {}
-    DirectionalLightComponent(const DirectionalLightComponent& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, color(comp.color), intensity(comp.intensity)
-    {}
 
     virtual void reset() override
     {
@@ -386,10 +346,6 @@ struct ScriptComponent : public Component
         engine->installExtensions(QJSEngine::ConsoleExtension);
         engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
     }
-    ScriptComponent(const ScriptComponent& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, engine{comp.engine}, filePath{comp.filePath},
-          JSEntity{comp.JSEntity}
-    {}
 
     virtual void reset() override
     {
@@ -418,11 +374,7 @@ struct ColliderComponent : public Component
     Type collisionType;
 
     ColliderComponent(unsigned int _eID = 0, bool _valid = false)
-        : Component{_eID, _valid, ComponentType::Collider}, collisionType{AABB}
-    {}
-    ColliderComponent(const ColliderComponent& comp)
-        : Component{comp.entityId, comp.valid, comp.type}, collisionType{comp.collisionType},
-          extents{comp.extents}, bounds{comp.bounds}
+        : Component(_eID, _valid, ComponentType::Collider), collisionType(AABB)
     {}
 
     virtual void reset() override

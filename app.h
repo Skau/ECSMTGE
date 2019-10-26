@@ -65,6 +65,8 @@ private:
     std::shared_ptr<InputHandler> mEventHandler;
     std::unique_ptr<World> mWorld;
 
+    void loadSession(const std::string& path);
+
     QTimer mUpdateTimer; // Calls update
 
     float mDeltaTime;

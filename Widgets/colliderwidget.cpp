@@ -107,10 +107,7 @@ void ColliderWidget::updateParameters()
         ui->widget_Parameters->setLayout(layout);
         layout->setMargin(0);
 
-    //    float minimumHeight = 0.f;
-
         std::vector<QWidget*> widgets{};
-
 
         switch (comp->collisionType)
         {
@@ -152,8 +149,6 @@ void ColliderWidget::updateParameters()
             break;
             case ColliderComponent::SPHERE:
             {
-                // widgets.push_back(new QLabel{"Centre:", ui->widget_Parameters});
-
                 widgets.push_back(new QWidget{ui->widget_Parameters});
                 auto &widget = widgets.back();
                 QHBoxLayout* hLayout = new QHBoxLayout();
@@ -183,8 +178,6 @@ void ColliderWidget::updateParameters()
             break;
             case ColliderComponent::CAPSULE:
             {
-                // widgets.push_back(new QLabel{"Centre:", ui->widget_Parameters});
-
                 auto& extents = std::get<std::pair<float, float>>(comp->extents);
                 float* extentsFloats[]{&extents.first, &extents.second};
                 const char* labelNames[]{"Radius:", "Half-height:"};

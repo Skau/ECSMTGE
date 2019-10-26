@@ -362,6 +362,14 @@ public:
                 addedAnyComponents = true;
             }
         }
+        if(auto comp = getComponent<CameraComponent>(entity))
+        {
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
+        }
         if(auto comp = getComponent<InputComponent>(entity))
         {
             if(comp->valid)

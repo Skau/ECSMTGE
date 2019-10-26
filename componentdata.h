@@ -177,7 +177,7 @@ struct CameraComponent : public Component
     CameraComponent(unsigned int _eID = 0, bool _valid = false,
            bool currentActive = true, GLuint fbTarget = 0, const gsl::mat4& vMat = gsl::mat4{},
            const gsl::mat4& pMat = gsl::mat4{})
-        : Component (_eID, _valid), isCurrentActive{currentActive},
+        : Component (_eID, _valid, ComponentType::Camera), isCurrentActive{currentActive},
           framebufferTarget{fbTarget}, viewMatrix{vMat}, projectionMatrix{pMat}
     {}
 

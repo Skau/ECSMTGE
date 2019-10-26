@@ -28,13 +28,15 @@ void Scene::initBlankScene()
     camCam.isCurrentActive = true;
 }
 
-void Scene::LoadFromFile(const std::string& path)
+bool Scene::LoadFromFile(const std::string& path)
 {
+    qDebug() << "Loaded: " << QString::fromStdString(path);
+
     QFile file(QString::fromStdString(path));
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "ERROR Scene.save(): Failed to open file at specified path!";
-        return;
+        return false;
     }
 
    QFileInfo info(QString::fromStdString(path));
@@ -44,14 +46,14 @@ void Scene::LoadFromFile(const std::string& path)
     if(!document.isObject())
     {
         qDebug() << "Load Error: Wrong formatting";
-        return;
+        return false;
     }
 
     QJsonObject mainObject = document.object();
     if(mainObject.isEmpty())
     {
         qDebug() << "Load Error: File is empty.";
-        return;
+        return false;
     }
 
     mWorld->clearEntities();
@@ -79,6 +81,8 @@ void Scene::LoadFromFile(const std::string& path)
             comp->fromJSON(compObject);
         }
     }
+
+    return true;
 }
 
 void Scene::SaveToFile(const std::string& path)
@@ -118,7 +122,6 @@ void Scene::SaveToFile(const std::string& path)
                 continue;
             compArray.push_back(comp->toJSON());
         }
-
 
         QJsonObject entityObject;
         entityObject.insert("Components", compArray);

@@ -25,7 +25,7 @@ public:
      */
     virtual void initCustomObjects(){}
 
-    void LoadFromFile(const std::string& path);
+    bool LoadFromFile(const std::string& path);
     void SaveToFile(const std::string& path);
 
 signals:

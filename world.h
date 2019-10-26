@@ -17,13 +17,15 @@ public:
 
     std::shared_ptr<EntityManager> getEntityManager() { return entityManager; }
 
-    void initScene();
+    void initBlankScene();
 
     void clearEntities();
 
     void loadTemp();
 
     void saveTemp();
+
+    bool isSceneValid() const;
 
 public slots:
     void saveScene(const std::string& path);

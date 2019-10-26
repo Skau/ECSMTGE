@@ -11,6 +11,8 @@
 #include "physicssystem.h"
 #include "scriptsystem.h"
 
+#include <QJsonDocument>
+
 App::App()
 {
     mSoundManager = std::make_unique<SoundManager>();
@@ -48,8 +50,13 @@ void App::initTheRest()
     // Script System needs the entity manager so data is available in scripts
     ScriptSystem::get()->setEntityManager(mWorld->getEntityManager());
 
-    mWorld->initScene();
+    // Load editor session data
+    loadSession("session.json");
 
+    if (!mWorld->isSceneValid())
+        mWorld->initBlankScene();
+
+    // Setup update loop
     connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);
     mUpdateTimer.start(16); // Simulates 60ish fps
 
@@ -268,5 +275,35 @@ void App::calculateFrames()
         mFrameCounter = 0;
         mTotalDeltaTime = 0;
         mFPSTimer.restart();
+    }
+}
+
+void App::loadSession(const std::string &path)
+{
+    QFile file(QString::fromStdString(path));
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        return;
+    }
+
+    QJsonDocument document = QJsonDocument::fromJson(file.readAll());
+    if(!document.isObject())
+    {
+        return;
+    }
+
+    QJsonObject mainObject = document.object();
+    if(mainObject.isEmpty())
+    {
+        return;
+    }
+
+    if (mWorld)
+    {
+        auto value = mainObject["DefaultMap"];
+        if (value.isString())
+        {
+            mWorld->loadScene(value.toString().toStdString());
+        }
     }
 }

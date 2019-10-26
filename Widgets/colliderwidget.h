@@ -3,6 +3,8 @@
 
 #include "componentwidget.h"
 
+class ColliderComponent;
+
 namespace Ui{
     class Collider;
 }
@@ -32,6 +34,7 @@ private:
     int lastHighlighted{0};
 
     void updateParameters();
+    ColliderComponent* getColliderComponent();
 };
 
 #endif // COLLIDERWIDGET_H

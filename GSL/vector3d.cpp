@@ -98,7 +98,22 @@ namespace gsl
 
     Vector3D Vector3D::operator^(const Vector3D &rhs) const
         {
-            return {y * rhs.getZ() - z * rhs.getY(), z * rhs.getX() - x * rhs.getZ(), x * rhs.getY() - y * rhs.getX()};
+        return {y * rhs.getZ() - z * rhs.getY(), z * rhs.getX() - x * rhs.getZ(), x * rhs.getY() - y * rhs.getX()};
+    }
+
+    GLfloat &Vector3D::operator[](const int index)
+    {
+        // assert(index < 3 && index >= 0);
+        if (index > 2 || index < 0)
+            throw std::out_of_range{"index must be between 0 and 2"};
+        return *(&x + index);
+    }
+
+    GLfloat Vector3D::operator[](const int index) const
+    {
+        if (index > 2 || index < 0)
+            throw std::out_of_range{"index must be between 0 and 2"};
+        return *(&x + index);
     }
 
 

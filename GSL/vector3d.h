@@ -33,6 +33,9 @@ public:
     GLfloat operator* (const Vector3D &rhs) const; // v * v - dot product
     Vector3D operator^ (const Vector3D& rhs) const; // v x v  - cross product
 
+    GLfloat& operator[](const int index);
+    GLfloat operator[] (const int index) const;
+
     //Functions
     GLfloat length() const;
     void normalize();

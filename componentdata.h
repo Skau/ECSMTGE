@@ -374,12 +374,12 @@ struct ColliderComponent : public Component
     Type collisionType;
 
     ColliderComponent(unsigned int _eID = 0, bool _valid = false)
-        : Component(_eID, _valid, ComponentType::Collider), collisionType(AABB)
+        : Component(_eID, _valid, ComponentType::Collider), collisionType(None)
     {}
 
     virtual void reset() override
     {
-        collisionType = AABB;
+        collisionType = None;
     }
 
     std::variant<gsl::vec3, float, std::pair<float, float>> extents;

@@ -17,18 +17,21 @@ ColliderWidget::ColliderWidget(MainWindow *mainWindow, QWidget *parent)
 
 void ColliderWidget::updateData()
 {
-    isUpdating = true;
 
+}
+
+void ColliderWidget::onSelected()
+{
     if (auto entity = mMainWindow->currentEntitySelected)
     {
         auto comp = mMainWindow->getEntityManager()->getComponent<ColliderComponent>(entity->entityId);
         if (comp) {
-            currentIndex = static_cast<int>(comp->collisionType);
-            ui->comboBox_Colliders->setCurrentIndex(currentIndex);
+            auto index = static_cast<int>(comp->collisionType);
+            lastHighlighted = index;
+            ui->comboBox_Colliders->setCurrentIndex(index);
+            ready = true;
         }
-
     }
-    isUpdating = false;
 }
 
 void ColliderWidget::Remove()
@@ -45,27 +48,23 @@ void ColliderWidget::Remove()
 
 void ColliderWidget::on_comboBox_Colliders_currentIndexChanged(int index)
 {
-    if (isUpdating)
+    if (!ready)
         return;
 
     if (auto entity = mMainWindow->currentEntitySelected)
     {
         auto comp = mMainWindow->getEntityManager()->getComponent<ColliderComponent>(entity->entityId);
-        if (lastHighlighted == index && static_cast<int>(comp->collisionType) != index)
+        auto currentIndex = static_cast<int>(comp->collisionType);
+        if (lastHighlighted == index && currentIndex != index)
         {
-            currentIndex = index;
-            qDebug() << entity->entityId << "'s index changed to: " << index;
+            comp->collisionType = static_cast<ColliderComponent::Type>(currentIndex);
         }
     }
 }
 
 void ColliderWidget::on_comboBox_Colliders_highlighted(int index)
 {
-    if (isUpdating)
-        return;
-
     lastHighlighted = index;
-    qDebug() << "last highlighted: " << lastHighlighted;
 }
 
 void ColliderWidget::updateParameters()

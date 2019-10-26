@@ -15,6 +15,7 @@ public:
     explicit ColliderWidget(MainWindow *mainWindow, QWidget* parent = nullptr);
 
     void updateData() override;
+    void onSelected() override;
 
 private slots:
 
@@ -27,8 +28,8 @@ private slots:
 private:
     Ui::Collider* ui;
 
+    bool ready{false};
     int lastHighlighted{0};
-    int currentIndex{0};
 
     void updateParameters();
 };

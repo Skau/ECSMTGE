@@ -274,6 +274,7 @@ void MainWindow::updateComponentArea(unsigned int entityID)
             {
                 connect(componentWidget, &ComponentWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
                 componentWidget->updateData();
+                componentWidget->onSelected();
                 layout->addWidget(componentWidget);
                 mCurrentComponentWidgets.push_back(componentWidget);
                 componentWidget = nullptr;

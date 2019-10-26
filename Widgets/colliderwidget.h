@@ -4,6 +4,7 @@
 #include "componentwidget.h"
 
 class ColliderComponent;
+class TransformComponent;
 
 namespace Ui{
     class Collider;
@@ -35,6 +36,7 @@ private:
 
     void updateParameters();
     ColliderComponent* getColliderComponent();
+    TransformComponent* getTransformComponent();
 };
 
 #endif // COLLIDERWIDGET_H

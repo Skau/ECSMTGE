@@ -31,6 +31,8 @@ void ColliderWidget::onSelected()
             lastHighlighted = index;
             ui->comboBox_Colliders->setCurrentIndex(index);
             ready = true;
+
+            updateParameters();
         }
     }
 }
@@ -58,8 +60,23 @@ void ColliderWidget::on_comboBox_Colliders_currentIndexChanged(int index)
         auto currentIndex = static_cast<int>(comp->collisionType);
         if (lastHighlighted == index && currentIndex != index)
         {
-            qDebug() << entity->entityId << "'s colldertype changed to " << index;
             comp->collisionType = static_cast<ColliderComponent::Type>(index);
+            switch (comp->collisionType)
+            {
+                case ColliderComponent::AABB:
+                case ColliderComponent::BOX:
+                    comp->extents = gsl::vec3{1.f, 1.f, 1.f};
+                    break;
+                case ColliderComponent::SPHERE:
+                    comp->extents = 1.f;
+                    break;
+                case ColliderComponent::CAPSULE:
+                    comp->extents = std::pair<float, float>{1.f, 1.f};
+                    break;
+                default:
+                    break;
+            }
+
             updateParameters();
         }
     }
@@ -92,80 +109,123 @@ void ColliderWidget::updateParameters()
 
     //    float minimumHeight = 0.f;
 
-        QWidget* widget = new QWidget();
-        QHBoxLayout* hLayout = new QHBoxLayout();
-        widget->setLayout(hLayout);
+        std::vector<QWidget*> widgets{};
+
 
         switch (comp->collisionType)
         {
             case ColliderComponent::AABB:
+            case ColliderComponent::BOX:
             {
-                qDebug() << "type was AABB!";
+                widgets.push_back(new QLabel{"Centre:", ui->widget_Parameters});
+
+                widgets.push_back(new QWidget{ui->widget_Parameters});
+                auto &widget = widgets.back();
+                QHBoxLayout* hLayout = new QHBoxLayout();
+                widget->setLayout(hLayout);
 
                 auto extents = std::get<gsl::vec3>(comp->extents);
 
-                int i = 0;
-
-                QLabel* label = new QLabel{"x:", widget};
-                hLayout->addWidget(label);
-                auto spinBox = new QDoubleSpinBox{widget};
-                spinBox->setValue(static_cast<double>(extents[i]));
-                connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-                [=](double d)
+                for (int i = 0; i < 3; ++i)
                 {
-                    if (auto collider = getColliderComponent())
-                        if (auto extents = std::get_if<gsl::vec3>(&collider->extents))
-                            (*extents)[i] = static_cast<float>(d);
-                });
-                hLayout->addWidget(spinBox);
+                    auto name = std::string{static_cast<char>('x' + i)}.append(":");
+                    QLabel* label = new QLabel{name.c_str(), widget};
+                    hLayout->addWidget(label);
+                    auto spinBox = new QDoubleSpinBox{widget};
+                    spinBox->setValue(static_cast<double>(extents[i]));
+                    connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+                    [=](double d)
+                    {
+                        if (auto collider = getColliderComponent())
+                            if (auto extents = std::get_if<gsl::vec3>(&collider->extents))
+                            {
+                                (*extents)[i] = static_cast<float>(d);
+                                if (auto trans = getTransformComponent())
+                                    trans->colliderBoundsOutdated = true;
+                            }
+                    });
+                    hLayout->addWidget(spinBox);
+                }
 
-                i = 1;
-
-                label = new QLabel{"y:", widget};
-                hLayout->addWidget(label);
-                spinBox = new QDoubleSpinBox{widget};
-                spinBox->setValue(static_cast<double>(extents[i]));
-                connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-                [=](double d)
-                {
-                    if (auto collider = getColliderComponent())
-                        if (auto extents = std::get_if<gsl::vec3>(&collider->extents))
-                            (*extents)[i] = static_cast<float>(d);
-                });
-                hLayout->addWidget(spinBox);
-
-                i = 2;
-
-                label = new QLabel{"z:", widget};
-                hLayout->addWidget(label);
-                spinBox = new QDoubleSpinBox{widget};
-                spinBox->setValue(static_cast<double>(extents[i]));
-                connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-                [=](double d)
-                {
-                    if (auto collider = getColliderComponent())
-                        if (auto extents = std::get_if<gsl::vec3>(&collider->extents))
-                            (*extents)[i] = static_cast<float>(d);
-                });
-                hLayout->addWidget(spinBox);
-                break;
+                ui->widget_Parameters->setMinimumHeight(20);
             }
-            case ColliderComponent::BOX:
-                qDebug() << "type was Box!";
             break;
             case ColliderComponent::SPHERE:
-            qDebug() << "type was Sphere!";
+            {
+                // widgets.push_back(new QLabel{"Centre:", ui->widget_Parameters});
+
+                widgets.push_back(new QWidget{ui->widget_Parameters});
+                auto &widget = widgets.back();
+                QHBoxLayout* hLayout = new QHBoxLayout();
+                widget->setLayout(hLayout);
+
+                auto extents = std::get<float>(comp->extents);
+
+                QLabel* label = new QLabel{"Radius: ", widget};
+                hLayout->addWidget(label);
+                auto spinBox = new QDoubleSpinBox{widget};
+                spinBox->setValue(static_cast<double>(extents));
+                connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+                [=](double d)
+                {
+                    if (auto collider = getColliderComponent())
+                        if (auto extents = std::get_if<float>(&collider->extents))
+                        {
+                            *extents = static_cast<float>(d);
+                            if (auto trans = getTransformComponent())
+                                trans->colliderBoundsOutdated = true;
+                        }
+                });
+                hLayout->addWidget(spinBox);
+
+                ui->widget_Parameters->setMinimumHeight(10);
+            }
             break;
             case ColliderComponent::CAPSULE:
-            qDebug() << "type was Capsule!";
+            {
+                // widgets.push_back(new QLabel{"Centre:", ui->widget_Parameters});
+
+                auto& extents = std::get<std::pair<float, float>>(comp->extents);
+                float* extentsFloats[]{&extents.first, &extents.second};
+                const char* labelNames[]{"Radius:", "Half-height:"};
+
+                for (int i = 0; i < 2; ++i)
+                {
+
+                    widgets.push_back(new QWidget{ui->widget_Parameters});
+                    auto &widget = widgets.back();
+                    QHBoxLayout* hLayout = new QHBoxLayout();
+                    widget->setLayout(hLayout);
+
+
+                    QLabel* label = new QLabel{labelNames[i], widget};
+                    hLayout->addWidget(label);
+                    auto spinBox = new QDoubleSpinBox{widget};
+                    spinBox->setValue(static_cast<double>(*extentsFloats[i]));
+                    connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+                    [=](double d)
+                    {
+                        if (auto collider = getColliderComponent())
+                            if (auto extents = std::get_if<std::pair<float, float>>(&collider->extents))
+                            {
+                                *(extentsFloats[i]) = static_cast<float>(d);
+                                if (auto trans = getTransformComponent())
+                                    trans->colliderBoundsOutdated = true;
+                            }
+                    });
+                    hLayout->addWidget(spinBox);
+                }
+
+                ui->widget_Parameters->setMinimumHeight(20);
+            }
             break;
             default:
-            qDebug() << "No type!";
                 break;
         }
 
-        layout->addWidget(widget);
-        ui->widget_Parameters->setMinimumHeight(100);
+        for (auto widget : widgets)
+            if (widget != nullptr)
+                layout->addWidget(widget);
     }
 }
 
@@ -173,6 +233,15 @@ ColliderComponent *ColliderWidget::getColliderComponent()
 {
     if (auto entity = mMainWindow->currentEntitySelected)
         if (auto comp = mMainWindow->getEntityManager()->getComponent<ColliderComponent>(entity->entityId))
+            return comp;
+
+    return nullptr;
+}
+
+TransformComponent *ColliderWidget::getTransformComponent()
+{
+    if (auto entity = mMainWindow->currentEntitySelected)
+        if (auto comp = mMainWindow->getEntityManager()->getComponent<TransformComponent>(entity->entityId))
             return comp;
 
     return nullptr;

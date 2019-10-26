@@ -280,6 +280,12 @@ public:
             returnComp = &component;
             break;
         }
+        case ComponentType::Camera:
+        {
+            auto [component] = addComponent<CameraComponent>(entity);
+            returnComp = &component;
+            break;
+        }
         case ComponentType::Input:
         {
             auto [component] = addComponent<InputComponent>(entity);

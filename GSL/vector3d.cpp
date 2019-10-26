@@ -98,7 +98,22 @@ namespace gsl
 
     Vector3D Vector3D::operator^(const Vector3D &rhs) const
         {
-            return {y * rhs.getZ() - z * rhs.getY(), z * rhs.getX() - x * rhs.getZ(), x * rhs.getY() - y * rhs.getX()};
+        return {y * rhs.getZ() - z * rhs.getY(), z * rhs.getX() - x * rhs.getZ(), x * rhs.getY() - y * rhs.getX()};
+    }
+
+    GLfloat &Vector3D::operator[](const int index)
+    {
+        // assert(index < 3 && index >= 0);
+        if (index > 2 || index < 0)
+            throw std::out_of_range{"index must be between 0 and 2"};
+        return *(&x + index);
+    }
+
+    GLfloat Vector3D::operator[](const int index) const
+    {
+        if (index > 2 || index < 0)
+            throw std::out_of_range{"index must be between 0 and 2"};
+        return *(&x + index);
     }
 
 
@@ -137,6 +152,16 @@ namespace gsl
     GLfloat Vector3D::dot(const Vector3D &v1, const Vector3D &v2)
     {
         return ((v1.getX() * v2.getX()) + (v1.getY() * v2.getY()) + (v1.getZ() * v2.getZ()));
+    }
+
+    Vector3D Vector3D::project(const Vector3D &b) const
+    {
+        return project(*this, b);
+    }
+
+    Vector3D Vector3D::project(const Vector3D &a, const Vector3D &b)
+    {
+        return b * (dot(a, b) / static_cast<float>(std::pow(b.length(), 2)));
     }
 
 

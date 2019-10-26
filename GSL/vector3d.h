@@ -33,12 +33,17 @@ public:
     GLfloat operator* (const Vector3D &rhs) const; // v * v - dot product
     Vector3D operator^ (const Vector3D& rhs) const; // v x v  - cross product
 
+    GLfloat& operator[](const int index);
+    GLfloat operator[] (const int index) const;
+
     //Functions
     GLfloat length() const;
     void normalize();
     Vector3D normalized() const;
     static Vector3D cross(const Vector3D &v1, const Vector3D &v2);
     static GLfloat dot(const Vector3D &v1, const Vector3D &v2);
+    Vector3D project(const Vector3D &b) const;
+    static Vector3D project (const Vector3D& a, const Vector3D& b);
 
     void rotateX(GLfloat angle);
     void rotateY(GLfloat angle);

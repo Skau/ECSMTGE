@@ -5,7 +5,6 @@
 #include "wavfilehandler.h"
 #include <QDebug>
 #include "soundmanager.h"
-#include "simplify.h"
 
 ResourceManager::~ResourceManager()
 {
@@ -99,7 +98,7 @@ std::shared_ptr<MeshData> ResourceManager::addMesh(const std::string& name, cons
             auto verticesIndicesPair = readObjFile(path);
             if(!verticesIndicesPair.first.size()) return nullptr;
             auto mesh = initializeMeshData(name, renderType, verticesIndicesPair);
-            auto [LOD1, LOD2] = initializeLODs(verticesIndicesPair, name, path, renderType);
+            auto [LOD1, LOD2] = initializeLODs(name, path, renderType);
             setupLODs(mesh, LOD1, LOD2);
             return mesh;
         }
@@ -117,38 +116,29 @@ std::shared_ptr<MeshData> ResourceManager::addMesh(const std::string& name, cons
     return nullptr;
 }
 
-std::pair<std::shared_ptr<MeshData>, std::shared_ptr<MeshData>> ResourceManager::initializeLODs(std::pair<std::vector<Vertex>, std::vector<GLuint>> data, const std::string& name, const std::string& path, GLenum renderType)
+std::pair<std::shared_ptr<MeshData>, std::shared_ptr<MeshData>> ResourceManager::initializeLODs(const std::string& name, const std::string& path, GLenum renderType)
 {
     auto split = QString::fromStdString(path).split(".");
     auto firstSplit = split[0].toStdString();
 
-    // Load original mesh
-    Simplify::load_obj((gsl::assetFilePath + "Meshes/" + path).c_str());
-    //qDebug() << "LOD0 vertices count: " << data.first.size();
+    std::shared_ptr<MeshData> LOD1{nullptr};
+    std::shared_ptr<MeshData> LOD2{nullptr};
 
     // LOD1
+    auto LOD1Name = name + "_L01.obj";
+    auto verticesIndicesPair = readObjFile(LOD1Name);
+    if(verticesIndicesPair.first.size())
+    {
+        LOD1 = initializeMeshData(LOD1Name, renderType, verticesIndicesPair);
 
-    // Simplify (Target is 30% triangle count)
-    Simplify::simplify_mesh(static_cast<int>((data.first.size() * 3) * 0.3f));
-    //qDebug() << "LOD1 vertices count: " << Simplify::vertices.size();
-    // Create new path (this will be in working directory)
-    auto pathName = firstSplit + "_LOD1.obj";
-    // Create new OBJ file in path
-    Simplify::write_obj(pathName.c_str());
-    // Load the newly created OBJ
-    auto LOD1 = initializeMeshData(name + "_LOD1", renderType, readObjFile(pathName, false));
-
-    // LOD 2
-
-    // Simplify (Target is 1/3 of triangles)
-    Simplify::simplify_mesh(static_cast<int>(Simplify::triangles.size() / 3));
-    //qDebug() << "LOD2 vertices count: " << Simplify::vertices.size();
-    // Create new path (this will be in working directory)
-    pathName = firstSplit + "_LOD2.obj";
-    // Create new OBJ file in path
-    Simplify::write_obj(pathName.c_str());
-    // Load the newly created OBJ
-    auto LOD2 = initializeMeshData(name + "_LOD2", renderType, readObjFile(pathName, false));
+        // LOD2
+        auto LOD2Name = name + "_L02.obj";
+        verticesIndicesPair = readObjFile(LOD2Name);
+        if(verticesIndicesPair.first.size())
+        {
+            LOD2 = initializeMeshData(LOD2Name, renderType, verticesIndicesPair);
+        }
+    }
 
     return {LOD1, LOD2};
 }
@@ -160,7 +150,7 @@ void ResourceManager::setupLODs(std::shared_ptr<MeshData> baseMeshData, std::sha
         baseMeshData->mVAOs[1]              = LOD1->mVAOs[0];
         baseMeshData->mVerticesCounts[1]    = LOD1->mVerticesCounts[0];
         baseMeshData->mIndicesCounts[1]     = LOD1->mIndicesCounts[0];
-        mMeshes.erase(LOD1->mName);
+
         if(LOD2)
         {
             baseMeshData->mVAOs[2]              = LOD2->mVAOs[0];
@@ -174,6 +164,8 @@ void ResourceManager::setupLODs(std::shared_ptr<MeshData> baseMeshData, std::sha
             baseMeshData->mVerticesCounts[2]    = LOD1->mVerticesCounts[0];
             baseMeshData->mIndicesCounts[2]     = LOD1->mIndicesCounts[0];
         }
+
+        mMeshes.erase(LOD1->mName);
     }
     else
     {

@@ -443,13 +443,13 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
             float distance = distanceFromCamera(camera, *transIt);
 
             unsigned index = 0;
-            if(distance > 10.f)
-            {
-                index = 1;
-            }
-            else if(distance > 20.f)
+            if(distance > 20.f)
             {
                 index = 2;
+            }
+            else if(distance > 10.f)
+            {
+                index = 1;
             }
 
             // Mesh data available

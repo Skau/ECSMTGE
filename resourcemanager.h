@@ -82,9 +82,9 @@ private:
     std::pair<std::vector<Vertex>, std::vector<GLuint>> readTxtFile(std::string filename);
 
     /**
-     * @brief Creates LOD meshes for a given data pair. Only works with OBJ files. Hardcoded to create 2 LODs
+     * @brief Sets up LOD meshes for a .obj. It looks for same name suffixed with '_L01/_L02'. Hardcoded to create 2 LODs
      */
-    std::pair<std::shared_ptr<MeshData>, std::shared_ptr<MeshData> > initializeLODs(std::pair<std::vector<Vertex>, std::vector<GLuint> > data, const std::string& name, const std::string& path, GLenum renderType);
+    std::pair<std::shared_ptr<MeshData>, std::shared_ptr<MeshData> > initializeLODs(const std::string& name, const std::string& path, GLenum renderType);
 
     /**
      * @brief Sets up the base mesh data vao, vertexcount and indexcount arrays with the provided values from LOD1 and LOD2 respectively.

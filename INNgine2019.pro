@@ -6,8 +6,7 @@ CONFIG      += c++17
 TARGET      = INNgine2019
 
 PRECOMPILED_HEADER += \
-                    innpch.h \
-                    simplify.h
+                    innpch.h
 
 INCLUDEPATH +=  ./GSL
 INCLUDEPATH += ./include
@@ -110,7 +109,6 @@ HEADERS += \
     resourcemanager.h \
     scene.h \
     scriptsystem.h \
-    simplify.h \
     soundlistener.h \
     soundmanager.h \
     texture.h \

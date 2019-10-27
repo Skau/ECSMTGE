@@ -40,6 +40,7 @@ public slots:
     void initTheRest();
     void toggleMute(bool mode);
     void mousePicking();
+    void saveSession();
 
 private slots:
     void update();
@@ -64,6 +65,8 @@ private:
     // Handles input events in Renderer
     std::shared_ptr<InputHandler> mEventHandler;
     std::unique_ptr<World> mWorld;
+
+    void loadSession(const std::string& path);
 
     QTimer mUpdateTimer; // Calls update
 

@@ -49,7 +49,7 @@ World::~World()
 {
 }
 
-void World::initScene()
+void World::initBlankScene()
 {
     mCurrentScene = std::make_unique<Scene>(this);
 
@@ -69,16 +69,27 @@ void World::loadScene(const std::string& path)
 {
     if(mCurrentScene)
     {
-        mCurrentScene.reset();
+        // Cleanup
+        if (auto obj = mCurrentScene.release())
+            delete obj;
     }
+
     mCurrentScene = std::make_unique<Scene>(this);
-    mCurrentScene->LoadFromFile(path);
+
+    if (!mCurrentScene->LoadFromFile(path))
+    {
+        // Cleanup
+        if (auto obj = mCurrentScene.release())
+            delete obj;
+    }
+    else
+        sceneLoaded();
 }
 
 void World::newScene()
 {
     entityManager->clear();
-    initScene();
+    initBlankScene();
 }
 
 void World::clearEntities()
@@ -103,4 +114,17 @@ void World::saveTemp()
     {
         mCurrentScene->SaveToFile("temp" + mCurrentScene->name + ".json");
     }
+}
+
+bool World::isSceneValid() const
+{
+    return static_cast<bool>(mCurrentScene);
+}
+
+std::optional<std::string> World::sceneFilePath() const
+{
+    if (mCurrentScene && mCurrentScene->filePath)
+        return mCurrentScene->filePath;
+
+    return std::nullopt;
 }

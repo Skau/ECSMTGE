@@ -10,6 +10,11 @@ ComponentWidget::ComponentWidget(MainWindow* mainWindow, QWidget* parent)
     connect(this, &QWidget::customContextMenuRequested, this, &ComponentWidget::ProvideContextMenu);
 }
 
+void ComponentWidget::onSelected()
+{
+
+}
+
 void ComponentWidget::ProvideContextMenu(const QPoint &point)
 {
     QMenu subMenu;

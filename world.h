@@ -17,7 +17,7 @@ public:
 
     std::shared_ptr<EntityManager> getEntityManager() { return entityManager; }
 
-    void initScene();
+    void initBlankScene();
 
     void clearEntities();
 
@@ -25,10 +25,17 @@ public:
 
     void saveTemp();
 
+    bool isSceneValid() const;
+
+    std::optional<std::string> sceneFilePath() const;
+
 public slots:
     void saveScene(const std::string& path);
     void loadScene(const std::string& path);
     void newScene();
+
+signals:
+    void sceneLoaded();
 
 private:
     std::unique_ptr<Scene> mCurrentScene;

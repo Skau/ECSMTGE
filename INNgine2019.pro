@@ -60,6 +60,7 @@ win32 {
 HEADERS += \
     GSL/math.h \
     GSL/quaternion.h \
+    Widgets/colliderwidget.h \
     Widgets/componentwidget.h \
     Widgets/directionallightwidget.h \
     Widgets/inputwidget.h \
@@ -121,6 +122,7 @@ HEADERS += \
 SOURCES += \
     GSL/math.cpp \
     GSL/quaternion.cpp \
+    Widgets/colliderwidget.cpp \
     Widgets/componentwidget.cpp \
     Widgets/directionallightwidget.cpp \
     Widgets/inputwidget.cpp \
@@ -172,6 +174,7 @@ SOURCES += \
 
 
 FORMS += \
+    collider.ui \
     directionallight.ui \
     input.ui \
     mainwindow.ui \

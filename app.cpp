@@ -11,6 +11,8 @@
 #include "physicssystem.h"
 #include "scriptsystem.h"
 
+#include <QJsonDocument>
+
 App::App()
 {
     mSoundManager = std::make_unique<SoundManager>();
@@ -23,6 +25,7 @@ App::App()
     connect(mMainWindow.get(), &MainWindow::shutUp, this, &App::toggleMute);
     connect(mMainWindow.get(), &MainWindow::play, this, &App::onPlay);
     connect(mMainWindow.get(), &MainWindow::stop, this, &App::onStop);
+    connect(mMainWindow.get(), &MainWindow::quitting, this, &App::saveSession);
 
     connect(mRenderer, &Renderer::initDone, this, &App::initTheRest);
     connect(mRenderer, &Renderer::windowUpdated, this, &App::updatePerspective);
@@ -40,6 +43,7 @@ void App::initTheRest()
     connect(mMainWindow.get(), &MainWindow::newScene, mWorld.get(), &World::newScene);
     connect(mMainWindow.get(), &MainWindow::saveScene, mWorld.get(), &World::saveScene);
     connect(mMainWindow.get(), &MainWindow::loadScene, mWorld.get(), &World::loadScene);
+    connect(mWorld.get(), &World::sceneLoaded, this, &App::updatePerspective);
     mMainWindow->setEntityManager(mWorld->getEntityManager());
 
     // Temp solution, this is just for script system experimentation
@@ -48,8 +52,13 @@ void App::initTheRest()
     // Script System needs the entity manager so data is available in scripts
     ScriptSystem::get()->setEntityManager(mWorld->getEntityManager());
 
-    mWorld->initScene();
+    // Load editor session data
+    loadSession("session.json");
 
+    if (!mWorld->isSceneValid())
+        mWorld->initBlankScene();
+
+    // Setup update loop
     connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);
     mUpdateTimer.start(16); // Simulates 60ish fps
 
@@ -217,6 +226,8 @@ void App::update()
 
 void App::quit()
 {
+    saveSession();
+
     mMainWindow->close();
 }
 
@@ -269,4 +280,53 @@ void App::calculateFrames()
         mTotalDeltaTime = 0;
         mFPSTimer.restart();
     }
+}
+
+void App::loadSession(const std::string &path)
+{
+    QFile file(QString::fromStdString(path));
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        return;
+    }
+
+    QJsonDocument document = QJsonDocument::fromJson(file.readAll());
+    if(!document.isObject())
+    {
+        return;
+    }
+
+    QJsonObject mainObject = document.object();
+    if(mainObject.isEmpty())
+    {
+        return;
+    }
+
+    if (mWorld)
+    {
+        auto value = mainObject["DefaultMap"];
+        if (value.isString())
+        {
+            mWorld->loadScene(value.toString().toStdString());
+        }
+    }
+}
+
+void App::saveSession()
+{
+    QFile file{"session.json"};
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
+    {
+        qDebug() << "Failed to save session file.";
+        return;
+    }
+
+    QJsonObject mainObject{};
+
+    if (mWorld)
+        if (auto path = mWorld->sceneFilePath())
+            mainObject["DefaultMap"] = QString::fromStdString(path.value());
+
+
+    file.write(QJsonDocument{mainObject}.toJson());
 }

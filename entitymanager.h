@@ -280,6 +280,12 @@ public:
             returnComp = &component;
             break;
         }
+        case ComponentType::Camera:
+        {
+            auto [component] = addComponent<CameraComponent>(entity);
+            returnComp = &component;
+            break;
+        }
         case ComponentType::Input:
         {
             auto [component] = addComponent<InputComponent>(entity);
@@ -316,6 +322,12 @@ public:
             returnComp = &component;
             break;
         }
+        case ComponentType::Collider:
+        {
+            auto [component] = addComponent<ColliderComponent>(entity);
+            returnComp = &component;
+            break;
+        }
         default:
             break;
         }
@@ -349,6 +361,14 @@ public:
             }
         }
         if(auto comp = getComponent<PhysicsComponent>(entity))
+        {
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
+        }
+        if(auto comp = getComponent<CameraComponent>(entity))
         {
             if(comp->valid)
             {
@@ -404,6 +424,14 @@ public:
                 addedAnyComponents = true;
             }
         }
+        if(auto comp = getComponent<ColliderComponent>(entity))
+        {
+            if(comp->valid)
+            {
+                outComponents.push_back(comp);
+                addedAnyComponents = true;
+            }
+        }
         return addedAnyComponents;
     }
 
@@ -417,6 +445,17 @@ public:
         for (auto comp : mMeshComponents)
             std::cout << "{id: " << comp.entityId << ", valid: " << comp.valid << "} ";
         std::cout << std::endl;
+    }
+
+    // TODO: Find should use binary search
+    template <typename iterator>
+    static typename iterator::value_type* find(const iterator& begin, const iterator& end, unsigned int eID)
+    {
+        for (auto it{begin}; it != end; ++it)
+            if (it->entityId == eID)
+                return &(*it);
+
+        return nullptr;
     }
 
     /** Breadth first search iterator for iterating through
@@ -520,17 +559,5 @@ public:
     void UpdateBounds();
     // static MeshData::Bounds CalculateBounds(const std::vector<Vertex> &vertices);
 };
-
-namespace gsl {
-    template <typename iterator>
-    typename iterator::value_type* find(const iterator& begin, const iterator& end, unsigned int eID)
-    {
-        for (auto it{begin}; it != end; ++it)
-            if (it->entityId == eID)
-                return &(*it);
-
-        return nullptr;
-    }
-}
 
 #endif // COMPONENTMANAGER_H

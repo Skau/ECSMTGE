@@ -18,6 +18,7 @@
 #include "Widgets/pointlightwidget.h"
 #include "Widgets/spotlightwidget.h"
 #include "Widgets/scriptwidget.h"
+#include "Widgets/colliderwidget.h"
 #include "componentdata.h"
 
 #include <QSplitter>
@@ -260,6 +261,11 @@ void MainWindow::updateComponentArea(unsigned int entityID)
                 componentWidget = new ScriptWidget(this);
                 break;
             }
+            case ComponentType::Collider:
+            {
+                componentWidget = new ColliderWidget(this);
+                break;
+            }
             default:
                 break;
             }
@@ -268,6 +274,7 @@ void MainWindow::updateComponentArea(unsigned int entityID)
             {
                 connect(componentWidget, &ComponentWidget::widgetRemoved, this, &MainWindow::onWidgetRemoved);
                 componentWidget->updateData();
+                componentWidget->onSelected();
                 layout->addWidget(componentWidget);
                 mCurrentComponentWidgets.push_back(componentWidget);
                 componentWidget = nullptr;
@@ -342,6 +349,11 @@ void MainWindow::updateAvailableComponents(std::vector<ComponentType> types)
         case ComponentType::Script:
         {
             ui->comboBox_Components->addItem("Script");
+            break;
+        }
+        case ComponentType::Collider:
+        {
+            ui->comboBox_Components->addItem("Collider");
             break;
         }
         default:
@@ -432,6 +444,11 @@ void MainWindow::setSelected(EntityInfo* entityInfo)
 
     if (auto renderer = getRenderer())
         renderer->EditorCurrentEntitySelected = currentEntitySelected;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    quitting();
 }
 
 void MainWindow::on_treeWidget_ObjectList_itemClicked(QTreeWidgetItem *item, int /*column*/)

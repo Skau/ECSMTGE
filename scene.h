@@ -14,6 +14,7 @@ public:
     virtual ~Scene();
 
     std::string name = "Scene";
+    std::optional<std::string> filePath{};
 
     /**
      * @brief Creates an empty scene with only a camera
@@ -25,7 +26,7 @@ public:
      */
     virtual void initCustomObjects(){}
 
-    void LoadFromFile(const std::string& path);
+    bool LoadFromFile(const std::string& path);
     void SaveToFile(const std::string& path);
 
 signals:

@@ -32,7 +32,8 @@ enum class ComponentType
 // Used by UI so it knows what components are available to add if the entity doesnt have one.
 const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, ComponentType::Transform, ComponentType::Physics,
                                                    ComponentType::Input, ComponentType::Sound, ComponentType::LightPoint,
-                                                   ComponentType::LightDirectional, ComponentType::LightSpot, ComponentType::Script, ComponentType::Collider};
+                                                   ComponentType::LightDirectional, ComponentType::LightSpot, ComponentType::Script,
+                                                   ComponentType::Collider};
 
 
 struct Component
@@ -176,7 +177,7 @@ struct CameraComponent : public Component
     CameraComponent(unsigned int _eID = 0, bool _valid = false,
            bool currentActive = true, GLuint fbTarget = 0, const gsl::mat4& vMat = gsl::mat4{},
            const gsl::mat4& pMat = gsl::mat4{})
-        : Component (_eID, _valid), isCurrentActive{currentActive},
+        : Component (_eID, _valid, ComponentType::Camera), isCurrentActive{currentActive},
           framebufferTarget{fbTarget}, viewMatrix{vMat}, projectionMatrix{pMat}
     {}
 
@@ -363,23 +364,26 @@ struct ScriptComponent : public Component
 
 struct ColliderComponent : public Component
 {
-    enum Type
+    enum Type : char
     {
+        None = 0,
         AABB,
         BOX,
         SPHERE,
         CAPSULE
     };
+    static constexpr const char* typeNames[]{"None", "AABB", "Box", "Sphere", "Capsule"};
+
 
     Type collisionType;
 
     ColliderComponent(unsigned int _eID = 0, bool _valid = false)
-        : Component(_eID, _valid), collisionType(AABB)
+        : Component(_eID, _valid, ComponentType::Collider), collisionType(None)
     {}
 
     virtual void reset() override
     {
-        collisionType = AABB;
+        collisionType = None;
     }
 
     std::variant<gsl::vec3, float, std::pair<float, float>> extents;

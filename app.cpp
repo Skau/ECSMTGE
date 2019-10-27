@@ -13,10 +13,6 @@
 
 App::App()
 {
-    qRegisterMetaType<std::vector<TransformComponent>>("std::vector<TransformComponent>");
-    qRegisterMetaType<std::vector<PhysicsComponent>>("std::vector<PhysicsComponent>");
-    qRegisterMetaType<std::vector<ColliderComponent>>("std::vector<ColliderComponent>");
-
     mSoundManager = std::make_unique<SoundManager>();
     mSoundListener = std::make_unique<SoundListener>();
 
@@ -49,7 +45,6 @@ void App::initTheRest()
     // Temp solution, this is just for script system experimentation
     connect(mWorld->getEntityManager().get(), &EntityManager::refreshWidgets, mMainWindow.get(), &MainWindow::refreshWidgets);
 
-
     // Script System needs the entity manager so data is available in scripts
     ScriptSystem::get()->setEntityManager(mWorld->getEntityManager());
 
@@ -66,6 +61,7 @@ void App::initTheRest()
     // Send skybox data to renderer
 
     auto skyboxMesh = ResourceManager::instance()->getMesh("skybox");
+
     auto skyboxMaterial = std::make_shared<Material>();
     auto skyShader = ResourceManager::instance()->getShader("skybox");
     skyboxMaterial->mShader = skyShader;
@@ -110,14 +106,6 @@ void App::initTheRest()
         material,
         0
     });
-
-    mPhysicsSystem = new PhysicsSystem;
-    mPhysicsThread = new QThread;
-    mPhysicsSystem->moveToThread(mPhysicsThread);
-    connect(mPhysicsThread,  &QThread::started, mPhysicsSystem, &PhysicsSystem::UpdatePhysics);
-    connect(mPhysicsSystem, &PhysicsSystem::finished, this, &App::onPhysicsFinished);
-    connect(this, &App::updatePhysicsComponents, mPhysicsSystem, &PhysicsSystem::updateComponents);
-    mPhysicsThread->start();
 }
 
 void App::toggleMute(bool mode)
@@ -160,9 +148,6 @@ void App::update()
 
     calculateFrames();
 
-    QElapsedTimer timer;
-    timer.start();
-
     // Tick scripts if playing
     if(mCurrentlyPlaying)
     {
@@ -175,6 +160,7 @@ void App::update()
     auto& transforms = mWorld->getEntityManager()->getTransformComponents();
     auto& cameras = mWorld->getEntityManager()->getCameraComponents();
     auto& physics = mWorld->getEntityManager()->getPhysicsComponents();
+    auto& colliders = mWorld->getEntityManager()->getColliderComponents();
     auto& sounds = mWorld->getEntityManager()->getSoundComponents();
 
     // Input:
@@ -182,10 +168,12 @@ void App::update()
     InputSystem::HandleInput(mDeltaTime, inputs, transforms);
     InputSystem::HandleCameraInput(mDeltaTime, inputs, transforms, cameras);
 
-    if(physicsUpdated)
-    {
-
-    }
+    // Physics:
+    /* Note: Physics calculation should be happening on a separate thread
+     * and instead of sending references to the lists we should take copies
+     * and then later apply those copies to the original lists.
+     */
+     PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
 
     // Sound
     // Sound listener is using the active camera view matrix (for directions) and transform (for position)
@@ -223,10 +211,6 @@ void App::update()
             break;
         }
     }
-
-    updatePhysicsComponents(mWorld->getEntityManager()->getTransformComponents(), mWorld->getEntityManager()->getPhysicsComponents(), mWorld->getEntityManager()->getColliderComponents());
-
-    //qDebug() << "Elapsed:" << timer.elapsed() << "ms";
 
     currentlyUpdating = false;
 }
@@ -271,13 +255,6 @@ void App::onStop()
     mRenderer->EditorCurrentEntitySelected = nullptr;
 
     mWorld->loadTemp();
-}
-
-void App::onPhysicsFinished(std::vector<TransformComponent> transforms, std::vector<PhysicsComponent> physics, std::vector<ColliderComponent> colliders)
-{
-    mWorld->getEntityManager()->setTransformComponents(std::move(transforms));
-    mWorld->getEntityManager()->setPhysicsComponents(std::move(physics));
-    mWorld->getEntityManager()->setColliderComponents(std::move(colliders));
 }
 
 void App::calculateFrames()

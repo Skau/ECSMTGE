@@ -147,16 +147,12 @@ void TestScene::initCustomObjects()
     for(int i = 0; i < 10; ++i)
     {
         auto entity = entityManager->createEntity();
-        auto [transform, render, physics] = entityManager->addComponent<TransformComponent, MeshComponent, PhysicsComponent>(entity);
+        auto [transform, render] = entityManager->addComponent<TransformComponent, MeshComponent>(entity);
         if(auto meshData = ResourceManager::instance()->getMesh("suzanne"))
         {
             render.meshData = *meshData;
             render.isVisible = true;
         }
         transform.setPosition(gsl::vec3(i*2.f, 0, 0));
-        if(i == 2)
-        {
-            physics.setVelocity({0, 0.5f, 0});
-        }
     }
 }

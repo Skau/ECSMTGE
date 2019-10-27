@@ -45,11 +45,6 @@ struct Component
         : entityId{_eID}, valid(_valid), type(typeIn)
     {}
 
-    bool operator==(const Component& other)
-    {
-        return entityId == other.entityId;
-    }
-
     virtual void reset()=0;
 
     virtual QJsonObject toJSON();

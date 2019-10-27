@@ -2,13 +2,8 @@
 #include "resourcemanager.h"
 #include "entitymanager.h"
 
-#include <QElapsedTimer>
-
 World::World()
 {
-    QElapsedTimer timer;
-    timer.start();
-
     // Forward
     ResourceManager::instance()->addShader("color",             std::make_shared<Shader>("colorshader", ShaderType::Forward));
     ResourceManager::instance()->addShader("texture",           std::make_shared<Shader>("textureshader", ShaderType::Forward));
@@ -47,8 +42,6 @@ World::World()
 
     ResourceManager::instance()->addTexture("skybox", "skyboxSpaceBoring.bmp", GL_TEXTURE_CUBE_MAP);
 
-    qDebug() << "Elapsed initialzing resources:" << timer.elapsed() << "ms";
-
     entityManager = std::make_shared<EntityManager>();
 }
 
@@ -58,7 +51,7 @@ World::~World()
 
 void World::initScene()
 {
-    mCurrentScene = std::make_unique<TestScene>(this);
+    mCurrentScene = std::make_unique<Scene>(this);
 
     mCurrentScene->initBlankScene();
     mCurrentScene->initCustomObjects();

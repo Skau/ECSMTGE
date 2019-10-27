@@ -93,6 +93,8 @@ void World::loadScene(const std::string& path)
                 qDebug() << "comptype: " << static_cast<int>(comp->type);
 
         }
+
+        sceneLoaded();
     }
 }
 

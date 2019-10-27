@@ -42,6 +42,7 @@ void App::initTheRest()
     connect(mMainWindow.get(), &MainWindow::newScene, mWorld.get(), &World::newScene);
     connect(mMainWindow.get(), &MainWindow::saveScene, mWorld.get(), &World::saveScene);
     connect(mMainWindow.get(), &MainWindow::loadScene, mWorld.get(), &World::loadScene);
+    connect(mWorld.get(), &World::sceneLoaded, this, &App::updatePerspective);
     mMainWindow->setEntityManager(mWorld->getEntityManager());
 
     // Temp solution, this is just for script system experimentation

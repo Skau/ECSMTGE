@@ -32,6 +32,9 @@ public slots:
     void loadScene(const std::string& path);
     void newScene();
 
+signals:
+    void sceneLoaded();
+
 private:
     std::unique_ptr<Scene> mCurrentScene;
 

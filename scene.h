@@ -14,6 +14,7 @@ public:
     virtual ~Scene();
 
     std::string name = "Scene";
+    std::optional<std::string> filePath{};
 
     /**
      * @brief Creates an empty scene with only a camera

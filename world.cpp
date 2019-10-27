@@ -83,19 +83,7 @@ void World::loadScene(const std::string& path)
             delete obj;
     }
     else
-    {
-        for (auto transform : getEntityManager()->getTransformComponents())
-        {
-            qDebug() << "Entity " << transform.entityId;
-            std::vector<Component*> comps;
-            getEntityManager()->getAllComponents(transform.entityId, comps);
-            for (auto comp : comps)
-                qDebug() << "comptype: " << static_cast<int>(comp->type);
-
-        }
-
         sceneLoaded();
-    }
 }
 
 void World::newScene()
@@ -131,4 +119,12 @@ void World::saveTemp()
 bool World::isSceneValid() const
 {
     return static_cast<bool>(mCurrentScene);
+}
+
+std::optional<std::string> World::sceneFilePath() const
+{
+    if (mCurrentScene && mCurrentScene->filePath)
+        return mCurrentScene->filePath;
+
+    return std::nullopt;
 }

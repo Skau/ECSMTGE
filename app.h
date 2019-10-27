@@ -40,6 +40,7 @@ public slots:
     void initTheRest();
     void toggleMute(bool mode);
     void mousePicking();
+    void saveSession();
 
 private slots:
     void update();

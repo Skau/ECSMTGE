@@ -30,12 +30,10 @@ void Scene::initBlankScene()
 
 bool Scene::LoadFromFile(const std::string& path)
 {
-    qDebug() << "Loaded: " << QString::fromStdString(path);
-
     QFile file(QString::fromStdString(path));
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "ERROR Scene.save(): Failed to open file at specified path!";
+        qDebug() << "ERROR Scene.load(): Failed to open file at specified path!";
         return false;
     }
 
@@ -55,6 +53,8 @@ bool Scene::LoadFromFile(const std::string& path)
         qDebug() << "Load Error: File is empty.";
         return false;
     }
+
+    filePath = path;
 
     mWorld->clearEntities();
     auto entityManager = mWorld->getEntityManager();
@@ -93,6 +93,8 @@ void Scene::SaveToFile(const std::string& path)
         qDebug() << "Save error: Failed to open file at specified path!";
         return;
     }
+
+    filePath = path;
 
     const auto& entityManager = mWorld->getEntityManager();
     const auto& entityInfos = entityManager->getEntityInfos();

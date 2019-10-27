@@ -25,6 +25,7 @@ App::App()
     connect(mMainWindow.get(), &MainWindow::shutUp, this, &App::toggleMute);
     connect(mMainWindow.get(), &MainWindow::play, this, &App::onPlay);
     connect(mMainWindow.get(), &MainWindow::stop, this, &App::onStop);
+    connect(mMainWindow.get(), &MainWindow::quitting, this, &App::saveSession);
 
     connect(mRenderer, &Renderer::initDone, this, &App::initTheRest);
     connect(mRenderer, &Renderer::windowUpdated, this, &App::updatePerspective);
@@ -225,6 +226,8 @@ void App::update()
 
 void App::quit()
 {
+    saveSession();
+
     mMainWindow->close();
 }
 
@@ -307,4 +310,23 @@ void App::loadSession(const std::string &path)
             mWorld->loadScene(value.toString().toStdString());
         }
     }
+}
+
+void App::saveSession()
+{
+    QFile file{"session.json"};
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
+    {
+        qDebug() << "Failed to save session file.";
+        return;
+    }
+
+    QJsonObject mainObject{};
+
+    if (mWorld)
+        if (auto path = mWorld->sceneFilePath())
+            mainObject["DefaultMap"] = QString::fromStdString(path.value());
+
+
+    file.write(QJsonDocument{mainObject}.toJson());
 }

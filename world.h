@@ -27,6 +27,8 @@ public:
 
     bool isSceneValid() const;
 
+    std::optional<std::string> sceneFilePath() const;
+
 public slots:
     void saveScene(const std::string& path);
     void loadScene(const std::string& path);

@@ -53,6 +53,7 @@ signals:
     void saveScene(const std::string& filePath);
     void loadScene(const std::string& filePath);
     void newScene();
+    void quitting();
 public slots:
     void updateUI(const std::vector<EntityInfo>& entityData);
     void onWidgetRemoved(ComponentWidget* widget);
@@ -107,6 +108,9 @@ private:
 
     std::vector<ComponentWidget*> mCurrentComponentWidgets;
     void setSelected(EntityInfo *entityInfo);
+
+protected:
+    void closeEvent(QCloseEvent* event) override;
 };
 
 #endif // MAINWINDOW_H

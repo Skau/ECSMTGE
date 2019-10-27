@@ -446,6 +446,11 @@ void MainWindow::setSelected(EntityInfo* entityInfo)
         renderer->EditorCurrentEntitySelected = currentEntitySelected;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    quitting();
+}
+
 void MainWindow::on_treeWidget_ObjectList_itemClicked(QTreeWidgetItem *item, int /*column*/)
 {
     if(mTreeDataCache.find(item) != mTreeDataCache.end())

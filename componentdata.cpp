@@ -488,7 +488,38 @@ QJsonObject ColliderComponent::toJSON()
 {
     auto parentObj = Component::toJSON();
 
-    qDebug() << "NOTE: Collider to JSON not implemented yet.";
+    parentObj.insert("CollisionType", static_cast<int>(collisionType));
+    switch (collisionType)
+    {
+        case ColliderComponent::AABB:
+        case ColliderComponent::BOX:
+        {
+            auto ext = std::get_if<gsl::vec3>(&extents);
+            QJsonArray arr;
+            arr.insert(0, (ext != nullptr) ? static_cast<double>(ext->x) : 1.0);
+            arr.insert(1, (ext != nullptr) ? static_cast<double>(ext->y) : 1.0);
+            arr.insert(2, (ext != nullptr) ? static_cast<double>(ext->z) : 1.0);
+            parentObj.insert("Extents", arr);
+        }
+        break;
+        case ColliderComponent::SPHERE:
+        {
+            auto ext = std::get_if<float>(&extents);
+            parentObj.insert("Extents", static_cast<double>((ext != nullptr) ? *ext : 1.f));
+        }
+        break;
+        case ColliderComponent::CAPSULE:
+        {
+            auto ext = std::get_if<std::pair<float, float>>(&extents);
+            QJsonObject obj;
+            obj.insert("Radius", (ext != nullptr) ? static_cast<double>(ext->first) : 1.0);
+            obj.insert("Half-height", (ext != nullptr) ? static_cast<double>(ext->second) : 1.0);
+            parentObj.insert("Extents", obj);
+        }
+        break;
+        default:
+        break;
+    }
 
     return parentObj;
 }
@@ -497,6 +528,40 @@ void ColliderComponent::fromJSON(QJsonObject object)
 {
     Component::fromJSON(object);
 
-    qDebug() << "NOTE: Collider from JSON not implemented yet.";
+    collisionType = static_cast<ColliderComponent::Type>(object["collisionType"].toInt(0));
 
+    auto obj = object["Extents"];
+    switch (collisionType)
+    {
+        case ColliderComponent::AABB:
+        case ColliderComponent::BOX:
+        {
+            gsl::vec3 ext{1.f, 1.f, 1.f};
+            if (obj.isArray())
+            {
+                auto arr = obj.toArray();
+                for (int i{0}; i < 3 && i < arr.size(); ++i)
+                    ext[i] = static_cast<float>(arr[i].toDouble(1.0));
+            }
+
+            extents = ext;
+        }
+        break;
+        case ColliderComponent::SPHERE:
+            extents = static_cast<float>(obj.toDouble(1.0));
+        break;
+        case ColliderComponent::CAPSULE:
+        {
+            std::pair<float, float> ext{1.f, 1.f};
+            if (obj.isObject())
+            {
+                ext.first = static_cast<float>(obj.toObject()["Radius"].toDouble(1.0));
+                ext.second = static_cast<float>(obj.toObject()["Half-height"].toDouble(1.0));
+            }
+            extents = ext;
+        }
+        break;
+        default:
+            break;
+    }
 }

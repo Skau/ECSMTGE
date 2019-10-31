@@ -77,6 +77,10 @@ void ColliderWidget::on_comboBox_Colliders_currentIndexChanged(int index)
                     break;
             }
 
+            // Remember to update bounds
+            if (auto trans = getTransformComponent())
+                trans->colliderBoundsOutdated = true;
+
             updateParameters();
         }
     }

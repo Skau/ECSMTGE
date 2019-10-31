@@ -121,19 +121,21 @@ std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vec
                     // Calculate bounds
                     switch (collIt->collisionType)
                     {
-                        float radius;
-
                         case ColliderComponent::SPHERE:
+                        {
                             collIt->bounds.centre = gsl::vec3{0.f, 0.f, 0.f};
-                            radius = std::get<float>(collIt->extents);
+                            float radius = std::get<float>(collIt->extents);
                             collIt->bounds.extents = gsl::vec3{radius * transIt->scale.x, radius * transIt->scale.y, radius * transIt->scale.z};
-                            break;
+                        }
+                        break;
                         case ColliderComponent::AABB:
+                        {
                             gsl::vec3 min{};
                             gsl::vec3 max{};
+
                             auto mMatrix = gsl::mat4::modelMatrix(gsl::vec3{}, transIt->rotation, transIt->scale);
-                            std::array<gsl::vec3, 2> points{(mMatrix * collIt->bounds.minMax().first).toVector3D(),
-                                                            (mMatrix * collIt->bounds.minMax().second).toVector3D()};
+                            std::array<gsl::vec3, 2> points{(mMatrix * std::get<gsl::vec3>(collIt->extents) * 0.5f).toVector3D(),
+                                                            (mMatrix * std::get<gsl::vec3>(collIt->extents) * -0.5f).toVector3D()};
                             for (const auto &p : points)
                             {
                                 min.x = (p.x < min.x) ? p.x : min.x;
@@ -144,9 +146,11 @@ std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vec
                                 max.y = (max.y < p.y) ? p.y : max.y;
                                 max.z = (max.z < p.z) ? p.z : max.z;
                             }
+
                             collIt->bounds.centre = (max - min) * 0.5f + min;
                             collIt->bounds.extents = gsl::abs(max - collIt->bounds.centre);
-                            break;
+                        }
+                        break;
                     }
                 }
 

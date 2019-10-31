@@ -389,8 +389,12 @@ struct ColliderComponent : public Component
     std::variant<gsl::vec3, float, std::pair<float, float>> extents;
     struct Bounds
     {
-        gsl::vec3 centre;
-        gsl::vec3 extents;
+        gsl::vec3 centre{0.f, 0.f, 0.f};
+
+        /* Note: Bounds extend by default 0.5 units
+         * away from the centre.
+         */
+        gsl::vec3 extents{1.f, 1.f, 1.f};
 
         std::pair<gsl::vec3, gsl::vec3> minMax() const;
     } bounds;

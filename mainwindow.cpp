@@ -481,10 +481,15 @@ void MainWindow::on_actionSave_triggered()
         QDir().mkdir(QString::fromStdString(gsl::assetFilePath + "/Scenes"));
     }
 
-    QFileDialog dialog(this);
-    dialog.setFileMode(QFileDialog::AnyFile);
 
-    auto filepath = dialog.getOpenFileName(this, tr("Save to disk"), QString::fromStdString(gsl::assetFilePath + "/Scenes"), tr("*.json"));
+    auto filepath = QFileDialog::getSaveFileName(this, "Save scene to disk", QString::fromStdString(gsl::assetFilePath + "/Scenes"),
+                                                "Scene files (*.json)",
+                                                new QString("Scene files (*.json)"));
+
+    if(!filepath.size())
+    {
+        return;
+    }
 
     saveScene(filepath.toStdString());
 }

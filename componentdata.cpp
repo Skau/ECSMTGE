@@ -66,10 +66,10 @@ QJsonObject TransformComponent::toJSON()
     positionArr.insert(2, QJsonValue(static_cast<double>(position.z)));
     parentObj.insert("Position", positionArr);
 
-    rotationArr.insert(0, QJsonValue(static_cast<double>(rotation.i)));
-    rotationArr.insert(1, QJsonValue(static_cast<double>(rotation.j)));
-    rotationArr.insert(2, QJsonValue(static_cast<double>(rotation.k)));
-    rotationArr.insert(3, QJsonValue(static_cast<double>(rotation.s)));
+    rotationArr.insert(0, QJsonValue(static_cast<double>(rotation.s)));
+    rotationArr.insert(1, QJsonValue(static_cast<double>(rotation.i)));
+    rotationArr.insert(2, QJsonValue(static_cast<double>(rotation.j)));
+    rotationArr.insert(3, QJsonValue(static_cast<double>(rotation.k)));
     parentObj.insert("Rotation", rotationArr);
 
     scaleArr.insert(0, QJsonValue(static_cast<double>(scale.x)));

@@ -121,19 +121,21 @@ std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vec
                     // Calculate bounds
                     switch (collIt->collisionType)
                     {
-                        float radius;
-
                         case ColliderComponent::SPHERE:
+                        {
                             collIt->bounds.centre = gsl::vec3{0.f, 0.f, 0.f};
-                            radius = std::get<float>(collIt->extents);
-                            collIt->bounds.extents = gsl::vec3{radius * transIt->scale.x, radius * transIt->scale.y, radius * transIt->scale.z};
-                            break;
+                            float radius = std::get<float>(collIt->extents);
+                            collIt->bounds.extents = gsl::vec3{2 * radius * transIt->scale.x, 2 * radius * transIt->scale.y, 2 * radius * transIt->scale.z};
+                        }
+                        break;
                         case ColliderComponent::AABB:
+                        {
                             gsl::vec3 min{};
                             gsl::vec3 max{};
+
                             auto mMatrix = gsl::mat4::modelMatrix(gsl::vec3{}, transIt->rotation, transIt->scale);
-                            std::array<gsl::vec3, 2> points{(mMatrix * collIt->bounds.minMax().first).toVector3D(),
-                                                            (mMatrix * collIt->bounds.minMax().second).toVector3D()};
+                            std::array<gsl::vec3, 2> points{(mMatrix * std::get<gsl::vec3>(collIt->extents) * 0.5f).toVector3D(),
+                                                            (mMatrix * std::get<gsl::vec3>(collIt->extents) * -0.5f).toVector3D()};
                             for (const auto &p : points)
                             {
                                 min.x = (p.x < min.x) ? p.x : min.x;
@@ -144,9 +146,11 @@ std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vec
                                 max.y = (max.y < p.y) ? p.y : max.y;
                                 max.z = (max.z < p.z) ? p.z : max.z;
                             }
+
                             collIt->bounds.centre = (max - min) * 0.5f + min;
-                            collIt->bounds.extents = gsl::abs(max - collIt->bounds.centre);
-                            break;
+                            collIt->bounds.extents = max - min;
+                        }
+                        break;
                     }
                 }
 
@@ -375,9 +379,9 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
     const auto& [bTrans, bColl, bVel] = b;
 
     // Initialize return values
-    std::optional<std::array<HitInfo, 2>> hitInfos{std::array<HitInfo, 2>{}};
-    HitInfo &aOut = hitInfos.value().at(0);
-    HitInfo &bOut = hitInfos.value().at(1);
+    std::array<HitInfo, 2> hitInfos{};
+    HitInfo &aOut = hitInfos.at(0);
+    HitInfo &bOut = hitInfos.at(1);
 
     aOut.eID = aTrans.entityId;
     bOut.eID = bTrans.entityId;
@@ -401,14 +405,12 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
              * construct a model matrix, multiply said model matrix with
              */
 
-            auto aMat = gsl::mat4::modelMatrix(aTrans.position, aTrans.rotation, aTrans.scale);
-            auto aMin = (aMat * ( -std::get<gsl::vec3>(aColl.extents) * 0.5f)).toVector3D();
-            auto aMax = (aMat * std::get<gsl::vec3>(aColl.extents) * 0.5f).toVector3D();
-            auto bMat = gsl::mat4::modelMatrix(bTrans.position, bTrans.rotation, bTrans.scale);
-            auto bMin = (bMat * ( -std::get<gsl::vec3>(bColl.extents) * 0.5f)).toVector3D();
-            auto bMax = (bMat * std::get<gsl::vec3>(bColl.extents) * 0.5f).toVector3D();
+            auto aMin = aTrans.position - std::get<gsl::vec3>(aColl.extents) * 0.5f;
+            auto aMax = aTrans.position + std::get<gsl::vec3>(aColl.extents) * 0.5f;
+            auto bMin = bTrans.position - std::get<gsl::vec3>(bColl.extents) * 0.5f;
+            auto bMax = bTrans.position + std::get<gsl::vec3>(bColl.extents) * 0.5f;
 
-            result = AABBAABB({aMin, aMax}, {bMin, bMax}, hitInfos.value());
+            result = AABBAABB({aMin, aMax}, {bMin, bMax}, hitInfos);
         }
         else if (bColl.collisionType == ColliderComponent::BOX)
         {
@@ -416,13 +418,12 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
         }
         else if (bColl.collisionType == ColliderComponent::SPHERE)
         {
-            auto aMat = gsl::mat4::modelMatrix(aTrans.position, aTrans.rotation, aTrans.scale);
-            auto aMin = (aMat * ( -std::get<gsl::vec3>(aColl.extents) * 0.5f)).toVector3D();
-            auto aMax = (aMat * std::get<gsl::vec3>(aColl.extents) * 0.5f).toVector3D();
+            auto aMin = aTrans.position - std::get<gsl::vec3>(aColl.extents) * 0.5f;
+            auto aMax = aTrans.position + std::get<gsl::vec3>(aColl.extents) * 0.5f;
             float bScale = (bTrans.scale.x < bTrans.scale.y) ? bTrans.scale.y : bTrans.scale.x;
             bScale = (bScale < bTrans.scale.z) ? bTrans.scale.z : bScale;
 
-            result = AABBSphere({aMin, aMax}, {bTrans.position, std::get<float>(bColl.extents) * bScale}, hitInfos.value());
+            result = AABBSphere({aMin, aMax}, {bTrans.position, std::get<float>(bColl.extents) * bScale}, hitInfos);
         }
         else if (bColl.collisionType == ColliderComponent::CAPSULE)
         {
@@ -460,7 +461,7 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
             float aScale = (aTrans.scale.x < aTrans.scale.y) ? aTrans.scale.y : aTrans.scale.x;
             aScale = (aScale < aTrans.scale.z) ? aTrans.scale.z : aScale;
 
-            result = AABBSphere({bMin, bMax}, {aTrans.position, std::get<float>(aColl.extents) * aScale}, hitInfos.value());
+            result = AABBSphere({bMin, bMax}, {aTrans.position, std::get<float>(aColl.extents) * aScale}, hitInfos);
         }
         else if (bColl.collisionType == ColliderComponent::BOX)
         {
@@ -473,7 +474,7 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
             float bScale = (bTrans.scale.x < bTrans.scale.y) ? bTrans.scale.y : bTrans.scale.x;
             bScale = (bScale < bTrans.scale.z) ? bTrans.scale.z : bScale;
 
-            result = SphereSphere({aTrans.position, aScale}, {bTrans.position, bScale}, hitInfos.value());
+            result = SphereSphere({aTrans.position, aScale}, {bTrans.position, bScale}, hitInfos);
         }
         else if (bColl.collisionType == ColliderComponent::CAPSULE)
         {
@@ -501,10 +502,12 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
         }
         break;
 
+    default:
+        break;
 
     }
 
-    return result ? hitInfos : std::nullopt;
+    return result ? std::optional{hitInfos} : std::nullopt;
 }
 
 void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info, TransformComponent* transform, PhysicsComponent* physics)
@@ -512,8 +515,10 @@ void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info, TransformComponen
     if (physics)
     {
         auto normal = info.collidingNormal;
-        normal.normalize();
-        physics->velocity -= info.velocity.project(normal);
+        if (!normal.isZero())
+        {
+            physics->velocity -= info.velocity.project(normal);
+        }
     }
 
     if (transform)
@@ -562,12 +567,10 @@ gsl::vec3 PhysicsSystem::ClosestPoint(const std::pair<gsl::vec3, gsl::vec3> &box
 
 bool PhysicsSystem::AABBAABB(const std::pair<gsl::vec3, gsl::vec3> &a, const std::pair<gsl::vec3, gsl::vec3> &b)
 {
-    // min = first, max = second
-    // return A.min <= B.max && a.max >= b.min
     return
             (a.first.x <= b.second.x && a.second.x >= b.first.x) &&
             (a.first.y <= b.second.y && a.second.y >= b.first.y) &&
-        (a.first.z <= b.second.z && a.second.z >= b.first.z);
+            (a.first.z <= b.second.z && a.second.z >= b.first.z);
 
 }
 
@@ -594,10 +597,12 @@ bool PhysicsSystem::AABBAABB(const std::pair<gsl::vec3, gsl::vec3> &a, const std
         auto B = (b.second - b.first) * 0.5f + b.first;
         auto aToB{B - A};
         if (gsl::vec3::dot(aToB, out.at(0).velocity) > gsl::vec3::dot(-aToB, out.at(1).velocity))
-            normal = gsl::vec3{std::round(out.at(0).velocity.x), std::round(out.at(0).velocity.y), std::round(out.at(0).velocity.z)};
+            normal = out.at(0).velocity;
         else
-            normal = gsl::vec3{std::round(out.at(1).velocity.x), std::round(out.at(1).velocity.y), std::round(out.at(1).velocity.z)};
+            normal = out.at(1).velocity;
 
+        normal.normalize();
+        normal = gsl::vec3{std::round(normal.x), std::round(normal.y), std::round(normal.z)};
         normal.normalize();
         out.at(0).collidingNormal = -normal;
         out.at(1).collidingNormal = normal;
@@ -618,7 +623,8 @@ bool PhysicsSystem::AABBSphere(const std::pair<gsl::vec3, gsl::vec3> &a, const s
     if (static_cast<double>(dist * dist) < std::pow(b.second, 2))
     {
         // AABB normal
-        gsl::vec3 normal{std::round(dist.x), std::round(dist.y), std::round(dist.z)};
+        auto nDist = dist.normalized();
+        gsl::vec3 normal{std::round(nDist.x), std::round(nDist.y), std::round(nDist.z)};
         normal.normalize();
         out.at(1).collidingNormal = normal;
 

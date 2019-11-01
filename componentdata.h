@@ -367,8 +367,26 @@ struct ColliderComponent : public Component
     enum Type : char
     {
         None = 0,
+        /** Axis Aligned Bounding Box collision.
+         * AABB extents is a vec3 defining the
+         * length of the bounding box in each
+         * direction from min to max.
+         * Meaning the distance from the centre
+         * out to the maximum point is defined by
+         * max = centre + 0.5 * extents
+         */
         AABB,
+        /** Box collision.
+         * Box collision works the same
+         * as AABB collision, but is no axis
+         * aligned meaning it can rotate in all directions.
+         */
         BOX,
+        /** Sphere collision.
+         * Sphere extents is a float describing the radius
+         * from the centre to the edges of the sphere in
+         * all directions.
+         */
         SPHERE,
         CAPSULE
     };
@@ -389,8 +407,12 @@ struct ColliderComponent : public Component
     std::variant<gsl::vec3, float, std::pair<float, float>> extents;
     struct Bounds
     {
-        gsl::vec3 centre;
-        gsl::vec3 extents;
+        gsl::vec3 centre{0.f, 0.f, 0.f};
+
+        /* Note: Bounds extend by default 0.5 units
+         * away from the centre.
+         */
+        gsl::vec3 extents{1.f, 1.f, 1.f};
 
         std::pair<gsl::vec3, gsl::vec3> minMax() const;
     } bounds;

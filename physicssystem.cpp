@@ -406,12 +406,10 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
              * construct a model matrix, multiply said model matrix with
              */
 
-            auto aMat = gsl::mat4::modelMatrix(aTrans.position, aTrans.rotation, aTrans.scale);
-            auto aMin = (aMat * ( -std::get<gsl::vec3>(aColl.extents) * 0.5f)).toVector3D();
-            auto aMax = (aMat * std::get<gsl::vec3>(aColl.extents) * 0.5f).toVector3D();
-            auto bMat = gsl::mat4::modelMatrix(bTrans.position, bTrans.rotation, bTrans.scale);
-            auto bMin = (bMat * ( -std::get<gsl::vec3>(bColl.extents) * 0.5f)).toVector3D();
-            auto bMax = (bMat * std::get<gsl::vec3>(bColl.extents) * 0.5f).toVector3D();
+            auto aMin = aTrans.position - std::get<gsl::vec3>(aColl.extents) * 0.5f;
+            auto aMax = aTrans.position + std::get<gsl::vec3>(aColl.extents) * 0.5f;
+            auto bMin = bTrans.position - std::get<gsl::vec3>(bColl.extents) * 0.5f;
+            auto bMax = bTrans.position + std::get<gsl::vec3>(bColl.extents) * 0.5f;
 
             result = AABBAABB({aMin, aMax}, {bMin, bMax}, hitInfos.value());
         }
@@ -521,10 +519,6 @@ void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info, TransformComponen
         {
             physics->velocity -= info.velocity.project(normal);
         }
-        else
-        {
-            throw std::runtime_error{"Normal is zero!"};
-        }
     }
 
     if (transform)
@@ -609,7 +603,7 @@ bool PhysicsSystem::AABBAABB(const std::pair<gsl::vec3, gsl::vec3> &a, const std
         else
             normal = out.at(1).velocity;
 
-        normal = normal.normalized();
+        normal.normalize();
         normal = gsl::vec3{std::round(normal.x), std::round(normal.y), std::round(normal.z)};
         normal.normalize();
         out.at(0).collidingNormal = -normal;

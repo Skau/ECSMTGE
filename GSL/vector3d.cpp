@@ -164,6 +164,11 @@ namespace gsl
         return b * (dot(a, b) / static_cast<float>(std::pow(b.length(), 2)));
     }
 
+    bool Vector3D::isZero() const
+    {
+        return gsl::equal(x, 0.f) && gsl::equal(y, 0.f) && gsl::equal(z, 0.f);
+    }
+
 
     void Vector3D::rotateX(GLfloat angle)
     {

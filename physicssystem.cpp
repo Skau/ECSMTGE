@@ -125,7 +125,7 @@ std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vec
                         {
                             collIt->bounds.centre = gsl::vec3{0.f, 0.f, 0.f};
                             float radius = std::get<float>(collIt->extents);
-                            collIt->bounds.extents = gsl::vec3{radius * transIt->scale.x, radius * transIt->scale.y, radius * transIt->scale.z};
+                            collIt->bounds.extents = gsl::vec3{2 * radius * transIt->scale.x, 2 * radius * transIt->scale.y, 2 * radius * transIt->scale.z};
                         }
                         break;
                         case ColliderComponent::AABB:
@@ -148,7 +148,7 @@ std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vec
                             }
 
                             collIt->bounds.centre = (max - min) * 0.5f + min;
-                            collIt->bounds.extents = gsl::abs(max - collIt->bounds.centre);
+                            collIt->bounds.extents = max - min;
                         }
                         break;
                     }
@@ -379,6 +379,7 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
     const auto& [bTrans, bColl, bVel] = b;
 
     // Initialize return values
+    // TODO: move array out of optional for simplicity
     std::optional<std::array<HitInfo, 2>> hitInfos{std::array<HitInfo, 2>{}};
     HitInfo &aOut = hitInfos.value().at(0);
     HitInfo &bOut = hitInfos.value().at(1);
@@ -420,9 +421,8 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
         }
         else if (bColl.collisionType == ColliderComponent::SPHERE)
         {
-            auto aMat = gsl::mat4::modelMatrix(aTrans.position, aTrans.rotation, aTrans.scale);
-            auto aMin = (aMat * ( -std::get<gsl::vec3>(aColl.extents) * 0.5f)).toVector3D();
-            auto aMax = (aMat * std::get<gsl::vec3>(aColl.extents) * 0.5f).toVector3D();
+            auto aMin = aTrans.position - std::get<gsl::vec3>(aColl.extents) * 0.5f;
+            auto aMax = aTrans.position + std::get<gsl::vec3>(aColl.extents) * 0.5f;
             float bScale = (bTrans.scale.x < bTrans.scale.y) ? bTrans.scale.y : bTrans.scale.x;
             bScale = (bScale < bTrans.scale.z) ? bTrans.scale.z : bScale;
 
@@ -516,8 +516,15 @@ void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info, TransformComponen
     if (physics)
     {
         auto normal = info.collidingNormal;
-        normal.normalize();
-        physics->velocity -= info.velocity.project(normal);
+        // normal.normalize(); // Should'nt need to normalize this
+        if (!normal.isZero())
+        {
+            physics->velocity -= info.velocity.project(normal);
+        }
+        else
+        {
+            throw std::runtime_error{"Normal is zero!"};
+        }
     }
 
     if (transform)
@@ -598,10 +605,12 @@ bool PhysicsSystem::AABBAABB(const std::pair<gsl::vec3, gsl::vec3> &a, const std
         auto B = (b.second - b.first) * 0.5f + b.first;
         auto aToB{B - A};
         if (gsl::vec3::dot(aToB, out.at(0).velocity) > gsl::vec3::dot(-aToB, out.at(1).velocity))
-            normal = gsl::vec3{std::round(out.at(0).velocity.x), std::round(out.at(0).velocity.y), std::round(out.at(0).velocity.z)};
+            normal = out.at(0).velocity;
         else
-            normal = gsl::vec3{std::round(out.at(1).velocity.x), std::round(out.at(1).velocity.y), std::round(out.at(1).velocity.z)};
+            normal = out.at(1).velocity;
 
+        normal = normal.normalized();
+        normal = gsl::vec3{std::round(normal.x), std::round(normal.y), std::round(normal.z)};
         normal.normalize();
         out.at(0).collidingNormal = -normal;
         out.at(1).collidingNormal = normal;
@@ -622,7 +631,8 @@ bool PhysicsSystem::AABBSphere(const std::pair<gsl::vec3, gsl::vec3> &a, const s
     if (static_cast<double>(dist * dist) < std::pow(b.second, 2))
     {
         // AABB normal
-        gsl::vec3 normal{std::round(dist.x), std::round(dist.y), std::round(dist.z)};
+        auto nDist = dist.normalized();
+        gsl::vec3 normal{std::round(nDist.x), std::round(nDist.y), std::round(nDist.z)};
         normal.normalize();
         out.at(1).collidingNormal = normal;
 

@@ -68,10 +68,10 @@ void ColliderWidget::on_comboBox_Colliders_currentIndexChanged(int index)
                     comp->extents = gsl::vec3{1.f, 1.f, 1.f};
                     break;
                 case ColliderComponent::SPHERE:
-                    comp->extents = 1.f;
+                    comp->extents = 0.5f;
                     break;
                 case ColliderComponent::CAPSULE:
-                    comp->extents = std::pair<float, float>{1.f, 1.f};
+                    comp->extents = std::pair<float, float>{0.5f, 1.f};
                     break;
                 default:
                     break;

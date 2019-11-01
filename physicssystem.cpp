@@ -379,10 +379,9 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
     const auto& [bTrans, bColl, bVel] = b;
 
     // Initialize return values
-    // TODO: move array out of optional for simplicity
-    std::optional<std::array<HitInfo, 2>> hitInfos{std::array<HitInfo, 2>{}};
-    HitInfo &aOut = hitInfos.value().at(0);
-    HitInfo &bOut = hitInfos.value().at(1);
+    std::array<HitInfo, 2> hitInfos{};
+    HitInfo &aOut = hitInfos.at(0);
+    HitInfo &bOut = hitInfos.at(1);
 
     aOut.eID = aTrans.entityId;
     bOut.eID = bTrans.entityId;
@@ -411,7 +410,7 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
             auto bMin = bTrans.position - std::get<gsl::vec3>(bColl.extents) * 0.5f;
             auto bMax = bTrans.position + std::get<gsl::vec3>(bColl.extents) * 0.5f;
 
-            result = AABBAABB({aMin, aMax}, {bMin, bMax}, hitInfos.value());
+            result = AABBAABB({aMin, aMax}, {bMin, bMax}, hitInfos);
         }
         else if (bColl.collisionType == ColliderComponent::BOX)
         {
@@ -424,7 +423,7 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
             float bScale = (bTrans.scale.x < bTrans.scale.y) ? bTrans.scale.y : bTrans.scale.x;
             bScale = (bScale < bTrans.scale.z) ? bTrans.scale.z : bScale;
 
-            result = AABBSphere({aMin, aMax}, {bTrans.position, std::get<float>(bColl.extents) * bScale}, hitInfos.value());
+            result = AABBSphere({aMin, aMax}, {bTrans.position, std::get<float>(bColl.extents) * bScale}, hitInfos);
         }
         else if (bColl.collisionType == ColliderComponent::CAPSULE)
         {
@@ -462,7 +461,7 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
             float aScale = (aTrans.scale.x < aTrans.scale.y) ? aTrans.scale.y : aTrans.scale.x;
             aScale = (aScale < aTrans.scale.z) ? aTrans.scale.z : aScale;
 
-            result = AABBSphere({bMin, bMax}, {aTrans.position, std::get<float>(aColl.extents) * aScale}, hitInfos.value());
+            result = AABBSphere({bMin, bMax}, {aTrans.position, std::get<float>(aColl.extents) * aScale}, hitInfos);
         }
         else if (bColl.collisionType == ColliderComponent::BOX)
         {
@@ -475,7 +474,7 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
             float bScale = (bTrans.scale.x < bTrans.scale.y) ? bTrans.scale.y : bTrans.scale.x;
             bScale = (bScale < bTrans.scale.z) ? bTrans.scale.z : bScale;
 
-            result = SphereSphere({aTrans.position, aScale}, {bTrans.position, bScale}, hitInfos.value());
+            result = SphereSphere({aTrans.position, aScale}, {bTrans.position, bScale}, hitInfos);
         }
         else if (bColl.collisionType == ColliderComponent::CAPSULE)
         {
@@ -503,10 +502,12 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
         }
         break;
 
+    default:
+        break;
 
     }
 
-    return result ? hitInfos : std::nullopt;
+    return result ? std::optional{hitInfos} : std::nullopt;
 }
 
 void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info, TransformComponent* transform, PhysicsComponent* physics)
@@ -514,7 +515,6 @@ void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info, TransformComponen
     if (physics)
     {
         auto normal = info.collidingNormal;
-        // normal.normalize(); // Should'nt need to normalize this
         if (!normal.isZero())
         {
             physics->velocity -= info.velocity.project(normal);
@@ -567,12 +567,10 @@ gsl::vec3 PhysicsSystem::ClosestPoint(const std::pair<gsl::vec3, gsl::vec3> &box
 
 bool PhysicsSystem::AABBAABB(const std::pair<gsl::vec3, gsl::vec3> &a, const std::pair<gsl::vec3, gsl::vec3> &b)
 {
-    // min = first, max = second
-    // return A.min <= B.max && a.max >= b.min
     return
             (a.first.x <= b.second.x && a.second.x >= b.first.x) &&
             (a.first.y <= b.second.y && a.second.y >= b.first.y) &&
-        (a.first.z <= b.second.z && a.second.z >= b.first.z);
+            (a.first.z <= b.second.z && a.second.z >= b.first.z);
 
 }
 

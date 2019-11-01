@@ -13,8 +13,8 @@ class InputSystem : public QObject
 public:
     InputSystem();
 
-    static void HandleInput(float deltaTime, const std::vector<InputComponent> &inputComponents, std::vector<TransformComponent>& transformComponents);
-    static void HandleCameraInput(float deltaTime, const std::vector<InputComponent> &inputComponents, std::vector<TransformComponent>& transformComponents,
+    static void HandleInput(float deltaTime, std::vector<InputComponent> &inputComponents, std::vector<TransformComponent>& transformComponents);
+    static void HandleCameraInput(float deltaTime, std::vector<InputComponent> &inputComponents, std::vector<TransformComponent>& transformComponents,
                                   std::vector<CameraComponent>& cameraComponents);
 };
 

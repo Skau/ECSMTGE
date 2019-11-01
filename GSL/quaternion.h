@@ -163,11 +163,7 @@ public:
     static gsl::quat diff(const gsl::quat& a, const gsl::quat& b);
 
 
-    /**
-     * @brief Returns the forward vector represented by this quaternion
-     * @return 3 comp vector holding the forward vector
-     */
-    gsl::vec3 forwardVector() const;
+
 
     // Helper functions
     /** Places the contents of a quaternion
@@ -184,6 +180,34 @@ public:
      * @return A quaternion pair
      */
     gsl::quat::Pair toPair() const;
+    /** Right vector.
+     * Finds the right unit vector by multiplying the vector
+     * [1, 0, 0] with the matrix representative of this quaternion
+     * found in toMat().
+     * Alternatively: rotatePoint(gsl::vec3{1.f, 0.f, 0.f}, *this)
+     * @brief Returns the right vector represented by this quaternion
+     * @return 3 comp vector holding the right vector
+     */
+    gsl::vec3 rightVector() const;
+    /** Up vector.
+     * Finds the up unit vector by multiplying the vector
+     * [0, 1, 0] with the matrix representative of this quaternion
+     * found in toMat().
+     * Alternatively: rotatePoint(gsl::vec3{0.f, 1.f, 0.f}, *this)
+     * @brief Returns the up vector represented by this quaternion
+     * @return 3 comp vector holding the up vector
+     */
+    gsl::vec3 upVector() const;
+    /** Forward vector.
+     * Finds the forward unit vector by multiplying the vector
+     * [0, 0, 1] with the matrix representative of this quaternion
+     * found in toMat().
+     * Alternatively: rotatePoint(gsl::vec3{0.f, 0.f, 1.f}, *this)
+     * @brief Returns the forward vector represented by this quaternion
+     * @return 3 comp vector holding the forward vector
+     */
+    gsl::vec3 forwardVector() const;
+
     friend std::ostream& operator<< (std::ostream& out, const gsl::quat& quat);
     friend QDebug& operator<< (QDebug& out, const gsl::quat& quat);
 

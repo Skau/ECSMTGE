@@ -5,7 +5,7 @@ InputSystem::InputSystem()
 
 }
 
-void InputSystem::HandleInput(float deltaTime, const std::vector<InputComponent> &inputComponents, std::vector<TransformComponent> &transformComponents)
+void InputSystem::HandleInput(float deltaTime, std::vector<InputComponent> &inputComponents, std::vector<TransformComponent> &transformComponents)
 {
     auto keys = InputHandler::Keys;
 
@@ -52,37 +52,59 @@ void InputSystem::HandleInput(float deltaTime, const std::vector<InputComponent>
 
             if(keys[Qt::MouseButton::RightButton] == true)
             {
+                gsl::vec3 forward{};
+                gsl::vec3 right{};
+                gsl::vec3 up{};
+
+                if (inputIt->cameraMovement)
+                {
+                    forward = transIt->rotation.inverse().forwardVector();
+                    right = transIt->rotation.inverse().rightVector();
+                    up = transIt->rotation.inverse().upVector();
+                }
+                else
+                {
+                    forward = transIt->rotation.forwardVector();
+                    right = transIt->rotation.rightVector();
+                    up = transIt->rotation.upVector();
+                }
+
+
                 if(keys[Qt::Key_W] == true)
                 {
-                    transIt->position += (gsl::vec3(0, 0, -1) * deltaTime);
+                    transIt->position += -forward * deltaTime;
                 }
 
                 if(keys[Qt::Key_A] == true)
                 {
-                    transIt->position += (gsl::vec3(-1, 0, 0) * deltaTime);
+                    transIt->position += -right * deltaTime;
                 }
 
                 if(keys[Qt::Key_S] == true)
                 {
-                    transIt->position += (gsl::vec3(0, 0, 1) * deltaTime);
+                    transIt->position += forward * deltaTime;
                 }
 
                 if(keys[Qt::Key_D] == true)
                 {
-                    transIt->position += (gsl::vec3(1, 0, 0) * deltaTime);
+                    transIt->position += right * deltaTime;
                 }
 
                 if(keys[Qt::Key_Q] == true)
                 {
-                    transIt->position += (gsl::vec3(0, -1, 0) * deltaTime);
+                    transIt->position += -up * deltaTime;
                 }
 
                 if(keys[Qt::Key_E] == true)
                 {
-                    transIt->position += (gsl::vec3(0, 1, 0) * deltaTime);
+                    transIt->position += up * deltaTime;
                 }
 
                 transIt->updated = true;
+
+                // Disable camera movement in case the entity
+                // is not a camera anymore. (Not quite sure if necessary)
+                inputIt->cameraMovement = false;
             }
 
             // Increment all
@@ -92,7 +114,7 @@ void InputSystem::HandleInput(float deltaTime, const std::vector<InputComponent>
     }
 }
 
-void InputSystem::HandleCameraInput(float deltaTime, const std::vector<InputComponent> &inputComponents,
+void InputSystem::HandleCameraInput(float deltaTime, std::vector<InputComponent> &inputComponents,
                                     std::vector<TransformComponent> &transformComponents, std::vector<CameraComponent> &cameraComponents)
 {
     auto keys = InputHandler::Keys;
@@ -162,6 +184,8 @@ void InputSystem::HandleCameraInput(float deltaTime, const std::vector<InputComp
 
                 transIt->setRotation(gsl::quat::lookAt(gsl::deg2radf(cameraIt->pitch), gsl::deg2radf(cameraIt->yaw)));
             }
+
+            inputIt->cameraMovement = true;
 
             // Increment all
             ++cameraIt;

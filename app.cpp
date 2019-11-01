@@ -165,7 +165,7 @@ void App::update()
     }
 
     // Get all necessary components that are reused for systems
-    const auto& inputs = mWorld->getEntityManager()->getInputComponents();
+    auto& inputs = mWorld->getEntityManager()->getInputComponents();
     auto& transforms = mWorld->getEntityManager()->getTransformComponents();
     auto& cameras = mWorld->getEntityManager()->getCameraComponents();
     auto& physics = mWorld->getEntityManager()->getPhysicsComponents();
@@ -174,8 +174,8 @@ void App::update()
 
     // Input:
     mEventHandler->updateMouse();
-    InputSystem::HandleInput(mDeltaTime, inputs, transforms);
     InputSystem::HandleCameraInput(mDeltaTime, inputs, transforms, cameras);
+    InputSystem::HandleInput(mDeltaTime, inputs, transforms);
 
     // Physics:
     /* Note: Physics calculation should be happening on a separate thread

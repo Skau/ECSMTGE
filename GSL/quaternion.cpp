@@ -160,12 +160,8 @@ gsl::vec3 gsl::Quaternion::rotatePointUnit(const gsl::vec3 &p, const gsl::quat &
 {
     // For unit vectors the inverse of a quaternion is
     // q^-1 = (s, -v)
-    auto Pq = rot * gsl::quat{0, p} * gsl::quat{rot.s, -rot.i, -rot.j, -rot.k};
+    auto Pq = rot * gsl::quat{0, p} * rot.conj();
     return gsl::vec3{Pq.i, Pq.j, Pq.k};
-
-    // Alernative:
-//    auto qp = rot.toPair();
-//    return (qp.s * qp.s) * p + qp.v * (p * qp.v) + 2.f * qp.s * (qp.v ^ p) + qp.v ^ (qp.v ^ p);
 }
 
 gsl::mat4 gsl::Quaternion::toMat() const
@@ -180,7 +176,6 @@ gsl::mat4 gsl::Quaternion::toMat() const
 
 gsl::vec3 gsl::Quaternion::toEuler() const
 {
-    // float test = i * j + k * s;
     vec3 returnValue;
     returnValue.x = std::atan2(2.f * (s * i + j * k), 1.f - 2.f * (i * i + j * j));
 
@@ -219,18 +214,31 @@ gsl::quat gsl::Quaternion::diff(const gsl::quat &a, const quat &b)
     return a.inverse() * b;
 }
 
+gsl::vec3 gsl::Quaternion::rightVector() const
+{
+    return gsl::vec3{
+        1.f - 2.f * j * j - 2.f * k * k,
+        2.f * i * j + 2.f * s * k,
+        2.f * i * k - 2.f * s * j
+    }.normalized();
+}
+
+gsl::vec3 gsl::Quaternion::upVector() const
+{
+    return gsl::vec3{
+        2.f * i * j - 2.f * s * k,
+        1.f - 2.f * i * i - 2.f * k * k,
+        2.f * j * k + 2.f * s * i
+    }.normalized();
+}
+
 gsl::vec3 gsl::Quaternion::forwardVector() const
 {
-    const float x2 = 2.0f * i;
-    const float y2 = 2.0f * j;
-    const float z2 = 2.0f * k;
-    const float x2w = x2 * s;
-    const float y2w = y2 * s;
-    const float x2x = x2 * i;
-    const float z2x = z2 * i;
-    const float y2y = y2 * j;
-    const float z2y = z2 * j;
-    return gsl::vec3( z2x + y2w, z2y - x2w, 1.0f - ( x2x + y2y ) );
+    return gsl::vec3{
+        2.f * i * k + 2.f * s * j,
+        2.f * j * k - 2.f * s * i,
+        1.f - 2.f * i * i - 2.f * j * j
+    }.normalized();
 }
 
 GLfloat gsl::Quaternion::dot(const gsl::quat &rhs) const

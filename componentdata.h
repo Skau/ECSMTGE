@@ -197,6 +197,7 @@ struct CameraComponent : public Component
 struct InputComponent : public Component
 {
     bool isCurrentlyControlled{false};
+    bool cameraMovement{false};
 
     InputComponent(unsigned int _eID = 0, bool _valid = false)
         : Component(_eID, _valid, ComponentType::Input)

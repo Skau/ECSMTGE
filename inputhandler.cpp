@@ -68,12 +68,14 @@ bool InputHandler::eventFilter(QObject* obj, QEvent* event)
         }
 
         Keys[keyEvent->key()] = true;
+        keysPressed.push_back(keyEvent->text());
         return true;
     }
     case QEvent::KeyRelease:
     {
         auto keyEvent = static_cast<QKeyEvent*>(event);
         Keys[keyEvent->key()] = false;
+        keysPressed.erase(std::remove(keysPressed.begin(), keysPressed.end(), keyEvent->text()), keysPressed.end());
         return true;
     }
     case QEvent::Wheel:

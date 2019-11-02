@@ -4,6 +4,7 @@
 #include "gltypes.h"
 #include "mathfwd.h"
 #include "vector3d.h"
+#include <QJsonArray>
 
 /** Quaternions
 A mathematical structure that uses a complex numnber
@@ -74,6 +75,8 @@ public:
     gsl::quat& operator*= (GLfloat scalar);
 
 
+    QJsonArray toJSON();
+    void fromJSON(const QJsonArray &array);
 
 
     // Mathematical functions

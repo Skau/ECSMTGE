@@ -35,6 +35,7 @@ void SpotLightWidget::updateData()
 //        if(auto comp = mMainWindow->getEntityManager()->getComponent<SpotLightComponent>(entity->entityId))
 //        {
 //            isUpdating = true;
+
 //            isUpdating = false;
 //        }
 //    }

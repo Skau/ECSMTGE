@@ -44,6 +44,7 @@ void ScriptWidget::updateData()
 //        if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
 //        {
 //            isUpdating = true;
+
 //            isUpdating = false;
 //        }
 //    }
@@ -179,13 +180,18 @@ void ScriptWidget::on_button_NewFile_clicked()
                 return;
             }
             QTextStream stream(&file);
-            // Base template for new files. Includes functions beginPlay, tick and endPlay.
+            // Base template for new files. Includes the functions beginPlay, tick, endPlay. keyPressed and onHit.
             stream << "// This will be run once when play button is pressed\n"
                    << "function beginPlay()\n{\n\tconsole.log(\"Begin play called on entity \" + me.ID);\n}\n\n"
-                   << "// This will be once run every frame\n"
+                   << "// This will be run once every frame\n"
                    << "function tick(deltaTime)\n{\n\tconsole.log(\"Tick called on entity \" + me.ID);\n}\n\n"
                    << "// This will be run once when stop button is pressed\n"
-                   << "function endPlay()\n{\n\tconsole.log(\"End play called on entity \" + me.ID);\n}";
+                   << "function endPlay()\n{\n\tconsole.log(\"End play called on entity \" + me.ID);\n}\n\n"
+                   << "// This will be run when input is received\n"
+                   << "// NOTE:\n// This requires that the entity has an Input component\n// and isBeingCurrentlyControlled is true\n"
+                   << "function keyPressed(key)\n{\n\tconsole.log(key);\n}\n\n"
+                   << "// This will be run when collision with another entity occurs\n"
+                   << "//function onHit(hitInfo)\n//{\n//\tconsole.log(\"Collided with entity ID: \" + hitInfo.ID);\n//}\n";
             file.close();
             QFileInfo fileInfo(file.fileName());
             ScriptSystem::get()->load(*comp, fileInfo.filePath().toStdString());

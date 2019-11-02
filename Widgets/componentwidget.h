@@ -12,7 +12,6 @@ public:
     ComponentWidget(MainWindow* mainWindow, QWidget* parent = nullptr);
 
     virtual void updateData()=0;
-    virtual void onSelected();
 
 signals:
     void widgetRemoved(ComponentWidget* widget);
@@ -25,7 +24,7 @@ private slots:
 
 protected:
     MainWindow* mMainWindow;
-    bool isUpdating = false;
+    bool isUpdating{false};
 };
 
 #endif // COMPONENTWIDGET_H

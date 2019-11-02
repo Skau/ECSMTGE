@@ -157,13 +157,6 @@ void App::update()
 
     calculateFrames();
 
-    // Tick scripts if playing
-    if(mCurrentlyPlaying)
-    {
-        auto& scripts = mWorld->getEntityManager()->getScriptComponents();
-        ScriptSystem::get()->tick(mDeltaTime, scripts);
-    }
-
     // Get all necessary components that are reused for systems
     auto& inputs = mWorld->getEntityManager()->getInputComponents();
     auto& transforms = mWorld->getEntityManager()->getTransformComponents();
@@ -171,18 +164,48 @@ void App::update()
     auto& physics = mWorld->getEntityManager()->getPhysicsComponents();
     auto& colliders = mWorld->getEntityManager()->getColliderComponents();
     auto& sounds = mWorld->getEntityManager()->getSoundComponents();
+    auto& scripts = mWorld->getEntityManager()->getScriptComponents();
 
     // Input:
     mEventHandler->updateMouse();
     InputSystem::HandleCameraInput(mDeltaTime, inputs, transforms, cameras);
     InputSystem::HandleInput(mDeltaTime, inputs, transforms);
 
+    if(mCurrentlyPlaying)
+    {
+        for(auto& input : inputs)
+        {
+            if(input.isCurrentlyControlled)
+            {
+                for(auto& key : mEventHandler->keysPressed)
+                {
+                    if(auto comp = mWorld->getEntityManager()->getComponent<ScriptComponent>(input.entityId))
+                    {
+                        ScriptSystem::get()->runKeyEvent(*comp, key);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    // Tick scripts if playing
+    if(mCurrentlyPlaying)
+    {
+        ScriptSystem::get()->tick(mDeltaTime, scripts);
+    }
+
     // Physics:
     /* Note: Physics calculation should be happening on a separate thread
      * and instead of sending references to the lists we should take copies
      * and then later apply those copies to the original lists.
      */
-     PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
+     auto hitInfos = PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
+
+     if(mCurrentlyPlaying && hitInfos.size())
+     {
+         ScriptSystem::get()->runHitEvents(scripts, hitInfos);
+     }
 
     // Sound
     // Sound listener is using the active camera view matrix (for directions) and transform (for position)

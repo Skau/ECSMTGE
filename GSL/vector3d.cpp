@@ -255,6 +255,24 @@ namespace gsl
         return &z;
     }
 
+    QJsonArray Vector3D::toJSON()
+    {
+        QJsonArray array;
+
+        array.insert(0, QJsonValue(static_cast<double>(x)));
+        array.insert(1, QJsonValue(static_cast<double>(y)));
+        array.insert(2, QJsonValue(static_cast<double>(z)));
+
+        return array;
+    }
+
+    void Vector3D::fromJSON(const QJsonArray& array)
+    {
+        x = static_cast<float>(array[0].toDouble());
+        y = static_cast<float>(array[1].toDouble());
+        z = static_cast<float>(array[2].toDouble());
+    }
+
     QVector3D Vector3D::getQVector() const
     {
         return QVector3D(x, y, z);

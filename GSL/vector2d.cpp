@@ -129,9 +129,21 @@ namespace gsl
         y = value;
     }
 
+    QJsonArray Vector2D::toJSON()
+    {
+        QJsonArray array;
 
+        array.insert(0, QJsonValue(static_cast<double>(x)));
+        array.insert(1, QJsonValue(static_cast<double>(y)));
 
+        return array;
+    }
 
+    void Vector2D::fromJSON(const QJsonArray &array)
+    {
+        x = static_cast<float>(array[0].toDouble());
+        y = static_cast<float>(array[1].toDouble());
+    }
 
     IVector2D::IVector2D(int _x, int _y) : x{_x}, y{_y}
     {

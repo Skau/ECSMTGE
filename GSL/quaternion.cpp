@@ -135,6 +135,26 @@ gsl::quat &gsl::Quaternion::operator*=(GLfloat scalar)
     return *this = *this * scalar;
 }
 
+QJsonArray gsl::Quaternion::toJSON()
+{
+    QJsonArray array;
+
+    array.insert(0, QJsonValue(static_cast<double>(i)));
+    array.insert(1, QJsonValue(static_cast<double>(j)));
+    array.insert(2, QJsonValue(static_cast<double>(k)));
+    array.insert(3, QJsonValue(static_cast<double>(s)));
+
+    return array;
+}
+
+void gsl::Quaternion::fromJSON(const QJsonArray &array)
+{
+    i = static_cast<float>(array[0].toDouble());
+    j = static_cast<float>(array[1].toDouble());
+    k = static_cast<float>(array[2].toDouble());
+    s = static_cast<float>(array[3].toDouble());
+}
+
 gsl::quat gsl::Quaternion::rot(GLfloat angle, const gsl::vec3 &axis)
 {
     return gsl::quat{std::cos(angle / 2.f), axis * (std::sin(angle / 2.f))};

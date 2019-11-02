@@ -150,17 +150,6 @@ public:
 
         idCounter = 0;
         mEntityInfos.clear();
-//        mTransformComponents.clear();
-//        mMeshComponents.clear();
-//        mPhysicsComponents.clear();
-//        mCameraComponents.clear();
-//        mInputComponents.clear();
-//        mSoundComponents.clear();
-//        mDirectionalLightComponents.clear();
-//        mSpotLightComponents.clear();
-//        mPointLightComponents.clear();
-//        mScriptComponents.clear();
-//        mColliderComponents.cleear();
         updateUI({});
     }
 
@@ -184,6 +173,22 @@ public:
             break;
         }
         }
+    }
+
+
+    unsigned int createEntity(std::string name = "")
+    {
+        auto id = ++idCounter;
+        EntityInfo entityInfo;
+        entityInfo.entityId = id;
+        if(!name.size())
+        {
+            name = "Entity" + std::to_string(id);
+        }
+        entityInfo.name = name;
+        mEntityInfos.push_back(entityInfo);
+        updateUI(mEntityInfos);
+        return id;
     }
 
     unsigned createCube()
@@ -212,39 +217,6 @@ public:
         return id;
     }
 
-    /**
-     * @brief Updates the mesh on the given entity
-     * @param Entity ID
-     * @param Name of the mesh
-     */
-    void setMesh(unsigned int entity, const std::string& meshName)
-    {
-        auto render = getComponent<MeshComponent>(entity);
-        if(render)
-        {
-            auto mesh = ResourceManager::instance()->getMesh(meshName);
-            if(mesh)
-            {
-                render->meshData = *mesh;
-            }
-        }
-    }
-
-    unsigned int createEntity(std::string name = "")
-    {
-        auto id = ++idCounter;
-        EntityInfo entityInfo;
-        entityInfo.entityId = id;
-        if(!name.size())
-        {
-            name = "Entity" + std::to_string(id);
-        }
-        entityInfo.name = name;
-        mEntityInfos.push_back(entityInfo);
-        updateUI(mEntityInfos);
-        return id;
-    }
-
     template<typename... componentTypes>
     std::tuple<componentTypes&...> addComponent(unsigned int entity)
     {
@@ -259,7 +231,7 @@ public:
 
     Component* addComponent(unsigned int entity, ComponentType type)
     {
-        Component* returnComp;
+        Component* returnComp{nullptr};
         switch (type)
         {
         case ComponentType::Mesh:

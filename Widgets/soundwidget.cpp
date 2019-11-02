@@ -42,8 +42,9 @@ void SoundWidget::updateData()
 {
 //    if(auto sound = getSoundComponent())
 //    {
-//        isUpdating = true;
-//        isUpdating = false;
+//            isUpdating = true;
+
+//            isUpdating = false;
 //    }
 }
 

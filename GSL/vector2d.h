@@ -5,6 +5,7 @@
 #include "mathfwd.h"
 #include <cmath>
 #include <iostream>
+#include <QJsonArray>
 
 namespace gsl
 {
@@ -40,6 +41,9 @@ public:
 
     GLfloat getY() const;
     void setY(const GLfloat &value);
+
+    QJsonArray toJSON();
+    void fromJSON(const QJsonArray &array);
 
     GLfloat* data() { return &x; }
 

@@ -5,6 +5,10 @@
 #include "componentdata.h"
 #include "qentity.h"
 #include <QFileInfo>
+#include <QJsonDocument>
+
+// For HitInfo struct
+#include "physicssystem.h"
 
 void ScriptSystem::beginPlay(std::vector<ScriptComponent>& comps)
 {
@@ -38,6 +42,39 @@ void ScriptSystem::endPlay(std::vector<ScriptComponent>& comps)
     for(auto& comp : comps)
     {
        call(comp, "endPlay");
+    }
+}
+
+void ScriptSystem::runKeyEvent(ScriptComponent& comp, const QString &key)
+{
+    QJSValueList list;
+    list << key;
+    call(comp, "keyPressed", list);
+}
+
+void ScriptSystem::runHitEvents(std::vector<ScriptComponent> &comps, std::vector<HitInfo> hitInfos)
+{
+    if(!comps.size() || !hitInfos.size())
+        return;
+
+    for(auto& hitInfo : hitInfos)
+    {
+        for(unsigned i = 0; i < comps.size(); ++i)
+        {
+            if(comps[i].entityId == hitInfo.eID)
+            {
+                QJsonObject hitJSON;
+                hitJSON.insert("ID", static_cast<int>(hitInfo.eID));
+                hitJSON.insert("hitPoint", hitInfo.hitPoint.toJSON());
+                hitJSON.insert("velocity", hitInfo.velocity.toJSON());
+                hitJSON.insert("collidingNormal", hitInfo.collidingNormal.toJSON());
+
+                QJSValueList list;
+                QJsonDocument doc(hitJSON);
+                list << comps[i].engine->toScriptValue(hitJSON);
+                call(comps[i], "onHit", list);
+            }
+        }
     }
 }
 

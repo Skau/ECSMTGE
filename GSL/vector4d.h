@@ -4,6 +4,7 @@
 #include "gltypes.h"
 #include <cmath>
 #include <iostream>
+#include <QJsonArray>
 
 namespace gsl
 {
@@ -63,6 +64,9 @@ public:
     void setW(const GLfloat &value);
 
     Vector3D getXYZ() const;
+
+    QJsonArray toJSON();
+    void fromJSON(const QJsonArray &array);
 
     GLfloat* data() { return &x; }
 

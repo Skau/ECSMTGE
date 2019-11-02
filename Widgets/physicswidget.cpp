@@ -18,9 +18,11 @@ void PhysicsWidget::updateData()
         if(auto physics = mMainWindow->getEntityManager()->getComponent<PhysicsComponent>(entity->entityId))
         {
             isUpdating = true;
+
             setVelocity(physics->velocity);
             setAcceleration(physics->acceleration);
             setMass(physics->mass);
+
             isUpdating = false;
         }
     }

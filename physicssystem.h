@@ -5,6 +5,15 @@
 #include "octree.h"
 #include <utility>
 
+struct HitInfo
+{
+    unsigned int eID;
+    unsigned int collidingEID;
+    gsl::vec3 hitPoint;
+    gsl::vec3 velocity;
+    gsl::vec3 collidingNormal;
+};
+
 /** Physics system
  * The idea is to later move this system to
  * another thread while leaving rendering and inputs
@@ -21,18 +30,10 @@
  * @brief Physic System
  * @authors Skau, andesyv
  */
-
 class PhysicsSystem
 {
 public:
-    struct HitInfo
-    {
-        unsigned int eID;
-        unsigned int collidingEID;
-        gsl::vec3 hitPoint;
-        gsl::vec3 velocity;
-        gsl::vec3 collidingNormal;
-    };
+
     struct CollisionEntity
     {
         unsigned int eID;
@@ -47,8 +48,10 @@ public:
     };
 
     PhysicsSystem();
-    static void UpdatePhysics(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent>& physics,
+    static std::vector<HitInfo> UpdatePhysics(std::vector<TransformComponent>& transforms, std::vector<PhysicsComponent>& physics,
                               std::vector<ColliderComponent>& colliders, float deltaTime);
+
+
 
 private:
     static std::vector<PhysicsSystem::CollisionEntity> updateBounds(std::vector<TransformComponent>& trans, std::vector<ColliderComponent>& colliders);

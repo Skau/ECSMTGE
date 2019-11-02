@@ -521,6 +521,9 @@
    <property name="text">
     <string>Load scene</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="actionExit">
    <property name="text">
@@ -584,6 +587,9 @@
   <action name="actionNew">
    <property name="text">
     <string>New scene</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>

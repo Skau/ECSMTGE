@@ -7,7 +7,10 @@
 #include <iostream>
 #include <QDebug>
 
+#include <QJsonArray>
+
 class QVector3D;
+
 
 namespace gsl
 {
@@ -68,6 +71,9 @@ public:
     GLfloat *zP();
 
     GLfloat* data() { return &x; }
+
+    QJsonArray toJSON();
+    void fromJSON(const QJsonArray &array);
 
 
     //Friend functions

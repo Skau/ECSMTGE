@@ -67,6 +67,9 @@ void MeshWidget::updateData()
 //        if(auto mesh = getRenderComponent(entity->entityId))
 //        {
 //            isUpdating = true;
+
+               // For tick update, do it here
+
 //            isUpdating = false;
 //        }
 //    }

@@ -6,10 +6,13 @@
 #include <memory>
 #include <vector>
 
+
+
 class EntityManager;
 class QJSEngine;
 class ScriptComponent;
 class QEntity;
+class HitInfo;
 
 /**
  * The instance of this class is given to all engines (all script components have one each)
@@ -30,6 +33,8 @@ public:
     void beginPlay(std::vector<ScriptComponent>& comps);
     void tick(float deltaTime, std::vector<ScriptComponent>& comps);
     void endPlay(std::vector<ScriptComponent>& comps);
+    void runKeyEvent(ScriptComponent &comp, const QString& key);
+    void runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos);
 
     // EntityManager given by App
     void setEntityManager(std::shared_ptr<EntityManager> entityManager){ this->entityManager = entityManager; }

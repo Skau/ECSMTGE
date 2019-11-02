@@ -13,7 +13,7 @@ PhysicsSystem::CollisionEntity::CollisionEntity(unsigned int id, const ColliderC
 
 }
 
-void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, std::vector<PhysicsComponent> &physics,
+std::vector<HitInfo> PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, std::vector<PhysicsComponent> &physics,
                                   std::vector<ColliderComponent> &colliders, float deltaTime)
 {
     // 1. Update positions and velocities
@@ -75,6 +75,8 @@ void PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, s
     {
         fireHitEvent(item);
     }
+
+    return hitInfos;
 }
 
 std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vector<TransformComponent> &trans, std::vector<ColliderComponent> &colliders)
@@ -371,7 +373,7 @@ void PhysicsSystem::updatePosVel(std::vector<TransformComponent> &transforms, st
     }
 }
 
-std::optional<std::array<PhysicsSystem::HitInfo, 2>>
+std::optional<std::array<HitInfo, 2>>
 PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const ColliderComponent&, const gsl::vec3&> a,
                                 std::tuple<const TransformComponent&, const ColliderComponent&, const gsl::vec3&> b)
 {
@@ -510,7 +512,7 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
     return result ? std::optional{hitInfos} : std::nullopt;
 }
 
-void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info, TransformComponent* transform, PhysicsComponent* physics)
+void PhysicsSystem::handleHitInfo(HitInfo info, TransformComponent* transform, PhysicsComponent* physics)
 {
     if (physics)
     {
@@ -527,7 +529,7 @@ void PhysicsSystem::handleHitInfo(PhysicsSystem::HitInfo info, TransformComponen
     }
 }
 
-void PhysicsSystem::fireHitEvent(PhysicsSystem::HitInfo info)
+void PhysicsSystem::fireHitEvent(HitInfo info)
 {
 
 }
@@ -586,7 +588,7 @@ bool PhysicsSystem::SphereSphere(const std::pair<gsl::vec3, float> &a, const std
     return static_cast<double>((a.first - b.first).length()) < std::pow(a.second + b.second, 2);
 }
 
-bool PhysicsSystem::AABBAABB(const std::pair<gsl::vec3, gsl::vec3> &a, const std::pair<gsl::vec3, gsl::vec3> &b, std::array<PhysicsSystem::HitInfo, 2> &out)
+bool PhysicsSystem::AABBAABB(const std::pair<gsl::vec3, gsl::vec3> &a, const std::pair<gsl::vec3, gsl::vec3> &b, std::array<HitInfo, 2> &out)
 {
     if ((a.first.x <= b.second.x && a.second.x >= b.first.x) &&
         (a.first.y <= b.second.y && a.second.y >= b.first.y) &&
@@ -615,7 +617,7 @@ bool PhysicsSystem::AABBAABB(const std::pair<gsl::vec3, gsl::vec3> &a, const std
     return false;
 }
 
-bool PhysicsSystem::AABBSphere(const std::pair<gsl::vec3, gsl::vec3> &a, const std::pair<gsl::vec3, float> &b, std::array<PhysicsSystem::HitInfo, 2> &out)
+bool PhysicsSystem::AABBSphere(const std::pair<gsl::vec3, gsl::vec3> &a, const std::pair<gsl::vec3, float> &b, std::array<HitInfo, 2> &out)
 {
     auto closestPoint = ClosestPoint(a, b.first);
     auto dist = closestPoint - b.first;
@@ -643,7 +645,7 @@ bool PhysicsSystem::AABBSphere(const std::pair<gsl::vec3, gsl::vec3> &a, const s
     return false;
 }
 
-bool PhysicsSystem::SphereSphere(const std::pair<gsl::vec3, float> &a, const std::pair<gsl::vec3, float> &b, std::array<PhysicsSystem::HitInfo, 2> &out)
+bool PhysicsSystem::SphereSphere(const std::pair<gsl::vec3, float> &a, const std::pair<gsl::vec3, float> &b, std::array<HitInfo, 2> &out)
 {
     auto aToB = b.first - a.first;
     if (static_cast<double>(aToB.length()) < std::pow(a.second + b.second, 2))

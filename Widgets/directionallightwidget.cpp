@@ -35,6 +35,7 @@ void DirectionalLightWidget::updateData()
 //        if(auto comp = mMainWindow->getEntityManager()->getComponent<DirectionalLightComponent>(entity->entityId))
 //        {
 //            isUpdating = true;
+
 //            isUpdating = false;
 //        }
 //    }

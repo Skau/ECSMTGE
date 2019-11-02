@@ -35,6 +35,7 @@ void PointLightWidget::updateData()
 //        if(auto comp = mMainWindow->getEntityManager()->getComponent<PointLightComponent>(entity->entityId))
 //        {
 //            isUpdating = true;
+
 //            isUpdating = false;
 //        }
 //    }

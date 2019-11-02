@@ -14,27 +14,29 @@ ColliderWidget::ColliderWidget(MainWindow *mainWindow, QWidget *parent)
     {
        ui->comboBox_Colliders->addItem(type);
     }
+
+    isUpdating = true;
+    auto comp = getColliderComponent();
+    if (comp)
+    {
+        ui->comboBox_Colliders->setCurrentIndex(comp->collisionType);
+        updateParameters();
+    }
+    isUpdating = false;
 }
 
 void ColliderWidget::updateData()
 {
+//    auto entity = mMainWindow->currentEntitySelected;
+//    if(entity)
+//    {
+//        if(auto comp =  getColliderComponent())
+//        {
+//            isUpdating = true;
 
-}
-
-void ColliderWidget::onSelected()
-{
-    if (auto entity = mMainWindow->currentEntitySelected)
-    {
-        auto comp = mMainWindow->getEntityManager()->getComponent<ColliderComponent>(entity->entityId);
-        if (comp) {
-            auto index = static_cast<int>(comp->collisionType);
-            lastHighlighted = index;
-            ui->comboBox_Colliders->setCurrentIndex(index);
-            ready = true;
-
-            updateParameters();
-        }
-    }
+//            isUpdating = false;
+//        }
+//    }
 }
 
 void ColliderWidget::Remove()
@@ -51,44 +53,33 @@ void ColliderWidget::Remove()
 
 void ColliderWidget::on_comboBox_Colliders_currentIndexChanged(int index)
 {
-    if (!ready)
-        return;
+    if(isUpdating) return;
 
-    if (auto entity = mMainWindow->currentEntitySelected)
+    if(auto comp = getColliderComponent())
     {
-        auto comp = mMainWindow->getEntityManager()->getComponent<ColliderComponent>(entity->entityId);
-        auto currentIndex = static_cast<int>(comp->collisionType);
-        if (lastHighlighted == index && currentIndex != index)
+        comp->collisionType = static_cast<ColliderComponent::Type>(index);
+        switch (comp->collisionType)
         {
-            comp->collisionType = static_cast<ColliderComponent::Type>(index);
-            switch (comp->collisionType)
-            {
-                case ColliderComponent::AABB:
-                case ColliderComponent::BOX:
-                    comp->extents = gsl::vec3{1.f, 1.f, 1.f};
-                    break;
-                case ColliderComponent::SPHERE:
-                    comp->extents = 0.5f;
-                    break;
-                case ColliderComponent::CAPSULE:
-                    comp->extents = std::pair<float, float>{0.5f, 1.f};
-                    break;
-                default:
-                    break;
-            }
-
-            // Remember to update bounds
-            if (auto trans = getTransformComponent())
-                trans->colliderBoundsOutdated = true;
-
-            updateParameters();
+            case ColliderComponent::AABB:
+            case ColliderComponent::BOX:
+                comp->extents = gsl::vec3{1.f, 1.f, 1.f};
+                break;
+            case ColliderComponent::SPHERE:
+                comp->extents = 0.5f;
+                break;
+            case ColliderComponent::CAPSULE:
+                comp->extents = std::pair<float, float>{0.5f, 1.f};
+                break;
+            default:
+                break;
         }
-    }
-}
 
-void ColliderWidget::on_comboBox_Colliders_highlighted(int index)
-{
-    lastHighlighted = index;
+        // Remember to update bounds
+        if (auto trans = getTransformComponent())
+            trans->colliderBoundsOutdated = true;
+
+        updateParameters();
+    }
 }
 
 void ColliderWidget::updateParameters()
@@ -101,12 +92,11 @@ void ColliderWidget::updateParameters()
         }
     }
 
-
     if (ui->widget_Parameters->isHidden())
         ui->widget_Parameters->show();
 
-    if (auto comp = getColliderComponent()) {
-
+    if (auto comp = getColliderComponent())
+    {
         QVBoxLayout* layout = new QVBoxLayout(ui->widget_Parameters);
         ui->widget_Parameters->setLayout(layout);
         layout->setMargin(0);

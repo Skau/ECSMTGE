@@ -15,9 +15,11 @@ TransformWidget::TransformWidget(MainWindow* mainWindow, QWidget *parent)
         if(auto transform = mMainWindow->getEntityManager()->getComponent<TransformComponent>(entity->entityId))
         {
                 isUpdating = true;
+
                 setPosition(transform->position);
                 setRotation(transform->rotation.toEuler());
                 setScale(transform->scale);
+
                 isUpdating = false;
         }
     }
@@ -33,9 +35,11 @@ void TransformWidget::updateData()
             if(transform->updated)
             {
                 isUpdating = true;
+
                 setPosition(transform->position);
                 setRotation(transform->rotation.toEuler());
                 setScale(transform->scale);
+
                 isUpdating = false;
             }
         }

@@ -11,5 +11,7 @@ void main() {
    col = abs(colAttr);
    mat4 viewMat = mat4(mat3(vMatrix));
    viewMat[3].z = -5.0;
-   gl_Position = pMatrix * viewMat * mMatrix * vec4(posAttr, 1);
+   mat4 UIMat = mat4(mat3(0.3));
+   UIMat[3].xy = vec2(-0.9, -0.9);
+   gl_Position = UIMat * pMatrix * viewMat * mMatrix * vec4(posAttr, 1);
 }

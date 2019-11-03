@@ -151,6 +151,7 @@ QJsonObject EntityInfo::toJSON()
 {
     auto parentObj = Component::toJSON();
     parentObj.insert("Name", QJsonValue(name.c_str()));
+    parentObj.insert("ShouldShowInEditor", QJsonValue(shouldShowInEditor));
     return parentObj;
 }
 
@@ -159,6 +160,7 @@ void EntityInfo::fromJSON(QJsonObject object)
     Component::fromJSON(object);
 
     name = object["Name"].toString().toStdString();
+    shouldShowInEditor = object["ShouldShowInEditor"].toBool();
 }
 
 void PhysicsComponent::setVelocity(gsl::vec3 newVel)
@@ -326,8 +328,7 @@ QJsonObject CameraComponent::toJSON()
 {
     auto parentObj = Component::toJSON();
 
-    parentObj.insert("CurrentActive", QJsonValue(isCurrentActive));
-    parentObj.insert("FramebufferTarget", QJsonValue(static_cast<int>(framebufferTarget)));
+    parentObj.insert("EditorCam", QJsonValue(isEditorCamera));
     parentObj.insert("Pitch", QJsonValue(static_cast<double>(pitch)));
     parentObj.insert("Yaw", QJsonValue(static_cast<double>(yaw)));
 
@@ -338,8 +339,7 @@ void CameraComponent::fromJSON(QJsonObject object)
 {
     Component::fromJSON(object);
 
-    isCurrentActive = object["CurrentActive"].toBool();
-    framebufferTarget = static_cast<unsigned>(object["FramebufferTarget"].toInt());
+    isEditorCamera = object["EditorCam"].toBool();
     pitch = static_cast<float>(object["Pitch"].toDouble());
     yaw = static_cast<float>(object["Yaw"].toDouble());
 }

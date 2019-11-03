@@ -55,9 +55,10 @@ struct Component
 struct EntityInfo : public Component
 {
     std::string name{};
+    bool shouldShowInEditor{};
 
-    EntityInfo(unsigned int _eID = 0, bool _valid = false)
-        : Component(_eID, _valid, ComponentType::Other)
+    EntityInfo(unsigned int _eID = 0, bool _valid = false, bool _shouldShowInEditor = true)
+        : Component(_eID, _valid, ComponentType::Other), shouldShowInEditor(_shouldShowInEditor)
     {}
 
     virtual void reset() override
@@ -168,23 +169,18 @@ struct MeshComponent : public Component
 
 struct CameraComponent : public Component
 {
-    bool isCurrentActive;
-    GLuint framebufferTarget;
+    bool isEditorCamera;
     float pitch{0.f}, yaw{0.f};
     gsl::Matrix4x4 viewMatrix;
     gsl::Matrix4x4 projectionMatrix;
 
-    CameraComponent(unsigned int _eID = 0, bool _valid = false,
-           bool currentActive = true, GLuint fbTarget = 0, const gsl::mat4& vMat = gsl::mat4{},
-           const gsl::mat4& pMat = gsl::mat4{})
-        : Component (_eID, _valid, ComponentType::Camera), isCurrentActive{currentActive},
-          framebufferTarget{fbTarget}, viewMatrix{vMat}, projectionMatrix{pMat}
+    CameraComponent(unsigned int _eID = 0, bool _valid = false, bool editorCamera = false, const gsl::mat4& vMat = gsl::mat4{}, const gsl::mat4& pMat = gsl::mat4{})
+        : Component (_eID, _valid, ComponentType::Camera), isEditorCamera{editorCamera},
+          viewMatrix{vMat}, projectionMatrix{pMat}
     {}
 
     virtual void reset() override
     {
-        isCurrentActive = true;
-        framebufferTarget = 0;
         pitch = yaw = 0.f;
         viewMatrix = gsl::mat4{};
         projectionMatrix = gsl::mat4{};

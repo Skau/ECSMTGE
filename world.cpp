@@ -34,6 +34,7 @@ World::World()
     ResourceManager::instance()->addMesh("box2", "box2.txt");
     ResourceManager::instance()->addMesh("axis", "axis.txt");
     ResourceManager::instance()->addMesh("suzanne", "monkey.obj");
+    ResourceManager::instance()->addMesh("camera", "camera.obj");
 
     ResourceManager::instance()->loadWav("Caravan_mono", std::string{gsl::soundsFilePath}.append("Caravan_mono.wav"));
     ResourceManager::instance()->loadWav("explosion", std::string{gsl::soundsFilePath}.append("explosion.wav"));

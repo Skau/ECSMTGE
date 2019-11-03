@@ -939,7 +939,7 @@ void Renderer::renderSkybox(const CameraComponent &camera)
 
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
     glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
-    glUniform1i(glGetUniformLocation(shader->getProgram(), "cubemap"), static_cast<int>(mSkyboxMaterial->mTextures[0].first));
+    glUniform1i(glGetUniformLocation(shader->getProgram(), "cubemap"), 0);
 
     int uniform = glGetUniformLocation(shader->getProgram(), "sTime");
     if (0 <= uniform)

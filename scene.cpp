@@ -20,12 +20,36 @@ void Scene::initBlankScene()
 {
     auto entityManager = mWorld->getEntityManager();
 
-    // Camera:
-    auto camera = entityManager->createEntity("mainCam");
-    auto [camTrans, camCam, dirLight, camInput] = entityManager->addComponent<TransformComponent, CameraComponent, DirectionalLightComponent, InputComponent>(camera);
-    camTrans.setPosition(gsl::vec3{0.f, 0.f, 5.f});
-    camInput.isCurrentlyControlled = true;
-    camCam.isCurrentActive = true;
+    // Editor cam
+    auto camera = entityManager->createEntity("EditorCam");
+    auto [editorTrans, editorCam, editorInput] = entityManager->addComponent<TransformComponent, CameraComponent, InputComponent>(camera);
+    editorTrans.setPosition(gsl::vec3{-1.f, 3.f, 10.f});
+    editorTrans.setRotation({1.f, .27f, .1f, 0.f});
+    editorInput.isCurrentlyControlled = true;
+    editorCam.isEditorCamera = true;
+    editorCam.yaw = 10.f;
+    editorCam.pitch = 30.f;
+    for(auto& info : entityManager->getEntityInfos())
+    {
+        if(info.entityId == camera)
+        {
+            info.shouldShowInEditor = false;
+        }
+    }
+
+    // Game cam
+    camera = entityManager->createEntity("GameCam");
+    auto [gameTrans, gameCam, gameMesh, gameInput] = entityManager->addComponent<TransformComponent, CameraComponent, MeshComponent, InputComponent>(camera);
+    gameTrans.setPosition(gsl::vec3{0.f, 0.f, 5.f});
+    if(auto meshData = ResourceManager::instance()->getMesh("camera"))
+    {
+        gameMesh.meshData = *meshData;
+        gameMesh.isVisible = true;
+    }
+
+    // Light
+    auto entity = entityManager->createEntity("light");
+    entityManager->addComponent<TransformComponent, DirectionalLightComponent>(entity);
 }
 
 bool Scene::LoadFromFile(const std::string& path)
@@ -37,8 +61,12 @@ bool Scene::LoadFromFile(const std::string& path)
         return false;
     }
 
+
    QFileInfo info(QString::fromStdString(path));
-   name = info.baseName().toStdString();
+   auto baseName = info.baseName();
+   if(baseName.contains("temp"))
+        baseName = baseName.replace("temp", "");
+   name = baseName.toStdString();
 
     QJsonDocument document = QJsonDocument::fromJson(file.readAll());
     if(!document.isObject())
@@ -67,6 +95,17 @@ bool Scene::LoadFromFile(const std::string& path)
 
         // Create the entity
         auto entity = entityManager->createEntity(entityObj["Name"].toString().toStdString());
+        auto shouldShowInEditor = entityObj["ShowInEditor"].toBool();
+        if(!shouldShowInEditor)
+        {
+            for(auto& info : entityManager->getEntityInfos())
+            {
+                if(info.entityId == entity)
+                {
+                    info.shouldShowInEditor = false;
+                }
+            }
+        }
 
         // Iterate all components
         for(auto compRef : entityObj["Components"].toArray())
@@ -128,6 +167,7 @@ void Scene::SaveToFile(const std::string& path)
         QJsonObject entityObject;
         entityObject.insert("Components", compArray);
         entityObject.insert("Name", QJsonValue(entityInfo.name.c_str()));
+        entityObject.insert("ShowInEditor", QJsonValue(entityInfo.shouldShowInEditor));
         entityArray.push_back(entityObject);
     }
 

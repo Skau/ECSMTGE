@@ -125,6 +125,9 @@ void App::toggleMute(bool mode)
 
 void App::mousePicking()
 {
+    if(mCurrentlyPlaying)
+        return;
+
     auto mousePoint = mRenderer->mapFromGlobal(QCursor::pos());
     auto cameras = mWorld->getEntityManager()->getCameraComponents();
     auto meshes = mWorld->getEntityManager()->getMeshComponents();
@@ -211,9 +214,21 @@ void App::update()
     // Sound listener is using the active camera view matrix (for directions) and transform (for position)
     for (const auto& camera : cameras)
     {
-        if(camera.isCurrentActive)
+        if(camera.isEditorCamera)
         {
-            mSoundListener->update(camera, *mWorld->getEntityManager()->getComponent<TransformComponent>(camera.entityId));
+            if(!mCurrentlyPlaying)
+            {
+                mSoundListener->update(camera, *mWorld->getEntityManager()->getComponent<TransformComponent>(camera.entityId));
+                break;
+            }
+        }
+        else
+        {
+            if(mCurrentlyPlaying)
+            {
+                mSoundListener->update(camera, *mWorld->getEntityManager()->getComponent<TransformComponent>(camera.entityId));
+                break;
+            }
         }
     }
     SoundManager::UpdatePositions(transforms, sounds);
@@ -233,14 +248,29 @@ void App::update()
     // Rendering
     for (const auto& camera : cameras)
     {
-        if(camera.isCurrentActive)
+        if(camera.isEditorCamera)
         {
-            auto& renders = mWorld->getEntityManager()->getMeshComponents();
-            mRenderer->render(renders, transforms, camera,
-                                      mWorld->getEntityManager()->getDirectionalLightComponents(),
-                                      mWorld->getEntityManager()->getSpotLightComponents(),
-                                      mWorld->getEntityManager()->getPointLightComponents());
-            break;
+            if(!mCurrentlyPlaying)
+            {
+                auto& renders = mWorld->getEntityManager()->getMeshComponents();
+                mRenderer->render(renders, transforms, camera,
+                                          mWorld->getEntityManager()->getDirectionalLightComponents(),
+                                          mWorld->getEntityManager()->getSpotLightComponents(),
+                                          mWorld->getEntityManager()->getPointLightComponents());
+                break;
+            }
+        }
+        else
+        {
+            if(mCurrentlyPlaying)
+            {
+                auto& renders = mWorld->getEntityManager()->getMeshComponents();
+                mRenderer->render(renders, transforms, camera,
+                                          mWorld->getEntityManager()->getDirectionalLightComponents(),
+                                          mWorld->getEntityManager()->getSpotLightComponents(),
+                                          mWorld->getEntityManager()->getPointLightComponents());
+                break;
+            }
         }
     }
 
@@ -257,7 +287,6 @@ void App::quit()
 void App::updatePerspective()
 {
     auto& cameras = mWorld->getEntityManager()->getCameraComponents();
-
     CameraSystem::updateCameras(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 0.1f, 100.f));
 }
 
@@ -267,6 +296,19 @@ void App::onPlay()
     mCurrentlyPlaying = true;
 
     mWorld->saveTemp();
+
+    for(auto camera : mWorld->getEntityManager()->getCameraComponents())
+    {
+        auto input = mWorld->getEntityManager()->getComponent<InputComponent>(camera.entityId);
+        input->isCurrentlyControlled = (camera.isEditorCamera) ? false : true;
+        if(!camera.isEditorCamera)
+        {
+            auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId);
+            mesh->isVisible = false;
+        }
+    }
+
+    mMainWindow->setSelected(nullptr);
 
     auto& scripts = mWorld->getEntityManager()->getScriptComponents();
     ScriptSystem::get()->beginPlay(scripts);
@@ -287,6 +329,17 @@ void App::onStop()
     SoundManager::stop(sounds);
 
     mRenderer->EditorCurrentEntitySelected = nullptr;
+
+    for(auto camera : mWorld->getEntityManager()->getCameraComponents())
+    {
+        auto input = mWorld->getEntityManager()->getComponent<InputComponent>(camera.entityId);
+        input->isCurrentlyControlled = (camera.isEditorCamera) ? true : false;
+        if(!camera.isEditorCamera)
+        {
+            auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId);
+            mesh->isVisible = true;
+        }
+    }
 
     mWorld->loadTemp();
 }

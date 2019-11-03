@@ -173,10 +173,13 @@ void MainWindow::updateUI(const std::vector<EntityInfo> &entityData)
     // Add all the entities
     for(unsigned i = 0; i < entityData.size(); ++i)
     {
-        QTreeWidgetItem* item = new QTreeWidgetItem(ui->treeWidget_ObjectList->topLevelItem(0));
-        item->setText(0, QString::fromStdString(entityData[i].name));
-        item->setFlags(item->flags() | Qt::ItemIsEditable);
-        mTreeDataCache[item] = entityData[i];
+        if(entityData[i].shouldShowInEditor)
+        {
+            QTreeWidgetItem* item = new QTreeWidgetItem(ui->treeWidget_ObjectList->topLevelItem(0));
+            item->setText(0, QString::fromStdString(entityData[i].name));
+            item->setFlags(item->flags() | Qt::ItemIsEditable);
+            mTreeDataCache[item] = entityData[i];
+        }
     }
 }
 
@@ -429,7 +432,13 @@ void MainWindow::on_treeWidget_ObjectList_itemChanged(QTreeWidgetItem *item, int
 void MainWindow::setSelected(EntityInfo* entityInfo)
 {
     if (entityInfo == nullptr)
+    {
+        currentEntitySelected = nullptr;
+        if (auto renderer = getRenderer())
+            renderer->EditorCurrentEntitySelected = nullptr;
+        updateComponentArea(0);
         return;
+    }
 
     // Cache currently selected entity
     currentEntitySelected = entityInfo;

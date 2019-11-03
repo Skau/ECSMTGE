@@ -178,6 +178,51 @@ void ResourceManager::setupLODs(std::shared_ptr<MeshData> baseMeshData, std::sha
     }
 }
 
+void ResourceManager::setupLOD(std::shared_ptr<MeshData> baseMesh, std::shared_ptr<MeshData> LOD, unsigned int level)
+{
+    const auto findMesh = [](std::map<std::string, std::shared_ptr<MeshData>>& map, std::shared_ptr<MeshData> mesh){
+        for (auto it = map.begin(); it != map.end(); ++it)
+            if (it->second == mesh)
+                return it;
+
+        return map.end();
+    };
+
+    if (baseMesh && LOD)
+    {
+        if (level == 0)
+        {
+            // If adding a lod to the base lod, just swap the meshes.
+
+            auto first = findMesh(mMeshes, baseMesh);
+            auto second = findMesh(mMeshes, LOD);
+
+            if (first == mMeshes.end() || second == mMeshes.end())
+                return;
+
+            first->second = std::move(second->second);
+            mMeshes.erase(second);
+        }
+        else if (0 < level && level < 3)
+        {
+            baseMesh->mVAOs[level]              = LOD->mVAOs[0];
+            baseMesh->mVerticesCounts[level]    = LOD->mVerticesCounts[0];
+            baseMesh->mIndicesCounts[level]     = LOD->mIndicesCounts[0];
+
+            if (level == 1 && baseMesh->mVerticesCounts[1] < baseMesh->mVerticesCounts[2])
+            {
+                baseMesh->mVAOs[2]              = LOD->mVAOs[0];
+                baseMesh->mVerticesCounts[2]    = LOD->mVerticesCounts[0];
+                baseMesh->mIndicesCounts[2]     = LOD->mIndicesCounts[0];
+            }
+
+            auto lodIt = findMesh(mMeshes, LOD);
+            if (lodIt != mMeshes.end())
+                mMeshes.erase(lodIt);
+        }
+    }
+}
+
 std::shared_ptr<MeshData> ResourceManager::initializeMeshData(const std::string& name, GLenum renderType, std::pair<std::vector<Vertex>, std::vector<GLuint>> data)
 {
     MeshData meshData;

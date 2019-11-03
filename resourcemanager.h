@@ -55,6 +55,14 @@ public:
     std::shared_ptr<MeshData> addMesh(const std::string& name, const std::string& path, GLenum renderType = GL_TRIANGLES);
     std::shared_ptr<MeshData> getMesh(const std::string& name);
 
+    /**
+     * @brief Adds the LOD meshdata to the baseMesh meshdata at the given level and removes the LOD mesh from the mesharray.
+     * @param baseMesh - The receiver of the LOD
+     * @param LOD - The meshdata of the LOD
+     * @param level - At what level the LOD shall be added; 0, 1 or 2. Defaults to 1. (0 is the basemesh)
+     */
+    void setupLOD(std::shared_ptr<MeshData> baseMesh, std::shared_ptr<MeshData> LOD, unsigned int level = 1);
+
     // Sound
 
     void loadWav(const std::string& name, const std::string& path);

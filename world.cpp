@@ -34,6 +34,9 @@ World::World()
     ResourceManager::instance()->addMesh("box2", "box2.txt");
     ResourceManager::instance()->addMesh("axis", "axis.txt");
     ResourceManager::instance()->addMesh("suzanne", "monkey.obj");
+    auto ball = ResourceManager::instance()->addMesh("ball", "octoball.txt");
+    ResourceManager::instance()->setupLOD(ball, ResourceManager::instance()->addMesh("ball_l2", "octoball_L02.txt"), 2);
+    ResourceManager::instance()->setupLOD(ball, ResourceManager::instance()->addMesh("ball_l1", "octoball_L01.txt"), 1);
 
     ResourceManager::instance()->loadWav("Caravan_mono", std::string{gsl::soundsFilePath}.append("Caravan_mono.wav"));
     ResourceManager::instance()->loadWav("explosion", std::string{gsl::soundsFilePath}.append("explosion.wav"));

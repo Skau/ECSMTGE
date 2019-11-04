@@ -326,7 +326,11 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
-    deferredGeometryPass(renders, transforms, camera);
+    glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+    glEnable(GL_STENCIL_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    geometryPass(renders, transforms, camera, ShaderType::Deferred);
 
     checkForGLerrors();
 
@@ -370,15 +374,18 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
     // Draw foward here
-    // Skybox
-    renderSkybox(camera);
-
     // Axis
     // Need to disable depth testing, or else the axis will sometimes appear behind other meshes
     glDisable(GL_DEPTH_TEST);
     renderAxis(camera);
 
+    glEnable(GL_DEPTH_TEST);
+    geometryPass(renders, transforms, camera, ShaderType::Forward);
+    // Skybox
+    renderSkybox(camera);
+
     // Postprocessing
+    glDisable(GL_DEPTH_TEST);
     if (mDepthStencilAttachmentSupported)
         drawEditorOutline();
     mPostprocessor->Render();
@@ -386,7 +393,7 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     glEnable(GL_DEPTH_TEST);
 }
 
-void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera)
+void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera, ShaderType renderMode)
 {
     auto transIt = transforms.begin();
     auto renderIt = renders.begin();
@@ -398,9 +405,6 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
     GLuint currentlySelectedEID = (EditorCurrentEntitySelected != nullptr) ? EditorCurrentEntitySelected->entityId : 0;
 
     // ** Geometry pass ** //
-    glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-    glEnable(GL_STENCIL_TEST);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     checkForGLerrors();
 
@@ -440,6 +444,25 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
                 continue;
             }
 
+            // ** NEEDS TO BE A DEFERRED SHADER ** //
+
+            auto shader = renderIt->mMaterial.mShader;
+            if(!shader)
+            {
+                shader = renderMode == ShaderType::Deferred ?
+                            ResourceManager::instance()->getShader("defaultDeferred") :
+                            ResourceManager::instance()->getShader("color");
+                renderIt->mMaterial.loadShaderWithParameters(shader);
+            }
+
+            if (shader->mRenderingType != renderMode)
+            {
+                // Increment all
+                ++transIt;
+                ++renderIt;
+                continue;
+            }
+
             float distance = distanceFromCamera(camera, *transIt);
 
             unsigned index = 0;
@@ -465,16 +488,6 @@ void Renderer::deferredGeometryPass(std::vector<MeshComponent>& renders, const s
             // Entity can be drawn. Draw.
 
             glBindVertexArray(meshData.mVAOs[index]);
-
-
-            // ** NEEDS TO BE A DEFERRED SHADER ** //
-
-            auto shader = renderIt->mMaterial.mShader;
-            if(!shader)
-            {
-                shader = ResourceManager::instance()->getShader("defaultDeferred");
-                renderIt->mMaterial.loadShaderWithParameters(shader);
-            }
 
             glUseProgram(shader->getProgram());
 

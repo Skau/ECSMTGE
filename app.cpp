@@ -94,10 +94,10 @@ void App::initTheRest()
     // mRenderer->mPostprocessor->steps.push_back({ResourceManager::instance()->getShader("passthrough")});
     mRenderer->mOutlineeffect->outputToDefault = false;
 
-    auto material = std::make_shared<Material>(ResourceManager::instance()->getShader("singleColor"));
+    auto material = std::make_shared<Material>(ResourceManager::instance()->getShader("ui_singleColor"));
     material->mParameters =
     {
-        {"color", gsl::vec3{1.f, 1.f, 0.f}}
+        {"p_color", gsl::vec3{1.f, 1.f, 0.f}}
     };
     mRenderer->mOutlineeffect->steps.push_back(
     {

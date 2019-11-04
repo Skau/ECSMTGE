@@ -11,6 +11,7 @@ World::World()
     ResourceManager::instance()->addShader("skybox",            std::make_shared<Shader>("skybox", ShaderType::Forward));
     ResourceManager::instance()->addShader("white",             std::make_shared<Shader>("white", ShaderType::Forward));
     ResourceManager::instance()->addShader("axis",              std::make_shared<Shader>("axisshader.vert", "colorshader.frag", ShaderType::Forward));
+    ResourceManager::instance()->addShader("singleColor",       std::make_shared<Shader>("white.vert", "singleColor.frag", ShaderType::Forward));
 
     // Deferred
     ResourceManager::instance()->addShader("defaultDeferred",   std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag", ShaderType::Deferred));
@@ -21,7 +22,7 @@ World::World()
     // Post prosessing
     ResourceManager::instance()->addShader("passthrough",       std::make_shared<Shader>("pass.vert", "pass.frag", ShaderType::PostProcessing));
     ResourceManager::instance()->addShader("blur",              std::make_shared<Shader>("pass.vert", "blur.frag", ShaderType::PostProcessing));
-    ResourceManager::instance()->addShader("singleColor",       std::make_shared<Shader>("pass.vert", "singleColor.frag", ShaderType::PostProcessing));
+    ResourceManager::instance()->addShader("ui_singleColor",    std::make_shared<Shader>("pass.vert", "singleColor.frag", ShaderType::PostProcessing));
     ResourceManager::instance()->addShader("blend",             std::make_shared<Shader>("pass.vert", "blend.frag", ShaderType::PostProcessing));
 
     // Other..

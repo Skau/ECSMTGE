@@ -49,33 +49,132 @@ bool InputHandler::eventFilter(QObject* obj, QEvent* event)
     {
         auto mouseEvent = static_cast<QMouseEvent*>(event);
         Keys[static_cast<int>(mouseEvent->button())] = true;
+        QString string;
         if (mouseEvent->button() == Qt::MouseButton::LeftButton)
+        {
             mousePress();
+            string = "mouseLeft";
+        }
+        else if(mouseEvent->button() == Qt::MouseButton::RightButton)
+        {
+            string = "mouseRight";
+        }
+
+        if(string.size())
+        {
+            inputStrings.push_back(string);
+        }
+
         return true;
     }
     case QEvent::MouseButtonRelease:
     {
         auto mouseEvent = static_cast<QMouseEvent*>(event);
+        QString string;
+        if (mouseEvent->button() == Qt::MouseButton::LeftButton)
+        {
+            string = "mouseLeft";
+        }
+        else if(mouseEvent->button() == Qt::MouseButton::RightButton)
+        {
+            string = "mouseRight";
+        }
+
+        if(string.size())
+        {
+            inputStrings.erase(std::remove(inputStrings.begin(), inputStrings.end(), string), inputStrings.end());
+        }
+
         Keys[static_cast<int>(mouseEvent->button())] = false;
         return true;
     }
     case QEvent::KeyPress:
     {
         auto keyEvent = static_cast<QKeyEvent*>(event);
-        if (keyEvent->key() == Qt::Key_Escape)
+        QString string;
+        switch (keyEvent->key())
+        {
+        case Qt::Key_Escape:
         {
             escapeKeyPressed();
+            string = "escape";
+            break;
+        }
+        case Qt::Key_Shift:
+        {
+            string = "shift";
+            break;
+        }
+        case Qt::Key_Control:
+        {
+            string = "control";
+            break;
+        }
+        case Qt::Key_Alt:
+        {
+            string = "alt";
+            break;
+        }
+        case Qt::Key_Space:
+        {
+            string = "space";
+            break;
+        }
         }
 
+        if (!string.size())
+        {
+            string = keyEvent->text();
+
+        }
+
+        inputStrings.push_back(string);
         Keys[keyEvent->key()] = true;
-        keysPressed.push_back(keyEvent->text());
+
         return true;
     }
     case QEvent::KeyRelease:
     {
         auto keyEvent = static_cast<QKeyEvent*>(event);
+        QString string;
+        switch (keyEvent->key())
+        {
+        case Qt::Key_Escape:
+        {
+            escapeKeyPressed();
+            string = "escape";
+            break;
+        }
+        case Qt::Key_Shift:
+        {
+            string = "shift";
+            break;
+        }
+        case Qt::Key_Control:
+        {
+            string = "control";
+            break;
+        }
+        case Qt::Key_Alt:
+        {
+            string = "alt";
+            break;
+        }
+        case Qt::Key_Space:
+        {
+            string = "space";
+            break;
+        }
+        }
+
+        if (!string.size())
+        {
+            string = keyEvent->text();
+        }
+
+        inputStrings.erase(std::remove(inputStrings.begin(), inputStrings.end(), string), inputStrings.end());
         Keys[keyEvent->key()] = false;
-        keysPressed.erase(std::remove(keysPressed.begin(), keysPressed.end(), keyEvent->text()), keysPressed.end());
+
         return true;
     }
     case QEvent::Wheel:

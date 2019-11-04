@@ -25,7 +25,6 @@ void Scene::initBlankScene()
     auto [editorTrans, editorCam, editorInput] = entityManager->addComponent<TransformComponent, CameraComponent, InputComponent>(camera);
     editorTrans.setPosition(gsl::vec3{-1.f, 3.f, 10.f});
     editorTrans.setRotation({1.f, .27f, .1f, 0.f});
-    editorInput.isCurrentlyControlled = true;
     editorCam.isEditorCamera = true;
     editorCam.yaw = 10.f;
     editorCam.pitch = 30.f;

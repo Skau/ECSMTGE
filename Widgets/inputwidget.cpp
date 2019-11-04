@@ -14,7 +14,7 @@ InputWidget::InputWidget(MainWindow *mainWindow, QWidget *parent)
     {
         if(auto input = mMainWindow->getEntityManager()->getComponent<InputComponent>(entity->entityId))
         {
-            auto checkState = input->isCurrentlyControlled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
+            auto checkState = input->controlledWhilePlaying ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
             ui->checkBox_IsBeingControlled->setCheckState(checkState);
         }
     }
@@ -44,7 +44,7 @@ void InputWidget::on_checkBox_IsBeingControlled_toggled(bool checked)
     {
         if(auto comp = mMainWindow->getEntityManager()->getComponent<InputComponent>(entity->entityId))
         {
-            comp->isCurrentlyControlled = checked;
+            comp->controlledWhilePlaying = checked;
         }
     }
 }

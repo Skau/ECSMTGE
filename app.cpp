@@ -169,34 +169,51 @@ void App::update()
     auto& sounds = mWorld->getEntityManager()->getSoundComponents();
     auto& scripts = mWorld->getEntityManager()->getScriptComponents();
 
-    // Input:
-    mEventHandler->updateMouse();
-    InputSystem::HandleCameraInput(mDeltaTime, inputs, transforms, cameras);
-    InputSystem::HandleInput(mDeltaTime, inputs, transforms);
-
-    if(mCurrentlyPlaying)
-    {
-        for(auto& input : inputs)
-        {
-            if(input.isCurrentlyControlled)
-            {
-                for(auto& key : mEventHandler->keysPressed)
-                {
-                    if(auto comp = mWorld->getEntityManager()->getComponent<ScriptComponent>(input.entityId))
-                    {
-                        ScriptSystem::get()->runKeyEvent(*comp, key);
-                    }
-                }
-                break;
-            }
-        }
-    }
 
     // Tick scripts if playing
     if(mCurrentlyPlaying)
     {
         ScriptSystem::get()->tick(mDeltaTime, scripts);
     }
+
+    // Input
+
+    // Editor Camera handles input if not playing
+    if(!mCurrentlyPlaying)
+    {
+        mEventHandler->updateMouse();
+
+        for(auto& camera : cameras)
+        {
+            if(camera.isEditorCamera)
+            {
+                auto transform = mWorld->getEntityManager()->getComponent<TransformComponent>(camera.entityId);
+                InputSystem::HandleEditorCameraInput(mDeltaTime, *transform, camera);
+            }
+        }
+    }
+    // Send input to scripts if playing
+    else
+    {
+        auto strings = mEventHandler->inputStrings;
+        if(strings.size())
+        {
+            for(auto& input : inputs)
+            {
+                if(input.controlledWhilePlaying)
+                {
+                    if(auto comp = mWorld->getEntityManager()->getComponent<ScriptComponent>(input.entityId))
+                    {
+                        ScriptSystem::get()->runKeyEvent(*comp, strings);
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Update JS comps
+    ScriptSystem::get()->updateJSComponents(scripts);
 
     // Physics:
     /* Note: Physics calculation should be happening on a separate thread
@@ -243,7 +260,6 @@ void App::update()
     // Calculate mesh bounds
     mWorld->getEntityManager()->UpdateBounds();
     // -------- Frustum culling here -----------
-
 
     // Rendering
     for (const auto& camera : cameras)
@@ -300,7 +316,7 @@ void App::onPlay()
     for(auto camera : mWorld->getEntityManager()->getCameraComponents())
     {
         auto input = mWorld->getEntityManager()->getComponent<InputComponent>(camera.entityId);
-        input->isCurrentlyControlled = (camera.isEditorCamera) ? false : true;
+        input->controlledWhilePlaying = (camera.isEditorCamera) ? false : true;
         if(!camera.isEditorCamera)
         {
             auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId);
@@ -333,7 +349,7 @@ void App::onStop()
     for(auto camera : mWorld->getEntityManager()->getCameraComponents())
     {
         auto input = mWorld->getEntityManager()->getComponent<InputComponent>(camera.entityId);
-        input->isCurrentlyControlled = (camera.isEditorCamera) ? true : false;
+        input->controlledWhilePlaying = (camera.isEditorCamera) ? true : false;
         if(!camera.isEditorCamera)
         {
             auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId);

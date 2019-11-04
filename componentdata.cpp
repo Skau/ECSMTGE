@@ -348,7 +348,7 @@ QJsonObject InputComponent::toJSON()
 {
     auto parentObj = Component::toJSON();
 
-    parentObj.insert("CurrentlyControlled", QJsonValue(isCurrentlyControlled));
+    parentObj.insert("ControlledWhilePlaying", QJsonValue(controlledWhilePlaying));
 
     return parentObj;
 }
@@ -357,7 +357,7 @@ void InputComponent::fromJSON(QJsonObject object)
 {
     Component::fromJSON(object);
 
-    isCurrentlyControlled = object["CurrentlyControlled"].toBool();
+    controlledWhilePlaying = object["ControlledWhilePlaying"].toBool();
 }
 
 QJsonObject SoundComponent::toJSON()

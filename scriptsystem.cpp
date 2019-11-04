@@ -12,6 +12,8 @@
 
 void ScriptSystem::beginPlay(std::vector<ScriptComponent>& comps)
 {
+    initializeHelperFuncs();
+
     for(auto& comp : comps)
     {
         if(comp.filePath.size())
@@ -28,12 +30,12 @@ void ScriptSystem::tick(float deltaTime, std::vector<ScriptComponent>& comps)
 {
     for(auto& comp : comps)
     {
-        // To propagate changes done in C++ back to JS
-        updateJSComponents(comp);
-
-        QJSValueList list;
-        list << deltaTime;
-        call(comp, "tick", list);
+        if(comp.filePath.size())
+        {
+            QJSValueList list;
+            list << deltaTime;
+            call(comp, "tick", list);
+        }
     }
 }
 
@@ -41,15 +43,26 @@ void ScriptSystem::endPlay(std::vector<ScriptComponent>& comps)
 {
     for(auto& comp : comps)
     {
-       call(comp, "endPlay");
+        if(comp.filePath.size())
+        {
+            call(comp, "endPlay");
+        }
     }
 }
 
-void ScriptSystem::runKeyEvent(ScriptComponent& comp, const QString &key)
+void ScriptSystem::runKeyEvent(ScriptComponent& comp, const std::vector<QString>& keys)
 {
+    if(!comp.filePath.size())
+        return;
+
     QJSValueList list;
-    list << key;
-    call(comp, "keyPressed", list);
+    auto array = comp.engine->newArray(static_cast<unsigned>(keys.size()));
+    for(unsigned i = 0; i < keys.size(); ++i)
+    {
+        array.setProperty(i, keys[i]);
+    }
+    list << array;
+    call(comp, "inputPressed", list);
 }
 
 void ScriptSystem::runHitEvents(std::vector<ScriptComponent> &comps, std::vector<HitInfo> hitInfos)
@@ -61,6 +74,9 @@ void ScriptSystem::runHitEvents(std::vector<ScriptComponent> &comps, std::vector
     {
         for(unsigned i = 0; i < comps.size(); ++i)
         {
+            if(!comps[i].filePath.size())
+                continue;
+
             if(comps[i].entityId == hitInfo.eID)
             {
                 QJsonObject hitJSON;
@@ -74,6 +90,17 @@ void ScriptSystem::runHitEvents(std::vector<ScriptComponent> &comps, std::vector
                 list << comps[i].engine->toScriptValue(hitJSON);
                 call(comps[i], "onHit", list);
             }
+        }
+    }
+}
+
+void ScriptSystem::updateJSComponents(std::vector<ScriptComponent> &comps)
+{
+    for(auto& comp : comps)
+    {
+        if(comp.filePath.size())
+        {
+            updateJSComponents(comp);
         }
     }
 }
@@ -120,12 +147,12 @@ bool ScriptSystem::load(ScriptComponent &comp, const std::string &file)
     }
     QTextStream stream(&scriptFile);
     QString contents = stream.readAll();
-    contents.prepend(ScriptSystem::get()->getEntityHelperFunctions());
+    contents.prepend(helperFuncs);
     scriptFile.close();
     auto value = comp.engine->evaluate(contents, QString::fromStdString(file));
     if(value.isError())
     {
-        ScriptSystem::get()->checkError(value);
+        checkError(value);
         return false;
     }
 
@@ -153,11 +180,10 @@ void ScriptSystem::call(ScriptComponent& comp, const std::string &function)
     QJSValue value = comp.engine->evaluate(QString::fromStdString(function), currentFileName);
     if(value.isError())
     {
-        ScriptSystem::get()->checkError(value);
+        checkError(value);
         return;
     }
 
-    currentComp = &comp;
     value.call();
 
     updateComponents();
@@ -172,7 +198,7 @@ QJSValue ScriptSystem::call(const std::string &function)
         QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), currentFileName);
         if(value.isError())
         {
-            ScriptSystem::get()->checkError(value);
+            checkError(value);
             currentComp->engine->globalObject().setProperty("accessedComponents", currentComp->engine->newArray());
             return false;
         }
@@ -181,7 +207,7 @@ QJSValue ScriptSystem::call(const std::string &function)
 
         if(returnValue.isError())
         {
-            ScriptSystem::get()->checkError(value);
+            checkError(value);
             currentComp->engine->globalObject().setProperty("accessedComponents", currentComp->engine->newArray());
             return false;
         }
@@ -208,7 +234,7 @@ void ScriptSystem::call(ScriptComponent &comp, const std::string &function, QJSV
     QJSValue value = comp.engine->evaluate(QString::fromStdString(function), currentFileName);
     if(value.isError())
     {
-        ScriptSystem::get()->checkError(value);
+        checkError(value);
         comp.engine->globalObject().setProperty("accessedComponents", comp.engine->newArray());
         return;
     }
@@ -227,7 +253,7 @@ QJSValue ScriptSystem::call(const std::string &function, QJSValueList params)
         QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), currentFileName);
         if(value.isError())
         {
-            ScriptSystem::get()->checkError(value);
+            checkError(value);
             currentComp->engine->globalObject().setProperty("accessedComponents", currentComp->engine->newArray());
             return false;
         }
@@ -235,7 +261,7 @@ QJSValue ScriptSystem::call(const std::string &function, QJSValueList params)
         auto returnValue = value.call(params);
         if(value.isError())
         {
-            ScriptSystem::get()->checkError(value);
+            checkError(value);
             currentComp->engine->globalObject().setProperty("accessedComponents", currentComp->engine->newArray());
             return false;
         }
@@ -263,7 +289,7 @@ bool ScriptSystem::execute(ScriptComponent& comp, QString function, QString cont
     QJSValue value = comp.engine->evaluate(contents, fileName);
     if(value.isError())
     {
-        ScriptSystem::get()->checkError(value);
+        checkError(value);
         comp.engine->globalObject().setProperty("accessedComponents", comp.engine->newArray());
         return false;
     }
@@ -271,7 +297,7 @@ bool ScriptSystem::execute(ScriptComponent& comp, QString function, QString cont
     value = comp.engine->evaluate(function);
     if(value.isError())
     {
-        ScriptSystem::get()->checkError(value);
+        checkError(value);
         comp.engine->globalObject().setProperty("accessedComponents", comp.engine->newArray());
         return false;
     }
@@ -279,7 +305,7 @@ bool ScriptSystem::execute(ScriptComponent& comp, QString function, QString cont
     value = value.call();
     if(value.isError())
     {
-        ScriptSystem::get()->checkError(value);
+        checkError(value);
         comp.engine->globalObject().setProperty("accessedComponents", comp.engine->newArray());
         return false;
     }
@@ -627,6 +653,19 @@ void ScriptSystem::updateJSComponents(ScriptComponent& comp)
             }
         }
     }
+}
+
+void ScriptSystem::initializeHelperFuncs()
+{
+    QFile file(QString::fromStdString("../INNgine2019/JSHelperFuncs.js"));
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "ERROR Script System: Failed to find JSHelperFuncs.js!";
+        return;
+    }
+
+    helperFuncs = file.readAll();
+    file.close();
 }
 
 

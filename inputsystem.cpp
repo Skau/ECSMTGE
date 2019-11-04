@@ -42,7 +42,7 @@ void InputSystem::HandleInput(float deltaTime, std::vector<InputComponent> &inpu
         }
         else
         {
-            if(!inputIt->isCurrentlyControlled)
+            if(!inputIt->controlledWhilePlaying)
             {
                 // Increment all
                 ++transIt;
@@ -114,82 +114,67 @@ void InputSystem::HandleInput(float deltaTime, std::vector<InputComponent> &inpu
     }
 }
 
-void InputSystem::HandleCameraInput(float deltaTime, std::vector<InputComponent> &inputComponents,
-                                    std::vector<TransformComponent> &transformComponents, std::vector<CameraComponent> &cameraComponents)
+void InputSystem::HandleEditorCameraInput(float deltaTime, TransformComponent& transformComponent, CameraComponent& cameraComponent)
 {
     auto keys = InputHandler::Keys;
 
-    auto inputIt = inputComponents.begin();
-    auto cameraIt = cameraComponents.begin();
-    auto transIt = transformComponents.begin();
-
-
-    bool cameraShortest = cameraComponents.size() < inputComponents.size();
-
-    bool _{true};
-
-    // cause normal while (true) loops are so outdated
-    for ( ;_; )
+    if(keys[Qt::MouseButton::RightButton] == true)
     {
-        if (cameraShortest)
+
+        // Rotation
+
+        auto mouseOffset = InputHandler::MouseOffset;
+
+        float deltaX = mouseOffset.x() * 5 * deltaTime;
+        float deltaY = mouseOffset.y() * 5 * deltaTime;
+
+        cameraComponent.pitch += deltaY;
+        cameraComponent.yaw += deltaX;
+
+        if(cameraComponent.pitch > 89.0f)
+            cameraComponent.pitch = 89.0f;
+        if(cameraComponent.pitch < -89.0f)
+            cameraComponent.pitch = -89.0f;
+
+        transformComponent.setRotation(gsl::quat::lookAt(gsl::deg2radf(cameraComponent.pitch), gsl::deg2radf(cameraComponent.yaw)));
+
+        // Position
+
+        gsl::vec3 forward = transformComponent.rotation.inverse().forwardVector();
+        gsl::vec3 right = transformComponent.rotation.inverse().rightVector();
+        gsl::vec3 up = transformComponent.rotation.inverse().upVector();
+
+
+        if(keys[Qt::Key_W] == true)
         {
-            if (cameraIt == cameraComponents.end())
-                break;
+            transformComponent.position += -forward * deltaTime;
         }
-        else
+
+        if(keys[Qt::Key_A] == true)
         {
-            if (inputIt == inputComponents.end())
-                break;
+            transformComponent.position += -right * deltaTime;
         }
 
-        // Increment lowest index
-        if (!cameraIt->valid || cameraIt->entityId < inputIt->entityId)
+        if(keys[Qt::Key_S] == true)
         {
-            ++cameraIt;
+            transformComponent.position += forward * deltaTime;
         }
-        else if (!inputIt->valid || inputIt->entityId < cameraIt->entityId)
+
+        if(keys[Qt::Key_D] == true)
         {
-            ++inputIt;
+            transformComponent.position += right * deltaTime;
         }
-        else
+
+        if(keys[Qt::Key_Q] == true)
         {
-            if(!inputIt->isCurrentlyControlled)
-            {
-                // Increment all
-                ++cameraIt;
-                ++inputIt;
-                continue;
-            }
-
-            while (transIt->entityId < cameraIt->entityId)
-                ++transIt;
-
-            if (transIt->entityId > cameraIt->entityId)
-                continue;
-
-            if(keys[Qt::MouseButton::RightButton] == true)
-            {
-                auto mouseOffset = InputHandler::MouseOffset;
-
-                float deltaX = mouseOffset.x() * 5 * deltaTime;
-                float deltaY = mouseOffset.y() * 5 * deltaTime;
-
-                cameraIt->pitch += deltaY;
-                cameraIt->yaw += deltaX;
-
-                if(cameraIt->pitch > 89.0f)
-                    cameraIt->pitch = 89.0f;
-                if(cameraIt->pitch < -89.0f)
-                    cameraIt->pitch = -89.0f;
-
-                transIt->setRotation(gsl::quat::lookAt(gsl::deg2radf(cameraIt->pitch), gsl::deg2radf(cameraIt->yaw)));
-            }
-
-            inputIt->cameraMovement = true;
-
-            // Increment all
-            ++cameraIt;
-            ++inputIt;
+            transformComponent.position += -up * deltaTime;
         }
+
+        if(keys[Qt::Key_E] == true)
+        {
+            transformComponent.position += up * deltaTime;
+        }
+
+        transformComponent.updated = true;
     }
 }

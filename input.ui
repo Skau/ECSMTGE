@@ -96,7 +96,7 @@
       <item>
        <widget class="QCheckBox" name="checkBox_IsBeingControlled">
         <property name="text">
-         <string>Is being controlled</string>
+         <string>Control while playing</string>
         </property>
        </widget>
       </item>

@@ -33,18 +33,23 @@ public:
     void beginPlay(std::vector<ScriptComponent>& comps);
     void tick(float deltaTime, std::vector<ScriptComponent>& comps);
     void endPlay(std::vector<ScriptComponent>& comps);
-    void runKeyEvent(ScriptComponent &comp, const QString& key);
+    void runKeyEvent(ScriptComponent &comp, const std::vector<QString> &keys);
     void runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos);
+
+    /**
+     * @brief Propagate changes done in C++ back to JS
+     */
+    void updateJSComponents(std::vector<ScriptComponent>& comps);
 
     // EntityManager given by App
     void setEntityManager(std::shared_ptr<EntityManager> entityManager){ this->entityManager = entityManager; }
 
-    static QString checkError(QJSValue value);
+    QString checkError(QJSValue value);
 
     QEntity* getEntityWrapper(unsigned int entity);
 
     // Hardcoded functions provided in all scripts
-    const QString getEntityHelperFunctions() { return QString(addCompFunc + getCompFunc); }
+    const QString getEntityHelperFunctions() { return helperFuncs; }
 
     /**
      * @brief Loads the js file given. Returns true if the file is successfully evaluated and set.
@@ -120,26 +125,8 @@ private:
     ScriptComponent* currentComp;
     QString currentFileName{};
 
-
-    const QString addCompFunc = "function addComponent(name, id = 0)"
-                                "{\n"
-                                "let comp = me._addComponent(name, id);\n"
-                                "if(comp != null)\n"
-                                "{\n"
-                                "accessedComponents.push(comp);\n"
-                                "}\n"
-                                "return comp;\n"
-                                "}\n";
-
-    const QString getCompFunc = "function getComponent(name, id = 0)"
-                                "{\n"
-                                "let comp = me._getComponent(name, id);\n"
-                                "if(comp != null)\n"
-                                "{\n"
-                                "accessedComponents.push(comp);\n"
-                                "}\n"
-                                "return comp;\n"
-                                "}\n";
+    void initializeHelperFuncs();
+    QString helperFuncs;
 };
 
 #endif // SCRIPTSYSTEM_H

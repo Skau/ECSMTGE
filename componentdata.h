@@ -192,7 +192,7 @@ struct CameraComponent : public Component
 
 struct InputComponent : public Component
 {
-    bool isCurrentlyControlled{false};
+    bool controlledWhilePlaying{false};
     bool cameraMovement{false};
 
     InputComponent(unsigned int _eID = 0, bool _valid = false)
@@ -201,7 +201,7 @@ struct InputComponent : public Component
 
     virtual void reset() override
     {
-        isCurrentlyControlled = false;
+        controlledWhilePlaying = false;
     }
     virtual QJsonObject toJSON() override;
     virtual void fromJSON(QJsonObject object) override;

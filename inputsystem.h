@@ -14,8 +14,7 @@ public:
     InputSystem();
 
     static void HandleInput(float deltaTime, std::vector<InputComponent> &inputComponents, std::vector<TransformComponent>& transformComponents);
-    static void HandleCameraInput(float deltaTime, std::vector<InputComponent> &inputComponents, std::vector<TransformComponent>& transformComponents,
-                                  std::vector<CameraComponent>& cameraComponents);
+    static void HandleEditorCameraInput(float deltaTime, TransformComponent &transformComponent, CameraComponent &cameraComponent);
 };
 
 #endif // INPUTSYSTEM_H

@@ -182,16 +182,16 @@ void ScriptWidget::on_button_NewFile_clicked()
             QTextStream stream(&file);
             // Base template for new files. Includes the functions beginPlay, tick, endPlay. keyPressed and onHit.
             stream << "// This will be run once when play button is pressed\n"
-                   << "function beginPlay()\n{\n\tconsole.log(\"Begin play called on entity \" + me.ID);\n}\n\n"
+                   << "function beginPlay()\n{\n\t//console.log(\"Begin play called on entity \" + me.ID);\n}\n\n"
                    << "// This will be run once every frame\n"
-                   << "function tick(deltaTime)\n{\n\tconsole.log(\"Tick called on entity \" + me.ID);\n}\n\n"
+                   << "function tick(deltaTime)\n{\n\t//console.log(\"Tick called on entity \" + me.ID);\n}\n\n"
                    << "// This will be run once when stop button is pressed\n"
-                   << "function endPlay()\n{\n\tconsole.log(\"End play called on entity \" + me.ID);\n}\n\n"
+                   << "function endPlay()\n{\n\t//console.log(\"End play called on entity \" + me.ID);\n}\n\n"
                    << "// This will be run when input is received\n"
-                   << "// NOTE:\n// This requires that the entity has an Input component\n// and isBeingCurrentlyControlled is true\n"
-                   << "function keyPressed(key)\n{\n\tconsole.log(key);\n}\n\n"
+                   << "// NOTE:\n// This requires that the entity has an Input component\n//and control while playing is true\n"
+                   << "function inputPressed(input)\n{\n\tconsole.log(input);\n}\n\n"
                    << "// This will be run when collision with another entity occurs\n"
-                   << "//function onHit(hitInfo)\n//{\n//\tconsole.log(\"Collided with entity ID: \" + hitInfo.ID);\n//}\n";
+                   << "function onHit(hitInfo)\n{\n\tconsole.log(\"Collided with entity ID: \" + hitInfo.ID);\n}\n";
             file.close();
             QFileInfo fileInfo(file.fileName());
             ScriptSystem::get()->load(*comp, fileInfo.filePath().toStdString());

@@ -315,12 +315,17 @@ void App::onPlay()
 
     for(auto camera : mWorld->getEntityManager()->getCameraComponents())
     {
-        auto input = mWorld->getEntityManager()->getComponent<InputComponent>(camera.entityId);
-        input->controlledWhilePlaying = (camera.isEditorCamera) ? false : true;
+        if(auto input = mWorld->getEntityManager()->getComponent<InputComponent>(camera.entityId))
+        {
+            input->controlledWhilePlaying = (camera.isEditorCamera) ? false : true;
+        }
+
         if(!camera.isEditorCamera)
         {
-            auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId);
-            mesh->isVisible = false;
+            if(auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId))
+            {
+                mesh->isVisible = false;
+            }
         }
     }
 
@@ -348,12 +353,17 @@ void App::onStop()
 
     for(auto camera : mWorld->getEntityManager()->getCameraComponents())
     {
-        auto input = mWorld->getEntityManager()->getComponent<InputComponent>(camera.entityId);
-        input->controlledWhilePlaying = (camera.isEditorCamera) ? true : false;
+        if(auto input = mWorld->getEntityManager()->getComponent<InputComponent>(camera.entityId))
+        {
+            input->controlledWhilePlaying = (camera.isEditorCamera) ? true : false;
+        }
+
         if(!camera.isEditorCamera)
         {
-            auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId);
-            mesh->isVisible = true;
+            if(auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId))
+            {
+                mesh->isVisible = true;
+            }
         }
     }
 

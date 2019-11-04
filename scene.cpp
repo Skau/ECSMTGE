@@ -38,7 +38,7 @@ void Scene::initBlankScene()
 
     // Game cam
     camera = entityManager->createEntity("GameCam");
-    auto [gameTrans, gameCam, gameMesh, gameInput] = entityManager->addComponent<TransformComponent, CameraComponent, MeshComponent, InputComponent>(camera);
+    auto [gameTrans, gameCam, gameMesh] = entityManager->addComponent<TransformComponent, CameraComponent, MeshComponent>(camera);
     gameTrans.setPosition(gsl::vec3{0.f, 0.f, 5.f});
     if(auto meshData = ResourceManager::instance()->getMesh("camera"))
     {

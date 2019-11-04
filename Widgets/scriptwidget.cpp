@@ -188,10 +188,10 @@ void ScriptWidget::on_button_NewFile_clicked()
                    << "// This will be run once when stop button is pressed\n"
                    << "function endPlay()\n{\n\t//console.log(\"End play called on entity \" + me.ID);\n}\n\n"
                    << "// This will be run when input is received\n"
-                   << "// NOTE:\n// This requires that the entity has an Input component\n//and control while playing is true\n"
-                   << "function inputPressed(input)\n{\n\tconsole.log(input);\n}\n\n"
+                   << "// NOTE:\n// This requires that the entity has an Input component\n// and control while playing is true\n"
+                   << "function inputPressed(inputs)\n{\n\t//for (let i = 0; i < inputs.length; i++)\n\t//{\n\t\t//console.log(inputs[i]);\n\t//}\n}\n\n"
                    << "// This will be run when collision with another entity occurs\n"
-                   << "function onHit(hitInfo)\n{\n\tconsole.log(\"Collided with entity ID: \" + hitInfo.ID);\n}\n";
+                   << "function onHit(hitInfo)\n{\n\t//console.log(\"Collided with entity ID: \" + hitInfo.ID);\n}\n";
             file.close();
             QFileInfo fileInfo(file.fileName());
             ScriptSystem::get()->load(*comp, fileInfo.filePath().toStdString());

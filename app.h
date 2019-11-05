@@ -74,13 +74,11 @@ private:
     float mTotalDeltaTime;
 
     QElapsedTimer mDeltaTimer;
-
     QElapsedTimer mFPSTimer;
+
     int mFrameCounter = 0;
 
     bool currentlyUpdating = false;
-
-    char padding[3]; // to get rid of annoying alignment boundary issue (and because I'm too lazy to remove the warning)
 
     bool mCurrentlyPlaying = false;
 };

@@ -77,6 +77,8 @@ void App::initTheRest()
     auto texture = ResourceManager::instance()->getTexture("skybox");
     skyboxMaterial->mTextures.push_back({texture->id(), texture->mType});
 
+
+
     mRenderer->mSkyboxMesh = skyboxMesh;
     mRenderer->mSkyboxMaterial = skyboxMaterial;
 
@@ -154,7 +156,6 @@ void App::update()
         return;
     currentlyUpdating = true;
 
-    // Time since last frame in seconds
     mDeltaTime = mDeltaTimer.restart() / 1000.f;
     mRenderer->mTimeSinceStart += mDeltaTime;
 
@@ -315,11 +316,6 @@ void App::onPlay()
 
     for(auto camera : mWorld->getEntityManager()->getCameraComponents())
     {
-        if(auto input = mWorld->getEntityManager()->getComponent<InputComponent>(camera.entityId))
-        {
-            input->controlledWhilePlaying = (camera.isEditorCamera) ? false : true;
-        }
-
         if(!camera.isEditorCamera)
         {
             if(auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId))
@@ -353,11 +349,6 @@ void App::onStop()
 
     for(auto camera : mWorld->getEntityManager()->getCameraComponents())
     {
-        if(auto input = mWorld->getEntityManager()->getComponent<InputComponent>(camera.entityId))
-        {
-            input->controlledWhilePlaying = (camera.isEditorCamera) ? true : false;
-        }
-
         if(!camera.isEditorCamera)
         {
             if(auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId))

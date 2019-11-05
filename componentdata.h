@@ -192,7 +192,7 @@ struct CameraComponent : public Component
 
 struct InputComponent : public Component
 {
-    bool controlledWhilePlaying{false};
+    bool controlledWhilePlaying{true};
     bool cameraMovement{false};
 
     InputComponent(unsigned int _eID = 0, bool _valid = false)

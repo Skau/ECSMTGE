@@ -120,7 +120,6 @@ void InputSystem::HandleEditorCameraInput(float deltaTime, TransformComponent& t
 
     if(keys[Qt::MouseButton::RightButton] == true)
     {
-
         // Rotation
 
         auto mouseOffset = InputHandler::MouseOffset;

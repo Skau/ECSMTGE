@@ -37,11 +37,8 @@ public:
     void init();
 
     void exposeEvent(QExposeEvent *) override;
-    void toggleWireframe(bool value);
 
     void checkForGLerrors();
-
-    void renderGlobalWireframe(const std::vector<VisualObject*>& objects, double deltaTime);
 
     // Should only need renders, materials and transforms
     void render(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
@@ -60,12 +57,14 @@ public:
     void evaluateParams(Material& material);
 
 private:
+    void renderReset();
     void renderGlobalWireframe(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
     void renderDeferred(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
                         const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                         const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
                         const std::vector<PointLightComponent>& pointLights = std::vector<PointLightComponent>());
-    void geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera, ShaderType renderMode = ShaderType::Deferred);
+    void geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
+                      ShaderType renderMode = ShaderType::Deferred, std::optional<Material> overrideMaterial = std::nullopt);
     void deferredLightningPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
                                const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                                const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
@@ -73,6 +72,7 @@ private:
     void directionalLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<DirectionalLightComponent>& dirLights);
     void pointLightPass(const std::vector<TransformComponent>& transforms,const CameraComponent &camera, const std::vector<PointLightComponent>& pointLights);
     void spotLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<SpotLightComponent>& spotLights);
+    void renderPostprocessing();
 signals:
     void initDone();
     void windowUpdated();
@@ -101,8 +101,6 @@ private:
     bool mDepthStencilAttachmentSupported{true};
 
     int mNumberOfVerticesDrawn{0};
-
-   // MainWindow *mMainWindow{nullptr};    //points back to MainWindow to be able to put info in StatusBar
 
     class QOpenGLDebugLogger *mOpenGLDebugLogger{nullptr};
 

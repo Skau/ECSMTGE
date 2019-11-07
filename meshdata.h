@@ -23,6 +23,7 @@ struct Material
              std::vector<std::pair<uint, GLenum>> textures = std::vector<std::pair<uint, GLenum>>{})
         : mShader{shader}, mParameters{parameters}, mTextures{textures}
     {}
+    Material(const Material& material) = default;
 
     void loadShaderWithParameters(std::shared_ptr<Shader> shader)
     {
@@ -104,6 +105,15 @@ struct Material
         returnObject.insert("Textures", textureArray);
 
         return returnObject;
+    }
+
+    Material& operator= (const Material& other) = default;
+    Material& operator= (Material&& other)
+    {
+        mShader = std::move(other.mShader);
+        mParameters = std::move(other.mParameters);
+        mTextures = std::move(other.mTextures);
+        return *this;
     }
 };
 

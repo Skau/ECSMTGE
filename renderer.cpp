@@ -202,123 +202,35 @@ void Renderer::render(std::vector<MeshComponent>& renders, const std::vector<Tra
     {
         mContext->makeCurrent(this);
 
-        if(mGlobalWireframe)
-        {
+        renderReset();
+
+
+        if (mGlobalWireframe)
             renderGlobalWireframe(renders, transforms, camera);
-        }
         else
-        {
             renderDeferred(renders, transforms, camera, dirLights, spotLights, pointLights);
-        }
+
+        renderPostprocessing();
 
         checkForGLerrors();
-
         mContext->swapBuffers(this);
     }
 }
 
 void Renderer::renderGlobalWireframe(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glDisable(GL_CULL_FACE);
 
-    /* Note: For å gjøre dette enda raskere kunne det vært
-     * mulig å gjøre at dataArraysene alltid resizer til nærmeste
-     * tall delelig på 8, også kan man unwrappe denne loopen til å
-     * gjøre 8 parallelle handlinger. Kan mulig gjøre prosessen raskere.
-     */
-    mNumberOfVerticesDrawn = 0;
+    geometryPass(renders, transforms, camera, ShaderType::Forward,
+                 std::make_optional<Material>(ResourceManager::instance()->getShader("singleColor"),
+                                              std::map<std::string, ShaderParamType>{    {"p_color", gsl::vec3{1.f, 1.f, 1.f}}     }));
 
-    auto transIt = transforms.begin();
-    auto renderIt = renders.begin();
-
-    bool transformShortest = transforms.size() < renders.size();
-
-    bool _{true};
-
-    // cause normal while (true) loops are so outdated
-    for ( ;_; )
-    {
-        if (transformShortest)
-        {
-            if (transIt == transforms.end())
-                break;
-        }
-        else
-        {
-            if (renderIt == renders.end())
-                break;
-        }
-
-        // Increment lowest index
-        if (!transIt->valid || transIt->entityId < renderIt->entityId)
-        {
-            ++transIt;
-        }
-        else if (!renderIt->valid || renderIt->entityId < transIt->entityId)
-        {
-            ++renderIt;
-        }
-        else
-        {
-            // They are the same
-            if(!renderIt->isVisible)
-            {
-                // Increment all
-                ++transIt;
-                ++renderIt;
-                continue;
-            }
-
-            // Mesh data available
-            auto meshData = renderIt->meshData;
-            if(!meshData.mVerticesCounts[0])
-            {
-                // Increment all
-                ++transIt;
-                ++renderIt;
-                continue;
-            }
-
-            // Entity can be drawn. Draw.
-            glBindVertexArray(meshData.mVAOs[0]);
-
-            auto shader = ResourceManager::instance()->getShader("white");
-
-            glUseProgram(shader->getProgram());
-
-            auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
-            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
-            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
-            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
-
-            mNumberOfVerticesDrawn += meshData.mVerticesCounts[0];
-
-            if(meshData.mIndicesCounts[0] > 0)
-            {
-                glDrawElements(meshData.mRenderType, static_cast<GLsizei>(meshData.mIndicesCounts[0]), GL_UNSIGNED_INT, nullptr);
-            }
-            else
-            {
-                glDrawArrays(meshData.mRenderType, 0, static_cast<GLsizei>(meshData.mVerticesCounts[0]));
-            }
-
-            // Increment all
-            ++transIt;
-            ++renderIt;
-        }
-    }
-
-    // Skybox
-    renderSkybox(camera);
-
-    // Axis
-    glDisable(GL_DEPTH_TEST);
-    renderAxis(camera);
-    glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_CULL_FACE);
 }
 
-void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera, const std::vector<DirectionalLightComponent>& dirLights, const std::vector<SpotLightComponent>& spotLights, const std::vector<PointLightComponent>& pointLights)
+void Renderer::renderReset()
 {
     // Setup
     glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -326,16 +238,24 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
+    // Clear postprocessor from last frame and bind to it
+    mPostprocessor->clear();
+
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
     glEnable(GL_STENCIL_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
+}
+
+void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms,
+                              const CameraComponent& camera, const std::vector<DirectionalLightComponent>& dirLights,
+                              const std::vector<SpotLightComponent>& spotLights, const std::vector<PointLightComponent>& pointLights)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
     geometryPass(renders, transforms, camera, ShaderType::Deferred);
+    glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
-    checkForGLerrors();
-
-    // Clear postprocessor from last frame and bind to it
-    mPostprocessor->clear();
 
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -347,8 +267,6 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     glBindTexture(GL_TEXTURE_2D, mGNormal);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     deferredLightningPass(transforms, camera, dirLights, spotLights, pointLights);
 
@@ -378,30 +296,10 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     geometryPass(renders, transforms, camera, ShaderType::Forward);
     // Skybox
     renderSkybox(camera);
-
-
-
-    if (mDepthStencilAttachmentSupported)
-    {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, mPostprocessor->input());
-
-        // Outline effect needs stencil buffer
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
-        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
-
-    // Postprocessing
-    glDisable(GL_DEPTH_TEST);
-    if (mDepthStencilAttachmentSupported)
-        drawEditorOutline();
-    mPostprocessor->Render();
-
-    glEnable(GL_DEPTH_TEST);
 }
 
-void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera, ShaderType renderMode)
+void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
+                            ShaderType renderMode, std::optional<Material> overrideMaterial)
 {
     auto transIt = transforms.begin();
     auto renderIt = renders.begin();
@@ -452,23 +350,29 @@ void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vect
                 continue;
             }
 
-            // ** NEEDS TO BE A DEFERRED SHADER ** //
-
-            auto shader = renderIt->mMaterial.mShader;
-            if(!shader)
+            Material material{renderIt->mMaterial};
+            if (!overrideMaterial)
             {
-                shader = renderMode == ShaderType::Deferred ?
-                            ResourceManager::instance()->getShader("phong") :
-                            ResourceManager::instance()->getShader("singleColor");
-                renderIt->mMaterial.loadShaderWithParameters(shader);
+                if(!material.mShader)
+                {
+                    material.mShader = renderMode == ShaderType::Deferred ?
+                                ResourceManager::instance()->getShader("phong") :
+                                ResourceManager::instance()->getShader("singleColor");
+                    renderIt->mMaterial.loadShaderWithParameters(material.mShader);
+                    material = renderIt->mMaterial;
+                }
+
+                if (material.mShader->mRenderingType != renderMode)
+                {
+                    // Increment all
+                    ++transIt;
+                    ++renderIt;
+                    continue;
+                }
             }
-
-            if (shader->mRenderingType != renderMode)
+            else
             {
-                // Increment all
-                ++transIt;
-                ++renderIt;
-                continue;
+                material = overrideMaterial.value();
             }
 
             float distance = distanceFromCamera(camera, *transIt);
@@ -497,24 +401,24 @@ void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vect
 
             glBindVertexArray(meshData.mVAOs[index]);
 
-            glUseProgram(shader->getProgram());
+            glUseProgram(material.mShader->getProgram());
 
-            evaluateParams(renderIt->mMaterial);
+            evaluateParams(material);
 
-            if(renderIt->mMaterial.mTextures.size())
+            if(material.mTextures.size())
             {
-                for(unsigned i = 0; i < renderIt->mMaterial.mTextures.size(); ++i)
+                for(unsigned i = 0; i < material.mTextures.size(); ++i)
                 {
                     glActiveTexture(GL_TEXTURE0 + i);
-                    glBindTexture(renderIt->mMaterial.mTextures[i].second, renderIt->mMaterial.mTextures[i].first);
-                    glUniform1i(glGetUniformLocation(shader->getProgram(), "textureSampler"), static_cast<int>(renderIt->mMaterial.mTextures[i].first));
+                    glBindTexture(material.mTextures[i].second, material.mTextures[i].first);
+                    glUniform1i(glGetUniformLocation(material.mShader->getProgram(), "textureSampler"), static_cast<int>(material.mTextures[i].first));
                 }
             }
 
             auto mMatrix = gsl::mat4::modelMatrix(transIt->position, transIt->rotation, transIt->scale);
-            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
-            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
-            glUniformMatrix4fv(glGetUniformLocation(shader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
+            glUniformMatrix4fv(glGetUniformLocation(material.mShader->getProgram(), "mMatrix"), 1, true, mMatrix.constData());
+            glUniformMatrix4fv(glGetUniformLocation(material.mShader->getProgram(), "vMatrix"), 1, true, camera.viewMatrix.constData());
+            glUniformMatrix4fv(glGetUniformLocation(material.mShader->getProgram(), "pMatrix"), 1, true, camera.projectionMatrix.constData());
 
             // If selected in editor, change it's stencil value
             if (currentlySelectedEID == renderIt->entityId)
@@ -541,6 +445,7 @@ void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vect
             ++renderIt;
         }
     }
+    checkForGLerrors();
 }
 
 void Renderer::deferredLightningPass(const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
@@ -749,6 +654,28 @@ void Renderer::spotLightPass(const std::vector<TransformComponent> &transforms, 
             ++lightIt;
         }
     }
+}
+
+void Renderer::renderPostprocessing()
+{
+    if (mDepthStencilAttachmentSupported)
+    {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, mPostprocessor->input());
+
+        // Outline effect needs stencil buffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
+        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
+
+    // Postprocessing
+    glDisable(GL_DEPTH_TEST);
+    if (mDepthStencilAttachmentSupported)
+        drawEditorOutline();
+    mPostprocessor->Render();
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 float Renderer::distanceFromCamera(const CameraComponent& camera, const TransformComponent& transform)
@@ -1033,24 +960,6 @@ void Renderer::exposeEvent(QExposeEvent *)
     glViewport(0, 0, static_cast<GLint>(width() * retinaScale), static_cast<GLint>(height() * retinaScale));
     resizeGBuffer();
     windowUpdated();
-}
-
-//Simple way to turn on/off wireframe mode
-//Not totally accurate, but draws the objects with
-//lines instead of filled polygons
-void Renderer::toggleWireframe(bool value)
-{
-    mGlobalWireframe = value;
-    if (mGlobalWireframe)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glDisable(GL_CULL_FACE);
-    }
-    else
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glEnable(GL_CULL_FACE);
-    }
 }
 
 /// Uses QOpenGLDebugLogger if this is present

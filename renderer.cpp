@@ -355,8 +355,6 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
-    // ** Forward shading ** //
-
     // copy content of geometry's depth buffer to default framebuffer's depth buffer
     glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
 
@@ -364,16 +362,13 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mPostprocessor->input());
     glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 
-    if (mDepthStencilAttachmentSupported)
-    {
-        // Outline effect needs stencil buffer
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
-        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
-    }
-
     glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
-    // Draw foward here
+
+
+    // ** Forward shading ** //
+    /// Draw foward here
+
     // Axis
     // Need to disable depth testing, or else the axis will sometimes appear behind other meshes
     glDisable(GL_DEPTH_TEST);
@@ -383,6 +378,19 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     geometryPass(renders, transforms, camera, ShaderType::Forward);
     // Skybox
     renderSkybox(camera);
+
+
+
+    if (mDepthStencilAttachmentSupported)
+    {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, mPostprocessor->input());
+
+        // Outline effect needs stencil buffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
+        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
     // Postprocessing
     glDisable(GL_DEPTH_TEST);

@@ -58,3 +58,4 @@ CMakeLists.txt.user*
 .DS_Store
 
 /Assets/*
+/docs/*

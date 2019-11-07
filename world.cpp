@@ -27,6 +27,7 @@ World::World()
 
     // Other..
     ResourceManager::instance()->addShader("mousepicking",      std::make_shared<Shader>("mousepicking.vert", "mousepicking.frag", ShaderType::WeirdStuff));
+    ResourceManager::instance()->addShader("particle",          std::make_shared<Shader>("particle.vert", "particle.frag", ShaderType::WeirdStuff));
 
     // This function is troublesome...
     // ResourceManager::instance()->LoadAssetFiles();

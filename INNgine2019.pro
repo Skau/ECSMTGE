@@ -102,6 +102,7 @@ HEADERS += \
     Renderables/trianglesurface.h \
     objecttreewidget.h \
     octree.h \
+    particlesystem.h \
     physicssystem.h \
     postprocessor.h \
     qentity.h \
@@ -157,6 +158,7 @@ SOURCES += \
     Renderables/skybox.cpp \
     Renderables/triangle.cpp \
     objecttreewidget.cpp \
+    particlesystem.cpp \
     physicssystem.cpp \
     postprocessor.cpp \
     qentity.cpp \

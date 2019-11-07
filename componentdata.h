@@ -26,6 +26,7 @@ enum class ComponentType
     LightSpot,
     Script,
     Collider,
+    Particle,
     Other
 };
 
@@ -417,6 +418,15 @@ struct ColliderComponent : public Component
 
     virtual QJsonObject toJSON() override;
     virtual void fromJSON(QJsonObject object) override;
+};
+
+struct ParticleComponent : public Component
+{
+
+
+    ParticleComponent(unsigned int _eID = 0, bool _valid = false)
+        : Component{_eID, _valid, ComponentType::Particle}
+    {}
 };
 
 // .. etc

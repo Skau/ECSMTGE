@@ -44,8 +44,6 @@ void ResourceManager::addShader(const std::string &name, std::shared_ptr<Shader>
     {
         shader->mName = name;
         mShaders[name] = shader;
-
-        //qDebug() << "ResourceManager: Added shader " << QString::fromStdString(name) << " (id: " << shader->getProgram() << ")";
     }
 }
 
@@ -360,7 +358,8 @@ std::vector<std::string> ResourceManager::getAllShaderNames()
 
     for(auto& shader : mShaders)
     {
-        returnStrings.push_back(shader.first);
+        if(shader.second->mRenderingType == ShaderType::Forward || shader.second->mRenderingType == ShaderType::Deferred)
+            returnStrings.push_back(shader.first);
     }
 
     return returnStrings;

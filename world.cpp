@@ -5,19 +5,15 @@
 World::World()
 {
     // Forward
-    ResourceManager::instance()->addShader("color",             std::make_shared<Shader>("colorshader", ShaderType::Forward));
-    ResourceManager::instance()->addShader("texture",           std::make_shared<Shader>("textureshader", ShaderType::Forward));
-    ResourceManager::instance()->addShader("phong",             std::make_shared<Shader>("phongshader", ShaderType::Forward));
-    ResourceManager::instance()->addShader("skybox",            std::make_shared<Shader>("skybox", ShaderType::Forward));
-    ResourceManager::instance()->addShader("white",             std::make_shared<Shader>("white", ShaderType::Forward));
-    ResourceManager::instance()->addShader("axis",              std::make_shared<Shader>("axisshader.vert", "colorshader.frag", ShaderType::Forward));
     ResourceManager::instance()->addShader("singleColor",       std::make_shared<Shader>("white.vert", "singleColor.frag", ShaderType::Forward));
 
     // Deferred
-    ResourceManager::instance()->addShader("defaultDeferred",   std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag", ShaderType::Deferred));
-    ResourceManager::instance()->addShader("directionalLight",  std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/directionallight.frag", ShaderType::Deferred));
-    ResourceManager::instance()->addShader("pointLight",        std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/pointlight.frag", ShaderType::Deferred));
-    ResourceManager::instance()->addShader("spotLight",         std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/spotlight.frag", ShaderType::Deferred));
+    ResourceManager::instance()->addShader("phong",             std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag", ShaderType::Deferred));
+
+    // Lights for deferred
+    ResourceManager::instance()->addShader("directionalLight",  std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/directionallight.frag", ShaderType::Light));
+    ResourceManager::instance()->addShader("pointLight",        std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/pointlight.frag", ShaderType::Light));
+    ResourceManager::instance()->addShader("spotLight",         std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/spotlight.frag", ShaderType::Light));
 
     // Post prosessing
     ResourceManager::instance()->addShader("passthrough",       std::make_shared<Shader>("pass.vert", "pass.frag", ShaderType::PostProcessing));
@@ -28,6 +24,9 @@ World::World()
     // Other..
     ResourceManager::instance()->addShader("mousepicking",      std::make_shared<Shader>("mousepicking.vert", "mousepicking.frag", ShaderType::WeirdStuff));
     ResourceManager::instance()->addShader("particle",          std::make_shared<Shader>("particle.vert", "particle.frag", ShaderType::WeirdStuff));
+    ResourceManager::instance()->addShader("axis",              std::make_shared<Shader>("axisshader.vert", "colorshader.frag", ShaderType::WeirdStuff));
+    ResourceManager::instance()->addShader("skybox",            std::make_shared<Shader>("skybox", ShaderType::WeirdStuff));
+    
 
     // This function is troublesome...
     // ResourceManager::instance()->LoadAssetFiles();
@@ -48,6 +47,7 @@ World::World()
     ResourceManager::instance()->loadWav("stereo", std::string{gsl::soundsFilePath}.append("stereo.wav"));
 
     ResourceManager::instance()->addTexture("skybox", "skyboxSpaceBoring.bmp", GL_TEXTURE_CUBE_MAP);
+    ResourceManager::instance()->addTexture("cow", "cow.bmp", GL_TEXTURE_2D);
 
     entityManager = std::make_shared<EntityManager>();
 }

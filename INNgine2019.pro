@@ -12,6 +12,7 @@ INCLUDEPATH +=  ./GSL
 INCLUDEPATH += ./include
 
 mac {
+    QMAKE_CXXFLAGS += --target=x86_64-apple-macosx10.14
     LIBS += -framework OpenAL
 }
 

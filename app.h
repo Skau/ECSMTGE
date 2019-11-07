@@ -50,6 +50,10 @@ private slots:
     void onPlay();
     void onStop();
 
+    void newScene();
+    void loadScene(const std::string& path);
+    void saveScene(const std::string& path);
+
 private:
 
     void calculateFrames();

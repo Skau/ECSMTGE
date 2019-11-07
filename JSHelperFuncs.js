@@ -11,9 +11,10 @@ function addComponent(name, id = 0)
 
 function getComponent(name, id = 0)
 {
-    let comp = me._getComponent(name, id);
+    const comp = me._getComponent(name, id);
     if(comp != null){
         accessedComponents.push(comp);
+        return comp;
     }
-    return comp;
+    return null;
 }

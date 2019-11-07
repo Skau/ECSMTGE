@@ -211,11 +211,6 @@ void App::update()
             }
         }
     }
-
-
-    // Update JS comps
-    ScriptSystem::get()->updateJSComponents(scripts);
-
     // Physics:
     /* Note: Physics calculation should be happening on a separate thread
      * and instead of sending references to the lists we should take copies
@@ -290,6 +285,9 @@ void App::update()
             }
         }
     }
+
+    // Update JS comps
+    ScriptSystem::get()->updateJSComponents(scripts);
 
     currentlyUpdating = false;
 }

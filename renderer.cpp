@@ -458,8 +458,8 @@ void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vect
             if(!shader)
             {
                 shader = renderMode == ShaderType::Deferred ?
-                            ResourceManager::instance()->getShader("defaultDeferred") :
-                            ResourceManager::instance()->getShader("color");
+                            ResourceManager::instance()->getShader("phong") :
+                            ResourceManager::instance()->getShader("singleColor");
                 renderIt->mMaterial.loadShaderWithParameters(shader);
             }
 

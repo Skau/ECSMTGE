@@ -246,11 +246,11 @@ std::shared_ptr<MeshData> ResourceManager::initializeMeshData(const std::string&
     glEnableVertexAttribArray(0);
 
     // 2nd attribute buffer : colors
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,  sizeof(Vertex),  (GLvoid*)(3 * sizeof(GLfloat)) );
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,  sizeof(Vertex),  (GLvoid*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
 
     // 3rd attribute buffer : uvs
-    glVertexAttribPointer(2, 2,  GL_FLOAT, GL_FALSE, sizeof( Vertex ), (GLvoid*)( 6 * sizeof( GLfloat ) ));
+    glVertexAttribPointer(2, 2,  GL_FLOAT, GL_FALSE, sizeof( Vertex ), (GLvoid*)(6 * sizeof(GLfloat )));
     glEnableVertexAttribArray(2);
 
     meshData.mVerticesCounts[0] = static_cast<unsigned>(data.first.size());

@@ -32,6 +32,7 @@ void ScriptSystem::tick(float deltaTime, std::vector<ScriptComponent>& comps)
     {
         if(comp.filePath.size())
         {
+            mDeltaTime = deltaTime;
             QJSValueList list;
             list << deltaTime;
             call(comp, "tick", list);
@@ -65,7 +66,7 @@ void ScriptSystem::runKeyEvent(ScriptComponent& comp, const std::vector<QString>
     call(comp, "inputPressed", list);
 }
 
-void ScriptSystem::runHitEvents(std::vector<ScriptComponent> &comps, std::vector<HitInfo> hitInfos)
+void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos)
 {
     if(!comps.size() || !hitInfos.size())
         return;
@@ -94,7 +95,7 @@ void ScriptSystem::runHitEvents(std::vector<ScriptComponent> &comps, std::vector
     }
 }
 
-void ScriptSystem::updateJSComponents(std::vector<ScriptComponent> &comps)
+void ScriptSystem::updateJSComponents(std::vector<ScriptComponent>& comps)
 {
     for(auto& comp : comps)
     {
@@ -119,7 +120,7 @@ QEntity* ScriptSystem::getEntityWrapper(unsigned int entity)
     return new QEntity(entity, currentComp->engine, entityManager.get(), this);
 }
 
-bool ScriptSystem::load(ScriptComponent &comp, const std::string &file)
+bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)
 {
     currentComp = &comp;
 
@@ -162,7 +163,7 @@ bool ScriptSystem::load(ScriptComponent &comp, const std::string &file)
     return true;
 }
 
-void ScriptSystem::call(ScriptComponent& comp, const std::string &function)
+void ScriptSystem::call(ScriptComponent& comp, const std::string& function)
 {
     if(!comp.filePath.size())
         return;
@@ -186,37 +187,12 @@ void ScriptSystem::call(ScriptComponent& comp, const std::string &function)
 
     value.call();
 
-    updateComponents();
+    updateCPPComponents();
     currentComp = nullptr;
     return;
 }
 
-QJSValue ScriptSystem::call(const std::string &function)
-{
-    if(currentComp && currentComp->JSEntity)
-    {
-        QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), currentFileName);
-        if(value.isError())
-        {
-            checkError(value);
-            currentComp->engine->globalObject().setProperty("accessedComponents", currentComp->engine->newArray());
-            return false;
-        }
-
-        auto returnValue = value.call();
-
-        if(returnValue.isError())
-        {
-            checkError(value);
-            currentComp->engine->globalObject().setProperty("accessedComponents", currentComp->engine->newArray());
-            return false;
-        }
-        return returnValue;
-    }
-    return false;
-}
-
-void ScriptSystem::call(ScriptComponent &comp, const std::string &function, QJSValueList params)
+void ScriptSystem::call(ScriptComponent &comp, const std::string& function, QJSValueList params)
 {
     if(!comp.filePath.size())
         return;
@@ -241,12 +217,37 @@ void ScriptSystem::call(ScriptComponent &comp, const std::string &function, QJSV
 
     value.call(params);
 
-    updateComponents();
+    updateCPPComponents();
     currentComp = nullptr;
     return;
 }
 
-QJSValue ScriptSystem::call(const std::string &function, QJSValueList params)
+QJSValue ScriptSystem::call(const std::string& function)
+{
+    if(currentComp && currentComp->JSEntity)
+    {
+        QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), currentFileName);
+        if(value.isError())
+        {
+            checkError(value);
+            currentComp->engine->globalObject().setProperty("accessedComponents", currentComp->engine->newArray());
+            return false;
+        }
+
+        auto returnValue = value.call();
+
+        if(returnValue.isError())
+        {
+            checkError(value);
+            currentComp->engine->globalObject().setProperty("accessedComponents", currentComp->engine->newArray());
+            return false;
+        }
+        return returnValue;
+    }
+    return false;
+}
+
+QJSValue ScriptSystem::call(const std::string& function, QJSValueList params)
 {
     if(currentComp && currentComp->JSEntity)
     {
@@ -310,12 +311,11 @@ bool ScriptSystem::execute(ScriptComponent& comp, QString function, QString cont
         return false;
     }
 
-    updateComponents();
+    updateCPPComponents();
     comp.engine->globalObject().setProperty("accessedComponents", comp.engine->newArray());
     currentComp = nullptr;
     return true;
 }
-
 
 QObject* ScriptSystem::spawnCube()
 {
@@ -447,7 +447,7 @@ QObject* ScriptSystem::getEntity(unsigned int id)
     return getEntityWrapper(id);
 }
 
-void ScriptSystem::updateComponents()
+void ScriptSystem::updateCPPComponents()
 {
     if(!currentComp)
         return;
@@ -461,7 +461,7 @@ void ScriptSystem::updateComponents()
         {
             for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
             {
-                objects.push_back(QJsonValue::fromVariant( currentComp->engine->globalObject().property("accessedComponents").property(i).toVariant()).toObject());
+                objects.push_back(QJsonValue::fromVariant(currentComp->engine->globalObject().property("accessedComponents").property(i).toVariant()).toObject());
             }
 
             if(!objects.size())
@@ -554,7 +554,6 @@ void ScriptSystem::updateComponents()
     }
 }
 
-
 void ScriptSystem::updateJSComponents(ScriptComponent& comp)
 {
     if(!comp.filePath.size())
@@ -568,11 +567,12 @@ void ScriptSystem::updateJSComponents(ScriptComponent& comp)
         {
             for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
             {
-                auto object = QJsonValue::fromVariant(comp.engine->globalObject().property("accessedComponents").property(i).toVariant()).toObject();
+                auto object = QJsonValue::fromVariant(componentArray.property(i).toVariant()).toObject();
 
                 if(object.isEmpty())
                     continue;
 
+                object.remove("ID");
                 // Get component that matches the type
                Component* component;
                switch (static_cast<ComponentType>(object["ComponentType"].toInt()))
@@ -667,6 +667,3 @@ void ScriptSystem::initializeHelperFuncs()
     helperFuncs = file.readAll();
     file.close();
 }
-
-
-

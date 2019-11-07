@@ -82,6 +82,7 @@ public:
      */
     bool execute(ScriptComponent& comp, QString function, QString contents, QString fileName);
 
+    Q_PROPERTY(float deltaTime MEMBER mDeltaTime)
 
 public slots:
     /**
@@ -109,7 +110,7 @@ public slots:
 
     /**
      * @brief Returns an entity with the given ID.
-     * Example: let entity = getEntity(2);
+     * Example: let entity = engine.getEntity(2);
      */
     QObject* getEntity(unsigned int id);
 
@@ -118,7 +119,7 @@ private:
 
     std::shared_ptr<EntityManager> entityManager;
 
-    void updateComponents();
+    void updateCPPComponents();
     void updateJSComponents(ScriptComponent& comp);
 
     // Cached
@@ -127,6 +128,8 @@ private:
 
     void initializeHelperFuncs();
     QString helperFuncs;
+
+    float mDeltaTime{0};
 };
 
 #endif // SCRIPTSYSTEM_H

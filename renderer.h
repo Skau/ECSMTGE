@@ -65,7 +65,7 @@ private:
                         const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                         const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
                         const std::vector<PointLightComponent>& pointLights = std::vector<PointLightComponent>());
-    void deferredGeometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera);
+    void geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera, ShaderType renderMode = ShaderType::Deferred);
     void deferredLightningPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
                                const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                                const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),

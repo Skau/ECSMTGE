@@ -5,13 +5,10 @@
 World::World()
 {
     // Forward
-    ResourceManager::instance()->addShader("color",             std::make_shared<Shader>("colorshader", ShaderType::Forward));
-    ResourceManager::instance()->addShader("texture",           std::make_shared<Shader>("textureshader", ShaderType::Forward));
-    ResourceManager::instance()->addShader("phong",             std::make_shared<Shader>("phongshader", ShaderType::Forward));
-    ResourceManager::instance()->addShader("white",             std::make_shared<Shader>("white", ShaderType::Forward));
+    ResourceManager::instance()->addShader("singleColor",       std::make_shared<Shader>("white.vert", "singleColor.frag", ShaderType::Forward));
 
     // Deferred
-    ResourceManager::instance()->addShader("defaultDeferred",   std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag", ShaderType::Deferred));
+    ResourceManager::instance()->addShader("phong",             std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag", ShaderType::Deferred));
 
     // Lights for deferred
     ResourceManager::instance()->addShader("directionalLight",  std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/directionallight.frag", ShaderType::Light));
@@ -21,7 +18,7 @@ World::World()
     // Post prosessing
     ResourceManager::instance()->addShader("passthrough",       std::make_shared<Shader>("pass.vert", "pass.frag", ShaderType::PostProcessing));
     ResourceManager::instance()->addShader("blur",              std::make_shared<Shader>("pass.vert", "blur.frag", ShaderType::PostProcessing));
-    ResourceManager::instance()->addShader("singleColor",       std::make_shared<Shader>("pass.vert", "singleColor.frag", ShaderType::PostProcessing));
+    ResourceManager::instance()->addShader("ui_singleColor",    std::make_shared<Shader>("pass.vert", "singleColor.frag", ShaderType::PostProcessing));
     ResourceManager::instance()->addShader("blend",             std::make_shared<Shader>("pass.vert", "blend.frag", ShaderType::PostProcessing));
 
     // Other..

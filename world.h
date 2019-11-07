@@ -29,13 +29,11 @@ public:
 
     std::optional<std::string> sceneFilePath() const;
 
-public slots:
     void saveScene(const std::string& path);
-    void loadScene(const std::string& path);
-    void newScene();
 
-signals:
-    void sceneLoaded();
+    void loadScene(const std::string& path);
+
+    void newScene();
 
 private:
     std::unique_ptr<Scene> mCurrentScene;

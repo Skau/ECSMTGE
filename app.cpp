@@ -40,10 +40,9 @@ App::App()
 void App::initTheRest()
 {
     mWorld = std::make_unique<World>();
-    connect(mMainWindow.get(), &MainWindow::newScene, mWorld.get(), &World::newScene);
-    connect(mMainWindow.get(), &MainWindow::saveScene, mWorld.get(), &World::saveScene);
-    connect(mMainWindow.get(), &MainWindow::loadScene, mWorld.get(), &World::loadScene);
-    connect(mWorld.get(), &World::sceneLoaded, this, &App::updatePerspective);
+    connect(mMainWindow.get(), &MainWindow::newScene, this, &App::newScene);
+    connect(mMainWindow.get(), &MainWindow::saveScene, this, &App::saveScene);
+    connect(mMainWindow.get(), &MainWindow::loadScene, this, &App::loadScene);
     mMainWindow->setEntityManager(mWorld->getEntityManager());
 
     // Temp solution, this is just for script system experimentation
@@ -76,8 +75,6 @@ void App::initTheRest()
     skyboxMaterial->mShader = skyShader;
     auto texture = ResourceManager::instance()->getTexture("skybox");
     skyboxMaterial->mTextures.push_back({texture->id(), texture->mType});
-
-
 
     mRenderer->mSkyboxMesh = skyboxMesh;
     mRenderer->mSkyboxMaterial = skyboxMaterial;
@@ -162,13 +159,13 @@ void App::update()
     calculateFrames();
 
     // Get all necessary components that are reused for systems
-    auto& inputs = mWorld->getEntityManager()->getInputComponents();
-    auto& transforms = mWorld->getEntityManager()->getTransformComponents();
-    auto& cameras = mWorld->getEntityManager()->getCameraComponents();
-    auto& physics = mWorld->getEntityManager()->getPhysicsComponents();
-    auto& colliders = mWorld->getEntityManager()->getColliderComponents();
-    auto& sounds = mWorld->getEntityManager()->getSoundComponents();
-    auto& scripts = mWorld->getEntityManager()->getScriptComponents();
+    auto& cameras       = mWorld->getEntityManager()->getCameraComponents();
+    auto& colliders     = mWorld->getEntityManager()->getColliderComponents();
+    auto& inputs        = mWorld->getEntityManager()->getInputComponents();
+    auto& physics       = mWorld->getEntityManager()->getPhysicsComponents();
+    auto& sounds        = mWorld->getEntityManager()->getSoundComponents();
+    auto& scripts       = mWorld->getEntityManager()->getScriptComponents();
+    auto& transforms    = mWorld->getEntityManager()->getTransformComponents();
 
 
     // Tick scripts if playing
@@ -420,4 +417,22 @@ void App::saveSession()
 
 
     file.write(QJsonDocument{mainObject}.toJson());
+}
+
+void App::newScene()
+{
+    mWorld->newScene();
+    updatePerspective();
+}
+
+void App::loadScene(const std::string& path)
+{
+    mWorld->loadScene(path);
+    updatePerspective();
+}
+
+void App::saveScene(const std::string& path)
+{
+    mWorld->saveScene(path);
+    updatePerspective();
 }

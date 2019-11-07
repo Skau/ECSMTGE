@@ -89,8 +89,6 @@ void World::loadScene(const std::string& path)
         if (auto obj = mCurrentScene.release())
             delete obj;
     }
-    else
-        sceneLoaded();
 }
 
 void World::newScene()

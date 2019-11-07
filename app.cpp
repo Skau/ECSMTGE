@@ -415,7 +415,6 @@ void App::saveSession()
         if (auto path = mWorld->sceneFilePath())
             mainObject["DefaultMap"] = QString::fromStdString(path.value());
 
-
     file.write(QJsonDocument{mainObject}.toJson());
 }
 

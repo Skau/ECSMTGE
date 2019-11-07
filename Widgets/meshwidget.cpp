@@ -474,7 +474,7 @@ void MeshWidget::on_pushButton_ChangeTextureDropdown_clicked()
     if(auto render = getRenderComponent())
     {
         auto texture = ResourceManager::instance()->getTexture(name.toStdString());
-        render->mMaterial.mTextures[0] = {texture->id(), texture->mType};
+        render->mMaterial.mTextures.push_back({texture->id(), texture->mType});
     }
 }
 

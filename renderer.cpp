@@ -965,6 +965,14 @@ void Renderer::exposeEvent(QExposeEvent *)
     windowUpdated();
 }
 
+//Simple way to turn on/off wireframe mode
+//Not totally accurate, but draws the objects with
+//lines instead of filled polygons
+void Renderer::toggleWireframe(bool value)
+{
+    mGlobalWireframe = value;
+}
+
 /// Uses QOpenGLDebugLogger if this is present
 /// Reverts to glGetError() if not
 void Renderer::checkForGLerrors()

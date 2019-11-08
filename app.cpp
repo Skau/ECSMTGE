@@ -21,7 +21,7 @@ App::App()
     mMainWindow = std::make_unique<MainWindow>();
     mRenderer = mMainWindow->getRenderer();
 
-    // connect(mMainWindow.get(), &MainWindow::toggleWireframe, mRenderer, &Renderer::toggleWireframe);
+    connect(mMainWindow.get(), &MainWindow::toggleWireframe, mRenderer, &Renderer::toggleWireframe);
     connect(mMainWindow.get(), &MainWindow::shutUp, this, &App::toggleMute);
     connect(mMainWindow.get(), &MainWindow::play, this, &App::onPlay);
     connect(mMainWindow.get(), &MainWindow::stop, this, &App::onStop);

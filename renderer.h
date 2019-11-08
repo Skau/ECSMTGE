@@ -38,6 +38,7 @@ public:
     void init();
 
     void exposeEvent(QExposeEvent *) override;
+    void toggleWireframe(bool value);
 
     void checkForGLerrors();
 

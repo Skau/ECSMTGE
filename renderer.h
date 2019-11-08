@@ -15,6 +15,7 @@ class QOpenGLContext;
 class Shader;
 class Light;
 class QTime;
+class ParticleSystem;
 
 /// This inherits from QWindow to get access to the Qt functionality and
 /// OpenGL surface.
@@ -44,7 +45,8 @@ public:
     void render(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
                         const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                         const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
-                        const std::vector<PointLightComponent>& pointLights = std::vector<PointLightComponent>());
+                        const std::vector<PointLightComponent>& pointLights = std::vector<PointLightComponent>(),
+                        const std::vector<ParticleComponent>& particles = std::vector<ParticleComponent>{});
 
     /** Renders a picture to the screen and uses the pixel locations to figure out what objects the mouse i hovering over.
      * The process is a accurate, but slow process and therefore should never be used in runtime; only in the editor.
@@ -81,6 +83,8 @@ private:
     QOpenGLContext *mContext{nullptr};
 
     float mTimeSinceStart{0};
+
+    std::unique_ptr<ParticleSystem> mParticleSystem;
 
     std::unique_ptr<Postprocessor> mPostprocessor;
     std::unique_ptr<Postprocessor> mOutlineeffect;

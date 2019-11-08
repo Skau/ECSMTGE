@@ -565,3 +565,18 @@ void ColliderComponent::fromJSON(QJsonObject object)
             break;
     }
 }
+
+void ParticleComponent::reset()
+{
+
+}
+
+QJsonObject ParticleComponent::toJSON()
+{
+
+}
+
+void ParticleComponent::fromJSON(QJsonObject object)
+{
+
+}

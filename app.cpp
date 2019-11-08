@@ -21,7 +21,7 @@ App::App()
     mMainWindow = std::make_unique<MainWindow>();
     mRenderer = mMainWindow->getRenderer();
 
-    connect(mMainWindow.get(), &MainWindow::toggleWireframe, mRenderer, &Renderer::toggleWireframe);
+    // connect(mMainWindow.get(), &MainWindow::toggleWireframe, mRenderer, &Renderer::toggleWireframe);
     connect(mMainWindow.get(), &MainWindow::shutUp, this, &App::toggleMute);
     connect(mMainWindow.get(), &MainWindow::play, this, &App::onPlay);
     connect(mMainWindow.get(), &MainWindow::stop, this, &App::onStop);
@@ -263,9 +263,10 @@ void App::update()
             {
                 auto& renders = mWorld->getEntityManager()->getMeshComponents();
                 mRenderer->render(renders, transforms, camera,
-                                          mWorld->getEntityManager()->getDirectionalLightComponents(),
-                                          mWorld->getEntityManager()->getSpotLightComponents(),
-                                          mWorld->getEntityManager()->getPointLightComponents());
+                                  mWorld->getEntityManager()->getDirectionalLightComponents(),
+                                  mWorld->getEntityManager()->getSpotLightComponents(),
+                                  mWorld->getEntityManager()->getPointLightComponents(),
+                                  mWorld->getEntityManager()->getParticleComponents());
                 break;
             }
         }
@@ -275,9 +276,10 @@ void App::update()
             {
                 auto& renders = mWorld->getEntityManager()->getMeshComponents();
                 mRenderer->render(renders, transforms, camera,
-                                          mWorld->getEntityManager()->getDirectionalLightComponents(),
-                                          mWorld->getEntityManager()->getSpotLightComponents(),
-                                          mWorld->getEntityManager()->getPointLightComponents());
+                                  mWorld->getEntityManager()->getDirectionalLightComponents(),
+                                  mWorld->getEntityManager()->getSpotLightComponents(),
+                                  mWorld->getEntityManager()->getPointLightComponents(),
+                                  mWorld->getEntityManager()->getParticleComponents());
                 break;
             }
         }

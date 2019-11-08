@@ -118,6 +118,7 @@ class EntityManager : public QObject
     REGISTER(PointLightComponent)
     REGISTER(ScriptComponent)
     REGISTER(ColliderComponent)
+    REGISTER(ParticleComponent)
     REGISTER(EntityInfo)
 
 private:
@@ -297,6 +298,12 @@ public:
         case ComponentType::Collider:
         {
             auto [component] = addComponent<ColliderComponent>(entity);
+            returnComp = &component;
+            break;
+        }
+        case ComponentType::Particle:
+        {
+            auto [component] = addComponent<ParticleComponent>(entity);
             returnComp = &component;
             break;
         }

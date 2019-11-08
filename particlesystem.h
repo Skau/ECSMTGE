@@ -9,7 +9,9 @@ class ParticleSystem : QOpenGLFunctions_4_1_Core
 public:
     ParticleSystem();
 
-    void emitParticles(const CameraComponent &camera, ParticleComponent& particles, float time = 0.f);
+    void updateParticles(const CameraComponent& camera, const std::vector<TransformComponent>& transforms,
+                         const std::vector<ParticleComponent>& particles, float time = 0.f);
+    void updateParticle(const CameraComponent &camera, const TransformComponent& transform, const ParticleComponent& particles, float time = 0.f);
 
     ~ParticleSystem();
 private:

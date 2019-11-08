@@ -422,11 +422,13 @@ struct ColliderComponent : public Component
 
 struct ParticleComponent : public Component
 {
-
-
     ParticleComponent(unsigned int _eID = 0, bool _valid = false)
         : Component{_eID, _valid, ComponentType::Particle}
     {}
+
+    void reset() override;
+    QJsonObject toJSON() override;
+    void fromJSON(QJsonObject object) override;
 };
 
 // .. etc

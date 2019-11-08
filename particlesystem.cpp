@@ -21,12 +21,56 @@ ParticleSystem::ParticleSystem()
     glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);
-
-    particleShader = ResourceManager::instance()->getShader("particle");
-    assert(particleShader);
 }
 
-void ParticleSystem::emitParticles(const CameraComponent &camera, ParticleComponent &particles, float time)
+void ParticleSystem::updateParticles(const CameraComponent &camera, const std::vector<TransformComponent> &transforms, const std::vector<ParticleComponent> &particles, float time)
+{
+    auto transIt = transforms.begin();
+    auto partIt = particles.begin();
+
+    bool particlesShortest = particles.size() < transforms.size();
+
+    if (!particleShader)
+    {
+        particleShader = ResourceManager::instance()->getShader("particle");
+        assert(particleShader);
+    }
+
+    // cause normal while (true) loops are so outdated
+    while (static_cast<bool>("Everything is awesome!"))
+    {
+        if (particlesShortest)
+        {
+            if (partIt == particles.end())
+                break;
+        }
+        else
+        {
+            if (transIt == transforms.end())
+                break;
+        }
+
+        // Increment lowest index
+        if (!transIt->valid || transIt->entityId < partIt->entityId)
+        {
+            ++transIt;
+        }
+        else if (!partIt->valid || partIt->entityId < transIt->entityId)
+        {
+            ++partIt;
+        }
+        else
+        {
+            updateParticle(camera, *transIt, *partIt, time);
+
+            // Increment all
+            ++transIt;
+            ++partIt;
+        }
+    }
+}
+
+void ParticleSystem::updateParticle(const CameraComponent &camera, const TransformComponent &transform, const ParticleComponent &particles, float time)
 {
     particleShader->use();
 

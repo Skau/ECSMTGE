@@ -7,6 +7,7 @@
 #include "inputhandler.h"
 #include "resourcemanager.h"
 #include "texture.h"
+#include "particlesystem.h"
 
 Renderer::Renderer()
 {
@@ -91,6 +92,9 @@ void Renderer::init()
     mPostprocessor->init();
     if (mDepthStencilAttachmentSupported)
         mOutlineeffect->init();
+
+    // Init particlesystem
+    mParticleSystem = std::make_unique<ParticleSystem>();
 
     // Called to tell App that it can continue initializing
     initDone();
@@ -194,14 +198,11 @@ void Renderer::initGBuffer()
 }
 
 void Renderer::render(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera,
-                              const std::vector<DirectionalLightComponent>& dirLights,
-                              const std::vector<SpotLightComponent>& spotLights,
-                              const std::vector<PointLightComponent>& pointLights)
+                      const std::vector<DirectionalLightComponent>& dirLights, const std::vector<SpotLightComponent>& spotLights,
+                      const std::vector<PointLightComponent>& pointLights, const std::vector<ParticleComponent>& particles)
 {
-    if(isExposed())
+    if(isExposed() && mContext->makeCurrent(this))
     {
-        mContext->makeCurrent(this);
-
         renderReset();
 
 
@@ -209,6 +210,8 @@ void Renderer::render(std::vector<MeshComponent>& renders, const std::vector<Tra
             renderGlobalWireframe(renders, transforms, camera);
         else
             renderDeferred(renders, transforms, camera, dirLights, spotLights, pointLights);
+
+        mParticleSystem->updateParticles(camera, transforms, particles, mTimeSinceStart);
 
         renderPostprocessing();
 

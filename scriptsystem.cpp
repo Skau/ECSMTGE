@@ -51,9 +51,9 @@ void ScriptSystem::endPlay(std::vector<ScriptComponent>& comps)
     }
 }
 
-void ScriptSystem::runKeyEvent(ScriptComponent& comp, const std::vector<QString>& keys)
+void ScriptSystem::runKeyPressedEvent(ScriptComponent& comp, const std::vector<QString>& keys)
 {
-    if(!comp.filePath.size())
+    if(!comp.filePath.size() || !keys.size())
         return;
 
     QJSValueList list;
@@ -64,6 +64,21 @@ void ScriptSystem::runKeyEvent(ScriptComponent& comp, const std::vector<QString>
     }
     list << array;
     call(comp, "inputPressed", list);
+}
+
+void ScriptSystem::runKeyReleasedEvent(ScriptComponent &comp, const std::vector<QString> &keys)
+{
+    if(!comp.filePath.size() || !keys.size())
+        return;
+
+    QJSValueList list;
+    auto array = comp.engine->newArray(static_cast<unsigned>(keys.size()));
+    for(unsigned i = 0; i < keys.size(); ++i)
+    {
+        array.setProperty(i, keys[i]);
+    }
+    list << array;
+    call(comp, "inputReleased", list);
 }
 
 void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos)

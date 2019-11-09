@@ -21,7 +21,8 @@ public:
 
     void updateMouse();
 
-    std::vector<QString> inputStrings;
+    std::vector<QString> inputPressedStrings;
+    std::vector<QString> inputReleasedStrings;
 
 signals:
     void escapeKeyPressed();

@@ -168,10 +168,12 @@ void App::update()
     auto& transforms    = mWorld->getEntityManager()->getTransformComponents();
 
 
+    auto scriptSystem = ScriptSystem::get();
+
     // Tick scripts if playing
     if(mCurrentlyPlaying)
     {
-        ScriptSystem::get()->tick(mDeltaTime, scripts);
+        scriptSystem->tick(mDeltaTime, scripts);
     }
 
     // Input
@@ -193,20 +195,20 @@ void App::update()
     // Send input to scripts if playing
     else
     {
-        auto strings = mEventHandler->inputStrings;
-        if(strings.size())
+        auto stringsPressed = mEventHandler->inputPressedStrings;
+        auto stringsReleased = mEventHandler->inputReleasedStrings;
+        for(auto& input : inputs)
         {
-            for(auto& input : inputs)
+            if(input.controlledWhilePlaying)
             {
-                if(input.controlledWhilePlaying)
+                if(auto comp = mWorld->getEntityManager()->getComponent<ScriptComponent>(input.entityId))
                 {
-                    if(auto comp = mWorld->getEntityManager()->getComponent<ScriptComponent>(input.entityId))
-                    {
-                        ScriptSystem::get()->runKeyEvent(*comp, strings);
-                    }
+                    scriptSystem->runKeyPressedEvent(*comp, stringsPressed);
+                    scriptSystem->runKeyReleasedEvent(*comp, stringsReleased);
                 }
             }
         }
+        mEventHandler->inputReleasedStrings.clear();
     }
     // Physics:
     /* Note: Physics calculation should be happening on a separate thread
@@ -217,7 +219,7 @@ void App::update()
 
      if(mCurrentlyPlaying && hitInfos.size())
      {
-         ScriptSystem::get()->runHitEvents(scripts, hitInfos);
+         scriptSystem->runHitEvents(scripts, hitInfos);
      }
 
     // Sound
@@ -286,7 +288,7 @@ void App::update()
     }
 
     // Update JS comps
-    ScriptSystem::get()->updateJSComponents(scripts);
+    scriptSystem->updateJSComponents(scripts);
 
     currentlyUpdating = false;
 }

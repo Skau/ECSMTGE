@@ -60,9 +60,9 @@ bool InputHandler::eventFilter(QObject* obj, QEvent* event)
             string = "mouseRight";
         }
 
-        if(string.size())
+        if(string.size() && std::find(inputPressedStrings.begin(), inputPressedStrings.end(), string) == inputPressedStrings.end())
         {
-            inputStrings.push_back(string);
+            inputPressedStrings.push_back(string);
         }
 
         return true;
@@ -82,7 +82,8 @@ bool InputHandler::eventFilter(QObject* obj, QEvent* event)
 
         if(string.size())
         {
-            inputStrings.erase(std::remove(inputStrings.begin(), inputStrings.end(), string), inputStrings.end());
+            inputReleasedStrings.push_back(string);
+            inputPressedStrings.erase(std::remove(inputPressedStrings.begin(), inputPressedStrings.end(), string), inputPressedStrings.end());
         }
 
         Keys[static_cast<int>(mouseEvent->button())] = false;
@@ -125,10 +126,13 @@ bool InputHandler::eventFilter(QObject* obj, QEvent* event)
         if (!string.size())
         {
             string = keyEvent->text();
-
         }
 
-        inputStrings.push_back(string);
+        if(std::find(inputPressedStrings.begin(), inputPressedStrings.end(), string) == inputPressedStrings.end())
+        {
+            inputPressedStrings.push_back(string);
+        }
+
         Keys[keyEvent->key()] = true;
 
         return true;
@@ -136,6 +140,9 @@ bool InputHandler::eventFilter(QObject* obj, QEvent* event)
     case QEvent::KeyRelease:
     {
         auto keyEvent = static_cast<QKeyEvent*>(event);
+        if(keyEvent->isAutoRepeat())
+            return QObject::eventFilter(obj, event);
+
         QString string;
         switch (keyEvent->key())
         {
@@ -172,7 +179,9 @@ bool InputHandler::eventFilter(QObject* obj, QEvent* event)
             string = keyEvent->text();
         }
 
-        inputStrings.erase(std::remove(inputStrings.begin(), inputStrings.end(), string), inputStrings.end());
+        inputReleasedStrings.push_back(string);
+        inputPressedStrings.erase(std::remove(inputPressedStrings.begin(), inputPressedStrings.end(), string), inputPressedStrings.end());
+
         Keys[keyEvent->key()] = false;
 
         return true;

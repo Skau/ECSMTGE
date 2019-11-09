@@ -33,7 +33,8 @@ public:
     void beginPlay(std::vector<ScriptComponent>& comps);
     void tick(float deltaTime, std::vector<ScriptComponent>& comps);
     void endPlay(std::vector<ScriptComponent>& comps);
-    void runKeyEvent(ScriptComponent &comp, const std::vector<QString> &keys);
+    void runKeyPressedEvent(ScriptComponent& comp, const std::vector<QString>& keys);
+    void runKeyReleasedEvent(ScriptComponent& comp, const std::vector<QString>& keys);
     void runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos);
 
     /**

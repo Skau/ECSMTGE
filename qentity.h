@@ -33,6 +33,8 @@ public slots:
     QJSValue _getComponent(const QString& name, unsigned id = 0);
     QJSValue _addComponent(const QString& name, unsigned id = 0);
 
+    void rotateCamera(float x, float y);
+
 private:
     EntityManager* entityManager;
     QJSEngine* mEngine;

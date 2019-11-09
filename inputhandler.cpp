@@ -20,9 +20,9 @@ InputHandler::InputHandler(Renderer *renderer) : mRenderer(renderer)
     QCursor::setPos(mRenderer->mapToGlobal(mCenter));
 }
 
-void InputHandler::updateMouse()
+void InputHandler::updateMouse(bool currentlyPlaying)
 {
-    if(Keys[Qt::MouseButton::RightButton] == true)
+    if(currentlyPlaying || (!currentlyPlaying && Keys[Qt::MouseButton::RightButton]))
     {
         mRenderer->setCursor(Qt::BlankCursor);
 

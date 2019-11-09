@@ -6,6 +6,7 @@
 #include "qentity.h"
 #include <QFileInfo>
 #include <QJsonDocument>
+#include <QPoint>
 
 // For HitInfo struct
 #include "physicssystem.h"
@@ -79,6 +80,19 @@ void ScriptSystem::runKeyReleasedEvent(ScriptComponent &comp, const std::vector<
     }
     list << array;
     call(comp, "inputReleased", list);
+}
+
+void ScriptSystem::runMouseOffsetEvent(ScriptComponent &comp, const QPoint& point)
+{
+    if(!comp.filePath.size())
+        return;
+
+    QJSValueList list;
+    auto array = comp.engine->newArray(2);
+    array.setProperty(0, point.x());
+    array.setProperty(1, point.y());
+    list << array;
+    call(comp, "mouseMoved", list);
 }
 
 void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos)

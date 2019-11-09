@@ -19,7 +19,7 @@ public:
     static std::map<int, bool> Keys;
     static QPoint MouseOffset;
 
-    void updateMouse();
+    void updateMouse(bool currentlyPlaying);
 
     std::vector<QString> inputPressedStrings;
     std::vector<QString> inputReleasedStrings;

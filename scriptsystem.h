@@ -35,6 +35,7 @@ public:
     void endPlay(std::vector<ScriptComponent>& comps);
     void runKeyPressedEvent(ScriptComponent& comp, const std::vector<QString>& keys);
     void runKeyReleasedEvent(ScriptComponent& comp, const std::vector<QString>& keys);
+    void runMouseOffsetEvent(ScriptComponent& comp, const QPoint& point);
     void runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos);
 
     /**

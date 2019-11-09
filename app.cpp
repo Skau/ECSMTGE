@@ -177,12 +177,11 @@ void App::update()
     }
 
     // Input
+    mEventHandler->updateMouse(mCurrentlyPlaying);
 
     // Editor Camera handles input if not playing
     if(!mCurrentlyPlaying)
     {
-        mEventHandler->updateMouse();
-
         for(auto& camera : cameras)
         {
             if(camera.isEditorCamera)
@@ -201,10 +200,16 @@ void App::update()
         {
             if(input.controlledWhilePlaying)
             {
+
                 if(auto comp = mWorld->getEntityManager()->getComponent<ScriptComponent>(input.entityId))
                 {
                     scriptSystem->runKeyPressedEvent(*comp, stringsPressed);
                     scriptSystem->runKeyReleasedEvent(*comp, stringsReleased);
+                    auto offset = mEventHandler->MouseOffset;
+                    if(std::abs(offset.x()) > 1.0f || std::abs(offset.y()) > 1.0f)
+                    {
+                        scriptSystem->runMouseOffsetEvent(*comp, offset);
+                    }
                 }
             }
         }

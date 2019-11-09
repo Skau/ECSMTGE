@@ -108,6 +108,19 @@ QJSValue QEntity::_addComponent(const QString &name, unsigned id)
     return mEngine->toScriptValue(JSON);
 }
 
+void QEntity::rotateCamera(float x, float y)
+{
+    auto [camera, transform] = entityManager->getComponents<CameraComponent, TransformComponent>(mID);
+
+    if(!camera || !transform)
+        return;
+
+    camera->yaw += x;
+    camera->pitch += y;
+
+    transform->setRotation(gsl::quat::lookAt(gsl::deg2radf(camera->pitch), gsl::deg2radf(camera->yaw)));
+}
+
 void QEntity::setMesh(const QString &name)
 {
     if(!name.size())

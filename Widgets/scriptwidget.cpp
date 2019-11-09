@@ -193,6 +193,7 @@ void ScriptWidget::on_button_NewFile_clicked()
                    << "// This will be run when input is relased\n"
                    << "// NOTE:\n// This requires that the entity has an Input component\n// and control while playing is true\n"
                    << "function inputReleased(inputs)\n{\n\t//for (let i = 0; i < inputs.length; i++)\n\t//{\n\t\t//console.log(inputs[i] + \" released\");\n\t//}\n}\n\n"
+                   << "function mouseMoved(offset)\n{\n\t//console.log(\"Mouse offset: x: \" + offset[0] + \", y: \" + offset[1]);\n}\n\n"
                    << "// This will be run when collision with another entity occurs\n"
                    << "function onHit(hitInfo)\n{\n\t//console.log(\"Collided with entity ID: \" + hitInfo.ID);\n}\n";
             file.close();

@@ -2,11 +2,9 @@
 #define SCRIPTSYSTEM_H
 
 #include <QObject>
-#include <QJSEngine>
+#include <QJSValue>
 #include <memory>
 #include <vector>
-
-
 
 class EntityManager;
 class QJSEngine;
@@ -51,7 +49,7 @@ public:
     QEntity* getEntityWrapper(unsigned int entity);
 
     // Hardcoded functions provided in all scripts
-    const QString getEntityHelperFunctions() { return helperFuncs; }
+    const QString getEntityHelperFunctions() { return mHelperFuncs; }
 
     /**
      * @brief Loads the js file given. Returns true if the file is successfully evaluated and set.
@@ -129,7 +127,7 @@ private:
     QString currentFileName{};
 
     void initializeHelperFuncs();
-    QString helperFuncs;
+    QString mHelperFuncs;
 
     float mDeltaTime{0};
 };

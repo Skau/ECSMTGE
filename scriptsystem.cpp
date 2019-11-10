@@ -177,7 +177,7 @@ bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)
     }
     QTextStream stream(&scriptFile);
     QString contents = stream.readAll();
-    contents.prepend(helperFuncs);
+    contents.prepend(mHelperFuncs);
     scriptFile.close();
     auto value = comp.engine->evaluate(contents, QString::fromStdString(file));
     if(value.isError())
@@ -693,6 +693,6 @@ void ScriptSystem::initializeHelperFuncs()
         return;
     }
 
-    helperFuncs = file.readAll();
+    mHelperFuncs = file.readAll();
     file.close();
 }

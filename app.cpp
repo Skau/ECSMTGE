@@ -177,7 +177,6 @@ void App::update()
     }
 
     // Input
-    mEventHandler->updateMouse(mCurrentlyPlaying);
 
     // Editor Camera handles input if not playing
     if(!mCurrentlyPlaying)
@@ -186,6 +185,7 @@ void App::update()
         {
             if(camera.isEditorCamera)
             {
+                mEventHandler->updateMouse(mCurrentlyPlaying);
                 auto transform = mWorld->getEntityManager()->getComponent<TransformComponent>(camera.entityId);
                 InputSystem::HandleEditorCameraInput(mDeltaTime, *transform, camera);
             }
@@ -200,15 +200,20 @@ void App::update()
         {
             if(input.controlledWhilePlaying)
             {
-
                 if(auto comp = mWorld->getEntityManager()->getComponent<ScriptComponent>(input.entityId))
                 {
                     scriptSystem->runKeyPressedEvent(*comp, stringsPressed);
                     scriptSystem->runKeyReleasedEvent(*comp, stringsReleased);
+
+                    mEventHandler->updateMouse(mCurrentlyPlaying);
                     auto offset = mEventHandler->MouseOffset;
                     if(std::abs(offset.x()) > 1.0f || std::abs(offset.y()) > 1.0f)
                     {
                         scriptSystem->runMouseOffsetEvent(*comp, offset);
+                        if(comp->JSEntity)
+                        {
+                            comp->JSEntity->updateCamera();
+                        }
                     }
                 }
             }
@@ -360,6 +365,13 @@ void App::onStop()
                 mesh->isVisible = true;
             }
         }
+    }
+
+    // Reset JS states.
+    for(auto& comp : mWorld->getEntityManager()->getScriptComponents())
+    {
+        delete comp.JSEntity;
+        comp.JSEntity = nullptr;
     }
 
     mWorld->loadTemp();

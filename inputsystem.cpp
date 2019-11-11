@@ -135,8 +135,6 @@ void InputSystem::HandleEditorCameraInput(float deltaTime, TransformComponent& t
         if(cameraComponent.pitch < -89.0f)
             cameraComponent.pitch = -89.0f;
 
-        transformComponent.setRotation(gsl::quat::lookAt(gsl::deg2radf(cameraComponent.pitch), gsl::deg2radf(cameraComponent.yaw)));
-
         // Position
 
         gsl::vec3 forward = transformComponent.rotation.inverse().forwardVector();

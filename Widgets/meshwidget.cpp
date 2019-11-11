@@ -15,6 +15,8 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
 {
     ui->setupUi(this);
 
+    isUpdating = true;
+
     ui->comboBox_Meshes->addItem("None");
     for(auto& name : ResourceManager::instance()->getAllMeshNames())
     {
@@ -33,7 +35,6 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
         ui->comboBox_Textures->addItem(QString::fromStdString(name));
     }
 
-    isUpdating = true;
     if(auto comp = getRenderComponent())
     {
         auto name = comp->meshData.mName;

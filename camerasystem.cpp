@@ -1,6 +1,11 @@
 #include "innpch.h"
 #include "camerasystem.h"
 
+void CameraSystem::updateLookAtRotation(TransformComponent& transform, CameraComponent& camera)
+{
+    transform.setRotation(gsl::quat::lookAt(gsl::deg2radf(camera.pitch), gsl::deg2radf(camera.yaw)));
+}
+
 void CameraSystem::updateCameras(std::vector<TransformComponent>& transforms, std::vector<CameraComponent>& cameras)
 {
     auto transIt = transforms.begin();

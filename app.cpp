@@ -1,17 +1,14 @@
 #include "app.h"
 
 #include <QDebug>
+#include <QJsonDocument>
 
 #include "inputhandler.h"
-
 #include "scene.h"
 #include "entitymanager.h"
-
 #include "inputsystem.h"
 #include "physicssystem.h"
 #include "scriptsystem.h"
-
-#include <QJsonDocument>
 
 App::App()
 {
@@ -159,7 +156,6 @@ void App::update()
     calculateFrames();
 
     // Get all necessary components that are reused for systems
-    auto& cameras       = mWorld->getEntityManager()->getCameraComponents();
     auto& colliders     = mWorld->getEntityManager()->getColliderComponents();
     auto& inputs        = mWorld->getEntityManager()->getInputComponents();
     auto& physics       = mWorld->getEntityManager()->getPhysicsComponents();
@@ -167,8 +163,17 @@ void App::update()
     auto& scripts       = mWorld->getEntityManager()->getScriptComponents();
     auto& transforms    = mWorld->getEntityManager()->getTransformComponents();
 
-
     auto scriptSystem = ScriptSystem::get();
+
+    CameraComponent* currentCamera{nullptr};
+    for(auto& camera : mWorld->getEntityManager()->getCameraComponents())
+    {
+        if(mCurrentlyPlaying ^ camera.isEditorCamera)
+        {
+            currentCamera = &camera;
+            break;
+        }
+    }
 
     // Tick scripts if playing
     if(mCurrentlyPlaying)
@@ -177,56 +182,33 @@ void App::update()
     }
 
     // Input
+    mEventHandler->updateMouse(mCurrentlyPlaying);
+
+    auto cameraTransform = mWorld->getEntityManager()->getComponent<TransformComponent>(currentCamera->entityId);
 
     // Editor Camera handles input if not playing
     if(!mCurrentlyPlaying)
     {
-        for(auto& camera : cameras)
-        {
-            if(camera.isEditorCamera)
-            {
-                mEventHandler->updateMouse(mCurrentlyPlaying);
-                auto transform = mWorld->getEntityManager()->getComponent<TransformComponent>(camera.entityId);
-                InputSystem::HandleEditorCameraInput(mDeltaTime, *transform, camera);
-            }
-        }
+        InputSystem::HandleEditorCameraInput(mDeltaTime, *cameraTransform, *currentCamera);
     }
     // Send input to scripts if playing
     else
     {
-        auto stringsPressed = mEventHandler->inputPressedStrings;
-        auto stringsReleased = mEventHandler->inputReleasedStrings;
-        for(auto& input : inputs)
-        {
-            if(input.controlledWhilePlaying)
-            {
-                if(auto comp = mWorld->getEntityManager()->getComponent<ScriptComponent>(input.entityId))
-                {
-                    scriptSystem->runKeyPressedEvent(*comp, stringsPressed);
-                    scriptSystem->runKeyReleasedEvent(*comp, stringsReleased);
+        scriptSystem->runKeyPressedEvent(scripts, inputs, mEventHandler->inputPressedStrings);
+        scriptSystem->runKeyReleasedEvent(scripts, inputs, mEventHandler->inputReleasedStrings);
+        scriptSystem->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
 
-                    mEventHandler->updateMouse(mCurrentlyPlaying);
-                    auto offset = mEventHandler->MouseOffset;
-                    if(std::abs(offset.x()) > 1.0f || std::abs(offset.y()) > 1.0f)
-                    {
-                        scriptSystem->runMouseOffsetEvent(*comp, offset);
-                        if(comp->JSEntity)
-                        {
-                            comp->JSEntity->updateCamera();
-                        }
-                    }
-                }
-            }
-        }
         mEventHandler->inputReleasedStrings.clear();
     }
+
+    CameraSystem::updateLookAtRotation(*cameraTransform, *currentCamera);
+
     // Physics:
     /* Note: Physics calculation should be happening on a separate thread
      * and instead of sending references to the lists we should take copies
      * and then later apply those copies to the original lists.
      */
      auto hitInfos = PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
-
      if(mCurrentlyPlaying && hitInfos.size())
      {
          scriptSystem->runHitEvents(scripts, hitInfos);
@@ -234,25 +216,8 @@ void App::update()
 
     // Sound
     // Sound listener is using the active camera view matrix (for directions) and transform (for position)
-    for (const auto& camera : cameras)
-    {
-        if(camera.isEditorCamera)
-        {
-            if(!mCurrentlyPlaying)
-            {
-                mSoundListener->update(camera, *mWorld->getEntityManager()->getComponent<TransformComponent>(camera.entityId));
-                break;
-            }
-        }
-        else
-        {
-            if(mCurrentlyPlaying)
-            {
-                mSoundListener->update(camera, *mWorld->getEntityManager()->getComponent<TransformComponent>(camera.entityId));
-                break;
-            }
-        }
-    }
+    mSoundListener->update(*currentCamera, *cameraTransform);
+
     SoundManager::UpdatePositions(transforms, sounds);
     SoundManager::UpdateVelocities(physics, sounds);
 
@@ -260,42 +225,20 @@ void App::update()
     mMainWindow->updateComponentWidgets();
 
     // Cameras
-    CameraSystem::updateCameras(transforms, cameras);
+    CameraSystem::updateCameras(transforms, mWorld->getEntityManager()->getCameraComponents());
 
     // Calculate mesh bounds
     mWorld->getEntityManager()->UpdateBounds();
     // -------- Frustum culling here -----------
 
     // Rendering
-    for (const auto& camera : cameras)
-    {
-        if(camera.isEditorCamera)
-        {
-            if(!mCurrentlyPlaying)
-            {
-                auto& renders = mWorld->getEntityManager()->getMeshComponents();
-                mRenderer->render(renders, transforms, camera,
-                                  mWorld->getEntityManager()->getDirectionalLightComponents(),
-                                  mWorld->getEntityManager()->getSpotLightComponents(),
-                                  mWorld->getEntityManager()->getPointLightComponents(),
-                                  mWorld->getEntityManager()->getParticleComponents());
-                break;
-            }
-        }
-        else
-        {
-            if(mCurrentlyPlaying)
-            {
-                auto& renders = mWorld->getEntityManager()->getMeshComponents();
-                mRenderer->render(renders, transforms, camera,
-                                  mWorld->getEntityManager()->getDirectionalLightComponents(),
-                                  mWorld->getEntityManager()->getSpotLightComponents(),
-                                  mWorld->getEntityManager()->getPointLightComponents(),
-                                  mWorld->getEntityManager()->getParticleComponents());
-                break;
-            }
-        }
-    }
+
+    auto& renders = mWorld->getEntityManager()->getMeshComponents();
+    mRenderer->render(renders, transforms, *currentCamera,
+                      mWorld->getEntityManager()->getDirectionalLightComponents(),
+                      mWorld->getEntityManager()->getSpotLightComponents(),
+                      mWorld->getEntityManager()->getPointLightComponents(),
+                      mWorld->getEntityManager()->getParticleComponents());
 
     // Update JS comps
     scriptSystem->updateJSComponents(scripts);
@@ -330,6 +273,7 @@ void App::onPlay()
             if(auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId))
             {
                 mesh->isVisible = false;
+                break;
             }
         }
     }
@@ -363,6 +307,7 @@ void App::onStop()
             if(auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId))
             {
                 mesh->isVisible = true;
+                break;
             }
         }
     }

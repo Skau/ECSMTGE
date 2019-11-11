@@ -9,6 +9,7 @@
 class EntityManager;
 class QJSEngine;
 class ScriptComponent;
+class InputComponent;
 class QEntity;
 class HitInfo;
 
@@ -31,9 +32,9 @@ public:
     void beginPlay(std::vector<ScriptComponent>& comps);
     void tick(float deltaTime, std::vector<ScriptComponent>& comps);
     void endPlay(std::vector<ScriptComponent>& comps);
-    void runKeyPressedEvent(ScriptComponent& comp, const std::vector<QString>& keys);
-    void runKeyReleasedEvent(ScriptComponent& comp, const std::vector<QString>& keys);
-    void runMouseOffsetEvent(ScriptComponent& comp, const QPoint& point);
+    void runKeyPressedEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const std::vector<QString>& keys);
+    void runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const std::vector<QString>& keys);
+    void runMouseOffsetEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const QPoint& point);
     void runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos);
 
     /**

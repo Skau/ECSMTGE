@@ -10,16 +10,17 @@ ColliderWidget::ColliderWidget(MainWindow *mainWindow, QWidget *parent)
 {
     ui->setupUi(this);
 
+    isUpdating = true;
+
     for (auto type : ColliderComponent::typeNames)
     {
        ui->comboBox_Colliders->addItem(type);
     }
 
-    isUpdating = true;
     auto comp = getColliderComponent();
     if (comp)
     {
-        ui->comboBox_Colliders->setCurrentIndex(comp->collisionType);
+        ui->comboBox_Colliders->setCurrentIndex(static_cast<int>(comp->collisionType));
         updateParameters();
     }
     isUpdating = false;
@@ -57,6 +58,7 @@ void ColliderWidget::on_comboBox_Colliders_currentIndexChanged(int index)
 
     if(auto comp = getColliderComponent())
     {
+        qDebug() << "Hallo";
         comp->collisionType = static_cast<ColliderComponent::Type>(index);
         switch (comp->collisionType)
         {

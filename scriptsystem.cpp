@@ -52,47 +52,86 @@ void ScriptSystem::endPlay(std::vector<ScriptComponent>& comps)
     }
 }
 
-void ScriptSystem::runKeyPressedEvent(ScriptComponent& comp, const std::vector<QString>& keys)
+void ScriptSystem::runKeyPressedEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const std::vector<QString>& keys)
 {
-    if(!comp.filePath.size() || !keys.size())
+    if(!keys.size())
         return;
 
-    QJSValueList list;
-    auto array = comp.engine->newArray(static_cast<unsigned>(keys.size()));
-    for(unsigned i = 0; i < keys.size(); ++i)
+    for(auto& input : inputs)
     {
-        array.setProperty(i, keys[i]);
+        if(!input.controlledWhilePlaying)
+            continue;
+
+        for(auto& script : scripts)
+        {
+            if(!script.filePath.size())
+                continue;
+
+            QJSValueList list;
+            auto array = script.engine->newArray(static_cast<unsigned>(keys.size()));
+            for(unsigned i = 0; i < keys.size(); ++i)
+            {
+                array.setProperty(i, keys[i]);
+            }
+            list << array;
+            call(script, "inputPressed", list);
+
+        }
     }
-    list << array;
-    call(comp, "inputPressed", list);
 }
 
-void ScriptSystem::runKeyReleasedEvent(ScriptComponent &comp, const std::vector<QString> &keys)
+void ScriptSystem::runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent> &inputs, const std::vector<QString>& keys)
 {
-    if(!comp.filePath.size() || !keys.size())
+    if(!keys.size())
         return;
 
-    QJSValueList list;
-    auto array = comp.engine->newArray(static_cast<unsigned>(keys.size()));
-    for(unsigned i = 0; i < keys.size(); ++i)
+    for(auto& input : inputs)
     {
-        array.setProperty(i, keys[i]);
+        if(!input.controlledWhilePlaying)
+            continue;
+
+        for(auto& script : scripts)
+        {
+            if(!script.filePath.size())
+                continue;
+
+            QJSValueList list;
+            auto array = script.engine->newArray(static_cast<unsigned>(keys.size()));
+            for(unsigned i = 0; i < keys.size(); ++i)
+            {
+                array.setProperty(i, keys[i]);
+            }
+            list << array;
+            call(script, "inputReleased", list);
+        }
     }
-    list << array;
-    call(comp, "inputReleased", list);
+
+
 }
 
-void ScriptSystem::runMouseOffsetEvent(ScriptComponent &comp, const QPoint& point)
+void ScriptSystem::runMouseOffsetEvent(std::vector<ScriptComponent> &scripts, std::vector<InputComponent> &inputs, const QPoint& point)
 {
-    if(!comp.filePath.size())
-        return;
+    if(point.x() > 1.0f || point.y() > 1.0f)
+    {
+        for(auto& input : inputs)
+        {
+            if(!input.controlledWhilePlaying)
+                continue;
 
-    QJSValueList list;
-    auto array = comp.engine->newArray(2);
-    array.setProperty(0, point.x());
-    array.setProperty(1, point.y());
-    list << array;
-    call(comp, "mouseMoved", list);
+            for(auto& script : scripts)
+            {
+                if(!script.filePath.size())
+                    continue;
+
+                QJSValueList list;
+                auto array = script.engine->newArray(2);
+                array.setProperty(0, point.x());
+                array.setProperty(1, point.y());
+                list << array;
+                call(script, "mouseMoved", list);
+            }
+        }
+    }
 }
 
 void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos)

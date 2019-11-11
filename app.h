@@ -17,6 +17,7 @@
 
 class InputHandler;
 class InputSystem;
+class CameraComponent;
 
 /**
  * @brief The creator of all things.

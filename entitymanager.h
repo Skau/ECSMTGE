@@ -218,6 +218,41 @@ public:
         return id;
     }
 
+private:
+    template<int ...>
+    struct seq { };
+
+    template<int N, int ...S>
+    struct gens : gens<N-1, N-1, S...> { };
+
+    template<int ...S>
+    struct gens<0, S...> {
+      typedef seq<S...> type;
+    };
+
+    template <int ...S, typename... componentTypes>
+    void _transform_internal(unsigned int eID, seq<S...>, const std::function<void(componentTypes*...)>& f)
+    {
+        std::tuple<componentTypes*...> comps = getComponents<componentTypes...>(eID);
+        f(std::get<S>(comps)...);
+    }
+
+public:
+    /** Runs a function on a entities component based on components in template.
+     * Uses variadic template packing and std::function to take in a varying number
+     * of parameters, attempts to get the components specified and sends them as
+     * parameters to the function.
+     * @param componentTypes - the different component types to get
+     * @param eID - entityID
+     * @param f - std::function wrapper object of function with equal parameter count
+     * as the count of componentTypes.
+     */
+    template <typename... componentTypes>
+    void transform(unsigned int eID, const std::function<void(componentTypes*...)>& f)
+    {
+        _transform_internal(eID, typename gens<sizeof...(componentTypes)>::type(), f);
+    }
+
     template<typename... componentTypes>
     std::tuple<componentTypes&...> addComponent(unsigned int entity)
     {

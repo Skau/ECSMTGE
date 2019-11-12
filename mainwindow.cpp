@@ -73,7 +73,7 @@ void MainWindow::updateStatusBar(int vertices, float deltaTime, float frameCount
                              QString::number(vertices) +
                              " | Time pr FrameDraw: "
                              + QString::number(static_cast<double>(deltaTime), 'g', 4)
-                             + " s  |  " + "FPS: "
+                             + " ms  |  " + "FPS: "
                              + QString::number(static_cast<double>(frameCounter), 'g', 4));
 }
 

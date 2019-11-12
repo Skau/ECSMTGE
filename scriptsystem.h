@@ -120,7 +120,14 @@ private:
 
     std::shared_ptr<EntityManager> entityManager;
 
+    /**
+     * @brief Updates all CPP components based on the ones used in JS. This gets called after every JS call.
+     */
     void updateCPPComponents();
+    /**
+     * @brief Updates all JS Components for a given JS engine from the respective CPP components. Called once at the end of every frame.
+     * @param Script component to update
+     */
     void updateJSComponents(ScriptComponent& comp);
 
     // Cached

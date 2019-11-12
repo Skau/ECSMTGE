@@ -175,7 +175,7 @@ QString ScriptSystem::checkError(QJSValue value)
 {
     QString lineNumber = QString::number(value.property("lineNumber").toInt());
     QString valueString = value.toString();
-    QString error("Uncaught exception at line" + lineNumber  + ":" + valueString );
+    QString error("Uncaught exception at line " + lineNumber  + " : " + valueString );
     qDebug() << error;
     return error;
 }
@@ -247,7 +247,12 @@ void ScriptSystem::call(ScriptComponent& comp, const std::string& function)
         return;
     }
 
-    value.call();
+    value = value.call();
+    if(value.isError())
+    {
+        checkError(value);
+        return;
+    }
 
     updateCPPComponents();
     currentComp = nullptr;
@@ -275,7 +280,12 @@ void ScriptSystem::call(ScriptComponent &comp, const std::string& function, QJSV
         return;
     }
 
-    value.call(params);
+    value = value.call(params);
+    if(value.isError())
+    {
+        checkError(value);
+        return;
+    }
 
     updateCPPComponents();
     currentComp = nullptr;

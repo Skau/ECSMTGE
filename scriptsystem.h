@@ -6,7 +6,6 @@
 #include <memory>
 #include <vector>
 
-class EntityManager;
 class QJSEngine;
 class ScriptComponent;
 class InputComponent;
@@ -42,16 +41,18 @@ public:
      */
     void updateJSComponents(std::vector<ScriptComponent>& comps);
 
+    /**
+     * @brief Propagate changes done in JS back to C++
+     */
     void updateCPPComponents(std::vector<ScriptComponent>& comps);
-
-    // EntityManager given by App
-    void setEntityManager(std::shared_ptr<EntityManager> entityManager){ this->entityManager = entityManager; }
 
     QString checkError(QJSValue value);
 
     QEntity* getEntityWrapper(unsigned int entity);
 
-    // Hardcoded functions provided in all scripts
+    /**
+     * @brief Returns hardcoded functions provided in all scripts
+     */
     const QString getEntityHelperFunctions() { return mHelperFuncs; }
 
     /**
@@ -82,6 +83,7 @@ public:
 
     /**
      * @brief Executes one off raw js code from the mini editor. Returns true if successfull.
+     * @deprecated No longer working :( Will be missed. RIP. F.
      */
     bool execute(ScriptComponent& comp, QString function, QString contents, QString fileName);
 
@@ -119,18 +121,15 @@ public slots:
 
 private:
     ScriptSystem(){}
-
-    std::shared_ptr<EntityManager> entityManager;
-
     /**
-     * @brief Updates all CPP components based on the ones used in JS. This gets called after every JS call.
-     */
-    void updateCPPComponents();
-    /**
-     * @brief Updates all JS Components for a given JS engine from the respective CPP components. Called once at the end of every frame.
+     * @brief Updates all JS Components for a given JS engine from the respective CPP components. Called once at the end of JS scripts.
      * @param Script component to update
      */
     void updateJSComponent(ScriptComponent& comp);
+
+    /**
+     * @brief Updates all CPP components based on the ones used in JS. Called once at the start of JS scripts.
+     */
     void updateCPPComponent(ScriptComponent& comp);
 
     void initializeJSEntity(ScriptComponent &comp);

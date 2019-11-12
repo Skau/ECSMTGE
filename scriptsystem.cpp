@@ -1,7 +1,7 @@
 #include "scriptsystem.h"
 #include <QFile>
 #include <QTextStream>
-#include "entitymanager.h"
+#include "world.h"
 #include "componentdata.h"
 #include "qentity.h"
 #include <QFileInfo>
@@ -192,7 +192,7 @@ QString ScriptSystem::checkError(QJSValue value)
 
 QEntity* ScriptSystem::getEntityWrapper(unsigned int entity)
 {
-    return new QEntity(entity, currentComp->engine, entityManager.get(), this);
+    return new QEntity(entity, currentComp->engine, World::getWorld().getEntityManager().get(), this);
 }
 
 bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)
@@ -382,7 +382,6 @@ bool ScriptSystem::execute(ScriptComponent& comp, QString function, QString cont
         return false;
     }
 
-    updateCPPComponents();
     comp.engine->globalObject().setProperty("accessedComponents", comp.engine->newArray());
     currentComp = nullptr;
     currentFileName = "";
@@ -391,13 +390,13 @@ bool ScriptSystem::execute(ScriptComponent& comp, QString function, QString cont
 
 QObject* ScriptSystem::spawnCube()
 {
-    auto entity = entityManager->createCube();
+    auto entity =  World::getWorld().getEntityManager()->createCube();
     return getEntityWrapper(entity);
 }
 
 QObject *ScriptSystem::spawnEntity()
 {
-    return getEntityWrapper(entityManager->createEntity());
+    return getEntityWrapper(World::getWorld().getEntityManager()->createEntity());
 }
 
 QJSValue ScriptSystem::getAllEntityIDsByComponent(const QString& name)
@@ -406,6 +405,8 @@ QJSValue ScriptSystem::getAllEntityIDsByComponent(const QString& name)
         return 0;
 
     std::vector<int> IDs;
+
+    auto entityManager = World::getWorld().getEntityManager();
 
     if(name == "transform")
     {
@@ -504,6 +505,8 @@ QJSValue ScriptSystem::getAllEntityIDs()
     if(!currentComp)
         return 0;
 
+    auto entityManager = World::getWorld().getEntityManager();
+
     std::vector<int> IDs;
     for(auto comp : entityManager->getEntityInfos())
     {
@@ -518,117 +521,6 @@ QObject* ScriptSystem::getEntity(unsigned int id)
         return nullptr;
 
     return getEntityWrapper(id);
-}
-
-void ScriptSystem::updateCPPComponents()
-{
-    if(!currentComp)
-        return;
-
-    std::vector<QJsonObject> objects;
-    auto componentArray = currentComp->engine->globalObject().property("accessedComponents");
-    if(!componentArray.isUndefined() && !componentArray.isNull())
-    {
-        auto length = componentArray.property("length").toInt();
-        if(length > 0)
-        {
-            for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
-            {
-                objects.push_back(QJsonValue::fromVariant(currentComp->engine->globalObject().property("accessedComponents").property(i).toVariant()).toObject());
-            }
-
-            if(!objects.size())
-                return;
-
-            // Iterate through accessed components
-            for(auto object : objects)
-            {
-                // Get component that matches the type
-                Component* comp{nullptr};
-                switch (static_cast<ComponentType>(object["ComponentType"].toInt()))
-                {
-                case ComponentType::Other:
-                {
-                    comp = entityManager->getComponent<EntityInfo>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Mesh:
-                {
-                    comp = entityManager->getComponent<MeshComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Transform:
-                {
-                    comp = entityManager->getComponent<TransformComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Camera:
-                {
-                    comp = entityManager->getComponent<CameraComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Physics:
-                {
-                    comp = entityManager->getComponent<PhysicsComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Input:
-                {
-                    comp = entityManager->getComponent<InputComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Sound:
-                {
-                    comp = entityManager->getComponent<SoundComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::LightSpot:
-                {
-                    comp = entityManager->getComponent<SpotLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::LightPoint:
-                {
-                    comp = entityManager->getComponent<PointLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::LightDirectional:
-                {
-                    comp = entityManager->getComponent<DirectionalLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Script:
-                {
-                    comp = entityManager->getComponent<ScriptComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Collider:
-                {
-                    comp = entityManager->getComponent<ColliderComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Particle:
-                {
-                    comp = entityManager->getComponent<ParticleComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                }
-
-                if(comp)
-                {
-                    object.remove("ID");
-
-                    // If they are different this component was modified in JS
-                    // and we need to update the C++ version
-                    auto oldJson = comp->toJSON();
-                    if(object != oldJson)
-                    {
-                        comp->fromJSON(object);
-                    }
-                }
-            }
-        }
-    }
 }
 
 void ScriptSystem::updateJSComponent(ScriptComponent& comp)
@@ -648,6 +540,8 @@ void ScriptSystem::updateJSComponent(ScriptComponent& comp)
 
                 if(object.isEmpty())
                     continue;
+
+                auto entityManager = World::getWorld().getEntityManager();
 
                 object.remove("ID");
 
@@ -754,6 +648,8 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
 
                 if(object.isEmpty())
                     continue;
+
+                auto entityManager = World::getWorld().getEntityManager();
 
                 // Get component that matches the type
                 Component* component{nullptr};

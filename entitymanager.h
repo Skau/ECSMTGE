@@ -127,7 +127,6 @@ private:
 
 signals:
     void updateUI(const std::vector<EntityInfo>& entityData);
-    void refreshWidgets();
 
     // ------------------------- Member functions ---------------
 public:

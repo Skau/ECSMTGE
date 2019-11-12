@@ -1,0 +1,203 @@
+{
+    "Entities": [
+        {
+            "Components": [
+                {
+                    "Children": [
+                    ],
+                    "ComponentType": 0,
+                    "Position": [
+                        -1.5912556648254395,
+                        2.796504497528076,
+                        9.195032119750977
+                    ],
+                    "Rotation": [
+                        0.9793412089347839,
+                        0.13650457561016083,
+                        0.14776083827018738,
+                        0.020595509558916092
+                    ],
+                    "Scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "Valid": true
+                },
+                {
+                    "ComponentType": 3,
+                    "EditorCam": true,
+                    "Pitch": 15.869993209838867,
+                    "Valid": true,
+                    "Yaw": 17.159893035888672
+                },
+                {
+                    "ComponentType": 4,
+                    "ControlledWhilePlaying": true,
+                    "Valid": true
+                }
+            ],
+            "Name": "EditorCam",
+            "ShowInEditor": false
+        },
+        {
+            "Components": [
+                {
+                    "Children": [
+                    ],
+                    "ComponentType": 0,
+                    "Position": [
+                        0,
+                        0,
+                        5
+                    ],
+                    "Rotation": [
+                        0.9985570907592773,
+                        0.050890516489744186,
+                        -0.017124680802226067,
+                        -0.0008727431413717568
+                    ],
+                    "Scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "Valid": true
+                },
+                {
+                    "ComponentType": 2,
+                    "IsVisible": true,
+                    "MaterialData": {
+                        "Parameters": [
+                            {
+                                "p_color": [
+                                    0,
+                                    0,
+                                    0
+                                ]
+                            }
+                        ],
+                        "Shader": "phong",
+                        "Textures": [
+                        ]
+                    },
+                    "MeshData": {
+                        "Name": "camera",
+                        "RenderType": 4
+                    },
+                    "RenderWireframe": false,
+                    "Valid": true
+                },
+                {
+                    "ComponentType": 3,
+                    "EditorCam": false,
+                    "Pitch": 5.835001468658447,
+                    "Valid": true,
+                    "Yaw": -1.964986801147461
+                },
+                {
+                    "ComponentType": 4,
+                    "ControlledWhilePlaying": true,
+                    "Valid": true
+                },
+                {
+                    "ComponentType": 9,
+                    "FilePath": "../INNgine2019/Assets/Scripts/camera.js",
+                    "Valid": true
+                }
+            ],
+            "Name": "GameCam",
+            "ShowInEditor": true
+        },
+        {
+            "Components": [
+                {
+                    "Children": [
+                    ],
+                    "ComponentType": 0,
+                    "Position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "Rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                    ],
+                    "Scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "Valid": true
+                },
+                {
+                    "Color": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "ComponentType": 7,
+                    "Intensity": 1,
+                    "Valid": true
+                }
+            ],
+            "Name": "light",
+            "ShowInEditor": true
+        },
+        {
+            "Components": [
+                {
+                    "Children": [
+                    ],
+                    "ComponentType": 0,
+                    "Position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "Rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                    ],
+                    "Scale": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "Valid": true
+                },
+                {
+                    "ComponentType": 2,
+                    "IsVisible": true,
+                    "MaterialData": {
+                        "Parameters": [
+                            {
+                                "p_color": [
+                                    1,
+                                    0,
+                                    0
+                                ]
+                            }
+                        ],
+                        "Shader": "phong",
+                        "Textures": [
+                        ]
+                    },
+                    "MeshData": {
+                        "Name": "suzanne",
+                        "RenderType": 4
+                    },
+                    "RenderWireframe": false,
+                    "Valid": true
+                }
+            ],
+            "Name": "Entity4",
+            "ShowInEditor": true
+        }
+    ]
+}

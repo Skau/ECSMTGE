@@ -42,12 +42,6 @@ void App::initTheRest()
     connect(mMainWindow.get(), &MainWindow::loadScene, this, &App::loadScene);
     mMainWindow->setEntityManager(mWorld->getEntityManager());
 
-    // Temp solution, this is just for script system experimentation
-    connect(mWorld->getEntityManager().get(), &EntityManager::refreshWidgets, mMainWindow.get(), &MainWindow::refreshWidgets);
-
-    // Script System needs the entity manager so data is available in scripts
-    ScriptSystem::get()->setEntityManager(mWorld->getEntityManager());
-
     // Load editor session data
     loadSession("session.json");
 
@@ -216,26 +210,25 @@ void App::update()
     // Tick scripts if playing
     if(mCurrentlyPlaying)
     {
-        auto scriptSystem = ScriptSystem::get();
         auto& scripts = mWorld->getEntityManager()->getScriptComponents();
 
-        scriptSystem->updateJSComponents(scripts);
+        ScriptSystem::get()->updateJSComponents(scripts);
 
-        scriptSystem->tick(mDeltaTime, scripts);
+        ScriptSystem::get()->tick(mDeltaTime, scripts);
 
         auto& inputs = mWorld->getEntityManager()->getInputComponents();
-        scriptSystem->runKeyPressedEvent(scripts, inputs, mEventHandler->inputPressedStrings);
-        scriptSystem->runKeyReleasedEvent(scripts, inputs, mEventHandler->inputReleasedStrings);
-        scriptSystem->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
+        ScriptSystem::get()->runKeyPressedEvent(scripts, inputs, mEventHandler->inputPressedStrings);
+        ScriptSystem::get()->runKeyReleasedEvent(scripts, inputs, mEventHandler->inputReleasedStrings);
+        ScriptSystem::get()->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
 
         mEventHandler->inputReleasedStrings.clear();
 
         if(hitInfos.size())
         {
-            scriptSystem->runHitEvents(scripts, hitInfos);
+            ScriptSystem::get()->runHitEvents(scripts, hitInfos);
         }
 
-        scriptSystem->updateCPPComponents(scripts);
+        ScriptSystem::get()->updateCPPComponents(scripts);
     }
 
     currentlyUpdating = false;

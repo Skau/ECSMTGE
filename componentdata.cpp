@@ -5,6 +5,7 @@
 #include "soundmanager.h"
 #include "qentity.h"
 #include <QFileInfo>
+#include "world.h"
 
 void TransformComponent::addPosition(const gsl::vec3 &pos)
 {
@@ -85,27 +86,36 @@ void TransformComponent::fromJSON(QJsonObject object)
     auto childsArray = object["Children"].toArray();
     for(auto child : childsArray)
     {
-        children.push_back(static_cast<unsigned>(child.toInt()));
+        auto baby = static_cast<unsigned>(child.toInt());
+        if (std::find(children.begin(), children.end(), baby) == children.end())
+            children.push_back(baby);
     }
 
-    auto positionArray = object["Position"].toArray();
-    setPosition({static_cast<float>(positionArray[0].toDouble()),
-                 static_cast<float>(positionArray[1].toDouble()),
-                 static_cast<float>(positionArray[2].toDouble())});
+    auto &world = World::getWorld();
 
+    auto positionArray = object["Position"].toArray();
+    world.getEntityManager()->setTransformPos(entityId, {
+                                                  static_cast<float>(positionArray[0].toDouble()),
+                                                  static_cast<float>(positionArray[1].toDouble()),
+                                                  static_cast<float>(positionArray[2].toDouble())
+                                              });
 
     auto rotationArray = object["Rotation"].toArray();
-    setRotation({static_cast<float>(rotationArray[0].toDouble()),
-                 static_cast<float>(rotationArray[1].toDouble()),
-                 static_cast<float>(rotationArray[2].toDouble()),
-                 static_cast<float>(rotationArray[3].toDouble())});
+    world.getEntityManager()->setTransformRot(entityId, {
+                                                  static_cast<float>(rotationArray[0].toDouble()),
+                                                  static_cast<float>(rotationArray[1].toDouble()),
+                                                  static_cast<float>(rotationArray[2].toDouble()),
+                                                  static_cast<float>(rotationArray[3].toDouble())
+                                              });
 
 
 
     auto scaleArray = object["Scale"].toArray();
-    setScale({static_cast<float>(scaleArray[0].toDouble()),
-              static_cast<float>(scaleArray[1].toDouble()),
-              static_cast<float>(scaleArray[2].toDouble())});
+    world.getEntityManager()->setTransformScale(entityId, {
+                                                    static_cast<float>(scaleArray[0].toDouble()),
+                                                    static_cast<float>(scaleArray[1].toDouble()),
+                                                    static_cast<float>(scaleArray[2].toDouble())
+                                                });
 }
 
 QJsonObject ScriptComponent::toJSON()

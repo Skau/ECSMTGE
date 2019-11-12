@@ -290,15 +290,14 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     // ** Forward shading ** //
     /// Draw foward here
 
+    geometryPass(renders, transforms, camera, ShaderType::Forward);
+    // Skybox
+    renderSkybox(camera);
+
     // Axis
     // Need to disable depth testing, or else the axis will sometimes appear behind other meshes
     glDisable(GL_DEPTH_TEST);
     renderAxis(camera);
-
-    glEnable(GL_DEPTH_TEST);
-    geometryPass(renders, transforms, camera, ShaderType::Forward);
-    // Skybox
-    renderSkybox(camera);
 }
 
 void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera,

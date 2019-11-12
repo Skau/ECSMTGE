@@ -165,6 +165,7 @@ void App::update()
 
     auto scriptSystem = ScriptSystem::get();
 
+    // Get current camera
     CameraComponent* currentCamera{nullptr};
     for(auto& camera : mWorld->getEntityManager()->getCameraComponents())
     {
@@ -174,6 +175,7 @@ void App::update()
             break;
         }
     }
+    auto cameraTransform = mWorld->getEntityManager()->getComponent<TransformComponent>(currentCamera->entityId);
 
     // Tick scripts if playing
     if(mCurrentlyPlaying)
@@ -183,8 +185,6 @@ void App::update()
 
     // Input
     mEventHandler->updateMouse(mCurrentlyPlaying);
-
-    auto cameraTransform = mWorld->getEntityManager()->getComponent<TransformComponent>(currentCamera->entityId);
 
     // Editor Camera handles input if not playing
     if(!mCurrentlyPlaying)
@@ -199,6 +199,11 @@ void App::update()
         scriptSystem->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
 
         mEventHandler->inputReleasedStrings.clear();
+    }
+
+    if(!currentCamera->isEditorCamera)
+    {
+        qDebug() << "Yaw:" << currentCamera->yaw << "," << "Pitch:" << currentCamera->pitch;
     }
 
     CameraSystem::updateLookAtRotation(*cameraTransform, *currentCamera);
@@ -232,7 +237,6 @@ void App::update()
     // -------- Frustum culling here -----------
 
     // Rendering
-
     auto& renders = mWorld->getEntityManager()->getMeshComponents();
     mRenderer->render(renders, transforms, *currentCamera,
                       mWorld->getEntityManager()->getDirectionalLightComponents(),

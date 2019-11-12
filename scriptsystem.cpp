@@ -111,25 +111,22 @@ void ScriptSystem::runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, st
 
 void ScriptSystem::runMouseOffsetEvent(std::vector<ScriptComponent> &scripts, std::vector<InputComponent> &inputs, const QPoint& point)
 {
-    if(point.x() > 1.0f || point.y() > 1.0f)
+    for(auto& input : inputs)
     {
-        for(auto& input : inputs)
+        if(!input.controlledWhilePlaying)
+            continue;
+
+        for(auto& script : scripts)
         {
-            if(!input.controlledWhilePlaying)
+            if(!script.filePath.size())
                 continue;
 
-            for(auto& script : scripts)
-            {
-                if(!script.filePath.size())
-                    continue;
-
-                QJSValueList list;
-                auto array = script.engine->newArray(2);
-                array.setProperty(0, point.x());
-                array.setProperty(1, point.y());
-                list << array;
-                call(script, "mouseMoved", list);
-            }
+            QJSValueList list;
+            auto array = script.engine->newArray(2);
+            array.setProperty(0, point.x());
+            array.setProperty(1, point.y());
+            list << array;
+            call(script, "mouseMoved", list);
         }
     }
 }

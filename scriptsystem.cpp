@@ -537,7 +537,7 @@ void ScriptSystem::updateCPPComponents()
             for(auto object : objects)
             {
                 // Get component that matches the type
-               Component* comp;
+               Component* comp{nullptr};
                switch (static_cast<ComponentType>(object["ComponentType"].toInt()))
                {
                case ComponentType::Other:
@@ -600,6 +600,11 @@ void ScriptSystem::updateCPPComponents()
                    comp = entityManager->getComponent<ColliderComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
                }
+               case ComponentType::Particle:
+               {
+                   comp = entityManager->getComponent<ParticleComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                   break;
+               }
                }
 
                if(comp)
@@ -639,7 +644,7 @@ void ScriptSystem::updateJSComponents(ScriptComponent& comp)
 
                 object.remove("ID");
                 // Get component that matches the type
-               Component* component;
+               Component* component{nullptr};
                switch (static_cast<ComponentType>(object["ComponentType"].toInt()))
                {
                case ComponentType::Other:
@@ -700,6 +705,11 @@ void ScriptSystem::updateJSComponents(ScriptComponent& comp)
                case ComponentType::Collider:
                {
                    component = entityManager->getComponent<ColliderComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                   break;
+               }
+               case ComponentType::Particle:
+               {
+                   component = entityManager->getComponent<ParticleComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
                }
                }

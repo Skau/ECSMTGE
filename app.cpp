@@ -66,13 +66,11 @@ void App::initTheRest()
     // Send skybox data to renderer
 
     auto skyboxMesh = ResourceManager::instance()->getMesh("skybox");
-
     auto skyboxMaterial = std::make_shared<Material>();
     auto skyShader = ResourceManager::instance()->getShader("skybox");
     skyboxMaterial->mShader = skyShader;
     auto texture = ResourceManager::instance()->getTexture("skybox");
     skyboxMaterial->mTextures.push_back({texture->id(), texture->mType});
-
     mRenderer->mSkyboxMesh = skyboxMesh;
     mRenderer->mSkyboxMaterial = skyboxMaterial;
 
@@ -80,10 +78,8 @@ void App::initTheRest()
 
     auto axisMesh = ResourceManager::instance()->getMesh("axis");
     axisMesh->mRenderType = GL_LINES;
-
     auto axisMaterial = std::make_shared<Material>();
     axisMaterial->mShader = ResourceManager::instance()->getShader("axis");
-
     mRenderer->mAxisMesh = axisMesh;
     mRenderer->mAxisMaterial = axisMaterial;
 
@@ -155,14 +151,6 @@ void App::update()
 
     calculateFrames();
 
-    // Get all necessary components that are reused for systems
-    auto& colliders     = mWorld->getEntityManager()->getColliderComponents();
-    auto& inputs        = mWorld->getEntityManager()->getInputComponents();
-    auto& physics       = mWorld->getEntityManager()->getPhysicsComponents();
-    auto& sounds        = mWorld->getEntityManager()->getSoundComponents();
-    auto& scripts       = mWorld->getEntityManager()->getScriptComponents();
-    auto& transforms    = mWorld->getEntityManager()->getTransformComponents();
-
     auto scriptSystem = ScriptSystem::get();
 
     // Get current camera
@@ -175,7 +163,8 @@ void App::update()
             break;
         }
     }
-    auto cameraTransform = mWorld->getEntityManager()->getComponent<TransformComponent>(currentCamera->entityId);
+
+    auto& scripts = mWorld->getEntityManager()->getScriptComponents();
 
     // Tick scripts if playing
     if(mCurrentlyPlaying)
@@ -186,14 +175,18 @@ void App::update()
     // Input
     mEventHandler->updateMouse(mCurrentlyPlaying);
 
+    auto cameraTransform = mWorld->getEntityManager()->getComponent<TransformComponent>(currentCamera->entityId);
+
     // Editor Camera handles input if not playing
     if(!mCurrentlyPlaying)
     {
+
         InputSystem::HandleEditorCameraInput(mDeltaTime, *cameraTransform, *currentCamera);
     }
     // Send input to scripts if playing
     else
     {
+        auto& inputs = mWorld->getEntityManager()->getInputComponents();
         scriptSystem->runKeyPressedEvent(scripts, inputs, mEventHandler->inputPressedStrings);
         scriptSystem->runKeyReleasedEvent(scripts, inputs, mEventHandler->inputReleasedStrings);
         scriptSystem->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
@@ -201,12 +194,11 @@ void App::update()
         mEventHandler->inputReleasedStrings.clear();
     }
 
-    if(!currentCamera->isEditorCamera)
-    {
-        qDebug() << "Yaw:" << currentCamera->yaw << "," << "Pitch:" << currentCamera->pitch;
-    }
-
     CameraSystem::updateLookAtRotation(*cameraTransform, *currentCamera);
+
+    auto& transforms    = mWorld->getEntityManager()->getTransformComponents();
+    auto& physics       = mWorld->getEntityManager()->getPhysicsComponents();
+    auto& colliders     = mWorld->getEntityManager()->getColliderComponents();
 
     // Physics:
     /* Note: Physics calculation should be happening on a separate thread
@@ -222,6 +214,8 @@ void App::update()
     // Sound
     // Sound listener is using the active camera view matrix (for directions) and transform (for position)
     mSoundListener->update(*currentCamera, *cameraTransform);
+
+    auto& sounds = mWorld->getEntityManager()->getSoundComponents();
 
     SoundManager::UpdatePositions(transforms, sounds);
     SoundManager::UpdateVelocities(physics, sounds);
@@ -331,9 +325,9 @@ void App::calculateFrames()
     ++mFrameCounter;
     mTotalDeltaTime += mDeltaTime;
     double elapsed = mFPSTimer.elapsed();
-    if(elapsed >= 100)
+    if(elapsed >= 1000)
     {
-        mMainWindow->updateStatusBar(mRenderer->getNumberOfVerticesDrawn(), mTotalDeltaTime / mFrameCounter, mFrameCounter / mTotalDeltaTime);
+        mMainWindow->updateStatusBar(mRenderer->getNumberOfVerticesDrawn(), (mTotalDeltaTime / mFrameCounter) * 1000.f, mFrameCounter / mTotalDeltaTime);
         mFrameCounter = 0;
         mTotalDeltaTime = 0;
         mFPSTimer.restart();

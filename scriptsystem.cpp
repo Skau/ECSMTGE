@@ -537,73 +537,73 @@ void ScriptSystem::updateCPPComponents()
             for(auto object : objects)
             {
                 // Get component that matches the type
-               Component* comp;
-               switch (static_cast<ComponentType>(object["ComponentType"].toInt()))
-               {
-               case ComponentType::Other:
-               {
+                Component* comp{nullptr};
+                switch (static_cast<ComponentType>(object["ComponentType"].toInt()))
+                {
+                case ComponentType::Other:
+                {
                     comp = entityManager->getComponent<EntityInfo>(static_cast<unsigned>(object["ID"].toInt()));
                     break;
-               }
-               case ComponentType::Mesh:
-               {
+                }
+                case ComponentType::Mesh:
+                {
                     comp = entityManager->getComponent<MeshComponent>(static_cast<unsigned>(object["ID"].toInt()));
                     break;
-               }
-               case ComponentType::Transform:
-               {
+                }
+                case ComponentType::Transform:
+                {
                    comp = entityManager->getComponent<TransformComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
-               }
-               case ComponentType::Camera:
-               {
+                }
+                case ComponentType::Camera:
+                {
                    comp = entityManager->getComponent<CameraComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
-               }
-               case ComponentType::Physics:
-               {
+                }
+                case ComponentType::Physics:
+                {
                    comp = entityManager->getComponent<PhysicsComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
-               }
-               case ComponentType::Input:
-               {
+                }
+                case ComponentType::Input:
+                {
                    comp = entityManager->getComponent<InputComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
-               }
-               case ComponentType::Sound:
-               {
+                }
+                case ComponentType::Sound:
+                {
                    comp = entityManager->getComponent<SoundComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
-               }
-               case ComponentType::LightSpot:
-               {
+                }
+                case ComponentType::LightSpot:
+                {
                    comp = entityManager->getComponent<SpotLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
-               }
-               case ComponentType::LightPoint:
-               {
+                }
+                case ComponentType::LightPoint:
+                {
                    comp = entityManager->getComponent<PointLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
-               }
-               case ComponentType::LightDirectional:
-               {
+                }
+                case ComponentType::LightDirectional:
+                {
                    comp = entityManager->getComponent<DirectionalLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
-               }
-               case ComponentType::Script:
-               {
+                }
+                case ComponentType::Script:
+                {
                    comp = entityManager->getComponent<ScriptComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
-               }
-               case ComponentType::Collider:
-               {
+                }
+                case ComponentType::Collider:
+                {
                    comp = entityManager->getComponent<ColliderComponent>(static_cast<unsigned>(object["ID"].toInt()));
                    break;
-               }
-               }
+                }
+                }
 
-               if(comp)
-               {
+                if(comp)
+                {
                    object.remove("ID");
                    // Check if they are different
                    // If they are different this component was modified in JS
@@ -613,7 +613,7 @@ void ScriptSystem::updateCPPComponents()
                    {
                        comp->fromJSON(object);
                    }
-               }
+                }
             }
         }
     }

@@ -1,9 +1,15 @@
 #include "world.h"
 #include "resourcemanager.h"
 #include "entitymanager.h"
+#include <cassert>
+
+World* World::mWorldInstance{nullptr};
 
 World::World()
 {
+    // Set yourself to be the singleton instance
+    mWorldInstance = this;
+
     // Forward
     ResourceManager::instance()->addShader("singleColor",       std::make_shared<Shader>("white.vert", "singleColor.frag", ShaderType::Forward));
 
@@ -52,8 +58,11 @@ World::World()
     entityManager = std::make_shared<EntityManager>();
 }
 
-World::~World()
+World &World::getWorld()
 {
+    // Must check for this, because this should never be the case
+    assert(mWorldInstance != nullptr);
+    return *mWorldInstance;
 }
 
 void World::initBlankScene()
@@ -133,3 +142,9 @@ std::optional<std::string> World::sceneFilePath() const
 
     return std::nullopt;
 }
+
+World::~World()
+{
+    mWorldInstance = nullptr;
+}
+

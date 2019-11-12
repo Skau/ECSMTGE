@@ -36,7 +36,7 @@ App::App()
 // Slot called from Renderer when its done with initialization
 void App::initTheRest()
 {
-    mWorld = std::make_unique<World>();
+    mWorld = std::unique_ptr<World>(new World{});
     connect(mMainWindow.get(), &MainWindow::newScene, this, &App::newScene);
     connect(mMainWindow.get(), &MainWindow::saveScene, this, &App::saveScene);
     connect(mMainWindow.get(), &MainWindow::loadScene, this, &App::loadScene);

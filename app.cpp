@@ -151,8 +151,6 @@ void App::update()
 
     calculateFrames();
 
-    auto scriptSystem = ScriptSystem::get();
-
     // Get current camera
     CameraComponent* currentCamera{nullptr};
     for(auto& camera : mWorld->getEntityManager()->getCameraComponents())
@@ -164,33 +162,13 @@ void App::update()
         }
     }
 
-    auto& scripts = mWorld->getEntityManager()->getScriptComponents();
-
-    // Tick scripts if playing
-    if(mCurrentlyPlaying)
-    {
-        scriptSystem->tick(mDeltaTime, scripts);
-    }
-
-    // Input
     mEventHandler->updateMouse(mCurrentlyPlaying);
 
     auto cameraTransform = mWorld->getEntityManager()->getComponent<TransformComponent>(currentCamera->entityId);
 
-    // Editor Camera handles input if not playing
     if(!mCurrentlyPlaying)
     {
         InputSystem::HandleEditorCameraInput(mDeltaTime, *cameraTransform, *currentCamera);
-    }
-    // Send input to scripts if playing
-    else
-    {
-        auto& inputs = mWorld->getEntityManager()->getInputComponents();
-        scriptSystem->runKeyPressedEvent(scripts, inputs, mEventHandler->inputPressedStrings);
-        scriptSystem->runKeyReleasedEvent(scripts, inputs, mEventHandler->inputReleasedStrings);
-        scriptSystem->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
-
-        mEventHandler->inputReleasedStrings.clear();
     }
 
     CameraSystem::updateLookAtRotation(*cameraTransform, *currentCamera);
@@ -205,10 +183,6 @@ void App::update()
      * and then later apply those copies to the original lists.
      */
      auto hitInfos = PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
-     if(mCurrentlyPlaying && hitInfos.size())
-     {
-         scriptSystem->runHitEvents(scripts, hitInfos);
-     }
 
     // Sound
     // Sound listener is using the active camera view matrix (for directions) and transform (for position)
@@ -237,8 +211,32 @@ void App::update()
                       mWorld->getEntityManager()->getPointLightComponents(),
                       mWorld->getEntityManager()->getParticleComponents());
 
-    // Update JS comps
-    scriptSystem->updateJSComponents(scripts);
+    // JAVASCRIPT HERE
+
+    // Tick scripts if playing
+    if(mCurrentlyPlaying)
+    {
+        auto scriptSystem = ScriptSystem::get();
+        auto& scripts = mWorld->getEntityManager()->getScriptComponents();
+
+        scriptSystem->updateJSComponents(scripts);
+
+        scriptSystem->tick(mDeltaTime, scripts);
+
+        auto& inputs = mWorld->getEntityManager()->getInputComponents();
+        scriptSystem->runKeyPressedEvent(scripts, inputs, mEventHandler->inputPressedStrings);
+        scriptSystem->runKeyReleasedEvent(scripts, inputs, mEventHandler->inputReleasedStrings);
+        scriptSystem->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
+
+        mEventHandler->inputReleasedStrings.clear();
+
+        if(hitInfos.size())
+        {
+            scriptSystem->runHitEvents(scripts, hitInfos);
+        }
+
+        scriptSystem->updateCPPComponents(scripts);
+    }
 
     currentlyUpdating = false;
 }

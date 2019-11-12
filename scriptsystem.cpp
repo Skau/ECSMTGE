@@ -75,7 +75,6 @@ void ScriptSystem::runKeyPressedEvent(std::vector<ScriptComponent>& scripts, std
             }
             list << array;
             call(script, "inputPressed", list);
-
         }
     }
 }
@@ -171,6 +170,17 @@ void ScriptSystem::updateJSComponents(std::vector<ScriptComponent>& comps)
     }
 }
 
+void ScriptSystem::updateCPPComponents(std::vector<ScriptComponent> &comps)
+{
+    for(auto& comp : comps)
+    {
+        if(comp.filePath.size())
+        {
+            updateCPPComponent(comp);
+        }
+    }
+}
+
 QString ScriptSystem::checkError(QJSValue value)
 {
     QString lineNumber = QString::number(value.property("lineNumber").toInt());
@@ -254,7 +264,6 @@ void ScriptSystem::call(ScriptComponent& comp, const std::string& function)
         return;
     }
 
-    updateCPPComponents();
     currentComp = nullptr;
     currentFileName = "";
     return;
@@ -287,7 +296,6 @@ void ScriptSystem::call(ScriptComponent &comp, const std::string& function, QJSV
         return;
     }
 
-    updateCPPComponents();
     currentComp = nullptr;
     currentFileName = "";
     return;
@@ -722,6 +730,112 @@ void ScriptSystem::updateJSComponent(ScriptComponent& comp)
                     if(object != newJson)
                     {
                         comp.engine->globalObject().property("accessedComponents").setProperty(i, comp.engine->toScriptValue(newJson));
+                    }
+                }
+            }
+        }
+    }
+}
+
+void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
+{
+    if(!comp.filePath.size())
+        return;
+
+    auto componentArray = comp.engine->globalObject().property("accessedComponents");
+    if(!componentArray.isUndefined() && !componentArray.isNull())
+    {
+        auto length = componentArray.property("length").toInt();
+        if(length > 0)
+        {
+            for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
+            {
+                auto object = QJsonValue::fromVariant(componentArray.property(i).toVariant()).toObject();
+
+                if(object.isEmpty())
+                    continue;
+
+                // Get component that matches the type
+                Component* component{nullptr};
+                switch (static_cast<ComponentType>(object["ComponentType"].toInt()))
+                {
+                case ComponentType::Other:
+                {
+                    component = entityManager->getComponent<EntityInfo>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::Mesh:
+                {
+                    component = entityManager->getComponent<MeshComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::Transform:
+                {
+                    component = entityManager->getComponent<TransformComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::Camera:
+                {
+                    component = entityManager->getComponent<CameraComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::Physics:
+                {
+                    component = entityManager->getComponent<PhysicsComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::Input:
+                {
+                    component = entityManager->getComponent<InputComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::Sound:
+                {
+                    component = entityManager->getComponent<SoundComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::LightSpot:
+                {
+                    component = entityManager->getComponent<SpotLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::LightPoint:
+                {
+                    component = entityManager->getComponent<PointLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::LightDirectional:
+                {
+                    component = entityManager->getComponent<DirectionalLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::Script:
+                {
+                    component = entityManager->getComponent<ScriptComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::Collider:
+                {
+                    component = entityManager->getComponent<ColliderComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                case ComponentType::Particle:
+                {
+                    component = entityManager->getComponent<ParticleComponent>(static_cast<unsigned>(object["ID"].toInt()));
+                    break;
+                }
+                }
+
+                if(component)
+                {
+                    object.remove("ID");
+
+                    // If they are different this component was modified in JS
+                    // and we need to update the C++ version
+                    auto oldJson = component->toJSON();
+                    if(object != oldJson)
+                    {
+                        component->fromJSON(object);
                     }
                 }
             }

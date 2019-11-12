@@ -42,6 +42,8 @@ public:
      */
     void updateJSComponents(std::vector<ScriptComponent>& comps);
 
+    void updateCPPComponents(std::vector<ScriptComponent>& comps);
+
     // EntityManager given by App
     void setEntityManager(std::shared_ptr<EntityManager> entityManager){ this->entityManager = entityManager; }
 
@@ -129,6 +131,7 @@ private:
      * @param Script component to update
      */
     void updateJSComponent(ScriptComponent& comp);
+    void updateCPPComponent(ScriptComponent& comp);
 
     void initializeJSEntity(ScriptComponent &comp);
 

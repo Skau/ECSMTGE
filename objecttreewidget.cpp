@@ -30,7 +30,8 @@ void ObjectTreeWidget::dropEvent(QDropEvent* event)
         {
             if(auto transform = mMainWindow->getEntityManager()->getComponent<TransformComponent>(destinationEntity->entityId))
             {
-                transform->children.push_back(currentEntity->entityId);
+                if (std::find(transform->children.begin(), transform->children.end(), currentEntity->entityId) == transform->children.end())
+                    transform->children.push_back(currentEntity->entityId);
             }
         }
     }

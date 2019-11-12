@@ -10,10 +10,18 @@ class EntityManager;
 class World : public QObject
 {
     Q_OBJECT
+    friend class App;
+
+private:
+    World();
+
+    static World* mWorldInstance;
 
 public:
-    World();
-    ~World();
+    World(const World& wld) = delete;
+    World& operator= (const World& wld) = delete;
+
+    static World& getWorld();
 
     std::shared_ptr<EntityManager> getEntityManager() { return entityManager; }
 
@@ -34,6 +42,8 @@ public:
     void loadScene(const std::string& path);
 
     void newScene();
+
+    ~World();
 
 private:
     std::unique_ptr<Scene> mCurrentScene;

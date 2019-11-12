@@ -128,7 +128,9 @@ private:
      * @brief Updates all JS Components for a given JS engine from the respective CPP components. Called once at the end of every frame.
      * @param Script component to update
      */
-    void updateJSComponents(ScriptComponent& comp);
+    void updateJSComponent(ScriptComponent& comp);
+
+    void initializeJSEntity(ScriptComponent &comp);
 
     // Cached
     ScriptComponent* currentComp;

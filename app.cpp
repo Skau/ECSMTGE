@@ -180,7 +180,6 @@ void App::update()
     // Editor Camera handles input if not playing
     if(!mCurrentlyPlaying)
     {
-
         InputSystem::HandleEditorCameraInput(mDeltaTime, *cameraTransform, *currentCamera);
     }
     // Send input to scripts if playing

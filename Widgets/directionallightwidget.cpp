@@ -1,7 +1,7 @@
 #include "directionallightwidget.h"
 #include "ui_directionallight.h"
 #include "mainwindow.h"
-#include "entitymanager.h"
+#include "world.h"
 #include <QColorDialog>
 
 DirectionalLightWidget::DirectionalLightWidget(MainWindow *mainWindow, QWidget *parent) :
@@ -13,7 +13,7 @@ DirectionalLightWidget::DirectionalLightWidget(MainWindow *mainWindow, QWidget *
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(auto comp = mMainWindow->getEntityManager()->getComponent<DirectionalLightComponent>(entity->entityId))
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<DirectionalLightComponent>(entity->entityId))
         {
             isUpdating = true;
             initialColor =  QColor(
@@ -46,7 +46,7 @@ void DirectionalLightWidget::Remove()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(mMainWindow->getEntityManager()->removeComponent<DirectionalLightComponent>(entity->entityId))
+        if(World::getWorld().getEntityManager()->removeComponent<DirectionalLightComponent>(entity->entityId))
         {
             widgetRemoved(this);
         }
@@ -59,7 +59,7 @@ void DirectionalLightWidget::on_button_ChangeColor_clicked()
     {
         QColor color = QColorDialog::getColor(initialColor, this, "Change light color");
 
-        if(auto comp = mMainWindow->getEntityManager()->getComponent<DirectionalLightComponent>(entity->entityId))
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<DirectionalLightComponent>(entity->entityId))
         {
             comp->color = gsl::vec3(static_cast<float>(color.redF()), static_cast<float>(color.greenF()), static_cast<float>(color.blueF()));
             initialColor = color;

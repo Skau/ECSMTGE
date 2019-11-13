@@ -1,9 +1,8 @@
 #include "objecttreewidget.h"
 #include <QDropEvent>
 #include <QDebug>
-#include <QMimeData>
 #include "mainwindow.h"
-#include "entitymanager.h"
+#include "world.h"
 
 ObjectTreeWidget::ObjectTreeWidget(QWidget* parent) : QTreeWidget(parent)
 {
@@ -20,7 +19,7 @@ void ObjectTreeWidget::dropEvent(QDropEvent* event)
     {
         if(parentEntity)
         {
-            if(auto transform = mMainWindow->getEntityManager()->getComponent<TransformComponent>(parentEntity->entityId))
+            if(auto transform = World::getWorld().getEntityManager()->getComponent<TransformComponent>(parentEntity->entityId))
             {
                 transform->children.erase(std::remove(transform->children.begin(), transform->children.end(), currentEntity->entityId), transform->children.end());
             }
@@ -28,7 +27,7 @@ void ObjectTreeWidget::dropEvent(QDropEvent* event)
 
         if(destinationEntity)
         {
-            if(auto transform = mMainWindow->getEntityManager()->getComponent<TransformComponent>(destinationEntity->entityId))
+            if(auto transform = World::getWorld().getEntityManager()->getComponent<TransformComponent>(destinationEntity->entityId))
             {
                 if (std::find(transform->children.begin(), transform->children.end(), currentEntity->entityId) == transform->children.end())
                     transform->children.push_back(currentEntity->entityId);

@@ -8,6 +8,7 @@
 #include <QTreeView>
 #include <QTreeWidgetItem>
 
+#include "world.h"
 #include "renderer.h"
 #include "Widgets/transformwidget.h"
 #include "Widgets/meshwidget.h"
@@ -39,7 +40,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->OpenGLLayout->setLayout(layout);
     ui->OpenGLLayout->layout()->addWidget(mRenderWindowContainer);
 
-    //ui->OpenGLLayout->addWidget(mRenderWindowContainer);
     mRenderWindowContainer->setFocus();
 
     resize(QDesktopWidget().availableGeometry(this).size() * 0.7);
@@ -75,15 +75,6 @@ void MainWindow::updateStatusBar(int vertices, float deltaTime, float frameCount
                              + QString::number(static_cast<double>(deltaTime), 'g', 4)
                              + " ms  |  " + "FPS: "
                              + QString::number(static_cast<double>(frameCounter), 'g', 4));
-}
-
-void MainWindow::setEntityManager(std::shared_ptr<EntityManager> entityManager)
-{
-    // Cach
-    mEntityManager = entityManager;
-
-    // Called from Entitymanager to refresh the tree widget showing all entities
-    connect(mEntityManager.get(), &EntityManager::updateUI, this, &MainWindow::updateUI);
 }
 
 EntityInfo* MainWindow::getEntityAt(QTreeWidgetItem* item)
@@ -124,17 +115,17 @@ void MainWindow::refreshWidgets()
 
 void MainWindow::on_actionEmpty_Object_triggered()
 {
-    mEntityManager->createObject(0);
+    World::getWorld().getEntityManager()->createObject(0);
 }
 
 void MainWindow::on_actionCube_triggered()
 {
-     mEntityManager->createObject(1);
+     World::getWorld().getEntityManager()->createObject(1);
 }
 
 void MainWindow::on_actionMonkey_triggered()
 {
-    mEntityManager->createObject(2);
+    World::getWorld().getEntityManager()->createObject(2);
 }
 
 void MainWindow::on_actionPlay_triggered(bool value)
@@ -201,7 +192,7 @@ void MainWindow::updateComponentArea(unsigned int entityID)
 
     // Get the components for this entity
     std::vector<Component*> components;
-    if(mEntityManager->getAllComponents(entityID, components))
+    if(World::getWorld().getEntityManager()->getAllComponents(entityID, components))
     {
         // Components were found, add them
 
@@ -374,7 +365,7 @@ void MainWindow::on_button_AddComponent_clicked()
         auto type = mAvailableComponentsToAddCache[static_cast<size_t>(index)];
 
         // Add the component
-        mEntityManager->addComponent(id, type);
+        World::getWorld().getEntityManager()->addComponent(id, type);
 
         // Refresh the UI with the components that the entity noew has
         updateComponentArea(id);

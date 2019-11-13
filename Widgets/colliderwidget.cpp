@@ -1,9 +1,9 @@
 #include "colliderwidget.h"
 #include "ui_collider.h"
 #include "mainwindow.h"
-#include "entitymanager.h"
+#include "world.h"
 #include <QDoubleSpinBox>
-#include <memory>
+
 
 ColliderWidget::ColliderWidget(MainWindow *mainWindow, QWidget *parent)
     : ComponentWidget(mainWindow, parent), ui(new Ui::Collider)
@@ -45,7 +45,7 @@ void ColliderWidget::Remove()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(mMainWindow->getEntityManager()->removeComponent<ColliderComponent>(entity->entityId))
+        if(World::getWorld().getEntityManager()->removeComponent<ColliderComponent>(entity->entityId))
         {
             widgetRemoved(this);
         }
@@ -221,7 +221,7 @@ void ColliderWidget::updateParameters()
 ColliderComponent *ColliderWidget::getColliderComponent()
 {
     if (auto entity = mMainWindow->currentEntitySelected)
-        if (auto comp = mMainWindow->getEntityManager()->getComponent<ColliderComponent>(entity->entityId))
+        if (auto comp = World::getWorld().getEntityManager()->getComponent<ColliderComponent>(entity->entityId))
             return comp;
 
     return nullptr;
@@ -230,7 +230,7 @@ ColliderComponent *ColliderWidget::getColliderComponent()
 TransformComponent *ColliderWidget::getTransformComponent()
 {
     if (auto entity = mMainWindow->currentEntitySelected)
-        if (auto comp = mMainWindow->getEntityManager()->getComponent<TransformComponent>(entity->entityId))
+        if (auto comp = World::getWorld().getEntityManager()->getComponent<TransformComponent>(entity->entityId))
             return comp;
 
     return nullptr;

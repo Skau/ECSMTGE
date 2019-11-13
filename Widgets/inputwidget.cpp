@@ -1,7 +1,7 @@
 #include "inputwidget.h"
 #include "mainwindow.h"
 #include "ui_input.h"
-#include "entitymanager.h"
+#include "world.h"
 
 InputWidget::InputWidget(MainWindow *mainWindow, QWidget *parent)
     : ComponentWidget(mainWindow, parent), ui(new Ui::Input)
@@ -12,7 +12,7 @@ InputWidget::InputWidget(MainWindow *mainWindow, QWidget *parent)
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(auto input = mMainWindow->getEntityManager()->getComponent<InputComponent>(entity->entityId))
+        if(auto input = World::getWorld().getEntityManager()->getComponent<InputComponent>(entity->entityId))
         {
             auto checkState = input->controlledWhilePlaying ? Qt::CheckState::Checked : Qt::CheckState::Unchecked;
             ui->checkBox_IsBeingControlled->setCheckState(checkState);
@@ -42,7 +42,7 @@ void InputWidget::on_checkBox_IsBeingControlled_toggled(bool checked)
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(auto comp = mMainWindow->getEntityManager()->getComponent<InputComponent>(entity->entityId))
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<InputComponent>(entity->entityId))
         {
             comp->controlledWhilePlaying = checked;
         }
@@ -54,7 +54,7 @@ void InputWidget::Remove()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(mMainWindow->getEntityManager()->removeComponent<InputComponent>(entity->entityId))
+        if(World::getWorld().getEntityManager()->removeComponent<InputComponent>(entity->entityId))
         {
             widgetRemoved(this);
         }

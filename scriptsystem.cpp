@@ -757,4 +757,14 @@ void ScriptSystem::initializeHelperFuncs()
 
     mHelperFuncs = file.readAll();
     file.close();
+
+    file.setFileName("../INNgine2019/JSMath.js");
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "ERROR Script System: Failed to find JSMath.js!";
+        return;
+    }
+
+    mHelperFuncs.prepend(file.readAll());
+    file.close();
 }

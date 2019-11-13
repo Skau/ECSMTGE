@@ -543,8 +543,6 @@ void ScriptSystem::updateJSComponent(ScriptComponent& comp)
 
                 auto entityManager = World::getWorld().getEntityManager();
 
-                object.remove("ID");
-
                 // Get component that matches the type
                 Component* component{nullptr};
                 switch (static_cast<ComponentType>(object["ComponentType"].toInt()))
@@ -618,12 +616,16 @@ void ScriptSystem::updateJSComponent(ScriptComponent& comp)
 
                 if(component)
                 {
+                    object.remove("ID");
+
                     // If they are different this component was modified in C++
                     // and we need to update the JS version
                     auto newJson = component->toJSON();
                     if(object != newJson)
                     {
-                        comp.engine->globalObject().property("accessedComponents").setProperty(i, comp.engine->toScriptValue(newJson));
+                        auto updatedComp = comp.engine->toScriptValue(newJson);
+                        for (auto key : newJson.keys())
+                            comp.engine->globalObject().property("accessedComponents").property(i).setProperty(key, updatedComp.property(key));
                     }
                 }
             }

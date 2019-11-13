@@ -13,7 +13,7 @@ function exists(comp)
 
 function addComponent(name, id = 0)
 {
-    let comp = me._addComponent(name, id);
+    const comp = me._addComponent(name, id);
     if(comp != null) {
         if (!exists(comp)) {
             accessedComponents.push(comp);

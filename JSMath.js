@@ -30,6 +30,49 @@ class Vec3
         this.norm = this.normalized;
     }
 
+    add(b)
+    {
+        if (typeof b === "number")
+        {
+            return new Vec3(this.x + b, this.y + b, this.z + b);
+        }
+        else if (b instanceof Vec3)
+        {
+            return new Vec3(this.x + b.x, this.y + b.y, this.z + b.z);
+        }
+
+        return undefined;
+    }
+
+    sub(b)
+    {
+        if (typeof b === "number")
+        {
+            return new Vec3(this.x - b, this.y - b, this.z - b);
+        }
+        else if (b instanceof Vec3)
+        {
+            return new Vec3(this.x - b.x, this.y - b.y, this.z - b.z);
+        }
+
+        return undefined;
+    }
+
+    mult(b)
+    {
+        if (typeof b === "number")
+        {
+            return new Vec3(this.x * b, this.y * b, this.z * b);
+        }
+        else if (b instanceof Vec3)
+        {
+            // Comp multiply, not dot product. Might be confusing...
+            return new Vec3(this.x * b.x, this.y * b.y, this.z * b.z);
+        }
+
+        return undefined;
+    }
+
     length()
     {
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);

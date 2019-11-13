@@ -29,35 +29,58 @@ function endPlay()
 // and control while playing is true
 function inputPressed(inputs)
 {
+	let cameraRot = new Quat(transform.Rotation);
+	cameraRot = cameraRot.inverse();
+	let fwd = cameraRot.forward();
+	let right = cameraRot.right();
+	let up = cameraRot.up();
+
+	let pos = new Vec3(transform.Position);
+
 	for (let i = 0; i < inputs.length; i++)
 	{
+		// let rotation = new Quat(transform.Rotation[0], transform.Rotation[1], transform.Rotation[2], transform.Rotation[3]);
+		// console.log("Rotation: " + rotation.s + ", " + rotation.i + ", " + rotation.j + ", " + rotation.k);
+		// console.log("Position: " + transform.Position[0] + ", " + transform.Position[1] + ", " + transform.Position[2]);
 		if(inputs[i] == "w")
 		{
-			transform.Position[2] -= moveSpeed * engine.deltaTime;
+			// transform.Position[2] -= moveSpeed * engine.deltaTime;
+			pos = pos.sub(fwd.mult(moveSpeed * engine.deltaTime));
 		}
 		else if(inputs[i] == "s")
 		{
-			transform.Position[2] += moveSpeed * engine.deltaTime;
+			// transform.Position[2] += moveSpeed * engine.deltaTime;
+			pos = pos.add(fwd.mult(moveSpeed * engine.deltaTime));
 		}
 		else if(inputs[i] == "a")
 		{
-			transform.Position[0] -= moveSpeed * engine.deltaTime;
+			// transform.Position[0] -= moveSpeed * engine.deltaTime;
+			pos = pos.sub(right.mult(moveSpeed * engine.deltaTime));
 		}
 		else if(inputs[i] == "d")
 		{
-			transform.Position[0] += moveSpeed * engine.deltaTime;
+			// transform.Position[0] += moveSpeed * engine.deltaTime;
+			pos = pos.add(right.mult(moveSpeed * engine.deltaTime));
 		}
 		else if(inputs[i] == "mouseLeft")
 		{
 			let entity = engine.spawnCube();
 
-			//let transformComp = entity.getComponent("transform");
-			//transformComp.Scale = [5.25, 2.25, 0.75];
+			// let transformComp = entity.getComponent("transform");
+			// transformComp.Scale = [5.25, 2.25, 0.75];
 
 			let physics = entity.addComponent("physics");
-			physics.Velocity[0] += 2;
+			// physics.Velocity[0] += 2;
+
+			physics.Velocity[0] = -fwd.x * 2;
+			physics.Velocity[1] = -fwd.y * 2;
+			physics.Velocity[2] = -fwd.z * 2;
 		}
 	}
+
+	transform.Position[0] = pos.x;
+	transform.Position[1] = pos.y;
+	transform.Position[2] = pos.z;
 }
 
 // This will be run when input is relased

@@ -1,7 +1,7 @@
 #include "scriptwidget.h"
 #include "ui_script.h"
 #include "mainwindow.h"
-#include "entitymanager.h"
+#include "world.h"
 #include <QFileDialog>
 #include "constants.h"
 #include "scriptsystem.h"
@@ -15,7 +15,7 @@ ScriptWidget::ScriptWidget(MainWindow* mainWindow, QWidget *parent) :
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
         {
             auto filePath = comp->filePath;
             if(filePath.size())
@@ -55,7 +55,7 @@ void ScriptWidget::Remove()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(mMainWindow->getEntityManager()->removeComponent<ScriptComponent>(entity->entityId))
+        if(World::getWorld().getEntityManager()->removeComponent<ScriptComponent>(entity->entityId))
         {
             widgetRemoved(this);
         }
@@ -73,7 +73,7 @@ void ScriptWidget::on_toolButton_clicked()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
         {
             QFileInfo info(fileName);
             auto name = QString::fromStdString(gsl::scriptsFilePath) + info.baseName() + ".js";
@@ -88,7 +88,7 @@ void ScriptWidget::on_button_ExecuteJS_clicked()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
         {
             ui->label_Status->clear();
             auto text = ui->textEdit_JSCode->toPlainText();
@@ -133,7 +133,7 @@ void ScriptWidget::on_button_NewFile_clicked()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
         {
             // If a .js file already exists, open it instead in the default text editor
             auto filePath = ui->lineEdit->text();

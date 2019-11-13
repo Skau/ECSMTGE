@@ -16,7 +16,6 @@ class MainWindow;
 
 enum class ComponentType;
 
-class EntityManager;
 class QTreeWidgetItem;
 class ComponentWidget;
 
@@ -27,17 +26,13 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
     void updateStatusBar(int vertices, float deltaTime, float frameCounter);
 
     Renderer* getRenderer() { return mRenderer; }
 
     Ui::MainWindow *ui;
-
-    void setEntityManager(std::shared_ptr<EntityManager> entityManager);
-
-    std::shared_ptr<EntityManager> getEntityManager() { return mEntityManager; }
 
     EntityInfo* currentEntitySelected{nullptr};
 
@@ -98,8 +93,6 @@ private:
 
     Renderer* mRenderer;
     QWidget *mRenderWindowContainer;
-
-    std::shared_ptr<EntityManager> mEntityManager;
 
     std::vector<EntityInfo> mEntityDataCache;
     std::vector<ComponentType> mAvailableComponentsToAddCache;

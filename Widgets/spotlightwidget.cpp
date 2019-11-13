@@ -1,7 +1,7 @@
 #include "spotlightwidget.h"
 #include "ui_spotlight.h"
 #include "mainwindow.h"
-#include "entitymanager.h"
+#include "world.h"
 #include <QColorDialog>
 
 SpotLightWidget::SpotLightWidget(MainWindow *mainWindow, QWidget *parent) :
@@ -13,7 +13,7 @@ SpotLightWidget::SpotLightWidget(MainWindow *mainWindow, QWidget *parent) :
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(auto comp = mMainWindow->getEntityManager()->getComponent<SpotLightComponent>(entity->entityId))
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<SpotLightComponent>(entity->entityId))
         {
             isUpdating = true;
             initialColor =  QColor(
@@ -46,7 +46,7 @@ void SpotLightWidget::Remove()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(mMainWindow->getEntityManager()->removeComponent<SpotLightComponent>(entity->entityId))
+        if(World::getWorld().getEntityManager()->removeComponent<SpotLightComponent>(entity->entityId))
         {
             widgetRemoved(this);
         }
@@ -60,7 +60,7 @@ void SpotLightWidget::on_button_ChangeColor_clicked()
     {
         QColor color = QColorDialog::getColor(initialColor, this, "Change light color");
 
-        if(auto comp = mMainWindow->getEntityManager()->getComponent<SpotLightComponent>(entity->entityId))
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<SpotLightComponent>(entity->entityId))
         {
             comp->color = gsl::vec3(static_cast<float>(color.redF()), static_cast<float>(color.greenF()), static_cast<float>(color.blueF()));
             initialColor = color;

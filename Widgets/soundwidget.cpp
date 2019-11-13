@@ -1,7 +1,7 @@
 #include "soundwidget.h"
 #include "mainwindow.h"
 #include "ui_sound.h"
-#include "entitymanager.h"
+#include "world.h"
 #include "soundmanager.h"
 #include "resourcemanager.h"
 #include <QFileDialog>
@@ -53,7 +53,7 @@ void SoundWidget::Remove()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(mMainWindow->getEntityManager()->removeComponent<SoundComponent>(entity->entityId))
+        if(World::getWorld().getEntityManager()->removeComponent<SoundComponent>(entity->entityId))
         {
             widgetRemoved(this);
         }
@@ -187,7 +187,7 @@ SoundComponent* SoundWidget::getSoundComponent()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(auto sound = mMainWindow->getEntityManager()->getComponent<SoundComponent>(entity->entityId))
+        if(auto sound = World::getWorld().getEntityManager()->getComponent<SoundComponent>(entity->entityId))
         {
            return sound;
         }

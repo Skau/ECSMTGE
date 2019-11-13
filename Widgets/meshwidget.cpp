@@ -4,7 +4,7 @@
 #include "constants.h"
 #include <QMenu>
 #include "mainwindow.h"
-#include "entitymanager.h"
+#include "world.h"
 #include "resourcemanager.h"
 #include "texture.h"
 #include <QLabel>
@@ -133,7 +133,7 @@ void MeshWidget::Remove()
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {
-        if(mMainWindow->getEntityManager()->removeComponent<MeshComponent>(entity->entityId))
+        if(World::getWorld().getEntityManager()->removeComponent<MeshComponent>(entity->entityId))
         {
             widgetRemoved(this);
         }
@@ -144,7 +144,7 @@ MeshComponent *MeshWidget::getRenderComponent()
 {
     if(auto entity = mMainWindow->currentEntitySelected)
     {
-        if(auto comp = mMainWindow->getEntityManager()->getComponent<MeshComponent>(entity->entityId))
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<MeshComponent>(entity->entityId))
         {
             return comp;
         }

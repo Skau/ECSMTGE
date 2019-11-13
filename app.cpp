@@ -40,7 +40,7 @@ void App::initTheRest()
     connect(mMainWindow.get(), &MainWindow::newScene, this, &App::newScene);
     connect(mMainWindow.get(), &MainWindow::saveScene, this, &App::saveScene);
     connect(mMainWindow.get(), &MainWindow::loadScene, this, &App::loadScene);
-    mMainWindow->setEntityManager(mWorld->getEntityManager());
+    connect(mWorld->getEntityManager().get(), &EntityManager::updateUI, mMainWindow.get(), &MainWindow::updateUI);
 
     // Load editor session data
     loadSession("session.json");

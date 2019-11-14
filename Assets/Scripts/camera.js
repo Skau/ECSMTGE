@@ -77,7 +77,7 @@ function inputPressed(inputs)
 
 			let transformComp = entity.getComponent("transform");
 			let newPos = pos;
-			//newPos = newPos.mult(fwd.mult(2));
+			newPos = newPos.sub(fwd.mult(1.5));
 
 			transformComp.Position[0] = newPos.x;
 			transformComp.Position[1] = newPos.y;

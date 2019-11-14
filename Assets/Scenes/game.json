@@ -8,15 +8,15 @@
                     "ColliderBoundsOutdated": true,
                     "ComponentType": 0,
                     "Position": [
-                        -1.7134162187576294,
-                        2.378702163696289,
-                        4.714019775390625
+                        -2.018159866333008,
+                        2.7481086254119873,
+                        5.253097057342529
                     ],
                     "Rotation": [
-                        0.9935292601585388,
-                        0.10670363157987595,
-                        0.038687389343976974,
-                        0.004154970869421959
+                        0.981124758720398,
+                        0.13758213818073273,
+                        0.13457077741622925,
+                        0.018870726227760315
                     ],
                     "Scale": [
                         1,
@@ -28,9 +28,9 @@
                 {
                     "ComponentType": 3,
                     "EditorCam": true,
-                    "Pitch": 12.259978294372559,
+                    "Pitch": 15.964957237243652,
                     "Valid": true,
-                    "Yaw": 4.45986795425415
+                    "Yaw": 15.619878768920898
                 },
                 {
                     "ComponentType": 4,
@@ -197,11 +197,6 @@
                         "RenderType": 4
                     },
                     "RenderWireframe": false,
-                    "Valid": true
-                },
-                {
-                    "ComponentType": 9,
-                    "FilePath": "../INNgine2019/Assets/Scripts/NewScript.js",
                     "Valid": true
                 },
                 {

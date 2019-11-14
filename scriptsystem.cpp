@@ -197,6 +197,31 @@ QEntity* ScriptSystem::getEntityWrapper(unsigned int entity)
     return new QEntity(entity, currentComp->engine, World::getWorld().getEntityManager().get(), this);
 }
 
+void ScriptSystem::takeOutTheTrash(std::vector<ScriptComponent> &comps)
+{
+    for (auto it = comps.begin(); it != comps.end(); ++it)
+    {
+        if (!(it->valid && it->engine))
+            continue;
+
+        auto cachedComps = it->engine->globalObject().property("accessedComponents");
+        if (!cachedComps.isUndefined() && cachedComps.isObject())
+        {
+
+        }
+    }
+}
+
+std::vector<std::string> ScriptSystem::findGlobalsInFile(const std::string &file) const
+{
+
+}
+
+void ScriptSystem::loadVariables(std::vector<ScriptComponent> &comps)
+{
+
+}
+
 bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)
 {
     currentComp = &comp;

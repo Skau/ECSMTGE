@@ -50,6 +50,21 @@ public:
 
     QEntity* getEntityWrapper(unsigned int entity);
 
+    /** Garbage collection
+     * Removes unwanted resources from the script engine.
+     * @brief Garbage collection
+     */
+    void takeOutTheTrash(std::vector<ScriptComponent>& comps);
+
+    /** Find all the global variable names in a script file.
+     * @brief findGlobalsInFile
+     * @param file - file to search
+     * @return a list of all variable names in the file.
+     */
+    std::vector<std::string> findGlobalsInFile(const std::string& file) const;
+
+    void loadVariables(std::vector<ScriptComponent>& comps);
+
     /**
      * @brief Returns hardcoded functions provided in all scripts
      */

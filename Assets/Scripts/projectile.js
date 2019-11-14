@@ -10,11 +10,11 @@ function beginPlay()
 // This will be run once every frame
 function tick(deltaTime)
 {
-    time += deltaTime;
-    if(time >= lifeTime)
-    {
-        engine.destroyEntity(me.ID);
-    }
+    // time += deltaTime;
+    // if(time >= lifeTime)
+    // {
+    //     engine.destroyEntity(me.ID);
+    // }
 	//console.log("Tick called on entity " + me.ID);
 }
 

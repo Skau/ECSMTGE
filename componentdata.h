@@ -65,6 +65,7 @@ struct EntityInfo : public Component
     virtual void reset() override
     {
         name = "";
+        shouldShowInEditor = false;
     }
 
     virtual QJsonObject toJSON() override;
@@ -194,7 +195,6 @@ struct CameraComponent : public Component
 struct InputComponent : public Component
 {
     bool controlledWhilePlaying{true};
-    bool cameraMovement{false};
 
     InputComponent(unsigned int _eID = 0, bool _valid = false)
         : Component(_eID, _valid, ComponentType::Input)
@@ -355,6 +355,10 @@ struct ScriptComponent : public Component
         delete JSEntity;
         JSEntity = nullptr;
         filePath = "";
+        beginplayRun = false;
+        engine = new QJSEngine();
+        engine->installExtensions(QJSEngine::ConsoleExtension);
+        engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
     }
 
     virtual QJsonObject toJSON() override;

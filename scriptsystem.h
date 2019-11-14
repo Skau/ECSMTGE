@@ -61,9 +61,14 @@ public:
      * @param file - file to search
      * @return a list of all variable names in the file.
      */
-    std::vector<std::string> findGlobalsInFile(const std::string& file) const;
+    std::vector<QString> findGlobalsInFile(const std::string& file) const;
 
-    void loadVariables(std::vector<ScriptComponent>& comps);
+    /** Saves the variable names from all script files in comps.
+     * Runs findGlobalsInFile on all script files and adds them to
+     * globalVariables
+     * @param comps - script component list
+     */
+    void saveGlobalVariables(std::vector<ScriptComponent>& comps);
 
     /**
      * @brief Returns hardcoded functions provided in all scripts
@@ -162,6 +167,7 @@ private:
     QString mHelperFuncs;
 
     float mDeltaTime{0};
+    std::map<unsigned int, std::vector<QString>> globalVariables{};
 };
 
 #endif // SCRIPTSYSTEM_H

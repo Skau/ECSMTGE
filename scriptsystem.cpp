@@ -7,6 +7,7 @@
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QPoint>
+#include <cstring>
 
 // For HitInfo struct
 #include "physicssystem.h"
@@ -212,14 +213,76 @@ void ScriptSystem::takeOutTheTrash(std::vector<ScriptComponent> &comps)
     }
 }
 
-std::vector<std::string> ScriptSystem::findGlobalsInFile(const std::string &file) const
+std::vector<QString> ScriptSystem::findGlobalsInFile(const std::string &file) const
 {
+    int scopeLevel{0};
+    std::vector<QString> variables{};
+    std::ifstream ifs{file, ifs.in};
+    if (!ifs)
+    {
+        return {};
+    }
 
+    std::string line;
+    while (std::getline(ifs, line))
+    {
+        for (unsigned int s{0}, i{0}; i < line.length(); ++i)
+        {
+            if (line[i] == ';')
+            {
+                // Loops through prefix words in a c-style string literal array
+                for (const auto& prefix : {"let", "var", "const"})
+                {
+                    // Finds the position of the first place where the prefix matches the string
+                    auto pos = line.find(prefix, s, i - s);
+                    if (pos != line.npos)
+                    {
+                        // Add characters to move to variable that is defined afterwards.
+                        pos += std::strlen(prefix) + 1;
+
+                        // Find start and end
+                        auto start = line.find_first_not_of(" ", pos, i);
+
+                        auto end = line.find_first_of(" =;([{.,+-*/?%<>&^|~", pos, i + 1);
+
+                        variables.push_back(QString::fromStdString(line.substr(start, end)));
+
+                        break;
+                    }
+                }
+
+                s = i + 1;
+            }
+            else if (line[i] == '{' || line[i] == '}')
+            {
+                scopeLevel += (line[i] == '{') ? 1 : -1;
+                s = i + 1;
+            }
+        }
+    }
+
+    return variables;
 }
 
-void ScriptSystem::loadVariables(std::vector<ScriptComponent> &comps)
+void ScriptSystem::saveGlobalVariables(std::vector<ScriptComponent> &comps)
 {
+    /* Remember to clear variablecache.
+     * Would'nt be a good garbage collector if it
+     * didn't clear it's own garbage now would it?
+     */
+    globalVariables.clear();
 
+    for (auto it = comps.begin(); it != comps.end(); ++it)
+    {
+        if (!it->valid)
+            continue;
+
+        auto globals = findGlobalsInFile(it->filePath);
+        if (!globals.empty())
+        {
+            globalVariables[it->entityId] = globals;
+        }
+    }
 }
 
 bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)

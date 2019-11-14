@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QPoint>
 #include <cstring>
+#include <QJSValueIterator>
 
 // For HitInfo struct
 #include "physicssystem.h"
@@ -268,20 +269,31 @@ void ScriptSystem::saveGlobalVariables(std::vector<ScriptComponent> &comps)
 {
     /* Remember to clear variablecache.
      * Would'nt be a good garbage collector if it
-     * didn't clear it's own garbage now would it?
+     * didn't clear it's own garbage would it?
      */
     globalVariables.clear();
 
     for (auto it = comps.begin(); it != comps.end(); ++it)
     {
-        if (!it->valid)
+        if (!(it->valid && it->engine))
             continue;
 
-        auto globals = findGlobalsInFile(it->filePath);
-        if (!globals.empty())
+        QJSValueIterator jsIt{it->engine->globalObject()};
+        while (jsIt.hasNext())
         {
-            globalVariables[it->entityId] = globals;
+            jsIt.next();
+            // Note remember to add other extra global variables here
+            if (jsIt.name() != "accessedComponents" && jsIt.name() != "me" && jsIt.name() != "engine")
+            {
+                globalVariables[it->entityId].push_back(jsIt.name());
+            }
         }
+
+//        auto globals = findGlobalsInFile(it->filePath);
+//        if (!globals.empty())
+//        {
+//            globalVariables[it->entityId] = globals;
+//        }
     }
 }
 

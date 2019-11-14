@@ -4,6 +4,11 @@ let camera;
 
 const moveSpeed = 5;
 
+function clamp(x, min, max)
+{
+	return x < min ? min : x > max ? max : x;
+}
+
 // This will be run once when play button is pressed
 function beginPlay()
 {
@@ -58,6 +63,14 @@ function inputPressed(inputs)
 		{
 			pos = pos.add(right.mult(moveSpeed * engine.deltaTime));
 		}
+		else if(inputs[i] == "e")
+		{
+			pos = pos.add(up.mult(moveSpeed * engine.deltaTime));
+		}
+		else if(inputs[i] == "q")
+		{
+			pos = pos.sub(up.mult(moveSpeed * engine.deltaTime));
+		}
 		else if(inputs[i] == "mouseLeft")
 		{
 			let entity = engine.spawnCube();
@@ -100,7 +113,13 @@ function inputReleased(inputs)
 function mouseMoved(offset)
 {
 	camera.Yaw 		+= offset[0] * 5 * engine.deltaTime;
+	if (camera.Yaw > 360)
+		camera.Yaw -= 360;
+	if (camera.Yaw < -360)
+		camera.Yaw += 360;
+
 	camera.Pitch 	+= offset[1] * 5 * engine.deltaTime;
+	camera.Pitch = clamp(camera.Pitch, -89, 89);
 }
 
 // This will be run when collision with another entity occurs

@@ -63,12 +63,18 @@ public:
      */
     std::vector<QString> findGlobalsInFile(const std::string& file) const;
 
-    /** Saves the variable names from all script files in comps.
-     * Runs findGlobalsInFile on all script files and adds them to
-     * globalVariables
-     * @param comps - script component list
+    /** Saves the variable names from the script in com and
+     * adds them to globalVariables list.
+     * @param comp - script component
      */
-    void saveGlobalVariables(std::vector<ScriptComponent>& comps);
+    void cacheGlobalVariables(ScriptComponent& comp);
+
+    /** Clears garbage from last garbage collection run.
+     * Might seem a bit ironic that the garbage collection
+     * needs to run it's own garbage collection...
+     * @brief initGarbageCollection
+     */
+    void initGarbageCollection();
 
     /**
      * @brief Returns hardcoded functions provided in all scripts

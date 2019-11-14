@@ -24,6 +24,8 @@ void ScriptSystem::beginPlay(std::vector<ScriptComponent>& comps)
         {
             // To catch changes to script during runtime
             load(comp, comp.filePath);
+            // cacheGlobalVariables(comp);
+
             call(comp, "beginPlay");
             comp.beginplayRun = true;
         }
@@ -265,36 +267,36 @@ std::vector<QString> ScriptSystem::findGlobalsInFile(const std::string &file) co
     return variables;
 }
 
-void ScriptSystem::saveGlobalVariables(std::vector<ScriptComponent> &comps)
+void ScriptSystem::cacheGlobalVariables(ScriptComponent &comp)
 {
-    /* Remember to clear variablecache.
-     * Would'nt be a good garbage collector if it
-     * didn't clear it's own garbage would it?
-     */
-    globalVariables.clear();
-
-    for (auto it = comps.begin(); it != comps.end(); ++it)
+    if (comp.engine)
     {
-        if (!(it->valid && it->engine))
-            continue;
-
-        QJSValueIterator jsIt{it->engine->globalObject()};
+        QJSValueIterator jsIt{comp.engine->globalObject()};
         while (jsIt.hasNext())
         {
             jsIt.next();
             // Note remember to add other extra global variables here
             if (jsIt.name() != "accessedComponents" && jsIt.name() != "me" && jsIt.name() != "engine")
             {
-                globalVariables[it->entityId].push_back(jsIt.name());
+                if (!jsIt.value().isCallable())
+                    globalVariables[comp.entityId].push_back(jsIt.name());
             }
         }
-
-//        auto globals = findGlobalsInFile(it->filePath);
-//        if (!globals.empty())
-//        {
-//            globalVariables[it->entityId] = globals;
-//        }
+        qDebug() << "added global variables: ";
+        for (auto& item : globalVariables[comp.entityId])
+        {
+            qDebug() << item;
+        }
     }
+}
+
+void ScriptSystem::initGarbageCollection()
+{
+    /* Remember to clear variablecache.
+     * Would'nt be a good garbage collector if it
+     * didn't clear it's own garbage would it?
+     */
+    globalVariables.clear();
 }
 
 bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)

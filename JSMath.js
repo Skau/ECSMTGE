@@ -192,7 +192,7 @@ class Quat
     {
         return new Vec3(
             2.0 * this.i * this.k + 2.0 * this.s * this.j,
-            2.0 * this.j * this.k + 2.0 * this.s * this.i,
+            2.0 * this.j * this.k - 2.0 * this.s * this.i,
             1.0 - 2.0 * this.i * this.i - 2.0 * this.j * this.j
         ).normalized();
     }

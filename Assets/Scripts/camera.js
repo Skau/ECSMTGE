@@ -4,7 +4,7 @@ var camera;
 
 var moveSpeed = 5;
 
-var fireRate = 2;
+var fireRate = 0.25;
 var fireTime = 0;
 var canFire = true;
 

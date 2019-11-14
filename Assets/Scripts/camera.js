@@ -1,8 +1,8 @@
 
-var transform;
-var camera;
+let transform;
+let camera;
 
-var moveSpeed = 5;
+const moveSpeed = 5;
 
 // This will be run once when play button is pressed
 function beginPlay()
@@ -44,33 +44,35 @@ function inputPressed(inputs)
 		// console.log("Position: " + transform.Position[0] + ", " + transform.Position[1] + ", " + transform.Position[2]);
 		if(inputs[i] == "w")
 		{
-			// transform.Position[2] -= moveSpeed * engine.deltaTime;
 			pos = pos.sub(fwd.mult(moveSpeed * engine.deltaTime));
 		}
 		else if(inputs[i] == "s")
 		{
-			// transform.Position[2] += moveSpeed * engine.deltaTime;
 			pos = pos.add(fwd.mult(moveSpeed * engine.deltaTime));
 		}
 		else if(inputs[i] == "a")
 		{
-			// transform.Position[0] -= moveSpeed * engine.deltaTime;
 			pos = pos.sub(right.mult(moveSpeed * engine.deltaTime));
 		}
 		else if(inputs[i] == "d")
 		{
-			// transform.Position[0] += moveSpeed * engine.deltaTime;
 			pos = pos.add(right.mult(moveSpeed * engine.deltaTime));
 		}
 		else if(inputs[i] == "mouseLeft")
 		{
 			let entity = engine.spawnCube();
 
-			// let transformComp = entity.getComponent("transform");
-			// transformComp.Scale = [5.25, 2.25, 0.75];
+			let transformComp = entity.getComponent("transform");
+			let newPos = pos;
+			//newPos = newPos.mult(fwd.mult(2));
+
+			transformComp.Position[0] = newPos.x;
+			transformComp.Position[1] = newPos.y;
+			transformComp.Position[2] = newPos.z;
+			
+			transformComp.Scale = [0.25, 0.25, 0.25];
 
 			let physics = entity.addComponent("physics");
-			// physics.Velocity[0] += 2;
 
 			physics.Velocity[0] = -fwd.x * 2;
 			physics.Velocity[1] = -fwd.y * 2;

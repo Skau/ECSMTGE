@@ -58,7 +58,6 @@ void ColliderWidget::on_comboBox_Colliders_currentIndexChanged(int index)
 
     if(auto comp = getColliderComponent())
     {
-        qDebug() << "Hallo";
         comp->collisionType = static_cast<ColliderComponent::Type>(index);
         switch (comp->collisionType)
         {

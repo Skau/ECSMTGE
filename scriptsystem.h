@@ -119,6 +119,11 @@ public slots:
      */
     QObject* getEntity(unsigned int id);
 
+    /**
+     * @brief Destroys the passed in entity.
+     */
+    void destroyEntity(unsigned entity);
+
 private:
     ScriptSystem(){}
     /**

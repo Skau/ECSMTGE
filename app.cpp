@@ -214,6 +214,7 @@ void App::update()
 
         ScriptSystem::get()->updateJSComponents(scripts);
 
+        ScriptSystem::get()->beginPlay(scripts);
         ScriptSystem::get()->tick(mDeltaTime, scripts);
 
         auto& inputs = mWorld->getEntityManager()->getInputComponents();
@@ -268,8 +269,6 @@ void App::onPlay()
 
     mMainWindow->setSelected(nullptr);
 
-    auto& scripts = mWorld->getEntityManager()->getScriptComponents();
-    ScriptSystem::get()->beginPlay(scripts);
 
     auto sounds = mWorld->getEntityManager()->getSoundComponents();
     SoundManager::play(sounds);

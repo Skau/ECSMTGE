@@ -18,11 +18,12 @@ void ScriptSystem::beginPlay(std::vector<ScriptComponent>& comps)
 
     for(auto& comp : comps)
     {
-        if(comp.filePath.size())
+        if(comp.filePath.size() && !comp.beginplayRun)
         {
             // To catch changes to script during runtime
             load(comp, comp.filePath);
             call(comp, "beginPlay");
+            comp.beginplayRun = true;
         }
     }
 }
@@ -31,7 +32,7 @@ void ScriptSystem::tick(float deltaTime, std::vector<ScriptComponent>& comps)
 {
     for(auto& comp : comps)
     {
-        if(comp.filePath.size())
+        if(comp.filePath.size() && comp.beginplayRun)
         {
             mDeltaTime = deltaTime;
             QJSValueList list;
@@ -45,9 +46,10 @@ void ScriptSystem::endPlay(std::vector<ScriptComponent>& comps)
 {
     for(auto& comp : comps)
     {
-        if(comp.filePath.size())
+        if(comp.filePath.size() && comp.beginplayRun)
         {
             call(comp, "endPlay");
+            comp.beginplayRun = false;
         }
     }
 }
@@ -521,6 +523,11 @@ QObject* ScriptSystem::getEntity(unsigned int id)
         return nullptr;
 
     return getEntityWrapper(id);
+}
+
+void ScriptSystem::destroyEntity(unsigned entity)
+{
+    World::getWorld().getEntityManager()->removeEntity(entity);
 }
 
 void ScriptSystem::updateJSComponent(ScriptComponent& comp)

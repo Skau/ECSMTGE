@@ -1,8 +1,12 @@
 
-let transform;
-let camera;
+var transform;
+var camera;
 
-const moveSpeed = 5;
+var moveSpeed = 5;
+
+var fireRate = 2;
+var fireTime = 0;
+var canFire = true;
 
 function clamp(x, min, max)
 {
@@ -20,6 +24,15 @@ function beginPlay()
 function tick(deltaTime)
 {
 	//console.log("Tick called on entity " + me.ID);
+	if(!canFire)
+	{
+		fireTime += deltaTime;
+		if(fireTime >= fireRate)
+		{
+			canFire = true;
+			fireTime = 0;
+		}
+	}
 }
 
 // This will be run once when stop button is pressed
@@ -73,23 +86,31 @@ function inputPressed(inputs)
 		}
 		else if(inputs[i] == "mouseLeft")
 		{
-			let entity = engine.spawnCube();
+			if(canFire)
+			{
+				let entity = engine.spawnCube();
 
-			let transformComp = entity.getComponent("transform");
-			let newPos = pos;
-			newPos = newPos.sub(fwd.mult(1.5));
+				let scriptComp = entity.addComponent("script");
+				scriptComp.FilePath = "../INNgine2019/Assets/Scripts/projectile.js";
 
-			transformComp.Position[0] = newPos.x;
-			transformComp.Position[1] = newPos.y;
-			transformComp.Position[2] = newPos.z;
+				let transformComp = entity.getComponent("transform");
+				let newPos = pos;
+				newPos = newPos.sub(fwd.mult(1.5));
 			
-			transformComp.Scale = [0.25, 0.25, 0.25];
+				transformComp.Position[0] = newPos.x;
+				transformComp.Position[1] = newPos.y;
+				transformComp.Position[2] = newPos.z;
 
-			let physics = entity.addComponent("physics");
+				transformComp.Scale = [0.25, 0.25, 0.25];
 
-			physics.Velocity[0] = -fwd.x * 2;
-			physics.Velocity[1] = -fwd.y * 2;
-			physics.Velocity[2] = -fwd.z * 2;
+				let physics = entity.addComponent("physics");
+
+				physics.Velocity[0] = -fwd.x * 2;
+				physics.Velocity[1] = -fwd.y * 2;
+				physics.Velocity[2] = -fwd.z * 2;
+			
+				canFire = false;
+			}
 		}
 	}
 
@@ -112,13 +133,13 @@ function inputReleased(inputs)
 
 function mouseMoved(offset)
 {
-	camera.Yaw 		+= offset[0] * 5 * engine.deltaTime;
+	camera.Yaw += offset[0] * 5 * engine.deltaTime;
 	if (camera.Yaw > 360)
 		camera.Yaw -= 360;
 	if (camera.Yaw < -360)
 		camera.Yaw += 360;
 
-	camera.Pitch 	+= offset[1] * 5 * engine.deltaTime;
+	camera.Pitch += offset[1] * 5 * engine.deltaTime;
 	camera.Pitch = clamp(camera.Pitch, -89, 89);
 }
 

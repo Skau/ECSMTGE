@@ -340,6 +340,7 @@ struct ScriptComponent : public Component
     QJSEngine* engine;
     std::string filePath;
     QEntity* JSEntity{nullptr};
+    bool beginplayRun{false};
 
     ScriptComponent(unsigned int _eID = 0, bool _valid = false)
         : Component(_eID, _valid, ComponentType::Script), filePath(""), JSEntity{nullptr}

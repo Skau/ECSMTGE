@@ -5,17 +5,18 @@
                 {
                     "Children": [
                     ],
+                    "ColliderBoundsOutdated": true,
                     "ComponentType": 0,
                     "Position": [
-                        -0.5431416034698486,
-                        2.6508586406707764,
-                        6.779553413391113
+                        -1.7134162187576294,
+                        2.378702163696289,
+                        4.714019775390625
                     ],
                     "Rotation": [
-                        0.9808338284492493,
-                        0.17374174296855927,
-                        0.08684585988521576,
-                        0.015383594669401646
+                        0.9935292601585388,
+                        0.10670363157987595,
+                        0.038687389343976974,
+                        0.004154970869421959
                     ],
                     "Scale": [
                         1,
@@ -27,9 +28,9 @@
                 {
                     "ComponentType": 3,
                     "EditorCam": true,
-                    "Pitch": 20.089984893798828,
+                    "Pitch": 12.259978294372559,
                     "Valid": true,
-                    "Yaw": 10.119876861572266
+                    "Yaw": 4.45986795425415
                 },
                 {
                     "ComponentType": 4,
@@ -45,6 +46,7 @@
                 {
                     "Children": [
                     ],
+                    "ColliderBoundsOutdated": false,
                     "ComponentType": 0,
                     "Position": [
                         0,
@@ -114,6 +116,7 @@
                 {
                     "Children": [
                     ],
+                    "ColliderBoundsOutdated": false,
                     "ComponentType": 0,
                     "Position": [
                         0,
@@ -152,6 +155,7 @@
                 {
                     "Children": [
                     ],
+                    "ColliderBoundsOutdated": false,
                     "ComponentType": 0,
                     "Position": [
                         0,
@@ -193,6 +197,21 @@
                         "RenderType": 4
                     },
                     "RenderWireframe": false,
+                    "Valid": true
+                },
+                {
+                    "ComponentType": 9,
+                    "FilePath": "../INNgine2019/Assets/Scripts/NewScript.js",
+                    "Valid": true
+                },
+                {
+                    "CollisionType": 2,
+                    "ComponentType": 10,
+                    "Extents": [
+                        1,
+                        1,
+                        1
+                    ],
                     "Valid": true
                 }
             ],

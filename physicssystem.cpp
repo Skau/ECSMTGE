@@ -153,6 +153,8 @@ std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vec
                             collIt->bounds.extents = max - min;
                         }
                         break;
+                    default:
+                        break;
                     }
                 }
 

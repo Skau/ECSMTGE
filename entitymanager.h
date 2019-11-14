@@ -217,6 +217,26 @@ public:
         return id;
     }
 
+    void removeEntity(unsigned entity)
+    {
+        std::vector<Component*> components;
+        getAllComponents(entity, components);
+        for(auto& comp : components)
+        {
+            comp->valid = false;
+            comp->reset();
+        }
+
+        for(unsigned i = 0; i < mEntityInfos.size(); ++i)
+        {
+            if(entity == mEntityInfos[i].entityId)
+            {
+                mEntityInfos.erase(mEntityInfos.begin() + i);
+                break;
+            }
+        }
+    }
+
     /** Runs a function on a entities component based on components in template.
      * Uses variadic template packing and std::function to take in a varying number
      * of parameters, attempts to get the components specified and sends them as

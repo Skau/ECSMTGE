@@ -78,6 +78,8 @@ QJsonObject TransformComponent::toJSON()
     scaleArr.insert(2, QJsonValue(static_cast<double>(scale.z)));
     parentObj.insert("Scale", scaleArr);
 
+    parentObj.insert("ColliderBoundsOutdated", colliderBoundsOutdated);
+
     return parentObj;
 }
 
@@ -91,7 +93,7 @@ void TransformComponent::fromJSON(QJsonObject object)
             children.push_back(baby);
     }
 
-    auto &world = World::getWorld();
+    auto& world = World::getWorld();
 
     auto positionArray = object["Position"].toArray();
     world.getEntityManager()->setTransformPos(entityId, {
@@ -116,6 +118,8 @@ void TransformComponent::fromJSON(QJsonObject object)
                                                     static_cast<float>(scaleArray[1].toDouble()),
                                                     static_cast<float>(scaleArray[2].toDouble())
                                                 });
+
+    colliderBoundsOutdated = object["ColliderBoundsOutdated"].toBool(true);
 }
 
 QJsonObject ScriptComponent::toJSON()
@@ -538,7 +542,7 @@ void ColliderComponent::fromJSON(QJsonObject object)
 {
     Component::fromJSON(object);
 
-    collisionType = static_cast<ColliderComponent::Type>(object["collisionType"].toInt(0));
+    collisionType = static_cast<ColliderComponent::Type>(object["CollisionType"].toInt(0));
 
     auto obj = object["Extents"];
     switch (collisionType)

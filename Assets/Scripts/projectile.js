@@ -4,11 +4,7 @@ var time = 0;
 // This will be run once when play button is pressed
 function beginPlay()
 {
-    let collider = addComponent("collider");
-    collider.CollisionType = 2;
-    collider.Extents = [1, 1, 1];
-    let transform = getComponent("transform");
-    transform.ColliderBoundsOutdated = true;
+
 }
 
 // This will be run once every frame

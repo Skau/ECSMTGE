@@ -229,7 +229,12 @@ void App::update()
             ScriptSystem::get()->runHitEvents(scripts, hitInfos);
         }
 
-        ScriptSystem::get()->takeOutTheTrash(scripts);
+        static unsigned int garbageCounter{0};
+        if (garbageCounter > ScriptSystem::get()->garbageCollectionFrequency)
+        {
+            garbageCounter = 0;
+            ScriptSystem::get()->takeOutTheTrash(scripts);
+        }
 
         ScriptSystem::get()->updateCPPComponents(scripts);
     }

@@ -277,6 +277,7 @@ void ScriptSystem::cacheGlobalVariables(ScriptComponent &comp)
 {
     if (comp.engine)
     {
+        // Note: This will obviously not work as I'm only sending the same array...
         QJSValueIterator jsIt{comp.engine->globalObject()};
         while (jsIt.hasNext())
         {

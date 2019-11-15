@@ -28,6 +28,12 @@ public:
         return &instance;
     }
 
+    /** How often the script resource garbage collection
+     * should run, in frames. (10 is every tenth frame)
+     * @brief garbageCollectionFrequency
+     */
+    unsigned int garbageCollectionFrequency = 10;
+
     void beginPlay(std::vector<ScriptComponent>& comps);
     void tick(float deltaTime, std::vector<ScriptComponent>& comps);
     void endPlay(std::vector<ScriptComponent>& comps);

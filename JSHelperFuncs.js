@@ -35,6 +35,7 @@ function getComponent(name, id = 0)
 
 function cleanupComp(comps)
 {
+    let totalRemoved = 0;
     for (i = accessedComponents.length - 1; 0 < i; --i)
     {
         let removeComp = true;
@@ -51,6 +52,12 @@ function cleanupComp(comps)
         }
 
         if (removeComp)
+        {
             accessedComponents.splice(i, 1);
+            totalRemoved++;
+        }
     }
+
+    if (totalRemoved > 0)
+        console.log("Garbage collection removed " + totalRemoved + " components.");
 }

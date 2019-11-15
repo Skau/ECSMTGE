@@ -32,3 +32,25 @@ function getComponent(name, id = 0)
     }
     return comp;
 }
+
+function cleanupComp(comps)
+{
+    for (i = accessedComponents.length - 1; 0 < i; --i)
+    {
+        let removeComp = true;
+        for (comp of comps)
+        {
+            if (comp === undefined)
+                continue;
+
+            if (comp.ComponentType === accessedComponents[i].ComponentType && comp.ID === accessedComponents[i].ID)
+            {
+                removeComp = false;
+                break;
+            }
+        }
+
+        if (removeComp)
+            accessedComponents.splice(i, 1);
+    }
+}

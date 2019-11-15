@@ -229,7 +229,13 @@ void App::update()
             ScriptSystem::get()->runHitEvents(scripts, hitInfos);
         }
 
+        ScriptSystem::get()->takeOutTheTrash(scripts);
+
         ScriptSystem::get()->updateCPPComponents(scripts);
+    }
+    else
+    {
+        ScriptSystem::get()->initGarbageCollection();
     }
 
     currentlyUpdating = false;

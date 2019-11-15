@@ -236,7 +236,7 @@ void App::update()
         if (garbageCounter - 1 > ScriptSystem::get()->garbageCollectionFrequency)
         {
             garbageCounter = 0;
-            // ScriptSystem::get()->takeOutTheTrash(scripts);
+            ScriptSystem::get()->takeOutTheTrash(scripts);
         }
     }
     else

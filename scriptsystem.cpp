@@ -217,7 +217,7 @@ void ScriptSystem::takeOutTheTrash(std::vector<ScriptComponent> &comps)
 
             QJSValueList args;
             args << variableArray;
-            call(*it, "cleanupComp", args);
+            call(*it, "deleteUnusedVariables", args);
         }
     }
 }
@@ -282,8 +282,7 @@ void ScriptSystem::cacheGlobalVariables(ScriptComponent &comp)
         while (jsIt.hasNext())
         {
             jsIt.next();
-            // Note remember to add other extra global variables here
-            if (jsIt.value().property("ComponentType").isNumber())
+            if (!jsIt.value().property("ComponentType").isUndefined() && jsIt.value().property("ComponentType").isNumber())
             {
                 if (!jsIt.value().isCallable())
                     globalVariables[comp.entityId].push_back(jsIt.name());

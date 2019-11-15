@@ -33,18 +33,24 @@ function getComponent(name, id = 0)
     return comp;
 }
 
-function cleanupComp(comps)
+function destringify(obj)
 {
-    let totalRemoved = 0;
+    return Function('"use strict"; return (' + obj + ')')();
+}
+
+function deleteUnusedVariables(args)
+{
     for (i = accessedComponents.length - 1; 0 < i; --i)
     {
         let removeComp = true;
-        for (comp of comps)
+        for (argIndex in args)
         {
-            if (comp === undefined)
+            let variable = destringify(args[argIndex]);
+
+            if (variable === undefined)
                 continue;
 
-            if (comp.ComponentType === accessedComponents[i].ComponentType && comp.ID === accessedComponents[i].ID)
+            if (variable.ComponentType === accessedComponents[i].ComponentType && variable.ID === accessedComponents[i].ID)
             {
                 removeComp = false;
                 break;
@@ -54,10 +60,6 @@ function cleanupComp(comps)
         if (removeComp)
         {
             accessedComponents.splice(i, 1);
-            totalRemoved++;
         }
     }
-
-    if (totalRemoved > 0)
-        console.log("Garbage collection removed " + totalRemoved + " components.");
 }

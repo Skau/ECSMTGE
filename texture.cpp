@@ -25,7 +25,6 @@ Texture::Texture(GLuint textureUnit) : QOpenGLFunctions_4_1_Core()
     glGenTextures(1, &mId);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mId);
-    qDebug() << "Texture::Texture() id = " << mId;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_UNSIGNED_BYTE,
                  reinterpret_cast<const GLvoid*>(pixels));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -97,7 +96,6 @@ void Texture::readBitmap(const std::string &filename)
         mBitmap[k] = mBitmap[k + 2];
         mBitmap[k + 2] = tmp;
     }
-    qDebug() << "Texture read: " << QString(fileWithPath.c_str());
 }
 
 void Texture::setTexture(GLuint textureUnit)
@@ -106,7 +104,6 @@ void Texture::setTexture(GLuint textureUnit)
     // activate the texture unit first before binding texture
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, mId);
-    qDebug() << "Texture::Texture() id = " << mId;
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -130,7 +127,6 @@ void Texture::initCubeMap(GLuint textureUnit)
     // activate the texture unit first before binding texture
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, mId);
-    qDebug() << "Texture::Texture(Cube_Map_Texture) id = " << mId;
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);

@@ -92,8 +92,6 @@ Shader::Shader(const std::string shaderName, ShaderType type)
     glDeleteShader( vertex );
     glDeleteShader( fragment );
 
-    qDebug() << "created shader " << program;
-
     mMatrixUniform = glGetUniformLocation( program, "mMatrix" );
     vMatrixUniform = glGetUniformLocation( program, "vMatrix" );
     pMatrixUniform = glGetUniformLocation( program, "pMatrix" );
@@ -181,8 +179,6 @@ Shader::Shader(const std::string vertexPath, const std::string fragmentPath, Sha
     // Delete the shaders as they're linked into our program now and no longer needed
     glDeleteShader( vertex );
     glDeleteShader( fragment );
-
-    qDebug() << "created shader " << program;
 
     updateParams(vertexWithPath);
     updateParams(fragmentWithPath);
@@ -303,8 +299,6 @@ Shader::Shader(const std::string vertexPath, const std::string fragmentPath, con
     glDeleteShader( fragment );
     glDeleteShader(geometry);
 
-    qDebug() << "created shader " << program;
-
     updateParams(vertexWithPath);
     updateParams(fragmentWithPath);
     updateParams(geometryWithPath);
@@ -312,7 +306,6 @@ Shader::Shader(const std::string vertexPath, const std::string fragmentPath, con
 
 Shader::~Shader()
 {
-    qDebug() << "Deleting shader program " << program;
     glDeleteProgram(program);
 }
 

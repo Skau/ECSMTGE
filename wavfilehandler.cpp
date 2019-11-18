@@ -5,12 +5,11 @@
 
 bool WavFileHandler::loadWave(std::string fileName, wave_t* wavePtr)
 {
-    qDebug() << "Loading "+ QString::fromStdString(fileName) + " from disk";
     FILE* fp = NULL;
     fp = std::fopen(std::string(fileName).c_str(), "rb");
     if (fp == NULL)
     {
-        return endOnError("FileHandler error: File not found.\n");
+        return endOnError("FileHandler error: File " + fileName + " not found.\n");
     }
 
     char type[4];
@@ -68,7 +67,6 @@ bool WavFileHandler::loadWave(std::string fileName, wave_t* wavePtr)
     }
 
     std::fclose(fp);
-    qDebug() << "Loading complete!";
     return true;
 }
 

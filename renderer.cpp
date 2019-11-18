@@ -289,7 +289,7 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     // ** Forward shading ** //
     /// Draw foward here
 
-    geometryPass(renders, transforms, camera, ShaderType::Forward);
+    mNumberOfVerticesDrawn += geometryPass(renders, transforms, camera, ShaderType::Forward);
     // Skybox
     renderSkybox(camera);
 

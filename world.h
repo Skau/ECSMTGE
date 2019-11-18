@@ -50,6 +50,10 @@ public:
 
 private:
     std::unique_ptr<Scene> mCurrentScene;
+    // Need to save a copy of the filename for the scene because
+    // the sceens gets changed out with a temporary scene whenever
+    // we go into play mode.
+    std::optional<std::string> sceneFileName;
 
     std::shared_ptr<EntityManager> entityManager;
 };

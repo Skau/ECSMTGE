@@ -309,15 +309,15 @@ void ScriptSystem::cacheGlobalVariables(ScriptComponent &comp)
 {
     if (comp.engine)
     {
-        // Note: This will obviously not work as I'm only sending the same array...
         QJSValueIterator jsIt{comp.engine->globalObject()};
         while (jsIt.hasNext())
         {
             jsIt.next();
-            if (!jsIt.value().property("ComponentType").isUndefined() && jsIt.value().property("ComponentType").isNumber())
+            if (!jsIt.value().property("ComponentType").isUndefined() &&
+                jsIt.value().property("ComponentType").isNumber() &&
+                !jsIt.value().isCallable())
             {
-                if (!jsIt.value().isCallable())
-                    globalVariables[comp.entityId].push_back(jsIt.name());
+                globalVariables[comp.entityId].push_back(jsIt.name());
             }
         }
     }

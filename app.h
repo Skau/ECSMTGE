@@ -72,6 +72,7 @@ private:
     // Handles input events in Renderer
     std::shared_ptr<InputHandler> mEventHandler;
     std::unique_ptr<World> mWorld;
+    std::unique_ptr<ResourceManager> mResourceManager;
 
     void loadSession(const std::string& path);
 

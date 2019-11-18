@@ -36,6 +36,8 @@ App::App()
 // Slot called from Renderer when its done with initialization
 void App::initTheRest()
 {
+    mResourceManager = std::unique_ptr<ResourceManager>(new ResourceManager{});
+
     mWorld = std::unique_ptr<World>(new World{});
     connect(mMainWindow.get(), &MainWindow::newScene, this, &App::newScene);
     connect(mMainWindow.get(), &MainWindow::saveScene, this, &App::saveScene);
@@ -59,28 +61,28 @@ void App::initTheRest()
 
     // Send skybox data to renderer
 
-    auto skyboxMesh = ResourceManager::instance()->getMesh("skybox");
+    auto skyboxMesh = ResourceManager::instance().getMesh("skybox");
     auto skyboxMaterial = std::make_shared<Material>();
-    auto skyShader = ResourceManager::instance()->getShader("skybox");
+    auto skyShader = ResourceManager::instance().getShader("skybox");
     skyboxMaterial->mShader = skyShader;
-    auto texture = ResourceManager::instance()->getTexture("skybox");
+    auto texture = ResourceManager::instance().getTexture("skybox");
     skyboxMaterial->mTextures.push_back({texture->id(), texture->mType});
     mRenderer->mSkyboxMesh = skyboxMesh;
     mRenderer->mSkyboxMaterial = skyboxMaterial;
 
     // Send axis data to renderer
 
-    auto axisMesh = ResourceManager::instance()->getMesh("axis");
+    auto axisMesh = ResourceManager::instance().getMesh("axis");
     axisMesh->mRenderType = GL_LINES;
     auto axisMaterial = std::make_shared<Material>();
-    axisMaterial->mShader = ResourceManager::instance()->getShader("axis");
+    axisMaterial->mShader = ResourceManager::instance().getShader("axis");
     mRenderer->mAxisMesh = axisMesh;
     mRenderer->mAxisMaterial = axisMaterial;
 
-    // mRenderer->mPostprocessor->steps.push_back({ResourceManager::instance()->getShader("passthrough")});
+    // mRenderer->mPostprocessor->steps.push_back({ResourceManager::instance().getShader("passthrough")});
     mRenderer->mOutlineeffect->outputToDefault = false;
 
-    auto material = std::make_shared<Material>(ResourceManager::instance()->getShader("ui_singleColor"));
+    auto material = std::make_shared<Material>(ResourceManager::instance().getShader("ui_singleColor"));
     material->mParameters =
     {
         {"p_color", gsl::vec3{1.f, 1.f, 0.f}}
@@ -91,7 +93,7 @@ void App::initTheRest()
         0
     });
 
-    material = std::make_shared<Material>(ResourceManager::instance()->getShader("blur"));
+    material = std::make_shared<Material>(ResourceManager::instance().getShader("blur"));
     material->mParameters =
     {
         {"radius", 2}

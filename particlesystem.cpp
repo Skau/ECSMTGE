@@ -32,7 +32,7 @@ void ParticleSystem::updateParticles(const CameraComponent &camera, const std::v
 
     if (!particleShader)
     {
-        particleShader = ResourceManager::instance()->getShader("particle");
+        particleShader = ResourceManager::instance().getShader("particle");
         assert(particleShader);
     }
 

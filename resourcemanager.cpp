@@ -8,7 +8,7 @@
 
 ResourceManager::~ResourceManager()
 {
-
+    inst = nullptr;
 }
 
 void ResourceManager::LoadAssetFiles()
@@ -601,4 +601,8 @@ std::pair<std::vector<Vertex>, std::vector<GLuint>> ResourceManager::readTxtFile
     return {mVertices, mIndices};
 }
 
-ResourceManager::ResourceManager(){}
+ResourceManager* ResourceManager::inst{nullptr};
+
+ResourceManager::ResourceManager(){
+    inst = this;
+}

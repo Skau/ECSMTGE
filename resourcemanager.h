@@ -25,11 +25,19 @@ class SoundSource;
 
 class ResourceManager : protected QOpenGLFunctions_4_1_Core
 {
+
+    friend class App;
+private:
+
+    static ResourceManager* inst;
+
+    ResourceManager();
+
 public:
-    static ResourceManager* instance()
+    static ResourceManager& instance()
     {
-        static ResourceManager instance;
-        return &instance;
+        assert(inst != nullptr);
+        return *inst;
     }
 
     virtual ~ResourceManager();
@@ -77,7 +85,6 @@ public:
     std::vector<std::string> getAllWavFileNames();
 
 private:
-    ResourceManager();
 
     /**
      * @brief Reads an obj file at the specified fileName. Relative means gsl::assetFilePath/Meshes if true, working directory if false

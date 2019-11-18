@@ -40,7 +40,7 @@ void Scene::initBlankScene()
     camera = entityManager->createEntity("GameCam");
     auto [gameTrans, gameCam, gameMesh] = entityManager->addComponent<TransformComponent, CameraComponent, MeshComponent>(camera);
     gameTrans.setPosition(gsl::vec3{0.f, 0.f, 5.f});
-    if(auto meshData = ResourceManager::instance()->getMesh("camera"))
+    if(auto meshData = ResourceManager::instance().getMesh("camera"))
     {
         gameMesh.meshData = *meshData;
         gameMesh.isVisible = true;
@@ -181,7 +181,7 @@ void TestScene::initCustomObjects()
     {
         auto entity = entityManager->createEntity();
         auto [transform, render] = entityManager->addComponent<TransformComponent, MeshComponent>(entity);
-        if(auto meshData = ResourceManager::instance()->getMesh("suzanne"))
+        if(auto meshData = ResourceManager::instance().getMesh("suzanne"))
         {
             render.meshData = *meshData;
             render.isVisible = true;

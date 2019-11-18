@@ -12,7 +12,7 @@ SoundWidget::SoundWidget(MainWindow* mainWindow, QWidget* parent)
     ui->setupUi(this);
 
     ui->comboBox_AvailableSounds->addItem("None");
-    for(auto& name : ResourceManager::instance()->getAllWavFileNames())
+    for(auto& name : ResourceManager::instance().getAllWavFileNames())
     {
         ui->comboBox_AvailableSounds->addItem(QString::fromStdString(name));
     }
@@ -239,7 +239,7 @@ void SoundWidget::on_pushButton_soundFromFile_clicked()
 
             if(!found)
             {
-                ResourceManager::instance()->loadWav(name.toStdString(), fileName.toStdString());
+                ResourceManager::instance().loadWav(name.toStdString(), fileName.toStdString());
                 ui->comboBox_AvailableSounds->addItem(name);
             }
 

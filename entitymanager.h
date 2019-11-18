@@ -215,7 +215,7 @@ public:
         auto id = createEntity();
         addComponent<MeshComponent, TransformComponent>(id);
         auto render = getComponent<MeshComponent>(id);
-        if(auto mesh = ResourceManager::instance()->getMesh("box2"))
+        if(auto mesh = ResourceManager::instance().getMesh("box2"))
         {
             render->meshData = *mesh;
             render->isVisible = true;
@@ -228,7 +228,7 @@ public:
         auto id = createEntity();
         addComponent<MeshComponent, TransformComponent>(id);
         auto render = getComponent<MeshComponent>(id);
-        if(auto mesh = ResourceManager::instance()->getMesh("suzanne"))
+        if(auto mesh = ResourceManager::instance().getMesh("suzanne"))
         {
             render->meshData = *mesh;
             render->isVisible = true;

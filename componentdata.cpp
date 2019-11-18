@@ -253,7 +253,7 @@ void MeshComponent::fromJSON(QJsonObject object)
     auto meshName = meshDataObj["Name"].toString().toStdString();
     if(meshName.size() && meshName != "None")
     {
-        meshData = *ResourceManager::instance()->getMesh(meshName);
+        meshData = *ResourceManager::instance().getMesh(meshName);
         meshData.mRenderType = static_cast<GLenum>(meshDataObj["RenderType"].toInt(GL_TRIANGLES));
     }
 
@@ -263,7 +263,7 @@ void MeshComponent::fromJSON(QJsonObject object)
     auto shaderName = materialObj["Shader"].toString();
     if(shaderName.size() && shaderName != "None")
     {
-        mMaterial.loadShaderWithParameters(ResourceManager::instance()->getShader(shaderName.toStdString()));
+        mMaterial.loadShaderWithParameters(ResourceManager::instance().getShader(shaderName.toStdString()));
     }
 
     auto parametersArray = materialObj["Parameters"].toArray();

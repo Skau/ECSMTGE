@@ -68,14 +68,14 @@ void SoundManager::createSource(SoundComponent* comp, const std::string& wav)
 
     checkOpenALError();
 
-    if(auto waveData = ResourceManager::instance()->getWav(wav))
+    if(auto waveData = ResourceManager::instance().getWav(wav))
     {
         ALuint source;
         alGenSources(1, &source);
 
         ALuint buffer;
 
-        auto sourceBuffer = ResourceManager::instance()->getSourceBuffer(wav);
+        auto sourceBuffer = ResourceManager::instance().getSourceBuffer(wav);
 
         if(sourceBuffer > -1)
         {

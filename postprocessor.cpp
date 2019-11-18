@@ -63,7 +63,7 @@ Postprocessor &Postprocessor::add(Postprocessor &other, Postprocessor::BLENDMODE
 {
     glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[mLastUsedBuffer]);
 
-    auto shader = ResourceManager::instance()->getShader("blend");
+    auto shader = ResourceManager::instance().getShader("blend");
     if (!shader)
     {
         std::cout << "blending shader is missing!" << std::endl;
@@ -161,7 +161,7 @@ void Postprocessor::Render()
     {
         if (!passThroughMaterial)
         {
-            passThroughMaterial = std::make_shared<Material>(ResourceManager::instance()->getShader("passthrough"));
+            passThroughMaterial = std::make_shared<Material>(ResourceManager::instance().getShader("passthrough"));
             if (!passThroughMaterial->mShader)
                 std::cout << "Postprocessor render step skipped because of missing passthrough shader" << std::endl;
         }
@@ -259,7 +259,7 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
     {
         if (!passThroughMaterial)
         {
-            passThroughMaterial = std::make_shared<Material>(ResourceManager::instance()->getShader("passthrough"));
+            passThroughMaterial = std::make_shared<Material>(ResourceManager::instance().getShader("passthrough"));
             if (!passThroughMaterial->mShader)
                 std::cout << "Postprocessor render step skipped because of missing default shader" << std::endl;
         }

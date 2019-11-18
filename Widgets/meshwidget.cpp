@@ -18,19 +18,19 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
     isUpdating = true;
 
     ui->comboBox_Meshes->addItem("None");
-    for(auto& name : ResourceManager::instance()->getAllMeshNames())
+    for(auto& name : ResourceManager::instance().getAllMeshNames())
     {
         ui->comboBox_Meshes->addItem(QString::fromStdString(name));
     }
 
     ui->comboBox_Shaders->addItem("None");
-    for(auto& name : ResourceManager::instance()->getAllShaderNames())
+    for(auto& name : ResourceManager::instance().getAllShaderNames())
     {
         ui->comboBox_Shaders->addItem(QString::fromStdString(name));
     }
 
     ui->comboBox_Textures->addItem("None");
-    for(auto& name : ResourceManager::instance()->getAllTextureNames())
+    for(auto& name : ResourceManager::instance().getAllTextureNames())
     {
         ui->comboBox_Textures->addItem(QString::fromStdString(name));
     }
@@ -94,7 +94,7 @@ void MeshWidget::on_button_ChangeMesh_clicked()
                 {
                     if(name == ui->comboBox_Meshes->itemText(0))
                     {
-                        render->meshData = *ResourceManager::instance()->getMesh(name.toStdString());
+                        render->meshData = *ResourceManager::instance().getMesh(name.toStdString());
                         found = true;
                         break;
                     }
@@ -102,7 +102,7 @@ void MeshWidget::on_button_ChangeMesh_clicked()
 
                 if(!found)
                 {
-                    render->meshData = *ResourceManager::instance()->addMesh(name.toStdString(), last.toStdString());
+                    render->meshData = *ResourceManager::instance().addMesh(name.toStdString(), last.toStdString());
                 }
 
                 if(render->meshData.mVAOs[0])
@@ -443,7 +443,7 @@ void MeshWidget::on_pushButton_ChangeMeshDropdown_clicked()
 
     if(auto render = getRenderComponent())
     {
-        render->meshData = *ResourceManager::instance()->getMesh(name.toStdString());
+        render->meshData = *ResourceManager::instance().getMesh(name.toStdString());
         render->isVisible = true;
         ui->checkBox_Visible->setCheckState(Qt::CheckState::Checked);
         ui->checkBox_Wireframe->setCheckState(Qt::CheckState::Unchecked);
@@ -460,7 +460,7 @@ void MeshWidget::on_pushButton_ChangeShaderDropdown_clicked()
 
     if(auto render = getRenderComponent())
     {
-        render->mMaterial.loadShaderWithParameters(ResourceManager::instance()->getShader(name.toStdString()));
+        render->mMaterial.loadShaderWithParameters(ResourceManager::instance().getShader(name.toStdString()));
         updateShaderParameters(render->mMaterial);
     }
 }
@@ -474,7 +474,7 @@ void MeshWidget::on_pushButton_ChangeTextureDropdown_clicked()
 
     if(auto render = getRenderComponent())
     {
-        auto texture = ResourceManager::instance()->getTexture(name.toStdString());
+        auto texture = ResourceManager::instance().getTexture(name.toStdString());
         render->mMaterial.mTextures.push_back({texture->id(), texture->mType});
     }
 }

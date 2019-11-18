@@ -225,7 +225,7 @@ void Renderer::renderGlobalWireframe(std::vector<MeshComponent>& renders, const 
     glDisable(GL_CULL_FACE);
 
     mNumberOfVerticesDrawn = geometryPass(renders, transforms, camera, ShaderType::Forward,
-                 std::make_optional<Material>(ResourceManager::instance()->getShader("singleColor"),
+                 std::make_optional<Material>(ResourceManager::instance().getShader("singleColor"),
                                               std::map<std::string, ShaderParamType>{    {"p_color", gsl::vec3{1.f, 1.f, 1.f}}     }));
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -357,8 +357,8 @@ int Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vecto
                 if(!material.mShader)
                 {
                     material.mShader = renderMode == ShaderType::Deferred ?
-                                ResourceManager::instance()->getShader("phong") :
-                                ResourceManager::instance()->getShader("singleColor");
+                                ResourceManager::instance().getShader("phong") :
+                                ResourceManager::instance().getShader("singleColor");
                     renderIt->mMaterial.loadShaderWithParameters(material.mShader);
                     material = renderIt->mMaterial;
                 }
@@ -458,7 +458,7 @@ void Renderer::deferredLightningPass(const std::vector<TransformComponent> &tran
     {
         if(mDirectionalLightShader == nullptr)
         {
-            mDirectionalLightShader = ResourceManager::instance()->getShader("directionalLight");
+            mDirectionalLightShader = ResourceManager::instance().getShader("directionalLight");
         }
         directionalLightPass(transforms, camera, dirLights);
     }
@@ -468,7 +468,7 @@ void Renderer::deferredLightningPass(const std::vector<TransformComponent> &tran
     {
         if(mSpotLightShader == nullptr)
         {
-            mSpotLightShader = ResourceManager::instance()->getShader("spotLight");
+            mSpotLightShader = ResourceManager::instance().getShader("spotLight");
         }
         spotLightPass(transforms, camera, spotLights);
     }
@@ -477,7 +477,7 @@ void Renderer::deferredLightningPass(const std::vector<TransformComponent> &tran
     {
         if(mPointLightShader == nullptr)
         {
-            mPointLightShader = ResourceManager::instance()->getShader("pointLight");
+            mPointLightShader = ResourceManager::instance().getShader("pointLight");
         }
         pointLightPass(transforms, camera, pointLights);
     }
@@ -694,7 +694,7 @@ unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std:
         // Using the postprocessor input framebuffer as an offscreen render.
         mPostprocessor->clear();
 
-        auto shader = ResourceManager::instance()->getShader("mousepicking");
+        auto shader = ResourceManager::instance().getShader("mousepicking");
         if(!shader)
         {
             std::cout << "mouse hover object function failed because it could'nt find mousepicking shader!" << std::endl;

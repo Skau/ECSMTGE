@@ -101,6 +101,7 @@ private:
 
     std::vector<ComponentWidget*> mCurrentComponentWidgets;
     void setSelected(EntityInfo *entityInfo);
+    void updateSelectedInTreeWidget(EntityInfo* entityInfo);
 
 protected:
     void closeEvent(QCloseEvent* event) override;

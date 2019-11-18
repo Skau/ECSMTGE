@@ -184,6 +184,8 @@ void MainWindow::updateComponentArea(unsigned int entityID)
     // Delete cached widgets
     mCurrentComponentWidgets.clear();
 
+
+
     if(!entityID)
         return;
 
@@ -428,6 +430,8 @@ void MainWindow::setSelected(EntityInfo* entityInfo)
         if (auto renderer = getRenderer())
             renderer->EditorCurrentEntitySelected = nullptr;
         updateComponentArea(0);
+        updateSelectedInTreeWidget(nullptr);
+        ui->lineEdit_SelectedObject->setText("");
         return;
     }
 
@@ -437,11 +441,31 @@ void MainWindow::setSelected(EntityInfo* entityInfo)
     // Update the selected object name
     ui->lineEdit_SelectedObject->setText(QString::fromStdString(currentEntitySelected->name));
 
+    updateSelectedInTreeWidget(entityInfo);
+
     // Update widgets
     updateComponentArea(currentEntitySelected->entityId);
 
     if (auto renderer = getRenderer())
         renderer->EditorCurrentEntitySelected = currentEntitySelected;
+}
+
+void MainWindow::updateSelectedInTreeWidget(EntityInfo *entityInfo)
+{
+    for(auto& item : mTreeDataCache)
+    {
+        // Unselect all (programatically
+        if(item.first->isSelected())
+        {
+            item.first->setSelected(false);
+        }
+
+        if(entityInfo && item.second.entityId == entityInfo->entityId)
+        {
+            if(!item.first->isSelected())
+                item.first->setSelected(true);
+        }
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

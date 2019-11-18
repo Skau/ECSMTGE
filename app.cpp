@@ -124,13 +124,20 @@ void App::mousePicking()
     if (!cameras.empty())
     {
         auto entity = mRenderer->getMouseHoverObject(gsl::ivec2{mousePoint.x(), mousePoint.y()}, meshes, transforms, cameras.front());
+        bool found{false};
         for (auto it = mMainWindow->mTreeDataCache.begin(); it != mMainWindow->mTreeDataCache.end(); ++it)
         {
             if (it->second.entityId == entity)
             {
                 mMainWindow->setSelected(&it->second);
+                found = true;
                 break;
             }
+        }
+
+        if(!found)
+        {
+            mMainWindow->setSelected(nullptr);
         }
     }
 }

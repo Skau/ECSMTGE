@@ -43,6 +43,7 @@ private slots:
 
 private:
     Ui::Transform* ui;
+    gsl::vec3 editorRot;
 
     void setPosition(const gsl::vec3& pos);
     void setRotation(const gsl::vec3 &rot);

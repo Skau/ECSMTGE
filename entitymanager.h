@@ -128,17 +128,17 @@ private:
 
     void removeEntity(unsigned entity)
     {
+        for(auto& comp : getAllComponents(entity))
+        {
+            comp->valid = false;
+            comp->reset();
+        }
         for(unsigned i = 0; i < mEntityInfos.size(); ++i)
         {
-            if(entity == mEntityInfos[i].entityId)
+            if(mEntityInfos[i].entityId == entity)
             {
-                for(auto& comp : getAllComponents(entity))
-                {
-                    comp->valid = false;
-                    comp->reset();
-                }
                 mEntityInfos.erase(mEntityInfos.begin() + i);
-                continue;
+                break;
             }
         }
     }
@@ -240,14 +240,14 @@ public:
 
     void removeEntitiesMarked()
     {
-        if(!entitiesToDestroy.empty())
+        if(entitiesToDestroy.empty())
+            return;
+
+        for(auto& entity : entitiesToDestroy)
         {
-            for(auto& entity : entitiesToDestroy)
-            {
-                removeEntity(entity);
-            }
-            entitiesToDestroy.clear();
+            removeEntity(entity);
         }
+        entitiesToDestroy.clear();
     }
 
     /** Runs a function on a entities component based on components in template.

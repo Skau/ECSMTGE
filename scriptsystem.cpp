@@ -175,7 +175,7 @@ void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector
             if(scriptIt->entityId == it->eID)
             {
                 QJsonObject hitJSON;
-                hitJSON.insert("ID", static_cast<int>(it->eID));
+                hitJSON.insert("ID", static_cast<int>(it->collidingEID));
                 hitJSON.insert("hitPoint", it->hitPoint.toJSON());
                 hitJSON.insert("velocity", it->velocity.toJSON());
                 hitJSON.insert("collidingNormal", it->collidingNormal.toJSON());

@@ -128,20 +128,17 @@ private:
 
     void removeEntity(unsigned entity)
     {
-        bool destroyed{false};
         for(unsigned i = 0; i < mEntityInfos.size(); ++i)
         {
             if(entity == mEntityInfos[i].entityId)
             {
-                destroyed = true;
                 for(auto& comp : getAllComponents(entity))
                 {
                     comp->valid = false;
                     comp->reset();
                 }
-                qDebug() << "Entity" << entity << "destroyed ==" << destroyed;
                 mEntityInfos.erase(mEntityInfos.begin() + i);
-                break;
+                continue;
             }
         }
     }

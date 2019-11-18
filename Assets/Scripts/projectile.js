@@ -1,20 +1,23 @@
 var lifeTime = 2;
 var time = 0;
 
+var collider;
+
 // This will be run once when play button is pressed
 function beginPlay()
 {
-
+	collider = addComponent("collider");
+	collider.CollisionType = 1;
 }
 
 // This will be run once every frame
 function tick(deltaTime)
 {
-    // time += deltaTime;
-    // if(time >= lifeTime)
-    // {
-    //     engine.destroyEntity(me.ID);
-    // }
+	time += deltaTime;
+	if(time >= lifeTime)
+	{
+		engine.destroyEntity(me.ID);
+	}
 	//console.log("Tick called on entity " + me.ID);
 }
 
@@ -56,5 +59,5 @@ function mouseMoved(offset)
 // This will be run when collision with another entity occurs
 function onHit(hitInfo)
 {
-	console.log("Projectile onHit");
+	engine.destroyEntity(hitInfo.ID);
 }

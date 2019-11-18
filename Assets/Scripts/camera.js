@@ -100,13 +100,11 @@ function inputPressed(inputs)
 				meshComp.IsVisible = true;
 				meshComp.MeshData.Name = "box2";
 
-				//let entity = engine.spawnCube();
-
  				let scriptComp = entity.addComponent("script");
 				scriptComp.FilePath = "projectile.js";
 
 				let transformComp = entity.addComponent("transform");
-				//let transformComp = entity.getComponent("transform");
+
 				let newPos = pos;
 				newPos = newPos.sub(fwd.mult(1.5));
 			
@@ -121,10 +119,6 @@ function inputPressed(inputs)
 				physics.Velocity[0] = -fwd.x * 2;
 				physics.Velocity[1] = -fwd.y * 2;
 				physics.Velocity[2] = -fwd.z * 2;
-
-				let collider = entity.addComponent("collider");
-				collider.CollisionType = 2;
-				collider.Extents = [1, 1, 1];
 			
 				canFire = false;
 			}

@@ -171,7 +171,9 @@ void App::update()
      * and instead of sending references to the lists we should take copies
      * and then later apply those copies to the original lists.
      */
-    auto hitInfos = PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
+    std::vector<HitInfo> hitInfos;
+    if (mCurrentlyPlaying)
+        hitInfos = PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
 
     // Sound:
     // Note: Sound listener is using the active camera view matrix (for directions) and transform (for position)

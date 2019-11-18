@@ -18,41 +18,41 @@ void ScriptSystem::beginPlay(std::vector<ScriptComponent>& comps)
     // To catch changes to helper function script during runtime
     initializeHelperFuncs();
 
-    for(auto& comp : comps)
+    for (auto scriptIt = comps.begin(); scriptIt != comps.end(); ++scriptIt)
     {
-        if(comp.filePath.size() && !comp.beginplayRun)
+        if(scriptIt->filePath.size() && !scriptIt->beginplayRun)
         {
             // To catch changes to script during runtime
-            load(comp, comp.filePath);
-            call(comp, "beginPlay");
-            cacheGlobalVariables(comp);
-            comp.beginplayRun = true;
+            load(*scriptIt, scriptIt->filePath);
+            call(*scriptIt, "beginPlay");
+            cacheGlobalVariables(*scriptIt);
+            scriptIt->beginplayRun = true;
         }
     }
 }
 
 void ScriptSystem::tick(float deltaTime, std::vector<ScriptComponent>& comps)
 {
-    for(auto& comp : comps)
+    for (auto scriptIt = comps.begin(); scriptIt != comps.end(); ++scriptIt)
     {
-        if(comp.filePath.size() && comp.beginplayRun)
+        if(scriptIt->filePath.size() && scriptIt->beginplayRun)
         {
             mDeltaTime = deltaTime;
             QJSValueList list;
             list << static_cast<double>(deltaTime);
-            call(comp, "tick", list);
+            call(*scriptIt, "tick", list);
         }
     }
 }
 
 void ScriptSystem::endPlay(std::vector<ScriptComponent>& comps)
 {
-    for(auto& comp : comps)
+    for (auto scriptIt = comps.begin(); scriptIt != comps.end(); ++scriptIt)
     {
-        if(comp.filePath.size() && comp.beginplayRun)
+        if(scriptIt->filePath.size() && scriptIt->beginplayRun)
         {
-            call(comp, "endPlay");
-            comp.beginplayRun = false;
+            call(*scriptIt, "endPlay");
+            scriptIt->beginplayRun = false;
         }
     }
 }
@@ -62,24 +62,24 @@ void ScriptSystem::runKeyPressedEvent(std::vector<ScriptComponent>& scripts, std
     if(!keys.size())
         return;
 
-    for(auto& input : inputs)
+    for (auto inputIt = inputs.begin(); inputIt != inputs.end(); ++inputIt)
     {
-        if(!input.controlledWhilePlaying)
+        if(!inputIt->controlledWhilePlaying)
             continue;
 
-        for(auto& script : scripts)
+        for (auto scriptIt = scripts.begin(); scriptIt != scripts.end(); ++scriptIt)
         {
-            if(!script.filePath.size())
+            if(!scriptIt->filePath.size())
                 continue;
 
             QJSValueList list;
-            auto array = script.engine->newArray(static_cast<unsigned>(keys.size()));
+            auto array = scriptIt->engine->newArray(static_cast<unsigned>(keys.size()));
             for(unsigned i = 0; i < keys.size(); ++i)
             {
                 array.setProperty(i, keys[i]);
             }
             list << array;
-            call(script, "inputPressed", list);
+            call(*scriptIt, "inputPressed", list);
         }
     }
 }
@@ -89,24 +89,24 @@ void ScriptSystem::runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, st
     if(!keys.size())
         return;
 
-    for(auto& input : inputs)
+    for (auto inputIt = inputs.begin(); inputIt != inputs.end(); ++inputIt)
     {
-        if(!input.controlledWhilePlaying)
+        if(!inputIt->controlledWhilePlaying)
             continue;
 
-        for(auto& script : scripts)
+        for (auto scriptIt = scripts.begin(); scriptIt != scripts.end(); ++scriptIt)
         {
-            if(!script.filePath.size())
+            if(!scriptIt->filePath.size())
                 continue;
 
             QJSValueList list;
-            auto array = script.engine->newArray(static_cast<unsigned>(keys.size()));
+            auto array = scriptIt->engine->newArray(static_cast<unsigned>(keys.size()));
             for(unsigned i = 0; i < keys.size(); ++i)
             {
                 array.setProperty(i, keys[i]);
             }
             list << array;
-            call(script, "inputReleased", list);
+            call(*scriptIt, "inputReleased", list);
         }
     }
 
@@ -115,22 +115,22 @@ void ScriptSystem::runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, st
 
 void ScriptSystem::runMouseOffsetEvent(std::vector<ScriptComponent> &scripts, std::vector<InputComponent> &inputs, const QPoint& point)
 {
-    for(auto& input : inputs)
+    for (auto inputIt = inputs.begin(); inputIt != inputs.end(); ++inputIt)
     {
-        if(!input.controlledWhilePlaying)
+        if(!inputIt->controlledWhilePlaying)
             continue;
 
-        for(auto& script : scripts)
+        for (auto scriptIt = scripts.begin(); scriptIt != scripts.end(); ++scriptIt)
         {
-            if(!script.filePath.size())
+            if(!scriptIt->filePath.size())
                 continue;
 
             QJSValueList list;
-            auto array = script.engine->newArray(2);
+            auto array = scriptIt->engine->newArray(2);
             array.setProperty(0, point.x());
             array.setProperty(1, point.y());
             list << array;
-            call(script, "mouseMoved", list);
+            call(*scriptIt, "mouseMoved", list);
         }
     }
 }
@@ -140,25 +140,25 @@ void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector
     if(!comps.size() || !hitInfos.size())
         return;
 
-    for(auto& hitInfo : hitInfos)
+    for (auto it = hitInfos.begin(); it != hitInfos.end(); ++it)
     {
-        for(unsigned i = 0; i < comps.size(); ++i)
+        for (auto scriptIt = comps.begin(); scriptIt != comps.end(); ++scriptIt)
         {
-            if(!comps[i].filePath.size())
+            if(!scriptIt->filePath.size())
                 continue;
 
-            if(comps[i].entityId == hitInfo.eID)
+            if(scriptIt->entityId == it->eID)
             {
                 QJsonObject hitJSON;
-                hitJSON.insert("ID", static_cast<int>(hitInfo.eID));
-                hitJSON.insert("hitPoint", hitInfo.hitPoint.toJSON());
-                hitJSON.insert("velocity", hitInfo.velocity.toJSON());
-                hitJSON.insert("collidingNormal", hitInfo.collidingNormal.toJSON());
+                hitJSON.insert("ID", static_cast<int>(it->eID));
+                hitJSON.insert("hitPoint", it->hitPoint.toJSON());
+                hitJSON.insert("velocity", it->velocity.toJSON());
+                hitJSON.insert("collidingNormal", it->collidingNormal.toJSON());
 
                 QJSValueList list;
                 QJsonDocument doc(hitJSON);
-                list << comps[i].engine->toScriptValue(hitJSON);
-                call(comps[i], "onHit", list);
+                list << scriptIt->engine->toScriptValue(hitJSON);
+                call(*scriptIt, "onHit", list);
             }
         }
     }
@@ -166,22 +166,22 @@ void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector
 
 void ScriptSystem::updateJSComponents(std::vector<ScriptComponent>& comps)
 {
-    for(auto& comp : comps)
+    for (auto it = comps.begin(); it != comps.end(); ++it)
     {
-        if(comp.filePath.size())
+        if(it->filePath.size())
         {
-            updateJSComponent(comp);
+            updateJSComponent(*it);
         }
     }
 }
 
 void ScriptSystem::updateCPPComponents(std::vector<ScriptComponent> &comps)
 {
-    for(auto& comp : comps)
+    for (auto it = comps.begin(); it != comps.end(); ++it)
     {
-        if(comp.filePath.size())
+        if(it->filePath.size())
         {
-            updateCPPComponent(comp);
+            updateCPPComponent(*it);
         }
     }
 }

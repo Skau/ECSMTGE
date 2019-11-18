@@ -205,7 +205,6 @@ void Renderer::render(std::vector<MeshComponent>& renders, const std::vector<Tra
     {
         renderReset();
 
-
         if (mGlobalWireframe)
             renderGlobalWireframe(renders, transforms, camera);
         else
@@ -225,7 +224,7 @@ void Renderer::renderGlobalWireframe(std::vector<MeshComponent>& renders, const 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDisable(GL_CULL_FACE);
 
-    geometryPass(renders, transforms, camera, ShaderType::Forward,
+    mNumberOfVerticesDrawn = geometryPass(renders, transforms, camera, ShaderType::Forward,
                  std::make_optional<Material>(ResourceManager::instance()->getShader("singleColor"),
                                               std::map<std::string, ShaderParamType>{    {"p_color", gsl::vec3{1.f, 1.f, 1.f}}     }));
 
@@ -256,7 +255,7 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
                               const std::vector<SpotLightComponent>& spotLights, const std::vector<PointLightComponent>& pointLights)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-    geometryPass(renders, transforms, camera, ShaderType::Deferred);
+    mNumberOfVerticesDrawn = geometryPass(renders, transforms, camera, ShaderType::Deferred);
     glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
 
@@ -300,7 +299,7 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     renderAxis(camera);
 }
 
-void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
+int Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
                             ShaderType renderMode, std::optional<Material> overrideMaterial)
 {
     auto transIt = transforms.begin();
@@ -316,7 +315,7 @@ void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vect
 
     checkForGLerrors();
 
-    mNumberOfVerticesDrawn = 0;
+    auto verticesDrawn = 0;
 
     // cause normal while (true) loops are so outdated
     for ( ;_; )
@@ -426,7 +425,7 @@ void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vect
             if (currentlySelectedEID == renderIt->entityId)
                 glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
-            mNumberOfVerticesDrawn += meshData.mVerticesCounts[index];
+            verticesDrawn += meshData.mVerticesCounts[index];
 
             if(meshData.mIndicesCounts[index] > 0)
             {
@@ -441,13 +440,13 @@ void Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vect
             if (currentlySelectedEID == renderIt->entityId)
                 glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-
             // Increment all
             ++transIt;
             ++renderIt;
         }
     }
     checkForGLerrors();
+    return verticesDrawn;
 }
 
 void Renderer::deferredLightningPass(const std::vector<TransformComponent> &transforms, const CameraComponent &camera,

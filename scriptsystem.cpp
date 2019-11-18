@@ -1,5 +1,6 @@
 #include "scriptsystem.h"
 #include <QFile>
+#include <QFileInfo>
 #include <QTextStream>
 #include "world.h"
 #include "componentdata.h"
@@ -23,10 +24,14 @@ void ScriptSystem::beginPlay(std::vector<ScriptComponent>& comps)
         if(scriptIt->filePath.size() && !scriptIt->beginplayRun)
         {
             // To catch changes to script during runtime
-            load(*scriptIt, scriptIt->filePath);
+            if(!load(*scriptIt, scriptIt->filePath))
+            {
+                qDebug() << "Failed to load" << scriptIt->filePath.c_str();
+                continue;
+            }
+            scriptIt->beginplayRun = true;
             call(*scriptIt, "beginPlay");
             cacheGlobalVariables(*scriptIt);
-            scriptIt->beginplayRun = true;
         }
     }
 }
@@ -69,8 +74,13 @@ void ScriptSystem::runKeyPressedEvent(std::vector<ScriptComponent>& scripts, std
 
         for (auto scriptIt = scripts.begin(); scriptIt != scripts.end(); ++scriptIt)
         {
-            if(!scriptIt->filePath.size())
+            if(!scriptIt->filePath.size() || !scriptIt->beginplayRun)
                 continue;
+
+            if(!scriptIt->JSEntity)
+            {
+                initializeJSEntity(*scriptIt);
+            }
 
             QJSValueList list;
             auto array = scriptIt->engine->newArray(static_cast<unsigned>(keys.size()));
@@ -96,8 +106,13 @@ void ScriptSystem::runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, st
 
         for (auto scriptIt = scripts.begin(); scriptIt != scripts.end(); ++scriptIt)
         {
-            if(!scriptIt->filePath.size())
+            if(!scriptIt->filePath.size() || !scriptIt->beginplayRun)
                 continue;
+
+            if(!scriptIt->JSEntity)
+            {
+                initializeJSEntity(*scriptIt);
+            }
 
             QJSValueList list;
             auto array = scriptIt->engine->newArray(static_cast<unsigned>(keys.size()));
@@ -122,8 +137,13 @@ void ScriptSystem::runMouseOffsetEvent(std::vector<ScriptComponent> &scripts, st
 
         for (auto scriptIt = scripts.begin(); scriptIt != scripts.end(); ++scriptIt)
         {
-            if(!scriptIt->filePath.size())
+            if(!scriptIt->filePath.size() || !scriptIt->beginplayRun)
                 continue;
+
+            if(!scriptIt->JSEntity)
+            {
+                initializeJSEntity(*scriptIt);
+            }
 
             QJSValueList list;
             auto array = scriptIt->engine->newArray(2);
@@ -144,8 +164,13 @@ void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector
     {
         for (auto scriptIt = comps.begin(); scriptIt != comps.end(); ++scriptIt)
         {
-            if(!scriptIt->filePath.size())
+            if(!scriptIt->filePath.size() || !scriptIt->beginplayRun)
                 continue;
+
+            if(!scriptIt->JSEntity)
+            {
+                initializeJSEntity(*scriptIt);
+            }
 
             if(scriptIt->entityId == it->eID)
             {
@@ -177,11 +202,11 @@ void ScriptSystem::updateJSComponents(std::vector<ScriptComponent>& comps)
 
 void ScriptSystem::updateCPPComponents(std::vector<ScriptComponent> &comps)
 {
-    for (auto it = comps.begin(); it != comps.end(); ++it)
+    for(auto& comp : comps)
     {
-        if(it->filePath.size())
+        if(comp.valid && comp.filePath.size())
         {
-            updateCPPComponent(*it);
+            updateCPPComponent(comp);
         }
     }
 }
@@ -190,7 +215,14 @@ QString ScriptSystem::checkError(QJSValue value)
 {
     QString lineNumber = QString::number(value.property("lineNumber").toInt());
     QString valueString = value.toString();
-    QString error("Uncaught exception at line " + lineNumber  + " : " + valueString );
+    QString error("Uncaught exception at line " +
+                  lineNumber  +
+                  " : " +
+                  valueString +
+                  " in script " +
+                  currentFileName +
+                  ", entity " +
+                  QString::number(currentComp->entityId));
     qDebug() << error;
     return error;
 }
@@ -315,29 +347,31 @@ bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)
         return false;
     }
 
-    QFile scriptFile(QString::fromStdString(file));
+    QFileInfo info(QString::fromStdString(gsl::scriptsFilePath + file));
+
+    QFile scriptFile(info.filePath());
     if(!scriptFile.exists())
     {
-        qDebug() << "Script file (" + QString::fromStdString(file) + ") does not exist!";
+        qDebug() << "Script file (" + info.filePath() + ") does not exist!";
         return false;
     }
     if (!scriptFile.open(QIODevice::ReadOnly))
     {
-        qDebug() << "Failed to open script: " << QString::fromStdString(file);
+        qDebug() << "Failed to open script: " << info.filePath();
+        return false;
     }
     QTextStream stream(&scriptFile);
     QString contents = stream.readAll();
     contents.prepend(mHelperFuncs);
     scriptFile.close();
-    auto value = comp.engine->evaluate(contents, QString::fromStdString(file));
+    auto value = comp.engine->evaluate(contents, info.filePath());
     if(value.isError())
     {
         checkError(value);
         return false;
     }
 
-    QFileInfo info(QString::fromStdString(file));
-    comp.filePath = gsl::scriptsFilePath + info.baseName().toStdString() + ".js";
+    comp.filePath = info.baseName().toStdString() + ".js";
     currentComp = nullptr;
     currentFileName = "";
     return true;
@@ -345,7 +379,7 @@ bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)
 
 void ScriptSystem::call(ScriptComponent& comp, const std::string& function)
 {
-    if(!comp.filePath.size())
+    if(!comp.filePath.size() || !comp.beginplayRun)
         return;
 
     currentComp = &comp;
@@ -356,7 +390,7 @@ void ScriptSystem::call(ScriptComponent& comp, const std::string& function)
         initializeJSEntity(comp);
     }
 
-    QJSValue value = comp.engine->evaluate(QString::fromStdString(function), currentFileName);
+    QJSValue value = comp.engine->evaluate(QString::fromStdString(function), QString::fromStdString(gsl::scriptsFilePath) + currentFileName);
     if(value.isError())
     {
         checkError(value);
@@ -377,7 +411,7 @@ void ScriptSystem::call(ScriptComponent& comp, const std::string& function)
 
 void ScriptSystem::call(ScriptComponent &comp, const std::string& function, QJSValueList params)
 {
-    if(!comp.filePath.size())
+    if(!comp.filePath.size() || !comp.beginplayRun)
         return;
 
     currentComp = &comp;
@@ -388,7 +422,7 @@ void ScriptSystem::call(ScriptComponent &comp, const std::string& function, QJSV
         initializeJSEntity(comp);
     }
 
-    QJSValue value = comp.engine->evaluate(QString::fromStdString(function), currentFileName);
+    QJSValue value = comp.engine->evaluate(QString::fromStdString(function), QString::fromStdString(gsl::scriptsFilePath) + currentFileName);
     if(value.isError())
     {
         checkError(value);
@@ -411,7 +445,7 @@ QJSValue ScriptSystem::call(const std::string& function)
 {
     if(currentComp && currentComp->JSEntity)
     {
-        QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), currentFileName);
+        QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), QString::fromStdString(gsl::scriptsFilePath) + currentFileName);
         if(value.isError())
         {
             checkError(value);
@@ -435,7 +469,7 @@ QJSValue ScriptSystem::call(const std::string& function, QJSValueList params)
 {
     if(currentComp && currentComp->JSEntity)
     {
-        QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), currentFileName);
+        QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), QString::fromStdString(gsl::scriptsFilePath) + currentFileName);
         if(value.isError())
         {
             checkError(value);
@@ -467,7 +501,7 @@ bool ScriptSystem::execute(ScriptComponent& comp, QString function, QString cont
         initializeJSEntity(comp);
     }
 
-    QJSValue value = comp.engine->evaluate(contents, fileName);
+    QJSValue value = comp.engine->evaluate(contents, QString::fromStdString(gsl::scriptsFilePath) + fileName);
     if(value.isError())
     {
         checkError(value);
@@ -631,7 +665,7 @@ QObject* ScriptSystem::getEntity(unsigned int id)
 
 void ScriptSystem::destroyEntity(unsigned entity)
 {
-    World::getWorld().getEntityManager()->removeEntity(entity);
+    World::getWorld().getEntityManager()->removeEntityLater(entity);
 }
 
 void ScriptSystem::updateJSComponent(ScriptComponent& comp)
@@ -655,75 +689,9 @@ void ScriptSystem::updateJSComponent(ScriptComponent& comp)
                 auto entityManager = World::getWorld().getEntityManager();
 
                 // Get component that matches the type
-                Component* component{nullptr};
-                switch (static_cast<ComponentType>(object["ComponentType"].toInt()))
-                {
-                case ComponentType::Other:
-                {
-                    component = entityManager->getComponent<EntityInfo>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Mesh:
-                {
-                    component = entityManager->getComponent<MeshComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Transform:
-                {
-                    component = entityManager->getComponent<TransformComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Camera:
-                {
-                    component = entityManager->getComponent<CameraComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Physics:
-                {
-                    component = entityManager->getComponent<PhysicsComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Input:
-                {
-                    component = entityManager->getComponent<InputComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Sound:
-                {
-                    component = entityManager->getComponent<SoundComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::LightSpot:
-                {
-                    component = entityManager->getComponent<SpotLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::LightPoint:
-                {
-                    component = entityManager->getComponent<PointLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::LightDirectional:
-                {
-                    component = entityManager->getComponent<DirectionalLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Script:
-                {
-                    component = entityManager->getComponent<ScriptComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Collider:
-                {
-                    component = entityManager->getComponent<ColliderComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Particle:
-                {
-                    component = entityManager->getComponent<ParticleComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                }
+                auto ID = static_cast<unsigned>(object["ID"].toInt());
+                auto componentType = static_cast<ComponentType>(object["ComponentType"].toInt());
+                auto component = entityManager->getComponent(ID, componentType);
 
                 if(component)
                 {
@@ -746,7 +714,7 @@ void ScriptSystem::updateJSComponent(ScriptComponent& comp)
 
 void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
 {
-    if(!comp.filePath.size())
+    if(!comp.valid || !comp.filePath.size() || !comp.beginplayRun)
         return;
 
     auto componentArray = comp.engine->globalObject().property("accessedComponents");
@@ -765,86 +733,34 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
                 auto entityManager = World::getWorld().getEntityManager();
 
                 // Get component that matches the type
-                Component* component{nullptr};
-                switch (static_cast<ComponentType>(object["ComponentType"].toInt()))
-                {
-                case ComponentType::Other:
-                {
-                    component = entityManager->getComponent<EntityInfo>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Mesh:
-                {
-                    component = entityManager->getComponent<MeshComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Transform:
-                {
-                    component = entityManager->getComponent<TransformComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Camera:
-                {
-                    component = entityManager->getComponent<CameraComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Physics:
-                {
-                    component = entityManager->getComponent<PhysicsComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Input:
-                {
-                    component = entityManager->getComponent<InputComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Sound:
-                {
-                    component = entityManager->getComponent<SoundComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::LightSpot:
-                {
-                    component = entityManager->getComponent<SpotLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::LightPoint:
-                {
-                    component = entityManager->getComponent<PointLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::LightDirectional:
-                {
-                    component = entityManager->getComponent<DirectionalLightComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Script:
-                {
-                    component = entityManager->getComponent<ScriptComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Collider:
-                {
-                    component = entityManager->getComponent<ColliderComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                case ComponentType::Particle:
-                {
-                    component = entityManager->getComponent<ParticleComponent>(static_cast<unsigned>(object["ID"].toInt()));
-                    break;
-                }
-                }
+                auto ID = static_cast<unsigned>(object["ID"].toInt());
+                auto componentType = static_cast<ComponentType>(object["ComponentType"].toInt());
+                auto component = entityManager->getComponent(ID, componentType);
+
+                object.remove("ID");
 
                 if(component)
                 {
-                    object.remove("ID");
-
                     // If they are different this component was modified in JS
                     // and we need to update the C++ version
                     auto oldJson = component->toJSON();
                     if(object != oldJson)
                     {
                         component->fromJSON(object);
+                    }
+                }
+                else
+                {
+                    // If the component does not exist it needs to be added. Deferred spawning.
+                    for(auto& info : entityManager->getEntityInfos())
+                    {
+                        if(ID == info.entityId)
+                        {
+                            auto comp = entityManager->addComponent(ID, componentType);
+                            comp->fromJSON(object);
+                            comp->valid = true;
+                            break;
+                        }
                     }
                 }
             }

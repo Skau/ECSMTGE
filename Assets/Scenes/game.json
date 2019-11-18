@@ -104,7 +104,7 @@
                 },
                 {
                     "ComponentType": 9,
-                    "FilePath": "../INNgine2019/Assets/Scripts/camera.js",
+                    "FilePath": "camera.js",
                     "Valid": true
                 }
             ],

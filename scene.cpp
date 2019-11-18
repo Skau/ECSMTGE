@@ -145,21 +145,10 @@ void Scene::SaveToFile(const std::string& path)
     // Iterate all entities
     for(auto& entityInfo : entityInfos)
     {
-        // Get entit
-        std::vector<Component*> components;
-        if(!entityManager->getAllComponents(entityInfo.entityId, components))
-        {
-            // No components found
-            continue;
-        }
-
-
+        // Get entity
         QJsonArray compArray;
-        for(auto comp : components)
+        for(auto comp : entityManager->getAllComponents(entityInfo.entityId))
         {
-            // Skip entity info
-            if(comp->type == ComponentType::Other)
-                continue;
             compArray.push_back(comp->toJSON());
         }
 

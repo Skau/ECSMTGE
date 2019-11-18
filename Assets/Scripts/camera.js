@@ -55,6 +55,7 @@ function inputPressed(inputs)
 
 	let pos = new Vec3(transform.Position);
 
+	let moved = false;
 	for (let i = 0; i < inputs.length; i++)
 	{
 		// let rotation = new Quat(transform.Rotation[0], transform.Rotation[1], transform.Rotation[2], transform.Rotation[3]);
@@ -63,37 +64,49 @@ function inputPressed(inputs)
 		if(inputs[i] == "w")
 		{
 			pos = pos.sub(fwd.mult(moveSpeed * engine.deltaTime));
+			moved = true;
 		}
 		else if(inputs[i] == "s")
 		{
 			pos = pos.add(fwd.mult(moveSpeed * engine.deltaTime));
+			moved = true;
 		}
 		else if(inputs[i] == "a")
 		{
 			pos = pos.sub(right.mult(moveSpeed * engine.deltaTime));
+			moved = true;
 		}
 		else if(inputs[i] == "d")
 		{
 			pos = pos.add(right.mult(moveSpeed * engine.deltaTime));
+			moved = true;
 		}
 		else if(inputs[i] == "e")
 		{
 			pos = pos.add(up.mult(moveSpeed * engine.deltaTime));
+			moved = true;
 		}
 		else if(inputs[i] == "q")
 		{
 			pos = pos.sub(up.mult(moveSpeed * engine.deltaTime));
+			moved = true;
 		}
 		else if(inputs[i] == "mouseLeft")
 		{
 			if(canFire)
 			{
-				let entity = engine.spawnCube();
+				let entity = engine.spawnEntity();
+				let meshComp = entity.addComponent("mesh");
+				meshComp.IsVisible = true;
+				meshComp.MeshData.Name = "box2";
 
-				let scriptComp = entity.addComponent("script");
-				scriptComp.FilePath = "../INNgine2019/Assets/Scripts/projectile.js";
+				//let entity = engine.spawnCube();
 
-				let transformComp = entity.getComponent("transform");
+ 				let scriptComp = entity.addComponent("script");
+				scriptComp.FilePath = "projectile.js";
+
+				let transformComp = entity.addComponent("transform");
+				//let transformComp = entity.getComponent("transform");
 				let newPos = pos;
 				newPos = newPos.sub(fwd.mult(1.5));
 			
@@ -112,16 +125,18 @@ function inputPressed(inputs)
 				let collider = entity.addComponent("collider");
 				collider.CollisionType = 2;
 				collider.Extents = [1, 1, 1];
-				transformComp.ColliderBoundsOutdated = true;
 			
 				canFire = false;
 			}
 		}
 	}
 
-	transform.Position[0] = pos.x;
-	transform.Position[1] = pos.y;
-	transform.Position[2] = pos.z;
+	if(moved == true)
+	{
+		transform.Position[0] = pos.x;
+		transform.Position[1] = pos.y;
+		transform.Position[2] = pos.z;
+	}
 }
 
 // This will be run when input is relased

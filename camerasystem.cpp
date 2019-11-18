@@ -6,7 +6,7 @@ void CameraSystem::updateLookAtRotation(TransformComponent& transform, CameraCom
     transform.setRotation(gsl::quat::lookAt(gsl::deg2radf(camera.pitch), gsl::deg2radf(camera.yaw)));
 }
 
-void CameraSystem::updateCameras(std::vector<TransformComponent>& transforms, std::vector<CameraComponent>& cameras)
+void CameraSystem::updateCameraViewMatrices(std::vector<TransformComponent>& transforms, std::vector<CameraComponent>& cameras)
 {
     auto transIt = transforms.begin();
     auto camIt = cameras.begin();
@@ -60,7 +60,7 @@ void CameraSystem::updateCameras(std::vector<TransformComponent>& transforms, st
     }
 }
 
-void CameraSystem::updateCameras(std::vector<CameraComponent>& cameras, const gsl::mat4 &projectionMatrix)
+void CameraSystem::updateCameraViewMatrices(std::vector<CameraComponent>& cameras, const gsl::mat4 &projectionMatrix)
 {
     for (auto& comp : cameras)
         comp.projectionMatrix = projectionMatrix;

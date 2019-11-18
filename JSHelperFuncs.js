@@ -40,7 +40,7 @@ function destringify(obj)
 
 function deleteUnusedVariables(args)
 {
-    for (i = accessedComponents.length - 1; 0 < i; --i)
+    for (let i = accessedComponents.length - 1; 0 < i; --i)
     {
         let removeComp = true;
         for (argIndex in args)

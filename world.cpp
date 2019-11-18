@@ -58,11 +58,23 @@ World::World()
     entityManager = std::make_shared<EntityManager>();
 }
 
-World &World::getWorld()
+World& World::getWorld()
 {
     // Must check for this, because this should never be the case
     assert(mWorldInstance != nullptr);
     return *mWorldInstance;
+}
+
+CameraComponent* World::getCurrentCamera(bool currentlyPlaying)
+{
+    for(auto& camera : getEntityManager()->getCameraComponents())
+    {
+        if(currentlyPlaying ^ camera.isEditorCamera)
+        {
+            return &camera;
+        }
+    }
+    return nullptr;
 }
 
 void World::initBlankScene()

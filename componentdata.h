@@ -77,8 +77,8 @@ struct TransformComponent : public Component
     bool updated : 1;
     std::vector<unsigned int> children;
     gsl::Vector3D position{};
-    gsl::Vector3D scale{1,1,1};
     gsl::Quaternion rotation{};
+    gsl::Vector3D scale{1,1,1};
     bool meshBoundsOutdated : 1;
     bool colliderBoundsOutdated : 1;
 
@@ -89,6 +89,7 @@ struct TransformComponent : public Component
         : Component (_eID, _valid, ComponentType::Transform), updated{true}, position{_pos},
           rotation{_rot}, scale{_scale}, meshBoundsOutdated{true}, colliderBoundsOutdated{true}
     {}
+
 
     virtual void reset() override
     {
@@ -339,11 +340,12 @@ struct ScriptComponent : public Component
 {
     QJSEngine* engine;
     std::string filePath;
-    QEntity* JSEntity{nullptr};
+    QEntity* JSEntity{};
     bool beginplayRun{false};
 
     ScriptComponent(unsigned int _eID = 0, bool _valid = false)
-        : Component(_eID, _valid, ComponentType::Script), filePath(""), JSEntity{nullptr}
+        : Component(_eID, _valid, ComponentType::Script),
+          filePath(""), JSEntity{nullptr}, beginplayRun{false}
     {
         engine = new QJSEngine();
         engine->installExtensions(QJSEngine::ConsoleExtension);

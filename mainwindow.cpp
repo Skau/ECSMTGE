@@ -191,8 +191,8 @@ void MainWindow::updateComponentArea(unsigned int entityID)
     mAvailableComponentsToAddCache = ComponentTypes;
 
     // Get the components for this entity
-    std::vector<Component*> components;
-    if(World::getWorld().getEntityManager()->getAllComponents(entityID, components))
+    auto components = World::getWorld().getEntityManager()->getAllComponents(entityID);
+    if(!components.empty())
     {
         // Components were found, add them
 

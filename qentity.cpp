@@ -33,9 +33,7 @@ QJSValue QEntity::_getComponent(const QString& name, unsigned id)
 
     Component* component = nullptr;
 
-    if(name == "info")
-        component = entityManager->getComponent<EntityInfo>(id);
-    else if(name == "transform")
+    if(name == "transform")
         component = entityManager->getComponent<TransformComponent>(id);
     else if(name == "mesh")
         component = entityManager->getComponent<MeshComponent>(id);
@@ -60,7 +58,7 @@ QJSValue QEntity::_getComponent(const QString& name, unsigned id)
 
     // Return 0 if nothing was found
     if(!component)
-        return 0;
+        return QJSValue();
 
     auto JSON = component->toJSON();
     JSON.insert("ID", QJsonValue(static_cast<int>(id)));
@@ -74,38 +72,85 @@ QJSValue QEntity::_addComponent(const QString &name, unsigned id)
         id = mID;
     }
 
-    Component* component = nullptr;
-
     if(name == "transform")
-        component = entityManager->addComponent(id, ComponentType::Transform);
+    {
+        TransformComponent comp{};
+        auto JSON = comp.toJSON();
+        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+        return mEngine->toScriptValue(JSON);
+    }
     else if(name == "mesh")
-        component = entityManager->addComponent(id, ComponentType::Mesh);
+    {
+        MeshComponent comp{};
+        auto JSON = comp.toJSON();
+        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+        return mEngine->toScriptValue(JSON);
+    }
     else if(name == "physics")
-        component = entityManager->addComponent(id, ComponentType::Physics);
+    {
+        PhysicsComponent comp{};
+        auto JSON = comp.toJSON();
+        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+        return mEngine->toScriptValue(JSON);
+    }
     else if(name == "camera")
-        component = entityManager->addComponent(id, ComponentType::Camera);
+    {
+        CameraComponent comp{};
+        auto JSON = comp.toJSON();
+        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+        return mEngine->toScriptValue(JSON);
+    }
     else if(name == "input")
-        component = entityManager->addComponent(id, ComponentType::Input);
+    {
+        InputComponent comp{};
+        auto JSON = comp.toJSON();
+        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+        return mEngine->toScriptValue(JSON);
+    }
     else if(name == "sound")
-        component = entityManager->addComponent(id, ComponentType::Sound);
+    {
+        SoundComponent comp{};
+        auto JSON = comp.toJSON();
+        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+        return mEngine->toScriptValue(JSON);
+    }
     else if(name == "pointLight")
-        component = entityManager->addComponent(id, ComponentType::LightPoint);
+    {
+        PointLightComponent comp{};
+        auto JSON = comp.toJSON();
+        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+        return mEngine->toScriptValue(JSON);
+    }
     else if(name == "directionalLight")
-        component = entityManager->addComponent(id, ComponentType::LightDirectional);
+    {
+        DirectionalLightComponent comp{};
+        auto JSON = comp.toJSON();
+        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+        return mEngine->toScriptValue(JSON);
+    }
     else if(name == "spotLight")
-        component = entityManager->addComponent(id, ComponentType::LightSpot);
+    {
+        SpotLightComponent comp{};
+        auto JSON = comp.toJSON();
+        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+        return mEngine->toScriptValue(JSON);
+    }
     else if(name == "script")
-        component = entityManager->addComponent(id, ComponentType::Script);
+    {
+        ScriptComponent comp{};
+        auto JSON = comp.toJSON();
+        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+        return mEngine->toScriptValue(JSON);
+    }
     else if(name == "collider")
-        component = entityManager->addComponent(id, ComponentType::Collider);
+    {
+        ColliderComponent comp{};
+        auto JSON = comp.toJSON();
+        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
+        return mEngine->toScriptValue(JSON);
+    }
 
-    // Return 0 if nothing was found
-    if(!component)
-        return 0;
-
-    auto JSON = component->toJSON();
-    JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-    return mEngine->toScriptValue(JSON);
+    return QJSValue();
 }
 
 void QEntity::updateCamera()

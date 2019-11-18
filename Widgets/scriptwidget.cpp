@@ -77,8 +77,8 @@ void ScriptWidget::on_toolButton_clicked()
         {
             QFileInfo info(fileName);
             auto name = QString::fromStdString(gsl::scriptsFilePath) + info.baseName() + ".js";
-            ui->lineEdit->setText(name);
-            ScriptSystem::get()->load(*comp, fileName.toStdString());
+            ui->lineEdit->setText(info.baseName() + ".js");
+            ScriptSystem::get()->load(*comp, info.baseName().toStdString() + ".js");
         }
     }
 }
@@ -198,8 +198,8 @@ void ScriptWidget::on_button_NewFile_clicked()
                    << "function onHit(hitInfo)\n{\n\t//console.log(\"Collided with entity ID: \" + hitInfo.ID);\n}\n";
             file.close();
             QFileInfo fileInfo(file.fileName());
-            ScriptSystem::get()->load(*comp, fileInfo.filePath().toStdString());
-            ui->lineEdit->setText(QString::fromStdString(comp->filePath));
+            ScriptSystem::get()->load(*comp, fileInfo.baseName().toStdString() + ".js");
+            ui->lineEdit->setText(fileInfo.baseName());
             ui->button_NewFile->setText("Open file");
         }
     }

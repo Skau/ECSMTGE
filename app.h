@@ -33,11 +33,13 @@ private:
 public:
     App();
 
-
 signals:
     void initScene();
 
 public slots:
+    /**
+     * @brief Called after the renderer has created its context.
+     */
     void initTheRest();
     void toggleMute(bool mode);
     void mousePicking();

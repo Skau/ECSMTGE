@@ -139,8 +139,7 @@ void ScriptComponent::fromJSON(QJsonObject object)
     if(file.size())
     {
         engine->globalObject().setProperty("entityID", entityId);
-        QFileInfo info(file);
-        ScriptSystem::get()->load(*this, gsl::scriptsFilePath + info.baseName().toStdString() + ".js");
+        ScriptSystem::get()->load(*this, file.toStdString());
     }
 }
 
@@ -255,7 +254,7 @@ void MeshComponent::fromJSON(QJsonObject object)
     if(meshName.size() && meshName != "None")
     {
         meshData = *ResourceManager::instance()->getMesh(meshName);
-        meshData.mRenderType = static_cast<GLenum>(meshDataObj["RenderType"].toInt());
+        meshData.mRenderType = static_cast<GLenum>(meshDataObj["RenderType"].toInt(GL_TRIANGLES));
     }
 
     // Material data

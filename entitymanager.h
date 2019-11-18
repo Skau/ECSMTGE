@@ -123,7 +123,28 @@ class EntityManager : public QObject
 
 private:
     // ------------------------------ Member Variables -----------------------------
+    std::vector<unsigned> entitiesToDestroy;
     unsigned int idCounter{0};
+
+    void removeEntity(unsigned entity)
+    {
+        bool destroyed{false};
+        for(unsigned i = 0; i < mEntityInfos.size(); ++i)
+        {
+            if(entity == mEntityInfos[i].entityId)
+            {
+                destroyed = true;
+                for(auto& comp : getAllComponents(entity))
+                {
+                    comp->valid = false;
+                    comp->reset();
+                }
+                qDebug() << "Entity" << entity << "destroyed ==" << destroyed;
+                mEntityInfos.erase(mEntityInfos.begin() + i);
+                break;
+            }
+        }
+    }
 
 signals:
     void updateUI(const std::vector<EntityInfo>& entityData);
@@ -139,9 +160,7 @@ public:
     {
         for(auto info : mEntityInfos)
         {
-            std::vector<Component*> components;
-            getAllComponents(info.entityId, components);
-            for(auto& comp : components)
+            for(auto& comp : getAllComponents(info.entityId))
             {
                 comp->valid = false;
                 comp->reset();
@@ -217,23 +236,20 @@ public:
         return id;
     }
 
-    void removeEntity(unsigned entity)
+    void removeEntityLater(unsigned entity)
     {
-        std::vector<Component*> components;
-        getAllComponents(entity, components);
-        for(auto& comp : components)
-        {
-            comp->valid = false;
-            comp->reset();
-        }
+        entitiesToDestroy.push_back(entity);
+    }
 
-        for(unsigned i = 0; i < mEntityInfos.size(); ++i)
+    void removeEntitiesMarked()
+    {
+        if(!entitiesToDestroy.empty())
         {
-            if(entity == mEntityInfos[i].entityId)
+            for(auto& entity : entitiesToDestroy)
             {
-                mEntityInfos.erase(mEntityInfos.begin() + i);
-                break;
+                removeEntity(entity);
             }
+            entitiesToDestroy.clear();
         }
     }
 
@@ -260,18 +276,30 @@ public:
         std::apply(f, comps);
     }
 
+    /**
+     * @brief Variadic template function that adds all components types given to an entity
+     */
     template<typename... componentTypes>
     std::tuple<componentTypes&...> addComponent(unsigned int entity)
     {
         return {addComponents<componentTypes>(entity)...};
     }
 
+    /**
+     * @brief Variadic template function that returns all component types given for an entity.
+     * @return Returns a tuple containing the components. If the entity does not have the respective component
+     * the variable will be null.
+     *
+     */
     template<typename... componentTypes>
     std::tuple<componentTypes*...> getComponents(unsigned int entity)
     {
         return {getComponent<componentTypes>(entity)...};
     }
 
+    /**
+     * @brief Adds a component to a given entity using the ComponentType enum.
+     */
     Component* addComponent(unsigned int entity, ComponentType type)
     {
         Component* returnComp{nullptr};
@@ -357,103 +385,164 @@ public:
     }
 
     /**
-     * @brief Adds all components for a given entity to the given vector. Returns true if any was found.
-     * @param The entity ID.
-     * @param The vector that will be filled with found components.
-     * @return If any components were found and added to the vector.
+     * @brief Gets a component to a given entity using the ComponentType enum.
      */
-    bool getAllComponents(unsigned int entity, std::vector<Component*>& outComponents)
+    Component* getComponent(unsigned int entity, ComponentType type)
     {
-        bool addedAnyComponents = false;
+        Component* returnComp{nullptr};
+        switch (type)
+        {
+        case ComponentType::Mesh:
+        {
+            returnComp = getComponent<MeshComponent>(entity);
+            break;
+        }
+        case ComponentType::Transform:
+        {
+            returnComp = getComponent<TransformComponent>(entity);
+            break;
+        }
+        case ComponentType::Physics:
+        {
+            returnComp = getComponent<PhysicsComponent>(entity);
+            break;
+        }
+        case ComponentType::Camera:
+        {
+            returnComp = getComponent<CameraComponent>(entity);
+            break;
+        }
+        case ComponentType::Input:
+        {
+            returnComp = getComponent<InputComponent>(entity);
+            break;
+        }
+        case ComponentType::Sound:
+        {
+            returnComp = getComponent<SoundComponent>(entity);
+            break;
+        }
+        case ComponentType::LightSpot:
+        {
+            returnComp = getComponent<SpotLightComponent>(entity);
+            break;
+        }
+        case ComponentType::LightDirectional:
+        {
+            returnComp = getComponent<DirectionalLightComponent>(entity);
+            break;
+        }
+        case ComponentType::LightPoint:
+        {
+            returnComp = getComponent<PointLightComponent>(entity);
+            break;
+        }
+        case ComponentType::Script:
+        {
+            returnComp = getComponent<ScriptComponent>(entity);
+            break;
+        }
+        case ComponentType::Collider:
+        {
+            returnComp = getComponent<ColliderComponent>(entity);
+            break;
+        }
+        case ComponentType::Particle:
+        {
+            returnComp = getComponent<ParticleComponent>(entity);
+            break;
+        }
+        default:
+            break;
+        }
+
+        return returnComp;
+    }
+
+    /**
+     * @brief Returns all components for a given entity.
+     */
+    std::vector<Component*> getAllComponents(unsigned int entity)
+    {
+        std::vector<Component*> components;
         if(auto comp = getComponent<TransformComponent>(entity))
         {
             if(comp->valid)
             {
-                outComponents.push_back(comp);
-                addedAnyComponents = true;
+                components.push_back(comp);
             }
         }
         if(auto comp = getComponent<MeshComponent>(entity))
         {
             if(comp->valid)
             {
-                outComponents.push_back(comp);
-                addedAnyComponents = true;
+                components.push_back(comp);
             }
         }
         if(auto comp = getComponent<PhysicsComponent>(entity))
         {
             if(comp->valid)
             {
-                outComponents.push_back(comp);
-                addedAnyComponents = true;
+                components.push_back(comp);
             }
         }
         if(auto comp = getComponent<CameraComponent>(entity))
         {
             if(comp->valid)
             {
-                outComponents.push_back(comp);
-                addedAnyComponents = true;
+                components.push_back(comp);
             }
         }
         if(auto comp = getComponent<InputComponent>(entity))
         {
             if(comp->valid)
             {
-                outComponents.push_back(comp);
-                addedAnyComponents = true;
+                components.push_back(comp);
             }
         }
         if(auto comp = getComponent<SoundComponent>(entity))
         {
             if(comp->valid)
             {
-                outComponents.push_back(comp);
-                addedAnyComponents = true;
+                components.push_back(comp);
             }
         }
         if(auto comp = getComponent<DirectionalLightComponent>(entity))
         {
             if(comp->valid)
             {
-                outComponents.push_back(comp);
-                addedAnyComponents = true;
+                components.push_back(comp);
             }
         }
         if(auto comp = getComponent<SpotLightComponent>(entity))
         {
             if(comp->valid)
             {
-                outComponents.push_back(comp);
-                addedAnyComponents = true;
+                components.push_back(comp);
             }
         }
         if(auto comp = getComponent<PointLightComponent>(entity))
         {
             if(comp->valid)
             {
-                outComponents.push_back(comp);
-                addedAnyComponents = true;
+                components.push_back(comp);
             }
         }
         if(auto comp = getComponent<ScriptComponent>(entity))
         {
             if(comp->valid)
             {
-                outComponents.push_back(comp);
-                addedAnyComponents = true;
+                components.push_back(comp);
             }
         }
         if(auto comp = getComponent<ColliderComponent>(entity))
         {
             if(comp->valid)
             {
-                outComponents.push_back(comp);
-                addedAnyComponents = true;
+                components.push_back(comp);
             }
         }
-        return addedAnyComponents;
+        return components;
     }
 
 public:

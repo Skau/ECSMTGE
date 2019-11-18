@@ -6,6 +6,7 @@
 #include "scene.h"
 
 class EntityManager;
+class CameraComponent;
 
 class World : public QObject
 {
@@ -24,6 +25,8 @@ public:
     static World& getWorld();
 
     std::shared_ptr<EntityManager> getEntityManager() { return entityManager; }
+
+    CameraComponent* getCurrentCamera(bool currentlyPlaying);
 
     void initBlankScene();
 

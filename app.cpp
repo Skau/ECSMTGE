@@ -145,55 +145,51 @@ void App::update()
 
     calculateFrames();
 
-    // Get current camera
-    CameraComponent* currentCamera{nullptr};
-    for(auto& camera : mWorld->getEntityManager()->getCameraComponents())
-    {
-        if(mCurrentlyPlaying ^ camera.isEditorCamera)
-        {
-            currentCamera = &camera;
-            break;
-        }
-    }
+    auto& transforms    = mWorld->getEntityManager()->getTransformComponents();
+    auto& physics       = mWorld->getEntityManager()->getPhysicsComponents();
+    auto& colliders     = mWorld->getEntityManager()->getColliderComponents();
 
+    // Camera:
+    /* Note: Current camera depends on if the engine is in editor-mode or not.
+     * Editor camera is handled in C++, game camera is handled through script.
+     */
+    auto currentCamera = mWorld->getCurrentCamera(mCurrentlyPlaying);
     mEventHandler->updateMouse(mCurrentlyPlaying);
-
     auto cameraTransform = mWorld->getEntityManager()->getComponent<TransformComponent>(currentCamera->entityId);
-
     if(!mCurrentlyPlaying)
     {
         InputSystem::HandleEditorCameraInput(mDeltaTime, *cameraTransform, *currentCamera);
     }
-
     CameraSystem::updateLookAtRotation(*cameraTransform, *currentCamera);
+    CameraSystem::updateCameraViewMatrices(transforms, mWorld->getEntityManager()->getCameraComponents());
 
-    auto& transforms    = mWorld->getEntityManager()->getTransformComponents();
-    auto& physics       = mWorld->getEntityManager()->getPhysicsComponents();
-    auto& colliders     = mWorld->getEntityManager()->getColliderComponents();
 
     // Physics:
     /* Note: Physics calculation should be happening on a separate thread
      * and instead of sending references to the lists we should take copies
      * and then later apply those copies to the original lists.
      */
-     auto hitInfos = PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
+    auto hitInfos = PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
 
-    // Sound
-    // Sound listener is using the active camera view matrix (for directions) and transform (for position)
-    mSoundListener->update(*currentCamera, *cameraTransform);
-
+    // Sound:
+    // Note: Sound listener is using the active camera view matrix (for directions) and transform (for position)
     auto& sounds = mWorld->getEntityManager()->getSoundComponents();
-
+    mSoundListener->update(*currentCamera, *cameraTransform);
     SoundManager::UpdatePositions(transforms, sounds);
     SoundManager::UpdateVelocities(physics, sounds);
 
     // UI
-    mMainWindow->updateComponentWidgets();
-
-    // Cameras
-    CameraSystem::updateCameras(transforms, mWorld->getEntityManager()->getCameraComponents());
+    /* Note: This is for components needing to update on tick. Example is transform widget.
+     * If the entity has a velocity (from physics component) the widget needs to be updated to reflect
+     * changes done to the position every frame. No need to do this while playing, as the widget UI is hidden.
+     */
+    if(!mCurrentlyPlaying)
+    {
+        mMainWindow->updateComponentWidgets();
+    }
 
     // Calculate mesh bounds
+    // Note: This is only done if the transform has changed.
     mWorld->getEntityManager()->UpdateBounds();
     // -------- Frustum culling here -----------
 
@@ -207,14 +203,18 @@ void App::update()
 
     // JAVASCRIPT HERE
 
-    // Tick scripts if playing
     if(mCurrentlyPlaying)
     {
         auto& scripts = mWorld->getEntityManager()->getScriptComponents();
 
         ScriptSystem::get()->updateJSComponents(scripts);
 
+        /* Note: This is called every frame, but only actually called on script components that this
+         * has not yet been done to. This is to catch script components spawned from scripts
+         * on runtime.
+         */
         ScriptSystem::get()->beginPlay(scripts);
+
         ScriptSystem::get()->tick(mDeltaTime, scripts);
 
         auto& inputs = mWorld->getEntityManager()->getInputComponents();
@@ -231,6 +231,8 @@ void App::update()
 
         ScriptSystem::get()->updateCPPComponents(scripts);
 
+        mWorld->getEntityManager()->removeEntitiesMarked();
+
         static unsigned int garbageCounter{0};
         garbageCounter++;
         if (garbageCounter - 1 > ScriptSystem::get()->garbageCollectionFrequency)
@@ -238,10 +240,6 @@ void App::update()
             garbageCounter = 0;
             ScriptSystem::get()->takeOutTheTrash(scripts);
         }
-    }
-    else
-    {
-        ScriptSystem::get()->initGarbageCollection();
     }
 
     currentlyUpdating = false;
@@ -257,7 +255,7 @@ void App::quit()
 void App::updatePerspective()
 {
     auto& cameras = mWorld->getEntityManager()->getCameraComponents();
-    CameraSystem::updateCameras(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 0.1f, 100.f));
+    CameraSystem::updateCameraViewMatrices(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 0.1f, 100.f));
 }
 
 // Called when play action is pressed while not playing in UI
@@ -267,20 +265,13 @@ void App::onPlay()
 
     mWorld->saveTemp();
 
-    for(auto camera : mWorld->getEntityManager()->getCameraComponents())
+    auto currentCamera = mWorld->getCurrentCamera(mCurrentlyPlaying);
+    if(auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(currentCamera->entityId))
     {
-        if(!camera.isEditorCamera)
-        {
-            if(auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId))
-            {
-                mesh->isVisible = false;
-                break;
-            }
-        }
+        mesh->isVisible = false;
     }
 
     mMainWindow->setSelected(nullptr);
-
 
     auto sounds = mWorld->getEntityManager()->getSoundComponents();
     SoundManager::play(sounds);
@@ -299,23 +290,22 @@ void App::onStop()
 
     mRenderer->EditorCurrentEntitySelected = nullptr;
 
-    for(auto camera : mWorld->getEntityManager()->getCameraComponents())
+    auto currentCamera = mWorld->getCurrentCamera(mCurrentlyPlaying);
+    if(auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(currentCamera->entityId))
     {
-        if(!camera.isEditorCamera)
-        {
-            if(auto mesh = mWorld->getEntityManager()->getComponent<MeshComponent>(camera.entityId))
-            {
-                mesh->isVisible = true;
-                break;
-            }
-        }
+        mesh->isVisible = true;
     }
+
+    ScriptSystem::get()->initGarbageCollection();
 
     // Reset JS states.
     for(auto& comp : mWorld->getEntityManager()->getScriptComponents())
     {
-        delete comp.JSEntity;
-        comp.JSEntity = nullptr;
+        if(comp.JSEntity)
+        {
+            delete comp.JSEntity;
+            comp.JSEntity = nullptr;
+        }
     }
 
     mWorld->loadTemp();

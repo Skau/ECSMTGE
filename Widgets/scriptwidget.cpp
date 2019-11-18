@@ -139,7 +139,7 @@ void ScriptWidget::on_button_NewFile_clicked()
             auto filePath = ui->lineEdit->text();
             if(filePath.length())
             {
-                QFileInfo info(filePath);
+                QFileInfo info(QString::fromStdString(gsl::scriptsFilePath) + filePath);
                 QDesktopServices::openUrl(QUrl::fromLocalFile(info.absoluteFilePath()));
                 return;
             }

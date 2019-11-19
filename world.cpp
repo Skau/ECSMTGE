@@ -91,6 +91,7 @@ void World::saveScene(const std::string& path)
     if(mCurrentScene)
     {
         mCurrentScene->SaveToFile(path);
+        sceneFileName = mCurrentScene->filePath;
         updateSceneName(mCurrentScene->name);
     }
 }
@@ -106,11 +107,16 @@ void World::loadScene(const std::string& path)
 
     mCurrentScene = std::make_unique<Scene>(this);
 
-    if (!mCurrentScene->LoadFromFile(path))
+    if (mCurrentScene->LoadFromFile(path))
+    {
+        sceneFileName = mCurrentScene->filePath;
+    }
+    else
     {
         // Cleanup
         if (auto obj = mCurrentScene.release())
             delete obj;
+        sceneFileName = std::nullopt;
     }
 
     updateSceneName(mCurrentScene->name);
@@ -155,14 +161,10 @@ bool World::isSceneValid() const
 
 std::optional<std::string> World::sceneFilePath() const
 {
-    if (mCurrentScene && mCurrentScene->filePath)
-        return mCurrentScene->filePath;
-
-    return std::nullopt;
+    return sceneFileName;
 }
 
 World::~World()
 {
     mWorldInstance = nullptr;
 }
-

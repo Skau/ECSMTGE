@@ -17,8 +17,6 @@ class PhysicsWidget : public ComponentWidget
 public:
     explicit PhysicsWidget(MainWindow *mainWindow, QWidget* parent = nullptr);
 
-    void updateData() override;
-
 private slots:
     void on_spinBox_Velocity_X_valueChanged(double arg1);
 

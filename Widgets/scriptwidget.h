@@ -15,8 +15,6 @@ public:
     explicit ScriptWidget(MainWindow* mainWindow, QWidget *parent = nullptr);
     ~ScriptWidget();
 
-    void updateData() override;
-
 protected slots:
     void Remove() override;
 

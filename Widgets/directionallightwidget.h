@@ -14,8 +14,6 @@ class DirectionalLightWidget : public ComponentWidget
 public:
     explicit DirectionalLightWidget(MainWindow* mainWindow, QWidget *parent = nullptr);
 
-    void updateData() override;
-
 protected slots:
     void Remove() override;
 

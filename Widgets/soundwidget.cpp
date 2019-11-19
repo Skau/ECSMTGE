@@ -37,17 +37,6 @@ SoundWidget::SoundWidget(MainWindow* mainWindow, QWidget* parent)
     }
 }
 
-
-void SoundWidget::updateData()
-{
-//    if(auto sound = getSoundComponent())
-//    {
-//            isUpdating = true;
-
-//            isUpdating = false;
-//    }
-}
-
 void SoundWidget::Remove()
 {
     auto entity = mMainWindow->currentEntitySelected;

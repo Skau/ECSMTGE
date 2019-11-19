@@ -125,13 +125,20 @@ void App::mousePicking()
     if (!cameras.empty())
     {
         auto entity = mRenderer->getMouseHoverObject(gsl::ivec2{mousePoint.x(), mousePoint.y()}, meshes, transforms, cameras.front());
+        bool found{false};
         for (auto it = mMainWindow->mTreeDataCache.begin(); it != mMainWindow->mTreeDataCache.end(); ++it)
         {
             if (it->second.entityId == entity)
             {
                 mMainWindow->setSelected(&it->second);
+                found = true;
                 break;
             }
+        }
+
+        if(!found)
+        {
+            mMainWindow->setSelected(nullptr);
         }
     }
 }
@@ -172,7 +179,9 @@ void App::update()
      * and instead of sending references to the lists we should take copies
      * and then later apply those copies to the original lists.
      */
-    auto hitInfos = PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
+    std::vector<HitInfo> hitInfos;
+    if (mCurrentlyPlaying)
+        hitInfos = PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
 
     // Sound:
     // Note: Sound listener is using the active camera view matrix (for directions) and transform (for position)
@@ -180,16 +189,6 @@ void App::update()
     mSoundListener->update(*currentCamera, *cameraTransform);
     SoundManager::UpdatePositions(transforms, sounds);
     SoundManager::UpdateVelocities(physics, sounds);
-
-    // UI
-    /* Note: This is for components needing to update on tick. Example is transform widget.
-     * If the entity has a velocity (from physics component) the widget needs to be updated to reflect
-     * changes done to the position every frame. No need to do this while playing, as the widget UI is hidden.
-     */
-    if(!mCurrentlyPlaying)
-    {
-        mMainWindow->updateComponentWidgets();
-    }
 
     // Calculate mesh bounds
     // Note: This is only done if the transform has changed.

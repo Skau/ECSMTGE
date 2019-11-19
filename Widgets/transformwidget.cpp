@@ -17,31 +17,11 @@ TransformWidget::TransformWidget(MainWindow* mainWindow, QWidget *parent)
                 isUpdating = true;
 
                 setPosition(transform->position);
-                setRotation(transform->rotation.toEuler());
+                editorRot = transform->rotation.toEuler();
+                setRotation(editorRot);
                 setScale(transform->scale);
 
                 isUpdating = false;
-        }
-    }
-}
-
-void TransformWidget::updateData()
-{
-    auto entity = mMainWindow->currentEntitySelected;
-    if(entity)
-    {
-        if(auto transform = World::getWorld().getEntityManager()->getComponent<TransformComponent>(entity->entityId))
-        {
-            if(transform->updated)
-            {
-                isUpdating = true;
-
-                setPosition(transform->position);
-                setRotation(transform->rotation.toEuler());
-                setScale(transform->scale);
-
-                isUpdating = false;
-            }
         }
     }
 }
@@ -117,9 +97,14 @@ void TransformWidget::on_spinBox_Rotation_X_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = World::getWorld().getEntityManager();
-        auto oldRot = entityManager->getComponent<TransformComponent>(entityData->entityId)->rotation.toEuler();
+        editorRot.x = static_cast<float>(arg1);
+        if (editorRot.x < -gsl::PI * 2.f)
+            editorRot.x += gsl::PI * 2.f;
+        else if (editorRot.x > gsl::PI * 2.f)
+            editorRot.x -= gsl::PI * 2.f;
+
         entityManager->setTransformRot(entityData->entityId,
-            gsl::vec3{static_cast<float>(arg1), oldRot.y, oldRot.z}.toQuat());
+            editorRot.toQuat());
     }
 }
 
@@ -131,9 +116,14 @@ void TransformWidget::on_spinBox_Rotation_Y_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = World::getWorld().getEntityManager();
-        auto oldRot = entityManager->getComponent<TransformComponent>(entityData->entityId)->rotation.toEuler();
+        editorRot.y = static_cast<float>(arg1);
+        if (editorRot.y < -gsl::PI * 2.f)
+            editorRot.y += gsl::PI * 2.f;
+        else if (editorRot.y > gsl::PI * 2.f)
+            editorRot.y -= gsl::PI * 2.f;
+
         entityManager->setTransformRot(entityData->entityId,
-            gsl::vec3{oldRot.x, static_cast<float>(arg1), oldRot.z}.toQuat());
+            editorRot.toQuat());
     }
 }
 
@@ -145,9 +135,14 @@ void TransformWidget::on_spinBox_Rotation_Z_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = World::getWorld().getEntityManager();
-        auto oldRot = entityManager->getComponent<TransformComponent>(entityData->entityId)->rotation.toEuler();
+        editorRot.z = static_cast<float>(arg1);
+        if (editorRot.z < -gsl::PI * 2.f)
+            editorRot.z += gsl::PI * 2.f;
+        else if (editorRot.z > gsl::PI * 2.f)
+            editorRot.z -= gsl::PI * 2.f;
+
         entityManager->setTransformRot(entityData->entityId,
-            gsl::vec3{oldRot.x, oldRot.y, static_cast<float>(arg1)}.toQuat());
+            editorRot.toQuat());
     }
 }
 

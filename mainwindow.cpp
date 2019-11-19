@@ -87,17 +87,6 @@ EntityInfo* MainWindow::getEntityAt(QTreeWidgetItem* item)
     return nullptr;
 }
 
-void MainWindow::updateComponentWidgets()
-{
-    if(currentEntitySelected)
-    {
-        for(auto& component : mCurrentComponentWidgets)
-        {
-            component->updateData();
-        }
-    }
-}
-
 // If a widget is removed we need to recreate the components
 void MainWindow::onWidgetRemoved(ComponentWidget* widget)
 {
@@ -406,6 +395,8 @@ void MainWindow::on_lineEdit_SelectedObject_editingFinished()
                     data.first->setText(0, text);
                 }
             }
+
+            updateEntityName(currentEntitySelected->entityId, text.toStdString());
         }
     }
 }
@@ -425,6 +416,20 @@ void MainWindow::on_treeWidget_ObjectList_itemChanged(QTreeWidgetItem *item, int
             ui->lineEdit_SelectedObject->setText(item->text(0));
             currentEntitySelected->name = item->text(0).toStdString();
         }
+
+        updateEntityName(entity.entityId, item->text(0).toStdString());
+    }
+}
+
+void MainWindow::updateEntityName(unsigned entity, const std::string& name)
+{
+    for(auto& info : World::getWorld().getEntityManager()->getEntityInfos())
+    {
+        if(info.entityId == entity)
+        {
+            info.name = name;
+            return;
+        }
     }
 }
 
@@ -437,6 +442,8 @@ void MainWindow::setSelected(EntityInfo* entityInfo)
         if (auto renderer = getRenderer())
             renderer->EditorCurrentEntitySelected = nullptr;
         updateComponentArea(0);
+        updateSelectedInTreeWidget(nullptr);
+        ui->lineEdit_SelectedObject->setText("");
         return;
     }
 
@@ -446,11 +453,30 @@ void MainWindow::setSelected(EntityInfo* entityInfo)
     // Update the selected object name
     ui->lineEdit_SelectedObject->setText(QString::fromStdString(currentEntitySelected->name));
 
+    updateSelectedInTreeWidget(entityInfo);
+
     // Update widgets
     updateComponentArea(currentEntitySelected->entityId);
 
     if (auto renderer = getRenderer())
         renderer->EditorCurrentEntitySelected = currentEntitySelected;
+}
+
+void MainWindow::updateSelectedInTreeWidget(EntityInfo *entityInfo)
+{
+    for(auto& item : mTreeDataCache)
+    {
+        if(item.first->isSelected())
+        {
+            item.first->setSelected(false);
+        }
+
+        if(entityInfo && item.second.entityId == entityInfo->entityId)
+        {
+            if(!item.first->isSelected())
+                item.first->setSelected(true);
+        }
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

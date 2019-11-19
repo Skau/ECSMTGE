@@ -27,20 +27,6 @@ DirectionalLightWidget::DirectionalLightWidget(MainWindow *mainWindow, QWidget *
     }
 }
 
-void DirectionalLightWidget::updateData()
-{
-//    auto entity = mMainWindow->currentEntitySelected;
-//    if(entity)
-//    {
-//        if(auto comp = mMainWindow->getEntityManager()->getComponent<DirectionalLightComponent>(entity->entityId))
-//        {
-//            isUpdating = true;
-
-//            isUpdating = false;
-//        }
-//    }
-}
-
 void DirectionalLightWidget::Remove()
 {
     auto entity = mMainWindow->currentEntitySelected;

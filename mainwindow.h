@@ -38,8 +38,6 @@ public:
 
     EntityInfo* getEntityAt(QTreeWidgetItem* item);
 
-    void updateComponentWidgets();
-
 signals:
     void play();
     void stop();
@@ -102,6 +100,9 @@ private:
 
     std::vector<ComponentWidget*> mCurrentComponentWidgets;
     void setSelected(EntityInfo *entityInfo);
+    void updateSelectedInTreeWidget(EntityInfo* entityInfo);
+
+    void updateEntityName(unsigned entity, const std::string &name);
 
 protected:
     void closeEvent(QCloseEvent* event) override;

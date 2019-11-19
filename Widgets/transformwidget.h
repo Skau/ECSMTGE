@@ -18,8 +18,6 @@ class TransformWidget : public ComponentWidget
 public:
     explicit TransformWidget(MainWindow *mainWindow, QWidget* parent = nullptr);
 
-    void updateData() override;
-
 private slots:
     void on_spinBox_Position_X_valueChanged(double arg1);
 
@@ -43,6 +41,7 @@ private slots:
 
 private:
     Ui::Transform* ui;
+    gsl::vec3 editorRot;
 
     void setPosition(const gsl::vec3& pos);
     void setRotation(const gsl::vec3 &rot);

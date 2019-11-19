@@ -36,20 +36,6 @@ ScriptWidget::~ScriptWidget()
     delete ui;
 }
 
-void ScriptWidget::updateData()
-{
-//    auto entity = mMainWindow->currentEntitySelected;
-//    if(entity)
-//    {
-//        if(auto comp = mMainWindow->getEntityManager()->getComponent<ScriptComponent>(entity->entityId))
-//        {
-//            isUpdating = true;
-
-//            isUpdating = false;
-//        }
-//    }
-}
-
 void ScriptWidget::Remove()
 {
     auto entity = mMainWindow->currentEntitySelected;

@@ -14,8 +14,6 @@ class PointLightWidget : public ComponentWidget
 public:
     explicit PointLightWidget(MainWindow* mainWindow, QWidget *parent = nullptr);
 
-    void updateData() override;
-
 protected slots:
     void Remove() override;
 

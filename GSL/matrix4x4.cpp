@@ -1,7 +1,7 @@
 #include "matrix4x4.h"
 //#include "quaternion.h"
 #include "math_constants.h"
-#include "math.h"
+#include "gsl_math.h"
 #include "matrix2x2.h"
 #include "matrix3x3.h"
 #include "quaternion.h"

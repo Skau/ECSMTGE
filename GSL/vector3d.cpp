@@ -1,6 +1,6 @@
 #include "vector3d.h"
 #include "math_constants.h"
-#include "math.h"
+#include "gsl_math.h"
 #include <cmath>
 #include <QVector3D>
 #include "quaternion.h"

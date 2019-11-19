@@ -1,4 +1,4 @@
-#include "math.h"
+#include "gsl_math.h"
 #include <array>
 #include <vector>
 #include <QDebug>

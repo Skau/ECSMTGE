@@ -3,7 +3,7 @@
 
 #include "componentwidget.h"
 
-#include "GSL/math.h"
+#include "GSL/gsl_math.h"
 #include "GSL/vector3d.h"
 #include "GSL/quaternion.h"
 

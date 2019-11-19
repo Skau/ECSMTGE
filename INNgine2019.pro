@@ -58,7 +58,7 @@ win32 {
 }
 
 HEADERS += \
-    GSL/math.h \
+    GSL/gsl_math.h \
     GSL/quaternion.h \
     Widgets/colliderwidget.h \
     Widgets/componentwidget.h \
@@ -120,7 +120,7 @@ HEADERS += \
 
 
 SOURCES += \
-    GSL/math.cpp \
+    GSL/gsl_math.cpp \
     GSL/quaternion.cpp \
     Widgets/colliderwidget.cpp \
     Widgets/componentwidget.cpp \

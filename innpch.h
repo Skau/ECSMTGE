@@ -24,7 +24,7 @@
 #include "Renderables/vertex.h"
 #include "Shaders/shader.h"
 #include "gltypes.h"
-#include "math.h"
+#include "math_gsl.h"
 #include "math_constants.h"
 #include "constants.h"
 

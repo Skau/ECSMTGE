@@ -265,6 +265,7 @@ void App::onPlay()
 {
     mCurrentlyPlaying = true;
 
+    saveSession();
     mWorld->saveTemp();
 
     auto currentCamera = mWorld->getCurrentCamera(mCurrentlyPlaying);
@@ -311,6 +312,7 @@ void App::onStop()
     }
 
     mWorld->loadTemp();
+    updatePerspective();
 }
 
 void App::calculateFrames()
@@ -390,5 +392,6 @@ void App::loadScene(const std::string& path)
 void App::saveScene(const std::string& path)
 {
     mWorld->saveScene(path);
+    saveSession();
     updatePerspective();
 }

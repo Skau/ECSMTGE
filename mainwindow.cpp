@@ -136,8 +136,8 @@ void MainWindow::on_actionPlay_triggered(bool value)
     }
     else
     {
-        ui->dockWidget_WorldOutliner->hide();
-        ui->dockWidget_ComponentWidgets->hide();
+        ui->dockWidget_WorldOutliner->show();
+        ui->dockWidget_ComponentWidgets->show();
         updateComponentArea(0);
         stop();
         ui->lineEdit_SelectedObject->setText("");

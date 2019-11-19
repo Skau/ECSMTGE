@@ -132,9 +132,6 @@ void Scene::SaveToFile(const std::string& path)
         return;
     }
 
-    QFileInfo info(QString::fromStdString(path));
-    name = info.baseName().toStdString();
-
     filePath = path;
 
     const auto& entityManager = mWorld->getEntityManager();

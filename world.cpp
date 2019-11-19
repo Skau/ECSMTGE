@@ -2,6 +2,7 @@
 #include "resourcemanager.h"
 #include "entitymanager.h"
 #include <cassert>
+#include <QFileInfo>
 
 World* World::mWorldInstance{nullptr};
 
@@ -32,7 +33,6 @@ World::World()
     ResourceManager::instance().addShader("particle",          std::make_shared<Shader>("particle.vert", "particle.frag", ShaderType::WeirdStuff));
     ResourceManager::instance().addShader("axis",              std::make_shared<Shader>("axisshader.vert", "colorshader.frag", ShaderType::WeirdStuff));
     ResourceManager::instance().addShader("skybox",            std::make_shared<Shader>("skybox", ShaderType::WeirdStuff));
-    
 
     // This function is troublesome...
     // ResourceManager::instance().LoadAssetFiles();
@@ -92,7 +92,10 @@ void World::saveScene(const std::string& path)
     {
         mCurrentScene->SaveToFile(path);
         sceneFileName = mCurrentScene->filePath;
-        updateSceneName(mCurrentScene->name);
+        QFileInfo info(QString::fromStdString(path));
+        auto name = info.baseName().toStdString();
+        mCurrentScene->name = name;
+        updateSceneName(name);
     }
 }
 

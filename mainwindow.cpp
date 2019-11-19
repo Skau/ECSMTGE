@@ -457,7 +457,6 @@ void MainWindow::updateSelectedInTreeWidget(EntityInfo *entityInfo)
 {
     for(auto& item : mTreeDataCache)
     {
-        // Unselect all (programatically
         if(item.first->isSelected())
         {
             item.first->setSelected(false);

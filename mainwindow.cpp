@@ -132,16 +132,16 @@ void MainWindow::on_actionPlay_triggered(bool value)
 {
     if(value)
     {
-        ui->dockWidget->hide();
-        ui->dockWidget_3->hide();
+        ui->dockWidget_WorldOutliner->hide();
+        ui->dockWidget_ComponentWidgets->hide();
         updateComponentArea(0);
         play();
         ui->actionPlay->setText("Stop");
     }
     else
     {
-        ui->dockWidget->show();
-        ui->dockWidget_3->show();
+        ui->dockWidget_WorldOutliner->hide();
+        ui->dockWidget_ComponentWidgets->hide();
         updateComponentArea(0);
         stop();
         ui->lineEdit_SelectedObject->setText("");

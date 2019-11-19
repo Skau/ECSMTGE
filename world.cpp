@@ -83,6 +83,7 @@ void World::initBlankScene()
 
     mCurrentScene->initBlankScene();
     mCurrentScene->initCustomObjects();
+    updateSceneName("Blank scene");
 }
 
 void World::saveScene(const std::string& path)
@@ -90,6 +91,7 @@ void World::saveScene(const std::string& path)
     if(mCurrentScene)
     {
         mCurrentScene->SaveToFile(path);
+        updateSceneName(mCurrentScene->name);
     }
 }
 
@@ -110,6 +112,8 @@ void World::loadScene(const std::string& path)
         if (auto obj = mCurrentScene.release())
             delete obj;
     }
+
+    updateSceneName(mCurrentScene->name);
 }
 
 void World::newScene()
@@ -131,6 +135,8 @@ void World::loadTemp()
         mCurrentScene.reset();
         mCurrentScene = std::make_unique<Scene>(this);
         mCurrentScene->LoadFromFile("temp" + name + ".json");
+
+        updateSceneName(mCurrentScene->name);
     }
 }
 

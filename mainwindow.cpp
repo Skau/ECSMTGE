@@ -113,6 +113,13 @@ void MainWindow::refreshWidgets()
     }
 }
 
+void MainWindow::setSceneName(const std::string& name)
+{
+    auto n = QString::fromStdString(name);
+    n.replace(0, 1, n[0].toUpper());
+    ui->treeWidget_ObjectList->topLevelItem(0)->setText(0, n);
+}
+
 void MainWindow::on_actionEmpty_Object_triggered()
 {
     World::getWorld().getEntityManager()->createObject(0);

@@ -48,6 +48,9 @@ public:
 
     ~World();
 
+signals:
+    void updateSceneName(const std::string& name);
+
 private:
     std::unique_ptr<Scene> mCurrentScene;
 

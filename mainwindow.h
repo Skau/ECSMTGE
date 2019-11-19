@@ -53,6 +53,7 @@ public slots:
     void updateUI(const std::vector<EntityInfo>& entityData);
     void onWidgetRemoved(ComponentWidget* widget);
     void refreshWidgets();
+    void setSceneName(const std::string& name);
 
 private slots:
     void on_actionEmpty_Object_triggered();

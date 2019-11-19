@@ -10,6 +10,7 @@
 #include "Renderables/visualobject.h"
 #include "componentdata.h"
 #include "postprocessor.h"
+#include <optional>
 
 class QOpenGLContext;
 class Shader;

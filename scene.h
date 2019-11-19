@@ -3,6 +3,7 @@
 
 #include "resourcemanager.h"
 #include "entitymanager.h"
+#include <optional>
 
 class World;
 

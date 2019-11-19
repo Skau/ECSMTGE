@@ -4,6 +4,7 @@
 #include "componentdata.h"
 #include "octree.h"
 #include <utility>
+#include <optional>
 
 struct HitInfo
 {

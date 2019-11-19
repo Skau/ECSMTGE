@@ -586,7 +586,7 @@ void ParticleComponent::reset()
 
 QJsonObject ParticleComponent::toJSON()
 {
-
+    return {};
 }
 
 void ParticleComponent::fromJSON(QJsonObject object)

@@ -35,7 +35,7 @@
     GETCOMPONENT(K) \
     REMOVECOMPONENT(K) \
     private: \
-    ADDCOMPONENTS(K) \
+    ADDCOMPONENT(K) \
 
 
 #define GETCOMPONENT(K) \
@@ -68,7 +68,7 @@ bool removeComponent(unsigned int entity) \
     return false; \
 } \
 
-#define ADDCOMPONENTS(K) \
+#define ADDCOMPONENT(K) \
     template<class T, typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
     T& addComponents(unsigned int entity) \
     { \

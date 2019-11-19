@@ -184,8 +184,6 @@ void MainWindow::updateComponentArea(unsigned int entityID)
     // Delete cached widgets
     mCurrentComponentWidgets.clear();
 
-
-
     if(!entityID)
         return;
 
@@ -399,6 +397,8 @@ void MainWindow::on_lineEdit_SelectedObject_editingFinished()
                     data.first->setText(0, text);
                 }
             }
+
+            updateEntityName(currentEntitySelected->entityId, text.toStdString());
         }
     }
 }
@@ -417,6 +417,20 @@ void MainWindow::on_treeWidget_ObjectList_itemChanged(QTreeWidgetItem *item, int
         {
             ui->lineEdit_SelectedObject->setText(item->text(0));
             currentEntitySelected->name = item->text(0).toStdString();
+        }
+
+        updateEntityName(entity.entityId, item->text(0).toStdString());
+    }
+}
+
+void MainWindow::updateEntityName(unsigned entity, const std::string& name)
+{
+    for(auto& info : World::getWorld().getEntityManager()->getEntityInfos())
+    {
+        if(info.entityId == entity)
+        {
+            info.name = name;
+            return;
         }
     }
 }

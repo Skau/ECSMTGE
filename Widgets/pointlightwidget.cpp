@@ -27,20 +27,6 @@ PointLightWidget::PointLightWidget(MainWindow *mainWindow, QWidget *parent) :
     }
 }
 
-void PointLightWidget::updateData()
-{
-//    auto entity = mMainWindow->currentEntitySelected;
-//    if(entity)
-//    {
-//        if(auto comp = mMainWindow->getEntityManager()->getComponent<PointLightComponent>(entity->entityId))
-//        {
-//            isUpdating = true;
-
-//            isUpdating = false;
-//        }
-//    }
-}
-
 void PointLightWidget::Remove()
 {
     auto entity = mMainWindow->currentEntitySelected;

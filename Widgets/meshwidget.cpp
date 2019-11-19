@@ -60,22 +60,6 @@ MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
     isUpdating = false;
 }
 
-void MeshWidget::updateData()
-{
-//    auto entity = mMainWindow->currentEntitySelected;
-//    if(entity)
-//    {
-//        if(auto mesh = getRenderComponent(entity->entityId))
-//        {
-//            isUpdating = true;
-
-               // For tick update, do it here
-
-//            isUpdating = false;
-//        }
-//    }
-}
-
 void MeshWidget::on_button_ChangeMesh_clicked()
 {
     if(mMainWindow->currentEntitySelected)

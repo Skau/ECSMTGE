@@ -19,8 +19,6 @@ class MeshWidget : public ComponentWidget
 public:
     explicit MeshWidget(MainWindow* mainWindow, QWidget* parent = nullptr);
 
-    void updateData() override;
-
 signals:
     void chooseMesh(unsigned int entity, const std::string& name);
 

@@ -14,8 +14,6 @@ class SpotLightWidget : public ComponentWidget
 public:
     explicit SpotLightWidget(MainWindow* mainWindow, QWidget *parent = nullptr);
 
-    void updateData() override;
-
 protected slots:
     void Remove() override;
 

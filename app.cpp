@@ -189,16 +189,6 @@ void App::update()
     SoundManager::UpdatePositions(transforms, sounds);
     SoundManager::UpdateVelocities(physics, sounds);
 
-    // UI
-    /* Note: This is for components needing to update on tick. Example is transform widget.
-     * If the entity has a velocity (from physics component) the widget needs to be updated to reflect
-     * changes done to the position every frame. No need to do this while playing, as the widget UI is hidden.
-     */
-    if(!mCurrentlyPlaying)
-    {
-        mMainWindow->updateComponentWidgets();
-    }
-
     // Calculate mesh bounds
     // Note: This is only done if the transform has changed.
     mWorld->getEntityManager()->UpdateBounds();

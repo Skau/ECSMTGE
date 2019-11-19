@@ -8,10 +8,7 @@ PhysicsWidget::PhysicsWidget(MainWindow* mainWindow, QWidget *parent)
     : ComponentWidget(mainWindow, parent), ui(new Ui::Physics)
 {
     ui->setupUi(this);
-}
 
-void PhysicsWidget::updateData()
-{
     auto entity = mMainWindow->currentEntitySelected;
     if(entity)
     {

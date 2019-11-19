@@ -26,20 +26,6 @@ ColliderWidget::ColliderWidget(MainWindow *mainWindow, QWidget *parent)
     isUpdating = false;
 }
 
-void ColliderWidget::updateData()
-{
-//    auto entity = mMainWindow->currentEntitySelected;
-//    if(entity)
-//    {
-//        if(auto comp =  getColliderComponent())
-//        {
-//            isUpdating = true;
-
-//            isUpdating = false;
-//        }
-//    }
-}
-
 void ColliderWidget::Remove()
 {
     auto entity = mMainWindow->currentEntitySelected;

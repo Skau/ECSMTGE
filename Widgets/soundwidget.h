@@ -16,8 +16,6 @@ class SoundWidget : public ComponentWidget
 public:
     SoundWidget(MainWindow *mainWindow, QWidget* parent = nullptr);
 
-    void updateData() override;
-
 protected slots:
     void Remove() override;
 

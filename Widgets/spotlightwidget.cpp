@@ -27,20 +27,6 @@ SpotLightWidget::SpotLightWidget(MainWindow *mainWindow, QWidget *parent) :
     }
 }
 
-void SpotLightWidget::updateData()
-{
-//    auto entity = mMainWindow->currentEntitySelected;
-//    if(entity)
-//    {
-//        if(auto comp = mMainWindow->getEntityManager()->getComponent<SpotLightComponent>(entity->entityId))
-//        {
-//            isUpdating = true;
-
-//            isUpdating = false;
-//        }
-//    }
-}
-
 void SpotLightWidget::Remove()
 {
     auto entity = mMainWindow->currentEntitySelected;

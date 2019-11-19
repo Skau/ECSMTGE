@@ -11,8 +11,6 @@ class ComponentWidget : public QWidget
 public:
     ComponentWidget(MainWindow* mainWindow, QWidget* parent = nullptr);
 
-    virtual void updateData()=0;
-
 signals:
     void widgetRemoved(ComponentWidget* widget);
 

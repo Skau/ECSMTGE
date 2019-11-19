@@ -18,8 +18,6 @@ class TransformWidget : public ComponentWidget
 public:
     explicit TransformWidget(MainWindow *mainWindow, QWidget* parent = nullptr);
 
-    void updateData() override;
-
 private slots:
     void on_spinBox_Position_X_valueChanged(double arg1);
 

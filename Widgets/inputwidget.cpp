@@ -21,20 +21,6 @@ InputWidget::InputWidget(MainWindow *mainWindow, QWidget *parent)
     isUpdating = false;
 }
 
-void InputWidget::updateData()
-{
-//    auto entity = mMainWindow->currentEntitySelected;
-//    if(entity)
-//    {
-//        if(auto input = mMainWindow->getEntityManager()->getComponent<InputComponent>(entity->entityId))
-//        {
-//            isUpdating = true;
-
-//            isUpdating = false;
-//        }
-//    }
-}
-
 void InputWidget::on_checkBox_IsBeingControlled_toggled(bool checked)
 {
     if(isUpdating) return;

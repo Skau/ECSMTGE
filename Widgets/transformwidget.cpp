@@ -26,26 +26,6 @@ TransformWidget::TransformWidget(MainWindow* mainWindow, QWidget *parent)
     }
 }
 
-void TransformWidget::updateData()
-{
-//    auto entity = mMainWindow->currentEntitySelected;
-//    if(entity)
-//    {
-//        if(auto transform = World::getWorld().getEntityManager()->getComponent<TransformComponent>(entity->entityId))
-//        {
-//            if(transform->updated)
-//            {
-//                isUpdating = true;
-
-//                setPosition(transform->position);
-//                setScale(transform->scale);
-
-//                isUpdating = false;
-//            }
-//        }
-//    }
-}
-
 void TransformWidget::setPosition(const gsl::vec3 &pos)
 {
     ui->spinBox_Position_X->setValue(static_cast<double>(pos.x));

@@ -38,8 +38,6 @@ public:
 
     EntityInfo* getEntityAt(QTreeWidgetItem* item);
 
-    void updateComponentWidgets();
-
 signals:
     void play();
     void stop();

@@ -17,8 +17,6 @@ class ColliderWidget : public ComponentWidget
 public:
     explicit ColliderWidget(MainWindow *mainWindow, QWidget* parent = nullptr);
 
-    void updateData() override;
-
 private slots:
     void Remove() override;
 

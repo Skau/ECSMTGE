@@ -87,17 +87,6 @@ EntityInfo* MainWindow::getEntityAt(QTreeWidgetItem* item)
     return nullptr;
 }
 
-void MainWindow::updateComponentWidgets()
-{
-    if(currentEntitySelected)
-    {
-        for(auto& component : mCurrentComponentWidgets)
-        {
-            component->updateData();
-        }
-    }
-}
-
 // If a widget is removed we need to recreate the components
 void MainWindow::onWidgetRemoved(ComponentWidget* widget)
 {

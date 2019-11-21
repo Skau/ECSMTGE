@@ -36,16 +36,10 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
 
     for (auto scriptIt{scripts.begin()}; scriptIt != scripts.end(); ++scriptIt)
     {
+        PROFILE_SCOPE("Scriptloop");
         bool startedThisFrame = false;
         if (!scriptIt->valid || scriptIt->engine == nullptr || !scriptIt->filePath.size())
             continue;
-
-        // To catch changes to script during runtime
-        if(!load(*scriptIt, scriptIt->filePath))
-        {
-            qDebug() << "Failed to load" << scriptIt->filePath.c_str();
-            continue;
-        }
 
         auto functions = scriptIt->engine->newArray(10);
         unsigned int i{0};
@@ -56,6 +50,14 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
         // Beginplay
         if (!scriptIt->beginplayRun)
         {
+            PROFILE_SCOPE("Begin play");
+            // To catch changes to script during runtime
+            if(!load(*scriptIt, scriptIt->filePath))
+            {
+                qDebug() << "Failed to load" << scriptIt->filePath.c_str();
+                continue;
+            }
+
             scriptIt->beginplayRun = true;
             startedThisFrame = true;
             funcObjs.push_back(scriptIt->engine->newObject());
@@ -68,12 +70,15 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
         if (!scriptIt->beginplayRun)
             continue;
 
+        {
+            PROFILE_SCOPE("Tick");
         // Tick
         funcObjs.push_back(scriptIt->engine->newObject());
         funcObjs.back().setProperty("func", QJSValue{"tick"});
         funcObjs.back().setProperty("params", deltaTime);
         functions.setProperty(i, funcObjs.back());
         ++i;
+        }
 
         // Input functions
         while (inpIt != inputs.end() && (!inpIt->valid || inpIt->entityId < scriptIt->entityId)) ++inpIt;
@@ -89,6 +94,7 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
             // Pressed key event
             if (pressed.size())
             {
+                PROFILE_SCOPE("Pressed key");
                 auto array = scriptIt->engine->newArray(static_cast<unsigned>(pressed.size()));
                 for(unsigned i = 0; i < pressed.size(); ++i)
                 {
@@ -104,6 +110,7 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
             // Released key event
             if (released.size())
             {
+                PROFILE_SCOPE("Released key");
                 auto array = scriptIt->engine->newArray(static_cast<unsigned>(released.size()));
                 for(unsigned i = 0; i < released.size(); ++i)
                 {
@@ -116,6 +123,8 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
                 ++i;
             }
 
+            {
+                PROFILE_SCOPE("Mouse movement");
             // Mouse movement event
             auto array = scriptIt->engine->newArray(2);
             array.setProperty(0, point.x());
@@ -125,6 +134,7 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
             funcObjs.back().setProperty("params", array);
             functions.setProperty(i, funcObjs.back());
             ++i;
+            }
         }
 
 
@@ -140,6 +150,7 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
          */
         if (hitIt != hitInfos.end() && scriptIt->entityId == hitIt->eID)
         {
+            PROFILE_SCOPE("Hit events");
             QJSValue val = scriptIt->engine->newObject();
             val.setProperty("ID", static_cast<int>(hitIt->collidingEID));
             auto arr = scriptIt->engine->newArray(3);
@@ -161,7 +172,8 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
         }
 
 
-
+        {
+            PROFILE_SCOPE("Javascript");
         // Finally run functions from JavaScript:
         QJSValueList list;
         list << functions;
@@ -174,6 +186,7 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
 
         // Update cpp comps
         // updateCPPComponent(*scriptIt, changedComps);
+        }
     }
 }
 

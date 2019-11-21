@@ -60,6 +60,7 @@ win32 {
 HEADERS += \
     GSL/gsl_math.h \
     GSL/quaternion.h \
+    Instrumentor.h \
     Widgets/colliderwidget.h \
     Widgets/componentwidget.h \
     Widgets/directionallightwidget.h \

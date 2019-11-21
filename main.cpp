@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QSplashScreen>
+
 #include "app.h"
 
 int main(int argc, char *argv[])

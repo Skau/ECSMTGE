@@ -14,8 +14,12 @@
 // For HitInfo struct
 #include "physicssystem.h"
 
+#include "Instrumentor.h"
+
+
 void ScriptSystem::beginPlay(std::vector<ScriptComponent>& comps)
 {
+    PROFILE_FUNCTION();
     // To catch changes to helper function script during runtime
     initializeHelperFuncs();
 
@@ -38,6 +42,7 @@ void ScriptSystem::beginPlay(std::vector<ScriptComponent>& comps)
 
 void ScriptSystem::tick(float deltaTime, std::vector<ScriptComponent>& comps)
 {
+    PROFILE_FUNCTION();
     for (auto scriptIt = comps.begin(); scriptIt != comps.end(); ++scriptIt)
     {
         if(scriptIt->filePath.size() && scriptIt->beginplayRun)
@@ -52,6 +57,7 @@ void ScriptSystem::tick(float deltaTime, std::vector<ScriptComponent>& comps)
 
 void ScriptSystem::endPlay(std::vector<ScriptComponent>& comps)
 {
+    PROFILE_FUNCTION();
     for (auto scriptIt = comps.begin(); scriptIt != comps.end(); ++scriptIt)
     {
         if(scriptIt->filePath.size() && scriptIt->beginplayRun)
@@ -64,6 +70,7 @@ void ScriptSystem::endPlay(std::vector<ScriptComponent>& comps)
 
 void ScriptSystem::runKeyPressedEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const std::vector<QString>& keys)
 {
+    PROFILE_FUNCTION();
     if(!keys.size())
         return;
 
@@ -96,6 +103,7 @@ void ScriptSystem::runKeyPressedEvent(std::vector<ScriptComponent>& scripts, std
 
 void ScriptSystem::runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent> &inputs, const std::vector<QString>& keys)
 {
+    PROFILE_FUNCTION();
     if(!keys.size())
         return;
 
@@ -130,6 +138,7 @@ void ScriptSystem::runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, st
 
 void ScriptSystem::runMouseOffsetEvent(std::vector<ScriptComponent> &scripts, std::vector<InputComponent> &inputs, const QPoint& point)
 {
+    PROFILE_FUNCTION();
     for (auto inputIt = inputs.begin(); inputIt != inputs.end(); ++inputIt)
     {
         if(!inputIt->controlledWhilePlaying)
@@ -157,6 +166,7 @@ void ScriptSystem::runMouseOffsetEvent(std::vector<ScriptComponent> &scripts, st
 
 void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos)
 {
+    PROFILE_FUNCTION();
     if(!comps.size() || !hitInfos.size())
         return;
 
@@ -191,6 +201,7 @@ void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector
 
 void ScriptSystem::updateJSComponents(std::vector<ScriptComponent>& comps)
 {
+    PROFILE_FUNCTION();
     for (auto it = comps.begin(); it != comps.end(); ++it)
     {
         if(it->filePath.size())
@@ -202,6 +213,7 @@ void ScriptSystem::updateJSComponents(std::vector<ScriptComponent>& comps)
 
 void ScriptSystem::updateCPPComponents(std::vector<ScriptComponent> &comps)
 {
+    PROFILE_FUNCTION();
     for(auto& comp : comps)
     {
         if(comp.valid && comp.filePath.size())
@@ -213,6 +225,7 @@ void ScriptSystem::updateCPPComponents(std::vector<ScriptComponent> &comps)
 
 QString ScriptSystem::checkError(QJSValue value)
 {
+    PROFILE_FUNCTION();
     QString lineNumber = QString::number(value.property("lineNumber").toInt());
     QString valueString = value.toString();
     QString error("Uncaught exception at line " +
@@ -229,11 +242,13 @@ QString ScriptSystem::checkError(QJSValue value)
 
 QEntity* ScriptSystem::getEntityWrapper(unsigned int entity)
 {
+    PROFILE_FUNCTION();
     return new QEntity(entity, currentComp->engine, World::getWorld().getEntityManager().get(), this);
 }
 
 void ScriptSystem::takeOutTheTrash(std::vector<ScriptComponent> &comps)
 {
+    PROFILE_FUNCTION();
     for (auto it = comps.begin(); it != comps.end(); ++it)
     {
         if (!(it->valid && it->engine))
@@ -256,6 +271,7 @@ void ScriptSystem::takeOutTheTrash(std::vector<ScriptComponent> &comps)
 
 std::vector<QString> ScriptSystem::findGlobalsInFile(const std::string &file) const
 {
+    PROFILE_FUNCTION();
     int scopeLevel{0};
     std::vector<QString> variables{};
     std::ifstream ifs{file, ifs.in};
@@ -307,6 +323,7 @@ std::vector<QString> ScriptSystem::findGlobalsInFile(const std::string &file) co
 
 void ScriptSystem::cacheGlobalVariables(ScriptComponent &comp)
 {
+    PROFILE_FUNCTION();
     if (comp.engine)
     {
         QJSValueIterator jsIt{comp.engine->globalObject()};
@@ -325,6 +342,7 @@ void ScriptSystem::cacheGlobalVariables(ScriptComponent &comp)
 
 void ScriptSystem::initGarbageCollection()
 {
+    PROFILE_FUNCTION();
     /* Remember to clear variablecache.
      * Would'nt be a good garbage collector if it
      * didn't clear it's own garbage would it?
@@ -335,6 +353,7 @@ void ScriptSystem::initGarbageCollection()
 
 bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)
 {
+    PROFILE_FUNCTION();
     currentComp = &comp;
 
     if(!comp.JSEntity)
@@ -379,6 +398,7 @@ bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)
 
 void ScriptSystem::call(ScriptComponent& comp, const std::string& function)
 {
+    PROFILE_FUNCTION();
     if(!comp.filePath.size() || !comp.beginplayRun)
         return;
 
@@ -411,6 +431,7 @@ void ScriptSystem::call(ScriptComponent& comp, const std::string& function)
 
 void ScriptSystem::call(ScriptComponent &comp, const std::string& function, QJSValueList params)
 {
+    PROFILE_FUNCTION();
     if(!comp.filePath.size() || !comp.beginplayRun)
         return;
 
@@ -443,6 +464,7 @@ void ScriptSystem::call(ScriptComponent &comp, const std::string& function, QJSV
 
 QJSValue ScriptSystem::call(const std::string& function)
 {
+    PROFILE_FUNCTION();
     if(currentComp && currentComp->JSEntity)
     {
         QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), QString::fromStdString(gsl::scriptsFilePath) + currentFileName);
@@ -467,6 +489,7 @@ QJSValue ScriptSystem::call(const std::string& function)
 
 QJSValue ScriptSystem::call(const std::string& function, QJSValueList params)
 {
+    PROFILE_FUNCTION();
     if(currentComp && currentComp->JSEntity)
     {
         QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), QString::fromStdString(gsl::scriptsFilePath) + currentFileName);
@@ -490,6 +513,7 @@ QJSValue ScriptSystem::call(const std::string& function, QJSValueList params)
 
 bool ScriptSystem::execute(ScriptComponent& comp, QString function, QString contents, QString fileName)
 {
+    PROFILE_FUNCTION();
     if(!function.size() || !contents.size() || !fileName.size())
         return false;
 
@@ -530,17 +554,20 @@ bool ScriptSystem::execute(ScriptComponent& comp, QString function, QString cont
 
 QObject* ScriptSystem::spawnCube()
 {
+    PROFILE_FUNCTION();
     auto entity =  World::getWorld().getEntityManager()->createCube();
     return getEntityWrapper(entity);
 }
 
 QObject *ScriptSystem::spawnEntity()
 {
+    PROFILE_FUNCTION();
     return getEntityWrapper(World::getWorld().getEntityManager()->createEntity());
 }
 
 QJSValue ScriptSystem::getAllEntityIDsByComponent(const QString& name)
 {
+    PROFILE_FUNCTION();
     if(!currentComp)
         return 0;
 
@@ -642,6 +669,7 @@ QJSValue ScriptSystem::getAllEntityIDsByComponent(const QString& name)
 
 QJSValue ScriptSystem::getAllEntityIDs()
 {
+    PROFILE_FUNCTION();
     if(!currentComp)
         return 0;
 
@@ -657,6 +685,7 @@ QJSValue ScriptSystem::getAllEntityIDs()
 
 QObject* ScriptSystem::getEntity(unsigned int id)
 {
+    PROFILE_FUNCTION();
     if(!currentComp)
         return nullptr;
 
@@ -665,11 +694,13 @@ QObject* ScriptSystem::getEntity(unsigned int id)
 
 void ScriptSystem::destroyEntity(unsigned entity)
 {
+    PROFILE_FUNCTION();
     World::getWorld().getEntityManager()->removeEntityLater(entity);
 }
 
 void ScriptSystem::updateJSComponent(ScriptComponent& comp)
 {
+    PROFILE_FUNCTION();
     if(!comp.filePath.size())
         return;
 
@@ -714,6 +745,7 @@ void ScriptSystem::updateJSComponent(ScriptComponent& comp)
 
 void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
 {
+    PROFILE_FUNCTION();
     if(!comp.valid || !comp.filePath.size() || !comp.beginplayRun)
         return;
 
@@ -770,6 +802,7 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
 
 void ScriptSystem::initializeJSEntity(ScriptComponent& comp)
 {
+    PROFILE_FUNCTION();
     comp.JSEntity = ScriptSystem::get()->getEntityWrapper(comp.entityId);
     comp.engine->globalObject().setProperty("me", comp.engine->newQObject(comp.JSEntity));
     comp.engine->globalObject().setProperty("accessedComponents", comp.engine->newArray());
@@ -777,6 +810,7 @@ void ScriptSystem::initializeJSEntity(ScriptComponent& comp)
 
 void ScriptSystem::initializeHelperFuncs()
 {
+    PROFILE_FUNCTION();
     QFile file(QString::fromStdString("../INNgine2019/JSHelperFuncs.js"));
     if(!file.open(QIODevice::ReadOnly))
     {

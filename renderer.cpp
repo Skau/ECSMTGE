@@ -9,8 +9,11 @@
 #include "texture.h"
 #include "particlesystem.h"
 
+#include "Instrumentor.h"
+
 Renderer::Renderer()
 {
+    PROFILE_FUNCTION();
     QSurfaceFormat format;
     format.setVersion(4, 1);
     format.setProfile(QSurfaceFormat::CoreProfile);
@@ -43,6 +46,7 @@ Renderer::~Renderer()
 // Called when first exposed
 void Renderer::init()
 {
+    PROFILE_FUNCTION();
     //The OpenGL context has to be set.
     //The context belongs to the instanse of this class!
     if (!mContext->makeCurrent(this)) {
@@ -102,6 +106,7 @@ void Renderer::init()
 
 void Renderer::initGBuffer()
 {
+    PROFILE_FUNCTION();
     bool framebufferComplete = false;
     bool buffersInitialized = false;
 
@@ -201,6 +206,7 @@ void Renderer::render(std::vector<MeshComponent>& renders, const std::vector<Tra
                       const std::vector<DirectionalLightComponent>& dirLights, const std::vector<SpotLightComponent>& spotLights,
                       const std::vector<PointLightComponent>& pointLights, const std::vector<ParticleComponent>& particles)
 {
+    PROFILE_FUNCTION();
     if(isExposed() && mContext->makeCurrent(this))
     {
         renderReset();
@@ -221,6 +227,7 @@ void Renderer::render(std::vector<MeshComponent>& renders, const std::vector<Tra
 
 void Renderer::renderGlobalWireframe(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent& camera)
 {
+    PROFILE_FUNCTION();
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDisable(GL_CULL_FACE);
 
@@ -234,6 +241,7 @@ void Renderer::renderGlobalWireframe(std::vector<MeshComponent>& renders, const 
 
 void Renderer::renderReset()
 {
+    PROFILE_FUNCTION();
     // Setup
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glStencilMask(0xFF);
@@ -254,6 +262,7 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
                               const CameraComponent& camera, const std::vector<DirectionalLightComponent>& dirLights,
                               const std::vector<SpotLightComponent>& spotLights, const std::vector<PointLightComponent>& pointLights)
 {
+    PROFILE_FUNCTION();
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
     mNumberOfVerticesDrawn = geometryPass(renders, transforms, camera, ShaderType::Deferred);
     glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
@@ -302,6 +311,7 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
 int Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
                             ShaderType renderMode, std::optional<Material> overrideMaterial)
 {
+    PROFILE_FUNCTION();
     auto transIt = transforms.begin();
     auto renderIt = renders.begin();
 
@@ -454,6 +464,7 @@ void Renderer::deferredLightningPass(const std::vector<TransformComponent> &tran
                                      const std::vector<SpotLightComponent>& spotLights,
                                      const std::vector<PointLightComponent>& pointLights)
 {
+    PROFILE_FUNCTION();
     if(dirLights.size())
     {
         if(mDirectionalLightShader == nullptr)
@@ -485,6 +496,7 @@ void Renderer::deferredLightningPass(const std::vector<TransformComponent> &tran
 
 void Renderer::directionalLightPass(const std::vector<TransformComponent> &transforms, const CameraComponent& camera, const std::vector<DirectionalLightComponent> &dirLights)
 {
+    PROFILE_FUNCTION();
     auto v = camera.viewMatrix;
     v.inverse();
     auto pos = gsl::vec3(v.at(0, 3), v.at(1, 3), v.at(2, 3));
@@ -540,6 +552,7 @@ void Renderer::directionalLightPass(const std::vector<TransformComponent> &trans
 
 void Renderer::pointLightPass(const std::vector<TransformComponent> &transforms,const CameraComponent& camera, const std::vector<PointLightComponent> &pointLights)
 {
+    PROFILE_FUNCTION();
     auto v = camera.viewMatrix;
     v.inverse();
     auto pos = gsl::vec3(v.at(0, 3), v.at(1, 3), v.at(2, 3));
@@ -598,6 +611,7 @@ void Renderer::pointLightPass(const std::vector<TransformComponent> &transforms,
 
 void Renderer::spotLightPass(const std::vector<TransformComponent> &transforms, const CameraComponent& camera, const std::vector<SpotLightComponent> &spotLights)
 {
+    PROFILE_FUNCTION();
     auto v = camera.viewMatrix;
     v.inverse();
     auto pos = gsl::vec3(v.at(0, 3), v.at(1, 3), v.at(2, 3));
@@ -659,6 +673,7 @@ void Renderer::spotLightPass(const std::vector<TransformComponent> &transforms, 
 
 void Renderer::renderPostprocessing()
 {
+    PROFILE_FUNCTION();
     if (mDepthStencilAttachmentSupported)
     {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, mPostprocessor->input());
@@ -681,12 +696,14 @@ void Renderer::renderPostprocessing()
 
 float Renderer::distanceFromCamera(const CameraComponent& camera, const TransformComponent& transform)
 {
+    PROFILE_FUNCTION();
     return std::abs((camera.viewMatrix.getPosition() - transform.position).length());
 }
 
 unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std::vector<MeshComponent> &renders, const std::vector<TransformComponent> &transforms,
                                            const CameraComponent &camera)
 {
+    PROFILE_FUNCTION();
     if(isExposed() && mouseScreenPos.x < width() && mouseScreenPos.y < height())
     {
         mContext->makeCurrent(this);
@@ -817,6 +834,7 @@ unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std:
 
 void Renderer::resizeGBuffer()
 {
+    PROFILE_FUNCTION();
     glBindTexture(GL_TEXTURE_2D, mGPosition);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width(), height(), 0, GL_RGB, GL_FLOAT, nullptr);
 
@@ -834,6 +852,7 @@ void Renderer::resizeGBuffer()
 
 void Renderer::evaluateParams(Material& material)
 {
+    PROFILE_FUNCTION();
     if(auto shader = material.mShader)
     {
         auto params = material.mParameters;
@@ -870,6 +889,7 @@ void Renderer::evaluateParams(Material& material)
 
 void Renderer::renderQuad()
 {
+    PROFILE_FUNCTION();
     glBindVertexArray(mScreenSpacedQuadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
@@ -877,6 +897,7 @@ void Renderer::renderQuad()
 
 void Renderer::renderSkybox(const CameraComponent &camera)
 {
+    PROFILE_FUNCTION();
     glDepthFunc(GL_LEQUAL);
     glBindVertexArray(mSkyboxMesh->mVAOs[0]);
 
@@ -910,6 +931,7 @@ void Renderer::renderSkybox(const CameraComponent &camera)
 
 void Renderer::renderAxis(const CameraComponent& camera)
 {
+    PROFILE_FUNCTION();
     glBindVertexArray(mAxisMesh->mVAOs[0]);
     auto shader = mAxisMaterial->mShader;
     glUseProgram(shader->getProgram());
@@ -923,6 +945,7 @@ void Renderer::renderAxis(const CameraComponent& camera)
 
 void Renderer::drawEditorOutline()
 {
+    PROFILE_FUNCTION();
     /* Steps:
      * 1. Draw a color on fragments that matches stencil
      * 2. Blur image
@@ -951,6 +974,7 @@ void Renderer::drawEditorOutline()
 
 void Renderer::exposeEvent(QExposeEvent *)
 {
+    PROFILE_FUNCTION();
     if(!isInitialized)
     {
         init();
@@ -968,6 +992,7 @@ void Renderer::exposeEvent(QExposeEvent *)
 //lines instead of filled polygons
 void Renderer::toggleWireframe(bool value)
 {
+    PROFILE_FUNCTION();
     mGlobalWireframe = value;
 }
 
@@ -975,6 +1000,7 @@ void Renderer::toggleWireframe(bool value)
 /// Reverts to glGetError() if not
 void Renderer::checkForGLerrors()
 {
+    PROFILE_FUNCTION();
     if(mOpenGLDebugLogger)
     {
         const QList<QOpenGLDebugMessage> messages = mOpenGLDebugLogger->loggedMessages();
@@ -994,6 +1020,7 @@ void Renderer::checkForGLerrors()
 /// Tries to start the extended OpenGL debugger that comes with Qt
 void Renderer::startOpenGLDebugger()
 {
+    PROFILE_FUNCTION();
     QOpenGLContext * temp = this->getContext();
     if (temp)
     {

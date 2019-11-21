@@ -10,8 +10,13 @@
 #include "physicssystem.h"
 #include "scriptsystem.h"
 
+#include "Instrumentor.h"
+
 App::App()
 {
+    Instrumentor::Get().BeginSession("AppResult");
+
+    PROFILE_FUNCTION();
     mSoundManager = std::make_unique<SoundManager>();
     mSoundListener = std::make_unique<SoundListener>();
 
@@ -33,9 +38,15 @@ App::App()
     mRenderer->installEventFilter(mEventHandler.get());
 }
 
+App::~App()
+{
+    Instrumentor::Get().EndSession();
+}
+
 // Slot called from Renderer when its done with initialization
 void App::initTheRest()
 {
+    PROFILE_FUNCTION();
     mResourceManager = std::unique_ptr<ResourceManager>(new ResourceManager{});
 
     mWorld = std::unique_ptr<World>(new World{});
@@ -114,6 +125,7 @@ void App::toggleMute(bool mode)
 
 void App::mousePicking()
 {
+    PROFILE_FUNCTION();
     if(mCurrentlyPlaying)
         return;
 
@@ -145,6 +157,7 @@ void App::mousePicking()
 
 void App::update()
 {
+    PROFILE_FUNCTION();
     // Not exactly needed now, but maybe this should be here? Timer does call this function every 16 ms.
     if(currentlyUpdating)
         return;
@@ -205,44 +218,49 @@ void App::update()
 
     // JAVASCRIPT HERE
 
-    if(mCurrentlyPlaying)
     {
-        auto& scripts = mWorld->getEntityManager()->getScriptComponents();
-
-        ScriptSystem::get()->updateJSComponents(scripts);
-
-        /* Note: This is called every frame, but only actually called on script components that this
-         * has not yet been done to. This is to catch script components spawned from scripts
-         * on runtime.
-         */
-        ScriptSystem::get()->beginPlay(scripts);
-
-        ScriptSystem::get()->tick(mDeltaTime, scripts);
-
-        auto& inputs = mWorld->getEntityManager()->getInputComponents();
-        ScriptSystem::get()->runKeyPressedEvent(scripts, inputs, mEventHandler->inputPressedStrings);
-        ScriptSystem::get()->runKeyReleasedEvent(scripts, inputs, mEventHandler->inputReleasedStrings);
-        ScriptSystem::get()->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
-
-        mEventHandler->inputReleasedStrings.clear();
-
-        if(hitInfos.size())
+        PROFILE_SCOPE("Scripting");
+        if(mCurrentlyPlaying)
         {
-            ScriptSystem::get()->runHitEvents(scripts, hitInfos);
-        }
+            auto& scripts = mWorld->getEntityManager()->getScriptComponents();
 
-        ScriptSystem::get()->updateCPPComponents(scripts);
+            ScriptSystem::get()->updateJSComponents(scripts);
 
-        mWorld->getEntityManager()->removeEntitiesMarked();
+            /* Note: This is called every frame, but only actually called on script components that this
+             * has not yet been done to. This is to catch script components spawned from scripts
+             * on runtime.
+             */
+            ScriptSystem::get()->beginPlay(scripts);
 
-        static unsigned int garbageCounter{0};
-        garbageCounter++;
-        if (garbageCounter - 1 > ScriptSystem::get()->garbageCollectionFrequency)
-        {
-            garbageCounter = 0;
-            ScriptSystem::get()->takeOutTheTrash(scripts);
+            ScriptSystem::get()->tick(mDeltaTime, scripts);
+
+            auto& inputs = mWorld->getEntityManager()->getInputComponents();
+            ScriptSystem::get()->runKeyPressedEvent(scripts, inputs, mEventHandler->inputPressedStrings);
+            ScriptSystem::get()->runKeyReleasedEvent(scripts, inputs, mEventHandler->inputReleasedStrings);
+            ScriptSystem::get()->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
+
+            mEventHandler->inputReleasedStrings.clear();
+
+            if(hitInfos.size())
+            {
+                ScriptSystem::get()->runHitEvents(scripts, hitInfos);
+            }
+
+            ScriptSystem::get()->updateCPPComponents(scripts);
+
+            mWorld->getEntityManager()->removeEntitiesMarked();
+
+            static unsigned int garbageCounter{0};
+            garbageCounter++;
+            if (garbageCounter - 1 > ScriptSystem::get()->garbageCollectionFrequency)
+            {
+                garbageCounter = 0;
+                ScriptSystem::get()->takeOutTheTrash(scripts);
+            }
         }
     }
+
+
 
     currentlyUpdating = false;
 }
@@ -256,6 +274,7 @@ void App::quit()
 
 void App::updatePerspective()
 {
+    PROFILE_FUNCTION();
     auto& cameras = mWorld->getEntityManager()->getCameraComponents();
     CameraSystem::updateCameraViewMatrices(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 0.1f, 100.f));
 }
@@ -263,6 +282,7 @@ void App::updatePerspective()
 // Called when play action is pressed while not playing in UI
 void App::onPlay()
 {
+    PROFILE_FUNCTION();
     mCurrentlyPlaying = true;
 
     saveSession();
@@ -283,6 +303,7 @@ void App::onPlay()
 // Called when play action is pressed while playing in UI
 void App::onStop()
 {
+    PROFILE_FUNCTION();
     mCurrentlyPlaying = false;
 
     auto& scripts = mWorld->getEntityManager()->getScriptComponents();
@@ -317,6 +338,7 @@ void App::onStop()
 
 void App::calculateFrames()
 {
+    PROFILE_FUNCTION();
     ++mFrameCounter;
     mTotalDeltaTime += mDeltaTime;
     double elapsed = mFPSTimer.elapsed();
@@ -331,6 +353,7 @@ void App::calculateFrames()
 
 void App::loadSession(const std::string &path)
 {
+    PROFILE_FUNCTION();
     QFile file(QString::fromStdString(path));
     if(!file.open(QIODevice::ReadOnly))
     {
@@ -361,6 +384,7 @@ void App::loadSession(const std::string &path)
 
 void App::saveSession()
 {
+    PROFILE_FUNCTION();
     QFile file{"session.json"};
     if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
     {
@@ -379,18 +403,21 @@ void App::saveSession()
 
 void App::newScene()
 {
+    PROFILE_FUNCTION();
     mWorld->newScene();
     updatePerspective();
 }
 
 void App::loadScene(const std::string& path)
 {
+    PROFILE_FUNCTION();
     mWorld->loadScene(path);
     updatePerspective();
 }
 
 void App::saveScene(const std::string& path)
 {
+    PROFILE_FUNCTION();
     mWorld->saveScene(path);
     saveSession();
     updatePerspective();

@@ -32,6 +32,7 @@ private:
 
 public:
     App();
+    ~App();
 
 signals:
     void initScene();

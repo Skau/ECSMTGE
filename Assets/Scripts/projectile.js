@@ -11,9 +11,9 @@ function beginPlay()
 }
 
 // This will be run once every frame
-function tick(deltaTime)
+function tick()
 {
-	time += deltaTime;
+	time += engine.deltaTime;
 	if(time >= lifeTime)
 	{
 		engine.destroyEntity(me.ID);

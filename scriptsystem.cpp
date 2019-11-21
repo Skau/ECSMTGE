@@ -122,7 +122,7 @@ void ScriptSystem::runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, st
             }
 
             QJSValueList list;
-            QJSValue array;
+            auto array = scriptIt->engine->newArray(static_cast<unsigned>(keys.size()));
             for(unsigned i = 0; i < keys.size(); ++i)
             {
                 array.setProperty(i, keys[i]);

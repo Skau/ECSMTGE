@@ -170,7 +170,7 @@ void ScriptWidget::on_button_NewFile_clicked()
             stream << "// This will be run once when play button is pressed\n"
                    << "function beginPlay()\n{\n\t//console.log(\"Begin play called on entity \" + me.ID);\n}\n\n"
                    << "// This will be run once every frame\n"
-                   << "function tick(deltaTime)\n{\n\t//console.log(\"Tick called on entity \" + me.ID);\n}\n\n"
+                   << "function tick()\n{\n\t//console.log(\"Tick called on entity \" + me.ID);\n}\n\n"
                    << "// This will be run once when stop button is pressed\n"
                    << "function endPlay()\n{\n\t//console.log(\"End play called on entity \" + me.ID);\n}\n\n"
                    << "// This will be run when input is pressed\n"

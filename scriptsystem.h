@@ -32,7 +32,7 @@ public:
      * should run, in frames. (10 is every tenth frame)
      * @brief garbageCollectionFrequency
      */
-    unsigned int garbageCollectionFrequency = 30;
+    unsigned int garbageCollectionFrequency = 15;
 
     void beginPlay(std::vector<ScriptComponent>& comps);
     void tick(float deltaTime, std::vector<ScriptComponent>& comps);

@@ -21,12 +21,12 @@ function beginPlay()
 }
 
 // This will be run once every frame
-function tick(deltaTime)
+function tick()
 {
 	//console.log("Tick called on entity " + me.ID);
 	if(!canFire)
 	{
-		fireTime += deltaTime;
+		fireTime += engine.deltaTime;
 		if(fireTime >= fireRate)
 		{
 			canFire = true;

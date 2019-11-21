@@ -157,10 +157,11 @@ void App::mousePicking()
 
 void App::update()
 {
-    PROFILE_FUNCTION();
+    PROFILE_SCOPE("Update");
     // Not exactly needed now, but maybe this should be here? Timer does call this function every 16 ms.
     if(currentlyUpdating)
         return;
+
     currentlyUpdating = true;
 
     mDeltaTime = mDeltaTimer.restart() / 1000.f;
@@ -172,49 +173,68 @@ void App::update()
     auto& physics       = mWorld->getEntityManager()->getPhysicsComponents();
     auto& colliders     = mWorld->getEntityManager()->getColliderComponents();
 
-    // Camera:
-    /* Note: Current camera depends on if the engine is in editor-mode or not.
-     * Editor camera is handled in C++, game camera is handled through script.
-     */
     auto currentCamera = mWorld->getCurrentCamera(mCurrentlyPlaying);
-    mEventHandler->updateMouse(mCurrentlyPlaying);
     auto cameraTransform = mWorld->getEntityManager()->getComponent<TransformComponent>(currentCamera->entityId);
-    if(!mCurrentlyPlaying)
     {
-        InputSystem::HandleEditorCameraInput(mDeltaTime, *cameraTransform, *currentCamera);
+        PROFILE_SCOPE("Camera");
+        // Camera:
+        /* Note: Current camera depends on if the engine is in editor-mode or not.
+         * Editor camera is handled in C++, game camera is handled through script.
+         */
+        mEventHandler->updateMouse(mCurrentlyPlaying);
+
+        if(!mCurrentlyPlaying)
+        {
+            InputSystem::HandleEditorCameraInput(mDeltaTime, *cameraTransform, *currentCamera);
+        }
+        CameraSystem::updateLookAtRotation(*cameraTransform, *currentCamera);
+        CameraSystem::updateCameraViewMatrices(transforms, mWorld->getEntityManager()->getCameraComponents());
     }
-    CameraSystem::updateLookAtRotation(*cameraTransform, *currentCamera);
-    CameraSystem::updateCameraViewMatrices(transforms, mWorld->getEntityManager()->getCameraComponents());
 
-
-    // Physics:
-    /* Note: Physics calculation should be happening on a separate thread
-     * and instead of sending references to the lists we should take copies
-     * and then later apply those copies to the original lists.
-     */
     std::vector<HitInfo> hitInfos;
-    if (mCurrentlyPlaying)
-        hitInfos = PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
 
-    // Sound:
-    // Note: Sound listener is using the active camera view matrix (for directions) and transform (for position)
-    auto& sounds = mWorld->getEntityManager()->getSoundComponents();
-    mSoundListener->update(*currentCamera, *cameraTransform);
-    SoundManager::UpdatePositions(transforms, sounds);
-    SoundManager::UpdateVelocities(physics, sounds);
+    {
+        PROFILE_SCOPE("Physics");
+        // Physics:
+        /* Note: Physics calculation should be happening on a separate thread
+         * and instead of sending references to the lists we should take copies
+         * and then later apply those copies to the original lists.
+         */
+        if (mCurrentlyPlaying)
+            hitInfos = PhysicsSystem::UpdatePhysics(transforms, physics, colliders, mDeltaTime);
 
-    // Calculate mesh bounds
-    // Note: This is only done if the transform has changed.
-    mWorld->getEntityManager()->UpdateBounds();
-    // -------- Frustum culling here -----------
+    }
+    {
+        PROFILE_SCOPE("Sound");
+        // Sound:
+        // Note: Sound listener is using the active camera view matrix (for directions) and transform (for position)
+        auto& sounds = mWorld->getEntityManager()->getSoundComponents();
+        mSoundListener->update(*currentCamera, *cameraTransform);
+        SoundManager::UpdatePositions(transforms, sounds);
+        SoundManager::UpdateVelocities(physics, sounds);
+    }
 
-    // Rendering
-    auto& renders = mWorld->getEntityManager()->getMeshComponents();
-    mRenderer->render(renders, transforms, *currentCamera,
-                      mWorld->getEntityManager()->getDirectionalLightComponents(),
-                      mWorld->getEntityManager()->getSpotLightComponents(),
-                      mWorld->getEntityManager()->getPointLightComponents(),
-                      mWorld->getEntityManager()->getParticleComponents());
+
+    {
+        PROFILE_SCOPE("Update Bounds");
+        // Calculate mesh bounds
+        // Note: This is only done if the transform has changed.
+        mWorld->getEntityManager()->UpdateBounds();
+        // -------- Frustum culling here -----------
+    }
+
+    {
+        PROFILE_SCOPE("Render");
+        // Rendering
+        auto& renders = mWorld->getEntityManager()->getMeshComponents();
+        mRenderer->render(renders, transforms, *currentCamera,
+                          mWorld->getEntityManager()->getDirectionalLightComponents(),
+                          mWorld->getEntityManager()->getSpotLightComponents(),
+                          mWorld->getEntityManager()->getPointLightComponents(),
+                          mWorld->getEntityManager()->getParticleComponents());
+    }
+
+
 
     // JAVASCRIPT HERE
 
@@ -259,8 +279,6 @@ void App::update()
             }
         }
     }
-
-
 
     currentlyUpdating = false;
 }

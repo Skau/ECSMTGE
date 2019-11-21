@@ -153,6 +153,9 @@ public:
 
     }
 
+    /** Resets all components to be "empty" while keeping memory allocation.
+     * @brief clear the entitymanager
+     */
     void clear()
     {
         for(auto info : mEntityInfos)
@@ -250,7 +253,7 @@ public:
         entitiesToDestroy.clear();
     }
 
-    /** Runs a function on a entities component based on components in template.
+    /** Runs a function on a entity component based on components in template.
      * Uses variadic template packing and std::function to take in a varying number
      * of parameters, attempts to get the components specified and sends them as
      * parameters to the function.
@@ -266,6 +269,15 @@ public:
         std::apply(f, comps);
     }
 
+    /** Runs a function on a entity component based on components in template.
+     * Similar to other version, but takes a lambda instead of a std::function,
+     * but lambda type needs to be sent in as first template parameter for
+     * compiler to understand. (use decltype on lambda to get type)
+     * @param FT - Lambda Type
+     * @param componentTypes - the different component types to get
+     * @param eID - entityID
+     * @param f - lambda for function with equal parameter count
+     */
     template <typename FT, typename... componentTypes>
     void transform(unsigned int eID, FT f)
     {

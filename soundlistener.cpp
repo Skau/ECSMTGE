@@ -81,6 +81,6 @@ void SoundListener::update(const CameraComponent& camera, const TransformCompone
 
     alListenerfv(AL_ORIENTATION, orientation);
 
-    SoundManager::checkOpenALError();
+    SoundManager::get().checkOpenALError();
 }
 

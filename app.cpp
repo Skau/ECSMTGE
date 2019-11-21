@@ -17,7 +17,7 @@ App::App()
     Instrumentor::Get().BeginSession("AppResult");
 
     PROFILE_FUNCTION();
-    mSoundManager = std::make_unique<SoundManager>();
+    mSoundManager = std::unique_ptr<SoundManager>(new SoundManager());
     mSoundListener = std::make_unique<SoundListener>();
 
     mMainWindow = std::make_unique<MainWindow>();
@@ -69,7 +69,7 @@ void App::initTheRest()
     mDeltaTimer.start();
     mFPSTimer.start();
 
-    SoundManager::checkOpenALError();
+    mSoundManager->checkOpenALError();
 
     // Send skybox data to renderer
 
@@ -210,8 +210,8 @@ void App::update()
         // Note: Sound listener is using the active camera view matrix (for directions) and transform (for position)
         auto& sounds = mWorld->getEntityManager()->getSoundComponents();
         mSoundListener->update(*currentCamera, *cameraTransform);
-        SoundManager::UpdatePositions(transforms, sounds);
-        SoundManager::UpdateVelocities(physics, sounds);
+        mSoundManager->UpdatePositions(transforms, sounds);
+        mSoundManager->UpdateVelocities(physics, sounds);
     }
 
 
@@ -315,7 +315,7 @@ void App::onPlay()
     mMainWindow->setSelected(nullptr);
 
     auto sounds = mWorld->getEntityManager()->getSoundComponents();
-    SoundManager::play(sounds);
+    mSoundManager->play(sounds);
 }
 
 // Called when play action is pressed while playing in UI
@@ -328,7 +328,7 @@ void App::onStop()
     ScriptSystem::get()->endPlay(scripts);
 
     auto sounds = mWorld->getEntityManager()->getSoundComponents();
-    SoundManager::stop(sounds);
+    mSoundManager->stop(sounds);
 
     mRenderer->EditorCurrentEntitySelected = nullptr;
 

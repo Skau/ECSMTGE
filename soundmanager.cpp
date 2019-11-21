@@ -5,8 +5,12 @@
 #include "resourcemanager.h"
 #include "componentdata.h"
 
+SoundManager* SoundManager::mSoundManagerInstance{nullptr};
+
 SoundManager::SoundManager()
 {
+    mSoundManagerInstance = this;
+
     qDebug() << "Intializing OpenAL!";
     mDevice = alcOpenDevice(nullptr);
     if (mDevice)
@@ -33,6 +37,13 @@ SoundManager::~SoundManager()
     alcMakeContextCurrent(nullptr);
     alcDestroyContext(mContext);
     alcCloseDevice(mDevice);
+}
+
+SoundManager &SoundManager::get()
+{
+    // Must check for this, because this should never be the case
+    assert(mSoundManagerInstance != nullptr);
+    return *mSoundManagerInstance;
 }
 
 bool SoundManager::checkOpenALError()

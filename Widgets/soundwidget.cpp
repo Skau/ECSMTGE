@@ -60,7 +60,7 @@ void SoundWidget::on_horizontalSlider_Gain_valueChanged(int value)
         {
             float v = value / 10.f;
             sound->gain = v;
-            SoundManager::changeGain(static_cast<unsigned>(sound->mSource), v);
+            SoundManager::get().changeGain(static_cast<unsigned>(sound->mSource), v);
             ui->label_GainValue->setText(QString::number(static_cast<double>(v)));
         }
     }
@@ -75,7 +75,7 @@ void SoundWidget::on_checkBox_Loop_toggled(bool checked)
     {
         if(sound->mSource != -1)
         {
-            SoundManager::setLooping(static_cast<unsigned>(sound->mSource), checked);
+            SoundManager::get().setLooping(static_cast<unsigned>(sound->mSource), checked);
             sound->isLooping = checked;
             ui->checkBox_Loop->setCheckState(checked ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
         }
@@ -92,7 +92,7 @@ void SoundWidget::on_checkBox_Mute_toggled(bool checked)
         if(sound->mSource != -1)
         {
             sound->isMuted = checked;
-            SoundManager::setMute(static_cast<unsigned>(sound->mSource), checked, sound->gain);
+            SoundManager::get().setMute(static_cast<unsigned>(sound->mSource), checked, sound->gain);
             ui->checkBox_Mute->setCheckState(sound->isMuted ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
         }
     }
@@ -107,7 +107,7 @@ void SoundWidget::on_pushButton_Start_clicked()
     {
         if(sound->mSource != -1)
         {
-            SoundManager::play(static_cast<unsigned>(sound->mSource));
+            SoundManager::get().play(static_cast<unsigned>(sound->mSource));
             isPlaying = true;
         }
     }
@@ -122,7 +122,7 @@ void SoundWidget::on_pushButton_Pause_clicked()
     {
         if(sound->mSource != -1)
         {
-            SoundManager::pause(static_cast<unsigned>(sound->mSource));
+            SoundManager::get().pause(static_cast<unsigned>(sound->mSource));
             isPlaying = false;
         }
     }
@@ -134,7 +134,7 @@ void SoundWidget::on_pushButton_Stop_clicked()
     {
         if(sound->mSource != -1)
         {
-            SoundManager::stop(static_cast<unsigned>(sound->mSource));
+            SoundManager::get().stop(static_cast<unsigned>(sound->mSource));
             isPlaying = false;
         }
     }
@@ -150,11 +150,11 @@ void SoundWidget::on_pushButton_ChangeSound_clicked()
         {
             if(sound->mSource != -1)
             {
-                SoundManager::cleanupSource(static_cast<unsigned>(sound->mSource));
+                SoundManager::get().cleanupSource(static_cast<unsigned>(sound->mSource));
                 sound->mSource = -1;
             }
 
-            SoundManager::createSource(sound, name.toStdString());
+            SoundManager::get().createSource(sound, name.toStdString());
 
             ui->label_CurrentSound->setText(QString::fromStdString(sound->name));
             ui->checkBox_Loop->setCheckState(sound->isLooping ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
@@ -165,7 +165,7 @@ void SoundWidget::on_pushButton_ChangeSound_clicked()
 
             if(isPlaying)
             {
-                SoundManager::play(static_cast<unsigned>(sound->mSource));
+                SoundManager::get().play(static_cast<unsigned>(sound->mSource));
             }
         }
     }
@@ -194,7 +194,7 @@ void SoundWidget::on_doubleSpinBox_Pitch_valueChanged(double arg1)
         if(sound->mSource != -1)
         {
             sound->pitch = static_cast<float>(arg1);
-            SoundManager::changePitch(static_cast<unsigned>(sound->mSource), static_cast<float>(arg1));
+            SoundManager::get().changePitch(static_cast<unsigned>(sound->mSource), static_cast<float>(arg1));
         }
     }
 }
@@ -212,7 +212,7 @@ void SoundWidget::on_pushButton_soundFromFile_clicked()
         {
             if(sound->mSource != -1)
             {
-                SoundManager::cleanupSource(static_cast<unsigned>(sound->mSource));
+                SoundManager::get().cleanupSource(static_cast<unsigned>(sound->mSource));
                 sound->mSource = -1;
             }
 
@@ -232,7 +232,7 @@ void SoundWidget::on_pushButton_soundFromFile_clicked()
                 ui->comboBox_AvailableSounds->addItem(name);
             }
 
-            SoundManager::createSource(sound, name.toStdString());
+            SoundManager::get().createSource(sound, name.toStdString());
 
             ui->label_CurrentSound->setText(QString::fromStdString(sound->name));
             ui->checkBox_Loop->setCheckState(sound->isLooping ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
@@ -244,7 +244,7 @@ void SoundWidget::on_pushButton_soundFromFile_clicked()
 
             if(isPlaying)
             {
-                SoundManager::play(static_cast<unsigned>(sound->mSource));
+                SoundManager::get().play(static_cast<unsigned>(sound->mSource));
             }
         }
     }

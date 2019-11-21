@@ -22,28 +22,34 @@ class PhysicsComponent;
  */
 class SoundManager
 {
+private:
+     friend class App;
+     SoundManager();
+     static SoundManager* mSoundManagerInstance;
+
 public:
-    SoundManager();
     ~SoundManager();
 
-   static bool checkOpenALError();
+   static SoundManager& get();
 
-   static void createSource(SoundComponent* comp, const std::string& wav);
-   static void play(unsigned source);
-   static void play(std::vector<SoundComponent> comps);
-   static void pause(unsigned source);
-   static void stop(unsigned source);
-   static void stop(std::vector<SoundComponent> comps);
-   static void changeGain(unsigned source, float value);
-   static void changePitch(unsigned source, float value);
-   static void setLooping(unsigned source, bool value);
-   static void setMute(unsigned source, bool value, float gain = 0.f);
-   static void setPosition(unsigned source, gsl::vec3 position = gsl::vec3{});
-   static void setVelocity(unsigned source, gsl::vec3 velocity = gsl::vec3{});
-   static void cleanupSource(unsigned source);
+   bool checkOpenALError();
 
-   static void UpdatePositions(std::vector<TransformComponent> &transforms, std::vector<SoundComponent> &sounds);
-   static void UpdateVelocities(std::vector<PhysicsComponent> &physics, std::vector<SoundComponent> &sounds);
+   void createSource(SoundComponent* comp, const std::string& wav);
+   void play(unsigned source);
+   void play(std::vector<SoundComponent> comps);
+   void pause(unsigned source);
+   void stop(unsigned source);
+   void stop(std::vector<SoundComponent> comps);
+   void changeGain(unsigned source, float value);
+   void changePitch(unsigned source, float value);
+   void setLooping(unsigned source, bool value);
+   void setMute(unsigned source, bool value, float gain = 0.f);
+   void setPosition(unsigned source, gsl::vec3 position = gsl::vec3{});
+   void setVelocity(unsigned source, gsl::vec3 velocity = gsl::vec3{});
+   void cleanupSource(unsigned source);
+
+   void UpdatePositions(std::vector<TransformComponent> &transforms, std::vector<SoundComponent> &sounds);
+   void UpdateVelocities(std::vector<PhysicsComponent> &physics, std::vector<SoundComponent> &sounds);
 
 public:
     ALCdevice* mDevice;

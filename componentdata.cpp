@@ -397,7 +397,7 @@ void SoundComponent::fromJSON(QJsonObject object)
     gain = static_cast<float>(object["Gain"].toDouble());
 
     if(name.size())
-        SoundManager::createSource(this, name);
+        SoundManager::get().createSource(this, name);
 }
 
 QJsonObject PointLightComponent::toJSON()

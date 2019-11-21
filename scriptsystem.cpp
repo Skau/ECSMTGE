@@ -122,7 +122,7 @@ void ScriptSystem::runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, st
             }
 
             QJSValueList list;
-            auto array = scriptIt->engine->newArray(static_cast<unsigned>(keys.size()));
+            QJSValue array;
             for(unsigned i = 0; i < keys.size(); ++i)
             {
                 array.setProperty(i, keys[i]);
@@ -131,8 +131,6 @@ void ScriptSystem::runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, st
             call(*scriptIt, "inputReleased", list);
         }
     }
-
-
 }
 
 void ScriptSystem::runMouseOffsetEvent(std::vector<ScriptComponent> &scripts, std::vector<InputComponent> &inputs, const QPoint& point)
@@ -169,8 +167,18 @@ void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector
     if(!comps.size() || !hitInfos.size())
         return;
     PROFILE_FUNCTION();
+
     for (auto it = hitInfos.begin(); it != hitInfos.end(); ++it)
     {
+        QJsonObject hitJSON;
+        hitJSON.insert("ID", static_cast<int>(it->collidingEID));
+        hitJSON.insert("hitPoint", it->hitPoint.toJSON());
+        hitJSON.insert("velocity", it->velocity.toJSON());
+        hitJSON.insert("collidingNormal", it->collidingNormal.toJSON());
+
+        QJSValueList list;
+        QJsonDocument doc(hitJSON);
+
         for (auto scriptIt = comps.begin(); scriptIt != comps.end(); ++scriptIt)
         {
             if(!scriptIt->filePath.size() || !scriptIt->beginplayRun)
@@ -183,14 +191,6 @@ void ScriptSystem::runHitEvents(std::vector<ScriptComponent>& comps, std::vector
 
             if(scriptIt->entityId == it->eID)
             {
-                QJsonObject hitJSON;
-                hitJSON.insert("ID", static_cast<int>(it->collidingEID));
-                hitJSON.insert("hitPoint", it->hitPoint.toJSON());
-                hitJSON.insert("velocity", it->velocity.toJSON());
-                hitJSON.insert("collidingNormal", it->collidingNormal.toJSON());
-
-                QJSValueList list;
-                QJsonDocument doc(hitJSON);
                 list << scriptIt->engine->toScriptValue(hitJSON);
                 call(*scriptIt, "onHit", list);
             }

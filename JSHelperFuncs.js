@@ -63,3 +63,59 @@ function deleteUnusedVariables(args)
         }
     }
 }
+
+function updateLoop(instructions)
+{
+    if (!Array.isArray(instructions))
+    {
+        console.log("instructions isn't an array!");
+        return;
+    }
+
+    // const compsBefore = accessedComponents.splice();
+
+    for (i = 0; i < instructions.length; ++i)
+    {
+        // console.log("Instruction type is : " + typeof instructions[i]);
+        if (typeof instructions[i] === "undefined")
+            continue;
+
+        if (typeof instructions[i].func === "function")
+        {
+            // console.log("Function is : " + instructions[i].func);
+            // console.log("it's a function!");
+            // instructions[i].func(instructions[i].params);
+            if (instructions[i].params !== "undefined")
+                instructions[i].func(instructions[i].params);
+            else
+                instructions[i].func();
+        }
+        else if (typeof instructions[i].func === "string")
+        {
+            // console.log("Function is : " + instructions[i].func)
+            let func = destringify(instructions[i].func);
+            // func(instructions[i].params);
+            if (instructions[i].params !== "undefined")
+                func(instructions[i].params);
+            else
+                func();
+        }
+    }
+
+    // let returnVals = [];
+    //
+    // for (i in accessedComponents)
+    // {
+    //     let changed = true;
+    //     for (j in compsBefore)
+    //     {
+    //         if (compsBefore[j] == accessedComponents[i])
+    //             changed = false;
+    //     }
+    //
+    //     if (changed)
+    //         returnVals.push(accessedComponents[i]);
+    // }
+    //
+    // return returnVals;
+}

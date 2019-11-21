@@ -34,6 +34,7 @@ public:
      */
     unsigned int garbageCollectionFrequency = 30;
 
+    void update(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const std::vector<QString>& pressed, const std::vector<QString> &released, const QPoint& point, std::vector<HitInfo> hitInfos, float deltaTime);
     void beginPlay(std::vector<ScriptComponent>& comps);
     void tick(float deltaTime, std::vector<ScriptComponent>& comps);
     void endPlay(std::vector<ScriptComponent>& comps);
@@ -105,7 +106,7 @@ public:
     /**
      * @brief Calls a JS function with params on the current file loaded. Returns true if successful.
      */
-    void call(ScriptComponent& comp, const std::string& function, QJSValueList params);
+    QJSValue call(ScriptComponent& comp, const std::string& function, QJSValueList params);
 
 
     /**
@@ -168,6 +169,7 @@ private:
      * @brief Updates all CPP components based on the ones used in JS. Called once at the start of JS scripts.
      */
     void updateCPPComponent(ScriptComponent& comp);
+    void updateCPPComponent(ScriptComponent& comp, QJSValue compList);
 
     void initializeJSEntity(ScriptComponent &comp);
 

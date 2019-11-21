@@ -246,15 +246,19 @@ void App::update()
 
             ScriptSystem::get()->updateJSComponents(scripts);
 
+            auto& inputs = mWorld->getEntityManager()->getInputComponents();
+            ScriptSystem::get()->update(scripts, inputs, mEventHandler->inputPressedStrings,
+                                        mEventHandler->inputReleasedStrings, mEventHandler->MouseOffset,
+                                        hitInfos, mDeltaTime);
+
             /* Note: This is called every frame, but only actually called on script components that this
              * has not yet been done to. This is to catch script components spawned from scripts
              * on runtime.
              */
-            ScriptSystem::get()->beginPlay(scripts);
+            /* ScriptSystem::get()->beginPlay(scripts);
 
             ScriptSystem::get()->tick(mDeltaTime, scripts);
 
-            auto& inputs = mWorld->getEntityManager()->getInputComponents();
             ScriptSystem::get()->runKeyPressedEvent(scripts, inputs, mEventHandler->inputPressedStrings);
             ScriptSystem::get()->runKeyReleasedEvent(scripts, inputs, mEventHandler->inputReleasedStrings);
             ScriptSystem::get()->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
@@ -265,8 +269,11 @@ void App::update()
             {
                 ScriptSystem::get()->runHitEvents(scripts, hitInfos);
             }
+            */
 
             ScriptSystem::get()->updateCPPComponents(scripts);
+
+            mEventHandler->inputReleasedStrings.clear();
 
             mWorld->getEntityManager()->removeEntitiesMarked();
 

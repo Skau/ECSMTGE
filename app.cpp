@@ -251,26 +251,6 @@ void App::update()
                                         mEventHandler->inputReleasedStrings, mEventHandler->MouseOffset,
                                         hitInfos, mDeltaTime);
 
-            /* Note: This is called every frame, but only actually called on script components that this
-             * has not yet been done to. This is to catch script components spawned from scripts
-             * on runtime.
-             */
-            /* ScriptSystem::get()->beginPlay(scripts);
-
-            ScriptSystem::get()->tick(mDeltaTime, scripts);
-
-            ScriptSystem::get()->runKeyPressedEvent(scripts, inputs, mEventHandler->inputPressedStrings);
-            ScriptSystem::get()->runKeyReleasedEvent(scripts, inputs, mEventHandler->inputReleasedStrings);
-            ScriptSystem::get()->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
-
-            mEventHandler->inputReleasedStrings.clear();
-
-            if(hitInfos.size())
-            {
-                ScriptSystem::get()->runHitEvents(scripts, hitInfos);
-            }
-            */
-
             ScriptSystem::get()->updateCPPComponents(scripts);
 
             mEventHandler->inputReleasedStrings.clear();

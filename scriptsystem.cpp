@@ -30,8 +30,8 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
     auto hitIt{hitInfos.begin()};
     if (hitIt != hitInfos.end())
     {
-        // Sort hitInfo's here.
-        // hitIt = hitInfos.begin();
+        std::sort(hitIt, hitInfos.end());
+        hitIt = hitInfos.begin();
     }
 
     for (auto scriptIt{scripts.begin()}; scriptIt != scripts.end(); ++scriptIt)
@@ -45,9 +45,12 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
         unsigned int i{0};
         std::vector<QJSValue> funcObjs;
         funcObjs.reserve(10);
-        // auto funcObj = scriptIt->engine->newObject();
 
         // Beginplay
+        /* Note: This is called every frame, but only actually called on script components that this
+         * has not yet been done to. This is to catch script components spawned from scripts
+         * on runtime.
+         */
         if (!scriptIt->beginplayRun)
         {
             PROFILE_SCOPE("Begin play");
@@ -178,6 +181,9 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
         QJSValueList list;
         list << functions;
         auto changedComps = call(*scriptIt, "updateLoop", list);
+
+        if (changedComps.isError())
+            continue;
 
         // Remember to do this after all functions have run but before contructing objects
         if (startedThisFrame)
@@ -620,14 +626,14 @@ QJSValue ScriptSystem::call(ScriptComponent &comp, const std::string& function, 
     if(value.isError())
     {
         checkError(value);
-        return QJSValue{};
+        return value;
     }
 
     value = value.call(params);
     if(value.isError())
     {
         checkError(value);
-        return QJSValue{};
+        return value;
     }
 
     currentComp = nullptr;

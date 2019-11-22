@@ -13,6 +13,9 @@ struct HitInfo
     gsl::vec3 hitPoint;
     gsl::vec3 velocity;
     gsl::vec3 collidingNormal;
+
+    // To be able to sort hitInfo's
+    bool operator< (const HitInfo& rhs) const { return eID < rhs.eID; }
 };
 
 /** Physics system

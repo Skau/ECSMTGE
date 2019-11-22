@@ -1,6 +1,6 @@
 #include "postprocessor.h"
 #include "renderer.h"
-
+#include "Instrumentor.h"
 Postprocessor::Postprocessor(Renderer *renderer)
 {
     mRenderer = renderer;
@@ -9,6 +9,7 @@ Postprocessor::Postprocessor(Renderer *renderer)
 
 void Postprocessor::init()
 {
+    PROFILE_FUNCTION();
     if (mRenderer != nullptr && mRenderer->mContext->makeCurrent(mRenderer))
     {
         initializeOpenGLFunctions();
@@ -97,6 +98,7 @@ Postprocessor &Postprocessor::operator+=(Postprocessor &other)
 
 void Postprocessor::Render()
 {
+    PROFILE_FUNCTION();
     if (!mInitialized)
         init();
     else if (outdatedRatio())
@@ -181,6 +183,7 @@ void Postprocessor::Render()
 
 unsigned int Postprocessor::RenderStep(unsigned int index)
 {
+    PROFILE_FUNCTION();
     if (index == 0)
     {
         if (!mInitialized)
@@ -320,6 +323,7 @@ void Postprocessor::updateRatio()
 
 void Postprocessor::recreateBuffers()
 {
+    PROFILE_FUNCTION();
     if (mInitialized)
     {
         glDeleteFramebuffers(2, mPingpong);

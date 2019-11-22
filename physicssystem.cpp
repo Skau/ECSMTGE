@@ -1,6 +1,7 @@
 #include "physicssystem.h"
 #include <chrono>
 #include "entitymanager.h"
+#include "Instrumentor.h"
 
 PhysicsSystem::PhysicsSystem()
 {
@@ -16,6 +17,7 @@ PhysicsSystem::CollisionEntity::CollisionEntity(unsigned int id, const ColliderC
 std::vector<HitInfo> PhysicsSystem::UpdatePhysics(std::vector<TransformComponent> &transforms, std::vector<PhysicsComponent> &physics,
                                   std::vector<ColliderComponent> &colliders, float deltaTime)
 {
+    PROFILE_FUNCTION();
     // 1. Update positions and velocities
     updatePosVel(transforms, physics, deltaTime);
 
@@ -81,6 +83,7 @@ std::vector<HitInfo> PhysicsSystem::UpdatePhysics(std::vector<TransformComponent
 
 std::vector<PhysicsSystem::CollisionEntity> PhysicsSystem::updateBounds(std::vector<TransformComponent> &trans, std::vector<ColliderComponent> &colliders)
 {
+    PROFILE_FUNCTION();
     auto transIt = trans.begin();
     auto collIt = colliders.begin();
 
@@ -328,6 +331,7 @@ std::vector<std::pair<gsl::ivec3, PhysicsSystem::CubeNode> > PhysicsSystem::subd
 
 void PhysicsSystem::updatePosVel(std::vector<TransformComponent> &transforms, std::vector<PhysicsComponent> &physics, float deltaTime)
 {
+    PROFILE_FUNCTION();
     auto transIt = transforms.begin();
     auto physIt = physics.begin();
 
@@ -379,6 +383,7 @@ std::optional<std::array<HitInfo, 2>>
 PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const ColliderComponent&, const gsl::vec3&> a,
                                 std::tuple<const TransformComponent&, const ColliderComponent&, const gsl::vec3&> b)
 {
+    PROFILE_FUNCTION();
     const auto& [aTrans, aColl, aVel] = a;
     const auto& [bTrans, bColl, bVel] = b;
 
@@ -516,6 +521,7 @@ PhysicsSystem::collisionCheck(  std::tuple<const TransformComponent&, const Coll
 
 void PhysicsSystem::handleHitInfo(HitInfo info, TransformComponent* transform, PhysicsComponent* physics)
 {
+    PROFILE_FUNCTION();
     if (physics)
     {
         auto normal = info.collidingNormal;

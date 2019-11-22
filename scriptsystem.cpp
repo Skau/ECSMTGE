@@ -75,12 +75,12 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
 
         {
             PROFILE_SCOPE("Tick");
-        // Tick
-        funcObjs.push_back(scriptIt->engine->newObject());
-        funcObjs.back().setProperty("func", QJSValue{"tick"});
-        funcObjs.back().setProperty("params", QJSValue{});
-        functions.setProperty(i, funcObjs.back());
-        ++i;
+            // Tick
+            funcObjs.push_back(scriptIt->engine->newObject());
+            funcObjs.back().setProperty("func", QJSValue{"tick"});
+            funcObjs.back().setProperty("params", QJSValue{});
+            functions.setProperty(i, funcObjs.back());
+            ++i;
         }
 
         // Input functions
@@ -128,15 +128,15 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
 
             {
                 PROFILE_SCOPE("Mouse movement");
-            // Mouse movement event
-            auto array = scriptIt->engine->newArray(2);
-            array.setProperty(0, point.x());
-            array.setProperty(1, point.y());
-            funcObjs.push_back(scriptIt->engine->newObject());
-            funcObjs.back().setProperty("func", QJSValue{"mouseMoved"});
-            funcObjs.back().setProperty("params", array);
-            functions.setProperty(i, funcObjs.back());
-            ++i;
+                // Mouse movement event
+                auto array = scriptIt->engine->newArray(2);
+                array.setProperty(0, point.x());
+                array.setProperty(1, point.y());
+                funcObjs.push_back(scriptIt->engine->newObject());
+                funcObjs.back().setProperty("func", QJSValue{"mouseMoved"});
+                funcObjs.back().setProperty("params", array);
+                functions.setProperty(i, funcObjs.back());
+                ++i;
             }
         }
 
@@ -177,21 +177,21 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
 
         {
             PROFILE_SCOPE("Javascript");
-        // Finally run functions from JavaScript:
-        QJSValueList list;
-        list << functions;
-        auto changedComps = call(*scriptIt, "updateLoop", list);
+            // Finally run functions from JavaScript:
+            QJSValueList list;
+            list << functions;
+            auto changedComps = call(*scriptIt, "updateLoop", list);
 
-        if (changedComps.isError())
-            continue;
+            if (changedComps.isError())
+                continue;
 
-        // Remember to do this after all functions have run but before contructing objects
-        if (startedThisFrame)
-            cacheGlobalVariables(*scriptIt);
+            // Remember to do this after all functions have run but before contructing objects
+            if (startedThisFrame)
+                cacheGlobalVariables(*scriptIt);
 
 
-        // Update cpp comps
-        // updateCPPComponent(*scriptIt, changedComps);
+            // Update cpp comps
+            // updateCPPComponent(*scriptIt, changedComps);
         }
     }
 }
@@ -449,7 +449,6 @@ void ScriptSystem::takeOutTheTrash(std::vector<ScriptComponent> &comps)
 
 std::vector<QString> ScriptSystem::findGlobalsInFile(const std::string &file) const
 {
-
     int scopeLevel{0};
     std::vector<QString> variables{};
     std::ifstream ifs{file, ifs.in};
@@ -501,7 +500,7 @@ std::vector<QString> ScriptSystem::findGlobalsInFile(const std::string &file) co
 
 void ScriptSystem::cacheGlobalVariables(ScriptComponent &comp)
 {
-
+    PROFILE_FUNCTION();
     if (comp.engine)
     {
         QJSValueIterator jsIt{comp.engine->globalObject()};
@@ -532,6 +531,7 @@ void ScriptSystem::initGarbageCollection()
 bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)
 {
 
+    PROFILE_FUNCTION();
     currentComp = &comp;
 
     if(!comp.JSEntity)
@@ -576,7 +576,7 @@ bool ScriptSystem::load(ScriptComponent& comp, const std::string& file)
 
 void ScriptSystem::call(ScriptComponent& comp, const std::string& function)
 {
-
+    PROFILE_FUNCTION();
     if(!comp.filePath.size() || !comp.beginplayRun)
         return;
 
@@ -609,7 +609,7 @@ void ScriptSystem::call(ScriptComponent& comp, const std::string& function)
 
 QJSValue ScriptSystem::call(ScriptComponent &comp, const std::string& function, QJSValueList params)
 {
-
+    PROFILE_FUNCTION();
     if(!comp.filePath.size() || !comp.beginplayRun)
         return QJSValue{};
 
@@ -642,7 +642,7 @@ QJSValue ScriptSystem::call(ScriptComponent &comp, const std::string& function, 
 
 QJSValue ScriptSystem::call(const std::string& function)
 {
-
+    PROFILE_FUNCTION();
     if(currentComp && currentComp->JSEntity)
     {
         QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), QString::fromStdString(gsl::scriptsFilePath) + currentFileName);
@@ -667,7 +667,7 @@ QJSValue ScriptSystem::call(const std::string& function)
 
 QJSValue ScriptSystem::call(const std::string& function, QJSValueList params)
 {
-
+    PROFILE_FUNCTION();
     if(currentComp && currentComp->JSEntity)
     {
         QJSValue value = currentComp->engine->evaluate(QString::fromStdString(function), QString::fromStdString(gsl::scriptsFilePath) + currentFileName);
@@ -691,7 +691,6 @@ QJSValue ScriptSystem::call(const std::string& function, QJSValueList params)
 
 bool ScriptSystem::execute(ScriptComponent& comp, QString function, QString contents, QString fileName)
 {
-
     if(!function.size() || !contents.size() || !fileName.size())
         return false;
 
@@ -732,20 +731,17 @@ bool ScriptSystem::execute(ScriptComponent& comp, QString function, QString cont
 
 QObject* ScriptSystem::spawnCube()
 {
-
     auto entity =  World::getWorld().getEntityManager()->createCube();
     return getEntityWrapper(entity);
 }
 
 QObject *ScriptSystem::spawnEntity()
 {
-
     return getEntityWrapper(World::getWorld().getEntityManager()->createEntity());
 }
 
 QJSValue ScriptSystem::getAllEntityIDsByComponent(const QString& name)
 {
-
     if(!currentComp)
         return 0;
 
@@ -847,7 +843,6 @@ QJSValue ScriptSystem::getAllEntityIDsByComponent(const QString& name)
 
 QJSValue ScriptSystem::getAllEntityIDs()
 {
-
     if(!currentComp)
         return 0;
 
@@ -863,7 +858,6 @@ QJSValue ScriptSystem::getAllEntityIDs()
 
 QObject* ScriptSystem::getEntity(unsigned int id)
 {
-
     if(!currentComp)
         return nullptr;
 
@@ -878,10 +872,9 @@ void ScriptSystem::destroyEntity(unsigned entity)
 
 void ScriptSystem::updateJSComponent(ScriptComponent& comp)
 {
-
     if(!comp.filePath.size())
         return;
-
+    PROFILE_FUNCTION();
     auto componentArray = comp.engine->globalObject().property("accessedComponents");
     if(!componentArray.isUndefined() && !componentArray.isNull())
     {
@@ -924,10 +917,9 @@ void ScriptSystem::updateJSComponent(ScriptComponent& comp)
 
 void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
 {
-
     if(!comp.valid || !comp.filePath.size() || !comp.beginplayRun)
         return;
-
+    PROFILE_FUNCTION();
     auto componentArray = comp.engine->globalObject().property("accessedComponents");
     if(!componentArray.isUndefined() && !componentArray.isNull())
     {
@@ -981,10 +973,9 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
 
 void ScriptSystem::updateCPPComponent(ScriptComponent &comp, QJSValue compList)
 {
-    PROFILE_FUNCTION();
     if(!comp.valid || !comp.filePath.size() || !comp.beginplayRun)
         return;
-
+    PROFILE_FUNCTION();
     if(!compList.isUndefined() && !compList.isNull())
     {
         auto length = compList.property("length").toInt();
@@ -1037,7 +1028,6 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp, QJSValue compList)
 
 void ScriptSystem::initializeJSEntity(ScriptComponent& comp)
 {
-
     comp.JSEntity = ScriptSystem::get()->getEntityWrapper(comp.entityId);
     comp.engine->globalObject().setProperty("me", comp.engine->newQObject(comp.JSEntity));
     comp.engine->globalObject().setProperty("accessedComponents", comp.engine->newArray());
@@ -1045,7 +1035,7 @@ void ScriptSystem::initializeJSEntity(ScriptComponent& comp)
 
 void ScriptSystem::initializeHelperFuncs()
 {
-
+    PROFILE_FUNCTION();
     QFile file(QString::fromStdString("../INNgine2019/JSHelperFuncs.js"));
     if(!file.open(QIODevice::ReadOnly))
     {

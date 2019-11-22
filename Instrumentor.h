@@ -42,17 +42,18 @@ private:
     InstrumentationSession* m_CurrentSession;
     std::ofstream m_OutputStream;
     int m_ProfileCount;
+
 public:
     Instrumentor()
         : m_CurrentSession(nullptr), m_ProfileCount(0)
     {
     }
 
-    void BeginSession(const std::string& name)
+    void BeginSession(const std::string& name, const std::string& filepath)
     {
-        m_OutputStream.open(name + ".json");
+        m_OutputStream.open(filepath + ".json");
         WriteHeader();
-        m_CurrentSession = new InstrumentationSession{ name };
+        m_CurrentSession = new InstrumentationSession{name};
     }
 
     void EndSession()
@@ -131,6 +132,7 @@ public:
 
         m_Stopped = true;
     }
+
 private:
     const char* m_Name;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTimepoint;
@@ -139,10 +141,15 @@ private:
 
 #define PROFILING 1
 #if PROFILING
-#define PROFILE_SCOPE(name) InstrumentationTimer timer##__LINE__(name)
-#define PROFILE_FUNCTION() PROFILE_SCOPE(Q_FUNC_INFO)
+    #define PROFILE_BEGIN_SESSION(name, filepath) Instrumentor::Get().BeginSession(name, filepath)
+    #define PROFILE_END_SESSION() Instrumentor::Get().EndSession()
+    #define PROFILE_SCOPE(name) InstrumentationTimer timer##__LINE__(name)
+    #define PROFILE_FUNCTION() PROFILE_SCOPE(Q_FUNC_INFO)
 #else
-#define PROFILE_SCOPE(name)
+    #define PROFILE_BEGIN_SESSION(name, filepath)
+    #define PROFILE_END_SESSION()
+    #define PROFILE_SCOPE(name)
+    #define PROFILE_FUNCTION()
 #endif
 
 #endif // INSTRUMENTOR_H

@@ -14,8 +14,9 @@
 
 App::App()
 {
-    Instrumentor::Get().BeginSession("ProfilingResult");
+    PROFILE_BEGIN_SESSION("Startup", "Profile-Startup");
 
+    PROFILE_FUNCTION();
     mSoundManager = std::unique_ptr<SoundManager>(new SoundManager());
     mSoundListener = std::make_unique<SoundListener>();
 
@@ -39,12 +40,13 @@ App::App()
 
 App::~App()
 {
-    Instrumentor::Get().EndSession();
+    PROFILE_END_SESSION();
 }
 
 // Slot called from Renderer when its done with initialization
 void App::initTheRest()
 {
+    PROFILE_FUNCTION();
     mResourceManager = std::unique_ptr<ResourceManager>(new ResourceManager{});
 
     mWorld = std::unique_ptr<World>(new World{});
@@ -62,7 +64,6 @@ void App::initTheRest()
 
     // Setup update loop
     connect(&mUpdateTimer, &QTimer::timeout, this, &App::update);
-    mUpdateTimer.start(16); // Simulates 60ish fps
 
     mDeltaTimer.start();
     mFPSTimer.start();
@@ -113,6 +114,9 @@ void App::initTheRest()
         material,
         0
     });
+    PROFILE_END_SESSION();
+    mUpdateTimer.start(16); // Simulates 60ish fps
+    PROFILE_BEGIN_SESSION("Editor", "Profile-Editor");
 }
 
 void App::toggleMute(bool mode)
@@ -126,6 +130,7 @@ void App::mousePicking()
     if(mCurrentlyPlaying)
         return;
 
+    PROFILE_FUNCTION();
     auto mousePoint = mRenderer->mapFromGlobal(QCursor::pos());
     auto cameras = mWorld->getEntityManager()->getCameraComponents();
     auto meshes = mWorld->getEntityManager()->getMeshComponents();
@@ -158,6 +163,7 @@ void App::update()
     if(currentlyUpdating)
         return;
 
+    PROFILE_FUNCTION();
     currentlyUpdating = true;
 
     mDeltaTime = mDeltaTimer.restart() / 1000.f;
@@ -172,7 +178,7 @@ void App::update()
     auto currentCamera = mWorld->getCurrentCamera(mCurrentlyPlaying);
     auto cameraTransform = mWorld->getEntityManager()->getComponent<TransformComponent>(currentCamera->entityId);
     {
-        //PROFILE_SCOPE("Camera");
+        PROFILE_SCOPE("Camera");
         // Camera:
         /* Note: Current camera depends on if the engine is in editor-mode or not.
          * Editor camera is handled in C++, game camera is handled through script.
@@ -190,7 +196,7 @@ void App::update()
     std::vector<HitInfo> hitInfos;
 
     {
-        //PROFILE_SCOPE("Physics");
+        PROFILE_SCOPE("Physics");
         // Physics:
         /* Note: Physics calculation should be happening on a separate thread
          * and instead of sending references to the lists we should take copies
@@ -201,7 +207,7 @@ void App::update()
 
     }
     {
-        //PROFILE_SCOPE("Sounds");
+        PROFILE_SCOPE("Sounds");
         // Sound:
         // Note: Sound listener is using the active camera view matrix (for directions) and transform (for position)
         auto& sounds = mWorld->getEntityManager()->getSoundComponents();
@@ -212,7 +218,7 @@ void App::update()
 
 
     {
-        //PROFILE_SCOPE("Bounds");
+        PROFILE_SCOPE("Bounds");
         // Calculate mesh bounds
         // Note: This is only done if the transform has changed.
         mWorld->getEntityManager()->UpdateBounds();
@@ -220,7 +226,7 @@ void App::update()
     }
 
     {
-        //PROFILE_SCOPE("Rendering");
+        PROFILE_SCOPE("Rendering");
         // Rendering
         auto& renders = mWorld->getEntityManager()->getMeshComponents();
         mRenderer->render(renders, transforms, *currentCamera,
@@ -235,21 +241,21 @@ void App::update()
     // JAVASCRIPT HERE
     if(mCurrentlyPlaying)
     {
-        //PROFILE_SCOPE("Scripting");
+        PROFILE_SCOPE("Scripting");
         auto& scripts = mWorld->getEntityManager()->getScriptComponents();
 
         ScriptSystem::get()->updateJSComponents(scripts);
 
-            auto& inputs = mWorld->getEntityManager()->getInputComponents();
-            ScriptSystem::get()->update(scripts, inputs, mEventHandler->inputPressedStrings,
-                                        mEventHandler->inputReleasedStrings, mEventHandler->MouseOffset,
-                                        hitInfos, mDeltaTime);
+        auto& inputs = mWorld->getEntityManager()->getInputComponents();
+        ScriptSystem::get()->update(scripts, inputs, mEventHandler->inputPressedStrings,
+                                    mEventHandler->inputReleasedStrings, mEventHandler->MouseOffset,
+                                    hitInfos, mDeltaTime);
 
         ScriptSystem::get()->updateCPPComponents(scripts);
 
-            mEventHandler->inputReleasedStrings.clear();
+        mEventHandler->inputReleasedStrings.clear();
 
-            mWorld->getEntityManager()->removeEntitiesMarked();
+        mWorld->getEntityManager()->removeEntitiesMarked();
 
         static unsigned int garbageCounter{0};
         garbageCounter++;
@@ -259,7 +265,6 @@ void App::update()
             ScriptSystem::get()->takeOutTheTrash(scripts);
         }
     }
-
 
     currentlyUpdating = false;
 }
@@ -273,6 +278,7 @@ void App::quit()
 
 void App::updatePerspective()
 {
+    PROFILE_FUNCTION();
     auto& cameras = mWorld->getEntityManager()->getCameraComponents();
     CameraSystem::updateCameraViewMatrices(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 0.1f, 100.f));
 }
@@ -280,6 +286,9 @@ void App::updatePerspective()
 // Called when play action is pressed while not playing in UI
 void App::onPlay()
 {
+    PROFILE_END_SESSION();
+    PROFILE_BEGIN_SESSION("Play", "Profile-Play");
+    PROFILE_FUNCTION();
     mCurrentlyPlaying = true;
 
     saveSession();
@@ -300,6 +309,9 @@ void App::onPlay()
 // Called when play action is pressed while playing in UI
 void App::onStop()
 {
+    PROFILE_END_SESSION();
+    PROFILE_BEGIN_SESSION("Editor", "Profile-Editor");
+    PROFILE_FUNCTION();
     mCurrentlyPlaying = false;
 
     auto& scripts = mWorld->getEntityManager()->getScriptComponents();

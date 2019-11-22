@@ -577,6 +577,45 @@ public:
         return nullptr;
     }
 
+//    template <typename T>
+//    static typename T::iterator binarySearch(const typename T::iterator& begin, const typename T::iterator& end, const typename T::value_type& value)
+//    {
+//        typename T::iterator::difference_type range = end - begin;
+//        if (range < 2)
+//            return (*begin < value && value < *begin) ? begin : end;
+
+//        auto lend = end - range / 2;
+//        if (value < *lend)
+//        {
+//            auto ret = binarySearch(begin, lend);
+//            return (ret == lend) ? end : ret;
+//        }
+//        else
+//        {
+//            return binarySearch(lend, end);
+//        }
+//    }
+
+    template <typename T, typename comp = std::less<>,
+              typename std::enable_if<(std::is_function<comp>::value)>::value>
+    static typename T::iterator binarySearch(const typename T::iterator& begin, const typename T::iterator& end, const typename T::value_type& value, comp compare)
+    {
+        typename T::iterator::difference_type range = end - begin;
+        if (range < 2)
+            return (compare(*begin, value) && compare(value, *begin)) ? begin : end;
+
+        auto lend = end - range / 2;
+        if (compare(value, *lend))
+        {
+            auto ret = binarySearch(begin, lend);
+            return (ret == lend) ? end : ret;
+        }
+        else
+        {
+            return binarySearch(lend, end);
+        }
+    }
+
     /** Breadth first search iterator for iterating through
      * a tree.
      * @brief Breadth first search iterator

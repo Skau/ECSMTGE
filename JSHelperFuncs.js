@@ -76,26 +76,20 @@ function updateLoop(instructions)
 
     for (i = 0; i < instructions.length; ++i)
     {
-        // console.log("Instruction type is : " + typeof instructions[i]);
         if (typeof instructions[i] === "undefined")
             continue;
 
         if (typeof instructions[i].func === "function")
         {
-            // console.log("Function is : " + instructions[i].func);
-            // console.log("it's a function!");
-            // instructions[i].func(instructions[i].params);
-            if (instructions[i].params !== "undefined")
+            if (typeof instructions[i].params !== "undefined")
                 instructions[i].func(instructions[i].params);
             else
                 instructions[i].func();
         }
         else if (typeof instructions[i].func === "string")
         {
-            // console.log("Function is : " + instructions[i].func)
             let func = destringify(instructions[i].func);
-            // func(instructions[i].params);
-            if (instructions[i].params !== "undefined")
+            if (typeof instructions[i].params !== "undefined")
                 func(instructions[i].params);
             else
                 func();

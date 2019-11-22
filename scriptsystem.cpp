@@ -78,7 +78,7 @@ void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<Inp
         // Tick
         funcObjs.push_back(scriptIt->engine->newObject());
         funcObjs.back().setProperty("func", QJSValue{"tick"});
-        funcObjs.back().setProperty("params", deltaTime);
+        funcObjs.back().setProperty("params", QJSValue{});
         functions.setProperty(i, funcObjs.back());
         ++i;
         }

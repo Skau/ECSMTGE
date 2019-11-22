@@ -596,23 +596,32 @@ public:
 //        }
 //    }
 
-    template <typename T, typename comp = std::less<>,
-              typename std::enable_if<(std::is_function<comp>::value)>::value>
-    static typename T::iterator binarySearch(const typename T::iterator& begin, const typename T::iterator& end, const typename T::value_type& value, comp compare)
+//    template<typename iterator>
+//    static iterator binarySearch(const iterator& begin, const iterator& end, const typename iterator::value_type& value)
+//    {
+////        return binarySearch<T, std::less<T>>(begin, end, value);
+//        return begin;
+//    }
+
+    /*,
+                  typename std::enable_if<(std::is_function<comp>::value)>::value*/
+
+    template <typename iterator, typename comp = std::less<typename iterator::value_type>>
+    static iterator binarySearch(const iterator& begin, const iterator& end, const typename iterator::value_type& value, comp compare = comp())
     {
-        typename T::iterator::difference_type range = end - begin;
+        typename iterator::difference_type range = end - begin;
         if (range < 2)
-            return (compare(*begin, value) && compare(value, *begin)) ? begin : end;
+            return (compare(*begin, value) || compare(value, *begin)) ? end : begin;
 
         auto lend = end - range / 2;
         if (compare(value, *lend))
         {
-            auto ret = binarySearch(begin, lend);
+            auto ret = binarySearch(begin, lend, value);
             return (ret == lend) ? end : ret;
         }
         else
         {
-            return binarySearch(lend, end);
+            return binarySearch(lend, end, value);
         }
     }
 

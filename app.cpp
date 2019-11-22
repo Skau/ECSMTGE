@@ -240,29 +240,16 @@ void App::update()
 
         ScriptSystem::get()->updateJSComponents(scripts);
 
-        /* Note: This is called every frame, but only actually called on script components that this
-         * has not yet been done to. This is to catch script components spawned from scripts
-         * on runtime.
-         */
-        ScriptSystem::get()->beginPlay(scripts);
-
-        ScriptSystem::get()->tick(mDeltaTime, scripts);
-
-        auto& inputs = mWorld->getEntityManager()->getInputComponents();
-        ScriptSystem::get()->runKeyPressedEvent(scripts, inputs, mEventHandler->inputPressedStrings);
-        ScriptSystem::get()->runKeyReleasedEvent(scripts, inputs, mEventHandler->inputReleasedStrings);
-        ScriptSystem::get()->runMouseOffsetEvent(scripts, inputs, mEventHandler->MouseOffset);
-
-        mEventHandler->inputReleasedStrings.clear();
-
-        if(hitInfos.size())
-        {
-            ScriptSystem::get()->runHitEvents(scripts, hitInfos);
-        }
+            auto& inputs = mWorld->getEntityManager()->getInputComponents();
+            ScriptSystem::get()->update(scripts, inputs, mEventHandler->inputPressedStrings,
+                                        mEventHandler->inputReleasedStrings, mEventHandler->MouseOffset,
+                                        hitInfos, mDeltaTime);
 
         ScriptSystem::get()->updateCPPComponents(scripts);
 
-        mWorld->getEntityManager()->removeEntitiesMarked();
+            mEventHandler->inputReleasedStrings.clear();
+
+            mWorld->getEntityManager()->removeEntitiesMarked();
 
         static unsigned int garbageCounter{0};
         garbageCounter++;

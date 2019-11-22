@@ -17,6 +17,185 @@
 #include "Instrumentor.h"
 
 
+void ScriptSystem::update(std::vector<ScriptComponent> &scripts, std::vector<InputComponent> &inputs,
+                          const std::vector<QString> &pressed, const std::vector<QString> &released,
+                          const QPoint &point, std::vector<HitInfo> hitInfos, float deltaTime)
+{
+    PROFILE_FUNCTION();
+    initializeHelperFuncs();
+    auto inpIt{inputs.begin()};
+
+    mDeltaTime = deltaTime;
+
+    auto hitIt{hitInfos.begin()};
+    if (hitIt != hitInfos.end())
+    {
+        std::sort(hitIt, hitInfos.end());
+        hitIt = hitInfos.begin();
+    }
+
+    for (auto scriptIt{scripts.begin()}; scriptIt != scripts.end(); ++scriptIt)
+    {
+        PROFILE_SCOPE("Scriptloop");
+        bool startedThisFrame = false;
+        if (!scriptIt->valid || scriptIt->engine == nullptr || !scriptIt->filePath.size())
+            continue;
+
+        auto functions = scriptIt->engine->newArray(10);
+        unsigned int i{0};
+        std::vector<QJSValue> funcObjs;
+        funcObjs.reserve(10);
+
+        // Beginplay
+        /* Note: This is called every frame, but only actually called on script components that this
+         * has not yet been done to. This is to catch script components spawned from scripts
+         * on runtime.
+         */
+        if (!scriptIt->beginplayRun)
+        {
+            PROFILE_SCOPE("Begin play");
+            // To catch changes to script during runtime
+            if(!load(*scriptIt, scriptIt->filePath))
+            {
+                qDebug() << "Failed to load" << scriptIt->filePath.c_str();
+                continue;
+            }
+
+            scriptIt->beginplayRun = true;
+            startedThisFrame = true;
+            funcObjs.push_back(scriptIt->engine->newObject());
+            funcObjs.back().setProperty("func", QJSValue{"beginPlay"});
+            funcObjs.back().setProperty("params", QJSValue{});
+            functions.setProperty(i, funcObjs.back());
+            ++i;
+        }
+
+        if (!scriptIt->beginplayRun)
+            continue;
+
+        {
+            PROFILE_SCOPE("Tick");
+        // Tick
+        funcObjs.push_back(scriptIt->engine->newObject());
+        funcObjs.back().setProperty("func", QJSValue{"tick"});
+        funcObjs.back().setProperty("params", deltaTime);
+        functions.setProperty(i, funcObjs.back());
+        ++i;
+        }
+
+        // Input functions
+        while (inpIt != inputs.end() && (!inpIt->valid || inpIt->entityId < scriptIt->entityId)) ++inpIt;
+
+        if (inpIt != inputs.end() && inpIt->entityId == scriptIt->entityId && inpIt->controlledWhilePlaying)
+        {
+
+            if(!scriptIt->JSEntity)
+            {
+                initializeJSEntity(*scriptIt);
+            }
+
+            // Pressed key event
+            if (pressed.size())
+            {
+                PROFILE_SCOPE("Pressed key");
+                auto array = scriptIt->engine->newArray(static_cast<unsigned>(pressed.size()));
+                for(unsigned i = 0; i < pressed.size(); ++i)
+                {
+                    array.setProperty(i, pressed[i]);
+                }
+                funcObjs.push_back(scriptIt->engine->newObject());
+                funcObjs.back().setProperty("func", QJSValue{"inputPressed"});
+                funcObjs.back().setProperty("params", array);
+                functions.setProperty(i, funcObjs.back());
+                ++i;
+            }
+
+            // Released key event
+            if (released.size())
+            {
+                PROFILE_SCOPE("Released key");
+                auto array = scriptIt->engine->newArray(static_cast<unsigned>(released.size()));
+                for(unsigned i = 0; i < released.size(); ++i)
+                {
+                    array.setProperty(i, released[i]);
+                }
+                funcObjs.push_back(scriptIt->engine->newObject());
+                funcObjs.back().setProperty("func", QJSValue{"inputReleased"});
+                funcObjs.back().setProperty("params", array);
+                functions.setProperty(i, funcObjs.back());
+                ++i;
+            }
+
+            {
+                PROFILE_SCOPE("Mouse movement");
+            // Mouse movement event
+            auto array = scriptIt->engine->newArray(2);
+            array.setProperty(0, point.x());
+            array.setProperty(1, point.y());
+            funcObjs.push_back(scriptIt->engine->newObject());
+            funcObjs.back().setProperty("func", QJSValue{"mouseMoved"});
+            funcObjs.back().setProperty("params", array);
+            functions.setProperty(i, funcObjs.back());
+            ++i;
+            }
+        }
+
+
+        // Hit events
+        while (hitIt != hitInfos.end() && hitIt->eID < scriptIt->entityId) ++hitIt;
+
+        /* Note: Physics system only reacts to first thing that it collides with
+         * frame. A.k.a. one object can only collide with one other object each
+         * frame and get information about that collision.
+         * It would be easy to implement a workaround on this. Either by sending
+         * in multiple hit results as an array or by running the same function
+         * multiple times per hit function.
+         */
+        if (hitIt != hitInfos.end() && scriptIt->entityId == hitIt->eID)
+        {
+            PROFILE_SCOPE("Hit events");
+            QJSValue val = scriptIt->engine->newObject();
+            val.setProperty("ID", static_cast<int>(hitIt->collidingEID));
+            auto arr = scriptIt->engine->newArray(3);
+            for (unsigned int i{0}; i < 3; ++i)
+                arr.setProperty(i, static_cast<double>(hitIt->hitPoint[i]));
+            val.setProperty("hitPoint", arr);
+            for (unsigned int i{0}; i < 3; ++i)
+                arr.setProperty(i, static_cast<double>(hitIt->velocity[i]));
+            val.setProperty("velocity", arr);
+            for (unsigned int i{0}; i < 3; ++i)
+                arr.setProperty(i, static_cast<double>(hitIt->collidingNormal[i]));
+            val.setProperty("collidingNormal", arr);
+
+            funcObjs.push_back(scriptIt->engine->newObject());
+            funcObjs.back().setProperty("func", QJSValue{"onHit"});
+            funcObjs.back().setProperty("params", val);
+            functions.setProperty(i, funcObjs.back());
+            ++i;
+        }
+
+
+        {
+            PROFILE_SCOPE("Javascript");
+        // Finally run functions from JavaScript:
+        QJSValueList list;
+        list << functions;
+        auto changedComps = call(*scriptIt, "updateLoop", list);
+
+        if (changedComps.isError())
+            continue;
+
+        // Remember to do this after all functions have run but before contructing objects
+        if (startedThisFrame)
+            cacheGlobalVariables(*scriptIt);
+
+
+        // Update cpp comps
+        // updateCPPComponent(*scriptIt, changedComps);
+        }
+    }
+}
+
 void ScriptSystem::beginPlay(std::vector<ScriptComponent>& comps)
 {
 
@@ -428,11 +607,11 @@ void ScriptSystem::call(ScriptComponent& comp, const std::string& function)
     return;
 }
 
-void ScriptSystem::call(ScriptComponent &comp, const std::string& function, QJSValueList params)
+QJSValue ScriptSystem::call(ScriptComponent &comp, const std::string& function, QJSValueList params)
 {
 
     if(!comp.filePath.size() || !comp.beginplayRun)
-        return;
+        return QJSValue{};
 
     currentComp = &comp;
     currentFileName = QString::fromStdString(comp.filePath);
@@ -446,19 +625,19 @@ void ScriptSystem::call(ScriptComponent &comp, const std::string& function, QJSV
     if(value.isError())
     {
         checkError(value);
-        return;
+        return value;
     }
 
     value = value.call(params);
     if(value.isError())
     {
         checkError(value);
-        return;
+        return value;
     }
 
     currentComp = nullptr;
     currentFileName = "";
-    return;
+    return value;
 }
 
 QJSValue ScriptSystem::call(const std::string& function)
@@ -758,6 +937,62 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
             for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
             {
                 auto object = QJsonValue::fromVariant(componentArray.property(i).toVariant()).toObject();
+
+                if(object.isEmpty())
+                    continue;
+
+                auto entityManager = World::getWorld().getEntityManager();
+
+                // Get component that matches the type
+                auto ID = static_cast<unsigned>(object["ID"].toInt());
+                auto componentType = static_cast<ComponentType>(object["ComponentType"].toInt());
+                auto component = entityManager->getComponent(ID, componentType);
+
+                object.remove("ID");
+
+                if(component)
+                {
+                    // If they are different this component was modified in JS
+                    // and we need to update the C++ version
+                    auto oldJson = component->toJSON();
+                    if(object != oldJson)
+                    {
+                        component->fromJSON(object);
+                    }
+                }
+                else
+                {
+                    // If the component does not exist it needs to be added. Deferred spawning.
+                    for(auto& info : entityManager->getEntityInfos())
+                    {
+                        if(ID == info.entityId)
+                        {
+                            auto comp = entityManager->addComponent(ID, componentType);
+                            comp->fromJSON(object);
+                            comp->valid = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void ScriptSystem::updateCPPComponent(ScriptComponent &comp, QJSValue compList)
+{
+    PROFILE_FUNCTION();
+    if(!comp.valid || !comp.filePath.size() || !comp.beginplayRun)
+        return;
+
+    if(!compList.isUndefined() && !compList.isNull())
+    {
+        auto length = compList.property("length").toInt();
+        if(length > 0)
+        {
+            for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
+            {
+                auto object = QJsonValue::fromVariant(compList.property(i).toVariant()).toObject();
 
                 if(object.isEmpty())
                     continue;

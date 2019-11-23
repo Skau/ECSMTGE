@@ -883,17 +883,16 @@ void ScriptSystem::updateJSComponent(ScriptComponent& comp)
         {
             for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
             {
-                auto object = QJsonValue::fromVariant(componentArray.property(i).toVariant()).toObject();
+                auto property = componentArray.property(i);
+                auto object = property.toVariant().toJsonObject();
 
                 if(object.isEmpty())
                     continue;
 
-                auto entityManager = World::getWorld().getEntityManager();
-
                 // Get component that matches the type
                 auto ID = static_cast<unsigned>(object["ID"].toInt());
                 auto componentType = static_cast<ComponentType>(object["ComponentType"].toInt());
-                auto component = entityManager->getComponent(ID, componentType);
+                auto component = World::getWorld().getEntityManager()->getComponent(ID, componentType);
 
                 if(component)
                 {
@@ -907,7 +906,9 @@ void ScriptSystem::updateJSComponent(ScriptComponent& comp)
                         auto updatedComp = comp.engine->toScriptValue(newJson);
 
                         for (auto key : newJson.keys())
-                            comp.engine->globalObject().property("accessedComponents").property(i).setProperty(key, updatedComp.property(key));
+                            property.setProperty(key, updatedComp.property(key));
+
+                        comp.engine->globalObject().property("accessedComponents").property(i) = property;
                     }
                 }
             }
@@ -928,7 +929,8 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
         {
             for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
             {
-                auto object = QJsonValue::fromVariant(componentArray.property(i).toVariant()).toObject();
+                auto property = componentArray.property(i);
+                auto object = property.toVariant().toJsonObject();
 
                 if(object.isEmpty())
                     continue;
@@ -955,15 +957,11 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
                 else
                 {
                     // If the component does not exist it needs to be added. Deferred spawning.
-                    for(auto& info : entityManager->getEntityInfos())
+                    if(auto info = entityManager->getComponent<EntityInfo>(ID))
                     {
-                        if(ID == info.entityId)
-                        {
-                            auto comp = entityManager->addComponent(ID, componentType);
-                            comp->fromJSON(object);
-                            comp->valid = true;
-                            break;
-                        }
+                        auto comp = entityManager->addComponent(ID, componentType);
+                        comp->fromJSON(object);
+                        comp->valid = true;
                     }
                 }
             }
@@ -983,7 +981,8 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp, QJSValue compList)
         {
             for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
             {
-                auto object = QJsonValue::fromVariant(compList.property(i).toVariant()).toObject();
+                auto property = compList.property(i);
+                auto object = property.toVariant().toJsonObject();
 
                 if(object.isEmpty())
                     continue;
@@ -1010,15 +1009,11 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp, QJSValue compList)
                 else
                 {
                     // If the component does not exist it needs to be added. Deferred spawning.
-                    for(auto& info : entityManager->getEntityInfos())
+                    if(auto info = entityManager->getComponent<EntityInfo>(ID))
                     {
-                        if(ID == info.entityId)
-                        {
-                            auto comp = entityManager->addComponent(ID, componentType);
-                            comp->fromJSON(object);
-                            comp->valid = true;
-                            break;
-                        }
+                        auto comp = entityManager->addComponent(ID, componentType);
+                        comp->fromJSON(object);
+                        comp->valid = true;
                     }
                 }
             }

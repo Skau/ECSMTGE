@@ -43,10 +43,10 @@ template<class T, \
     typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
 T* getComponent(unsigned int entity) \
     { \
-    for (auto& comp : CONCATENATE(m, K, s)) \
-        if (comp.valid && comp.entityId == entity) \
-            return &comp; \
-        return nullptr; \
+        auto result = std::lower_bound(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(), entity, [](const K& a, const unsigned int& b){ \
+            return a.entityId < b; \
+        }); \
+        return (result != CONCATENATE(m, K, s).end() && result->entityId == entity) ? &(*result) : nullptr; \
     } \
 
 #define REMOVECOMPONENT(K) \
@@ -575,6 +575,14 @@ public:
                 return &(*it);
 
         return nullptr;
+    }
+
+    template <typename iterator, typename comp = std::less<typename iterator::value_type>>
+    static iterator binarySearch(const iterator& begin, const iterator& end, const typename iterator::value_type& value, comp compare = comp())
+    {
+        auto result = std::lower_bound(begin, end, value, compare);
+        // If lower_bound found something and it's not lower or higher, then it found it. Return position.
+        return (result != end && !(compare(*result, value) || compare(value, *result))) ? result : end;
     }
 
     /** Breadth first search iterator for iterating through

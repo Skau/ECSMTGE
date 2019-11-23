@@ -41,13 +41,7 @@
 #define GETCOMPONENT(K) \
 template<class T, \
     typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
-T* getComponent(unsigned int entity) \
-    { \
-        auto result = std::lower_bound(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(), entity, [](const K& a, const unsigned int& b){ \
-            return a.entityId < b; \
-        }); \
-        return (result != CONCATENATE(m, K, s).end() && result->entityId == entity) ? &(*result) : nullptr; \
-    } \
+T* getComponent(unsigned int entity) { return find(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(), entity); } \
 
 #define REMOVECOMPONENT(K) \
 template<class T, \
@@ -582,11 +576,10 @@ public:
     template <typename iterator>
     static typename iterator::value_type* find(const iterator& begin, const iterator& end, unsigned int eID)
     {
-        for (auto it{begin}; it != end; ++it)
-            if (it->entityId == eID)
-                return &(*it);
-
-        return nullptr;
+        auto result = std::lower_bound(begin, end, eID, [](const typename iterator::value_type& a, const unsigned int& b){
+            return a.entityId < b;
+        });
+        return (result != end && result->entityId == eID) ? &(*result) : nullptr;
     }
 
     template <typename iterator, typename comp = std::less<typename iterator::value_type>>

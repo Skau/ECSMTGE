@@ -54,15 +54,15 @@ template<class T, \
          typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
 bool removeComponent(unsigned int entity) \
 { \
-    for(auto& comp : CONCATENATE(m, K, s)) \
+    auto it = std::lower_bound(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(), entity, [](const K& a, const unsigned int& b){ \
+        return a.entityId < b; \
+    }); \
+    if (it != CONCATENATE(m, K, s).end() && it->entityId == entity) \
     { \
-        if(comp.entityId == entity) \
+        if (it->valid) \
         { \
-            if(comp.valid) \
-            { \
-                comp = K{}; \
-                return true; \
-            } \
+            it->valid = false; \
+            return true; \
         } \
     } \
     return false; \
@@ -72,17 +72,24 @@ bool removeComponent(unsigned int entity) \
     template<class T, typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
     T& addComponents(unsigned int entity) \
     { \
-        for (auto& comp : CONCATENATE(m, K, s)) \
+        for (auto it{CONCATENATE(m, K, s).begin()}; it != CONCATENATE(m, K, s).end(); ++it) \
         { \
-            if (!comp.valid) \
+            if (!it->valid) \
             { \
-                comp.valid = true; \
-                comp.entityId = entity; \
-                std::sort(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(),[](const K& t1, const K& t2) \
+                it->~K(); \
+                new (&(*it)) K{entity, true}; \
+                std::sort(it, CONCATENATE(m, K, s).end(),[](const K& t1, const K& t2) \
                 { \
                     return t1.entityId < t2.entityId; \
                 }); \
-                return comp; \
+                if (it->entityId == entity) \
+                    return *it; \
+                else \
+                { \
+                    return *std::lower_bound(it, CONCATENATE(m, K, s).end(), entity, [](const K& a, const unsigned int& b){ \
+                        return a.entityId < b; \
+                    }); \
+                } \
             } \
         } \
         CONCATENATE(m, K, s).emplace_back(K{entity, true}); \
@@ -91,7 +98,12 @@ bool removeComponent(unsigned int entity) \
         { \
             return t1.entityId < t2.entityId; \
         }); \
-        return comp; \
+        if (comp.entityId == entity) \
+            return comp; \
+        else \
+            return *std::lower_bound(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(), entity, [](const K& a, const unsigned int& b){ \
+                return a.entityId < b; \
+            }); \
     } \
 
 #define CONCATENATE( x, y, z) x##y##z

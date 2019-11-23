@@ -2,153 +2,69 @@
 #include "entitymanager.h"
 #include "componentdata.h"
 #include <QJsonDocument>
+#include "scriptsystem.h"
 
-QEntity::QEntity(unsigned int _ID, QJSEngine* engine, EntityManager* _entityManager, QObject* parent)
-    :  QObject(parent), entityManager(_entityManager), mEngine(engine), mID(_ID)
+QEntity::QEntity(unsigned int _ID, QObject* parent)
+    :  QObject(parent), mID(_ID)
 {
 }
 
 QJSValue QEntity::getComponent(const QString &name)
 {
-    QJSValueList list;
-    list << name;
-    list << mID;
-    return ScriptSystem::get()->call("getComponent", list);
+    QJSValue value;
+
+    if(name == "transform")
+        value = ScriptSystem::get()->getComponent<TransformComponent>(mID);
+    else if(name == "mesh")
+        value = ScriptSystem::get()->getComponent<MeshComponent>(mID);
+    else if(name == "physics")
+        value = ScriptSystem::get()->getComponent<PhysicsComponent>(mID);
+    else if(name == "camera")
+        value = ScriptSystem::get()->getComponent<CameraComponent>(mID);
+    else if(name == "input")
+        value = ScriptSystem::get()->getComponent<InputComponent>(mID);
+    else if(name == "sound")
+        value = ScriptSystem::get()->getComponent<SoundComponent>(mID);
+    else if(name == "pointLight")
+        value = ScriptSystem::get()->getComponent<PointLightComponent>(mID);
+    else if(name == "directionalLight")
+        value = ScriptSystem::get()->getComponent<DirectionalLightComponent>(mID);
+    else if(name == "spotLight")
+        value = ScriptSystem::get()->getComponent<SpotLightComponent>(mID);
+    else if(name == "script")
+        value = ScriptSystem::get()->getComponent<ScriptComponent>(mID);
+    else if(name == "collider")
+        value = ScriptSystem::get()->getComponent<ColliderComponent>(mID);
+
+    return value;
 }
 
 QJSValue QEntity::addComponent(const QString &name)
 {
-    QJSValueList list;
-    list << name;
-    list << mID;
-    return ScriptSystem::get()->call("addComponent", list);
-}
-
-QJSValue QEntity::_getComponent(const QString& name, unsigned id)
-{
-    if(!id)
-    {
-        id = mID;
-    }
-
-    Component* component = nullptr;
+    QJSValue value;
 
     if(name == "transform")
-        component = entityManager->getComponent<TransformComponent>(id);
+        value = ScriptSystem::get()->addComponent<TransformComponent>(mID);
     else if(name == "mesh")
-        component = entityManager->getComponent<MeshComponent>(id);
+        value = ScriptSystem::get()->addComponent<MeshComponent>(mID);
     else if(name == "physics")
-        component = entityManager->getComponent<PhysicsComponent>(id);
+        value = ScriptSystem::get()->addComponent<PhysicsComponent>(mID);
     else if(name == "camera")
-        component = entityManager->getComponent<CameraComponent>(id);
+        value = ScriptSystem::get()->addComponent<CameraComponent>(mID);
     else if(name == "input")
-        component = entityManager->getComponent<InputComponent>(id);
+        value = ScriptSystem::get()->addComponent<InputComponent>(mID);
     else if(name == "sound")
-        component = entityManager->getComponent<SoundComponent>(id);
+        value = ScriptSystem::get()->addComponent<SoundComponent>(mID);
     else if(name == "pointLight")
-        component = entityManager->getComponent<PointLightComponent>(mID);
+        value = ScriptSystem::get()->addComponent<PointLightComponent>(mID);
     else if(name == "directionalLight")
-        component = entityManager->getComponent<DirectionalLightComponent>(id);
+        value = ScriptSystem::get()->addComponent<DirectionalLightComponent>(mID);
     else if(name == "spotLight")
-        component = entityManager->getComponent<SpotLightComponent>(id);
+        value = ScriptSystem::get()->addComponent<SpotLightComponent>(mID);
     else if(name == "script")
-        component = entityManager->getComponent<ScriptComponent>(id);
+        value = ScriptSystem::get()->addComponent<ScriptComponent>(mID);
     else if(name == "collider")
-        component = entityManager->getComponent<ColliderComponent>(id);
+        value = ScriptSystem::get()->addComponent<ColliderComponent>(mID);
 
-    // Return 0 if nothing was found
-    if(!component)
-        return QJSValue();
-
-    auto JSON = component->toJSON();
-    JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-    return mEngine->toScriptValue(JSON);
-}
-
-QJSValue QEntity::_addComponent(const QString &name, unsigned id)
-{
-    if(!id)
-    {
-        id = mID;
-    }
-
-    if(name == "transform")
-    {
-        TransformComponent comp{};
-        auto JSON = comp.toJSON();
-        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-        return mEngine->toScriptValue(JSON);
-    }
-    else if(name == "mesh")
-    {
-        MeshComponent comp{};
-        auto JSON = comp.toJSON();
-        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-        return mEngine->toScriptValue(JSON);
-    }
-    else if(name == "physics")
-    {
-        PhysicsComponent comp{};
-        auto JSON = comp.toJSON();
-        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-        return mEngine->toScriptValue(JSON);
-    }
-    else if(name == "camera")
-    {
-        CameraComponent comp{};
-        auto JSON = comp.toJSON();
-        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-        return mEngine->toScriptValue(JSON);
-    }
-    else if(name == "input")
-    {
-        InputComponent comp{};
-        auto JSON = comp.toJSON();
-        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-        return mEngine->toScriptValue(JSON);
-    }
-    else if(name == "sound")
-    {
-        SoundComponent comp{};
-        auto JSON = comp.toJSON();
-        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-        return mEngine->toScriptValue(JSON);
-    }
-    else if(name == "pointLight")
-    {
-        PointLightComponent comp{};
-        auto JSON = comp.toJSON();
-        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-        return mEngine->toScriptValue(JSON);
-    }
-    else if(name == "directionalLight")
-    {
-        DirectionalLightComponent comp{};
-        auto JSON = comp.toJSON();
-        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-        return mEngine->toScriptValue(JSON);
-    }
-    else if(name == "spotLight")
-    {
-        SpotLightComponent comp{};
-        auto JSON = comp.toJSON();
-        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-        return mEngine->toScriptValue(JSON);
-    }
-    else if(name == "script")
-    {
-        ScriptComponent comp{};
-        auto JSON = comp.toJSON();
-        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-        return mEngine->toScriptValue(JSON);
-    }
-    else if(name == "collider")
-    {
-        ColliderComponent comp{};
-        auto JSON = comp.toJSON();
-        JSON.insert("ID", QJsonValue(static_cast<int>(id)));
-        return mEngine->toScriptValue(JSON);
-    }
-
-    return QJSValue();
+    return value;
 }

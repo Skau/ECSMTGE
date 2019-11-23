@@ -5,11 +5,11 @@
 #include <QJSValue>
 #include <memory>
 #include <vector>
+#include "world.h"
+#include "qentity.h"
+#include "qjsengine.h"
+#include "componentdata.h"
 
-class QJSEngine;
-class ScriptComponent;
-class InputComponent;
-class QEntity;
 class HitInfo;
 
 /**
@@ -113,6 +113,70 @@ public:
      * @brief Calls a JS function with params on the current file loaded. Returns true if successful.
      */
     QJSValue call(const std::string& function, QJSValueList params);
+
+    template<class Comp, typename std::enable_if<std::is_base_of<Component, Comp>::value>::type* = nullptr>
+    QJSValue addComponent(unsigned entity)
+    {
+        if(!currentComp)
+            return QJSValue();
+
+        Comp comp{};
+        QJsonObject object = comp.toJSON();
+
+        auto componentArray = currentComp->engine->globalObject().property("accessedComponents");
+        auto length = componentArray.property("length").toInt();
+        if(length > 0)
+        {
+            for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
+            {
+                auto property = componentArray.property(i);
+                auto jsObject = property.toVariant().toJsonObject();
+                if(jsObject["ID"].toInt() == static_cast<int>(entity) && jsObject["ComponentType"].toInt() == object["ComponentType"].toInt())
+                {
+                    return componentArray.property(i);
+                }
+            }
+        }
+
+        object.insert("ID", QJsonValue(static_cast<int>(entity)));
+        auto value = currentComp->engine->toScriptValue(object);
+        currentComp->engine->globalObject().property("accessedComponents").setProperty(static_cast<unsigned>(length), value);
+
+        return value;
+    }
+
+    template<class Comp, typename std::enable_if<std::is_base_of<Component, Comp>::value>::type* = nullptr>
+    QJSValue getComponent(unsigned entity)
+    {
+        if(!currentComp)
+            return QJSValue();
+
+        auto comp = World::getWorld().getEntityManager()->getComponent<Comp>(entity);
+        if(!comp)
+            return QJSValue();
+
+        auto object = comp->toJSON();
+
+        auto componentArray = currentComp->engine->globalObject().property("accessedComponents");
+        auto length = componentArray.property("length").toInt();
+        if(length > 0)
+        {
+            for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
+            {
+                auto jsObject = componentArray.property(i).toVariant().toJsonObject();
+
+                if(jsObject["ID"].toInt() == static_cast<int>(entity) && jsObject["ComponentType"].toInt() == object["ComponentType"].toInt())
+                {
+                    return componentArray.property(i);
+                }
+            }
+        }
+
+        object.insert("ID", QJsonValue(static_cast<int>(entity)));
+        auto value = currentComp->engine->toScriptValue(object);
+        currentComp->engine->globalObject().property("accessedComponents").setProperty(static_cast<unsigned>(length), value);
+        return value;
+    }
 
     /**
      * @brief Executes one off raw js code from the mini editor. Returns true if successfull.

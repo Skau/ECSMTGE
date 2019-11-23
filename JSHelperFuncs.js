@@ -11,26 +11,14 @@ function exists(comp)
     return false;
 }
 
-function addComponent(name, id = 0)
+function addComponent(name)
 {
-    const comp = me._addComponent(name, id);
-    if(comp != null) {
-        if (!exists(comp)) {
-            accessedComponents.push(comp);
-        }
-    }
-    return comp;
+    return me.addComponent(name);
 }
 
-function getComponent(name, id = 0)
+function getComponent(name)
 {
-    const comp = me._getComponent(name, id);
-    if(comp != null) {
-        if(!exists(comp)) {
-            accessedComponents.push(comp);
-        }
-    }
-    return comp;
+    return me.getComponent(name);
 }
 
 function destringify(obj)

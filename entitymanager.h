@@ -43,10 +43,10 @@ template<class T, \
     typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
 T* getComponent(unsigned int entity) \
     { \
-    for (auto& comp : CONCATENATE(m, K, s)) \
-        if (comp.valid && comp.entityId == entity) \
-            return &comp; \
-        return nullptr; \
+        auto result = std::lower_bound(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(), entity, [](const K& a, const unsigned int& b){ \
+            return a.entityId < b; \
+        }); \
+        return (result != CONCATENATE(m, K, s).end() && result->entityId == entity) ? &(*result) : nullptr; \
     } \
 
 #define REMOVECOMPONENT(K) \

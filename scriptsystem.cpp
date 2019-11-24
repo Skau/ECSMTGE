@@ -389,12 +389,20 @@ void ScriptSystem::updateJSComponents(std::vector<ScriptComponent>& comps)
 void ScriptSystem::updateCPPComponents(std::vector<ScriptComponent> &comps)
 {
     PROFILE_FUNCTION();
+    std::vector<QJsonObject> deferredSpawning;
     for(auto it{comps.begin()}; it != comps.end(); ++it)
     {
         if(it->valid && it->filePath.size())
         {
-            updateCPPComponent(*it);
+            updateCPPComponent(*it, deferredSpawning);
         }
+    }
+
+    for(auto& object : deferredSpawning)
+    {
+        auto comp = World::getWorld().getEntityManager()->addComponent(object["ID"].toInt(), static_cast<ComponentType>(object["ComponentType"].toInt()));
+        comp->fromJSON(object);
+        comp->valid = true;
     }
 }
 
@@ -912,10 +920,11 @@ void ScriptSystem::updateJSComponent(ScriptComponent& comp)
     }
 }
 
-void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
+void ScriptSystem::updateCPPComponent(ScriptComponent &comp, std::vector<QJsonObject> &deferredSpawning)
 {
     if(!comp.valid || !comp.filePath.size() || !comp.beginplayRun)
         return;
+
     PROFILE_FUNCTION();
     auto componentArray = comp.engine->globalObject().property("accessedComponents");
     if(!componentArray.isUndefined() && !componentArray.isNull())
@@ -938,10 +947,9 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
                 auto componentType = static_cast<ComponentType>(object["ComponentType"].toInt());
                 auto component = entityManager->getComponent(ID, componentType);
 
-                object.remove("ID");
-
                 if(component)
                 {
+                    object.remove("ID");
                     // If they are different this component was modified in JS
                     // and we need to update the C++ version
                     auto oldJson = component->toJSON();
@@ -953,12 +961,7 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp)
                 else
                 {
                     // If the component does not exist it needs to be added. Deferred spawning.
-                    if(auto info = entityManager->getComponent<EntityInfo>(ID))
-                    {
-                        auto comp = entityManager->addComponent(ID, componentType);
-                        comp->fromJSON(object);
-                        comp->valid = true;
-                    }
+                    deferredSpawning.push_back(object);
                 }
             }
         }

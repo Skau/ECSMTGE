@@ -233,7 +233,7 @@ private:
     /**
      * @brief Updates all CPP components based on the ones used in JS. Called once at the start of JS scripts.
      */
-    void updateCPPComponent(ScriptComponent& comp);
+    QJsonObject updateCPPComponent(ScriptComponent& comp);
     void updateCPPComponent(ScriptComponent& comp, QJSValue compList);
 
     void initializeJSEntity(ScriptComponent &comp);

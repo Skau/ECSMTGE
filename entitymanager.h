@@ -47,58 +47,13 @@ T* getComponent(unsigned int entity) { return find(CONCATENATE(m, K, s).begin(),
 template<class T, \
          typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
 bool removeComponent(unsigned int entity) \
-{ \
-    auto it = std::lower_bound(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(), entity, [](const K& a, const unsigned int& b){ \
-        return a.entityId < b; \
-    }); \
-    if (it != CONCATENATE(m, K, s).end() && it->entityId == entity) \
-    { \
-        if (it->valid) \
-        { \
-            it->valid = false; \
-            return true; \
-        } \
-    } \
-    return false; \
-} \
+{ return removeComponent(CONCATENATE(m, K, s), entity); } \
 
 #define ADDCOMPONENT(K) \
-    template<class T, typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
-    T& addComponents(unsigned int entity) \
-    { \
-        for (auto it{CONCATENATE(m, K, s).begin()}; it != CONCATENATE(m, K, s).end(); ++it) \
-        { \
-            if (!it->valid) \
-            { \
-                it->~K(); \
-                new (&(*it)) K{entity, true}; \
-                std::sort(it, CONCATENATE(m, K, s).end(),[](const K& t1, const K& t2) \
-                { \
-                    return t1.entityId < t2.entityId; \
-                }); \
-                if (it->entityId == entity) \
-                    return *it; \
-                else \
-                { \
-                    return *std::lower_bound(it, CONCATENATE(m, K, s).end(), entity, [](const K& a, const unsigned int& b){ \
-                        return a.entityId < b; \
-                    }); \
-                } \
-            } \
-        } \
-        CONCATENATE(m, K, s).emplace_back(entity, true); \
-        auto &comp = CONCATENATE(m, K, s).back(); \
-        std::sort(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(),[](const K& t1, const K& t2) \
-        { \
-            return t1.entityId < t2.entityId; \
-        }); \
-        if (comp.entityId == entity) \
-            return comp; \
-        else \
-            return *std::lower_bound(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(), entity, [](const K& a, const unsigned int& b){ \
-                return a.entityId < b; \
-            }); \
-    } \
+template<class T, \
+    typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
+T& addComponents(unsigned int entity) \
+{ return addComponent(CONCATENATE(m, K, s), entity); } \
 
 #define CONCATENATE( x, y, z) x##y##z
 
@@ -600,6 +555,87 @@ public:
         auto result = std::lower_bound(begin, end, value, compare);
         // If lower_bound found something and it's not lower or higher, then it found it. Return position.
         return (result != end && !(compare(*result, value) || compare(value, *result))) ? result : end;
+    }
+
+    /** Adds a component to the a specified component vector.
+     * Searches first through the component array for a unvalid component,
+     * and if found uses that one instead of allocating room for more.
+     * If none is found then it resizes the vector and emblaces the component
+     * at the end.
+     *
+     * This function also sorts the array after adding a component.
+     * @param list - vector of components. Type must be T = std::vector<T>
+     * @param entity - entityId for component to add.
+     * @return the new component that was added to the entity
+     */
+    template<class T>
+    typename T::value_type& addComponent(T& list, unsigned int entity)
+    {
+        typedef typename T::value_type VT;
+
+        // Check if object already exist and if so just return that one instead.
+        if (auto obj = find(list.begin(), list.end(), entity))
+            return *obj;
+
+        for (auto it{list.begin()}; it != list.end(); ++it)
+        {
+            if (!it->valid)
+            {
+                it->~VT();
+                new (&(*it)) VT{entity, true};
+                std::sort(it, list.end(),[](const VT& t1, const VT& t2)
+                {
+                    return t1.entityId < t2.entityId;
+                });
+                if (it->entityId == entity)
+                    return *it;
+                else
+                {
+                    return *std::lower_bound(it, list.end(), entity, [](const VT& a, const unsigned int& b){
+                        return a.entityId < b;
+                    });
+                }
+            }
+        }
+        list.emplace_back(entity, true);
+        auto &comp = list.back();
+        std::sort(list.begin(), list.end(),[](const VT& t1, const VT& t2)
+        {
+            return t1.entityId < t2.entityId;
+        });
+        if (comp.entityId == entity)
+            return comp;
+        else
+            return *std::lower_bound(list.begin(), list.end(), entity, [](const VT& a, const unsigned int& b){
+                return a.entityId < b;
+            });
+    }
+
+    /** Removes a component from the specified component vector.
+     * This function just marks the component as unvalid so that
+     * the next addComponent call can use the spot instead of
+     * allocating new storage.
+     * @param list - vector of components. Type must be T = std::vector<T>
+     * @param entity - entityId for component to add.
+     * @param true if component was removed and false if operation failed.
+     */
+    template<class T>
+    bool removeComponent(T& list, unsigned int entity)
+    {
+        typedef typename T::value_type VT;
+
+        auto it = std::lower_bound(list.begin(), list.end(), entity, [](const VT& a, const unsigned int& b){
+            return a.entityId < b;
+        });
+        if (it != list.end() && it->entityId == entity)
+        {
+            if (it->valid)
+            {
+                it->valid = false;
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Breadth first search iterator for iterating through entity children

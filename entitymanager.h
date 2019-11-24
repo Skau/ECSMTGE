@@ -572,7 +572,15 @@ public:
         std::cout << std::endl;
     }
 
-    // TODO: Find should use binary search
+    /** Finds a component for a given entity.
+     * Searches from begin to end in a certain component array to find
+     * a component with the specified entityID and returns it if found
+     * and nullptr otherwise.
+     * @param begin - startpos to search from. Inclusive.
+     * @param end - endpos to search to. Exclusive.
+     * @param eID - entityID for component to find.
+     * @return ptr to component if found or nullptr otherwise
+     */
     template <typename iterator>
     static typename iterator::value_type* find(const iterator& begin, const iterator& end, unsigned int eID)
     {
@@ -582,6 +590,10 @@ public:
         return (result != end && result->entityId == eID) ? &(*result) : nullptr;
     }
 
+    /** Implementation of binary search to use in other functions.
+     * This function should be more of a guideline in how to use
+     * binary search and usage should just copy this function.
+     */
     template <typename iterator, typename comp = std::less<typename iterator::value_type>>
     static iterator binarySearch(const iterator& begin, const iterator& end, const typename iterator::value_type& value, comp compare = comp())
     {
@@ -590,9 +602,9 @@ public:
         return (result != end && !(compare(*result, value) || compare(value, *result))) ? result : end;
     }
 
-    /** Breadth first search iterator for iterating through
-     * a tree.
-     * @brief Breadth first search iterator
+    /** Breadth first search iterator for iterating through entity children
+     * in a tree-like fashion.
+     * @brief Parent-child breadth first search iterator
      */
     class TreeIterator
     {
@@ -676,11 +688,24 @@ public:
     // Returns an end iterator pointing to nothing
     TreeIterator treeEnd() { return TreeIterator{this, nullptr}; }
 
+
+
+    /** Helper functions to add and set position rotation and scale for transforms.
+     * These functions works just like the components themselves, but does take
+     * children of entities into account, which component transforms does not.
+     * @brief transform setters
+     */
+    /// Add transform position with inheritance
     void addTransformPos(unsigned int eID, const gsl::vec3& pos);
+    /// Add transform rotation with inheritance
     void addTransformRot(unsigned int eID, const gsl::quat& rot);
+    /// Add transform scale with inheritance
     void addTransformScale(unsigned int eID, const gsl::vec3& scale);
+    /// Set transform position with inheritance
     void setTransformPos(unsigned int eID, const gsl::vec3& pos);
+    /// Set transform rotation with inheritance
     void setTransformRot(unsigned int eID, const gsl::quat& rot);
+    /// Set transform scale with inheritance
     void setTransformScale(unsigned int eID, const gsl::vec3& scale);
 
     gsl::vec3 getTransformPos(unsigned int eID);

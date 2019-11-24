@@ -2,9 +2,6 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
-#include "world.h"
-#include "componentdata.h"
-#include "qentity.h"
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QPoint>
@@ -420,8 +417,7 @@ QString ScriptSystem::checkError(QJSValue value)
 
 QEntity* ScriptSystem::getEntityWrapper(unsigned int entity)
 {
-
-    return new QEntity(entity, currentComp->engine, World::getWorld().getEntityManager().get(), this);
+    return new QEntity(entity, this);
 }
 
 void ScriptSystem::takeOutTheTrash(std::vector<ScriptComponent> &comps)

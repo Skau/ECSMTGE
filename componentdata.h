@@ -1,14 +1,13 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
-#include "innpch.h"
 #include "meshdata.h"
 #include <QtMath> // temp for qDegreesRadians in spot light component
 
 // For ScriptComponent
 #include <QFile>
 #include <QJSEngine>
-#include "scriptsystem.h"
+
 #include "qentity.h"
 
 #include <QJsonObject>
@@ -346,25 +345,9 @@ struct ScriptComponent : public Component
     QEntity* JSEntity{};
     bool beginplayRun : 1;
 
-    ScriptComponent(unsigned int _eID = 0, bool _valid = false)
-        : Component(_eID, _valid, ComponentType::Script),
-          filePath(""), JSEntity{nullptr}, beginplayRun{false}
-    {
-        engine = new QJSEngine();
-        engine->installExtensions(QJSEngine::ConsoleExtension);
-        engine->globalObject().setProperty("engine", engine->newQObject(new QScriptSystemPointer{}));
-    }
+    ScriptComponent(unsigned int _eID = 0, bool _valid = false);
 
-    virtual void reset() override
-    {
-        delete JSEntity;
-        JSEntity = nullptr;
-        filePath = "";
-        beginplayRun = false;
-        engine = new QJSEngine();
-        engine->installExtensions(QJSEngine::ConsoleExtension);
-        engine->globalObject().setProperty("engine", engine->newQObject(new QScriptSystemPointer{}));
-    }
+    virtual void reset() override;
 
     virtual QJsonObject toJSON() override;
     virtual void fromJSON(QJsonObject object) override;

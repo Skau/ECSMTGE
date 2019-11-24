@@ -3,6 +3,7 @@
 #include <QJsonArray>
 #include "resourcemanager.h"
 #include "soundmanager.h"
+#include "scriptsystem.h"
 #include "qentity.h"
 #include <QFileInfo>
 #include "world.h"
@@ -120,6 +121,26 @@ void TransformComponent::fromJSON(QJsonObject object)
                                                 });
 
     colliderBoundsOutdated = object["ColliderBoundsOutdated"].toBool(true);
+}
+
+ScriptComponent::ScriptComponent(unsigned int _eID, bool _valid)
+    : Component(_eID, _valid, ComponentType::Script),
+    filePath(""), JSEntity{nullptr}, beginplayRun{false}
+{
+    engine = new QJSEngine();
+    engine->installExtensions(QJSEngine::ConsoleExtension);
+    engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
+}
+
+void ScriptComponent::reset()
+{
+    delete JSEntity;
+    JSEntity = nullptr;
+    filePath = "";
+    beginplayRun = false;
+    engine = new QJSEngine();
+    engine->installExtensions(QJSEngine::ConsoleExtension);
+    engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
 }
 
 QJsonObject ScriptComponent::toJSON()

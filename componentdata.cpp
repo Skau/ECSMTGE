@@ -132,12 +132,39 @@ ScriptComponent::ScriptComponent(unsigned int _eID, bool _valid)
     engine->globalObject().setProperty("engine", engine->newQObject(new QScriptSystemPointer{}));
 }
 
+ScriptComponent::ScriptComponent(ScriptComponent &&rhs)
+    : Component{rhs}, engine{rhs.engine}, filePath{std::move(rhs.filePath)}, JSEntity{rhs.JSEntity}, beginplayRun{rhs.beginplayRun}
+{
+    rhs.engine = nullptr;
+    rhs.JSEntity = nullptr;
+}
+
+ScriptComponent &ScriptComponent::operator=(ScriptComponent &&rhs)
+{
+    entityId = rhs.entityId;
+    valid = rhs.valid;
+
+    engine = rhs.engine;
+    rhs.engine = nullptr;
+    JSEntity = rhs.JSEntity;
+    rhs.JSEntity = nullptr;
+
+    filePath = std::move(rhs.filePath);
+    beginplayRun = rhs.beginplayRun;
+
+    return *this;
+}
+
 void ScriptComponent::reset()
 {
     delete JSEntity;
     JSEntity = nullptr;
+    delete engine;
+    engine = nullptr;
+
     filePath = "";
     beginplayRun = false;
+
     engine = new QJSEngine();
     engine->installExtensions(QJSEngine::ConsoleExtension);
     engine->globalObject().setProperty("engine", engine->newQObject(new QScriptSystemPointer{}));
@@ -177,14 +204,13 @@ std::pair<gsl::vec3, gsl::vec3> ColliderComponent::Bounds::minMax() const {
 QJsonObject Component::toJSON()
 {
     QJsonObject returnObject;
-    returnObject.insert("Valid", QJsonValue(valid));
     returnObject.insert("ComponentType", QJsonValue(static_cast<int>(type)));
     return returnObject;
 }
 
 void Component::fromJSON(QJsonObject object)
 {
-    valid = object["Valid"].toBool();
+
 }
 
 QJsonObject EntityInfo::toJSON()

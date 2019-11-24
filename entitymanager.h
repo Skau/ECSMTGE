@@ -161,6 +161,7 @@ public:
         auto id = ++idCounter;
         EntityInfo entityInfo;
         entityInfo.entityId = id;
+        entityInfo.valid = true;
         if(!name.size())
         {
             name = "Entity" + std::to_string(id);

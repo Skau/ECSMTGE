@@ -346,6 +346,11 @@ struct ScriptComponent : public Component
     bool beginplayRun : 1;
 
     ScriptComponent(unsigned int _eID = 0, bool _valid = false);
+    ScriptComponent(const ScriptComponent& rhs) = delete;
+    ScriptComponent(ScriptComponent&& rhs);
+
+    ScriptComponent& operator= (const ScriptComponent& rhs) = delete;
+    ScriptComponent& operator= (ScriptComponent&& rhs);
 
     virtual void reset() override;
 

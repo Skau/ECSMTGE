@@ -819,7 +819,7 @@ QJSValue ScriptSystem::getAllEntityIDsByComponent(const QString& name)
     }
     else if(name == "script")
     {
-        auto components = entityManager->getScriptComponents();
+        auto& components = entityManager->getScriptComponents();
         for(auto& comp : components)
         {
             IDs.emplace_back(comp.entityId);

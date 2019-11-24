@@ -352,11 +352,7 @@ struct ScriptComponent : public Component
     virtual QJsonObject toJSON() override;
     virtual void fromJSON(QJsonObject object) override;
 
-    virtual ~ScriptComponent() override
-    {
-        delete JSEntity;
-        delete engine;
-    }
+    virtual ~ScriptComponent() override;
 };
 
 struct ColliderComponent : public Component

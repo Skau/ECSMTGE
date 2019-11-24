@@ -129,7 +129,7 @@ ScriptComponent::ScriptComponent(unsigned int _eID, bool _valid)
 {
     engine = new QJSEngine();
     engine->installExtensions(QJSEngine::ConsoleExtension);
-    engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
+    engine->globalObject().setProperty("engine", engine->newQObject(new QScriptSystemPointer{}));
 }
 
 void ScriptComponent::reset()
@@ -140,7 +140,13 @@ void ScriptComponent::reset()
     beginplayRun = false;
     engine = new QJSEngine();
     engine->installExtensions(QJSEngine::ConsoleExtension);
-    engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
+    engine->globalObject().setProperty("engine", engine->newQObject(new QScriptSystemPointer{}));
+}
+
+ScriptComponent::~ScriptComponent()
+{
+    delete JSEntity;
+    delete engine;
 }
 
 QJsonObject ScriptComponent::toJSON()

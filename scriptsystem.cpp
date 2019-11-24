@@ -389,11 +389,11 @@ void ScriptSystem::updateJSComponents(std::vector<ScriptComponent>& comps)
 void ScriptSystem::updateCPPComponents(std::vector<ScriptComponent> &comps)
 {
     PROFILE_FUNCTION();
-    for(auto& comp : comps)
+    for(auto it{comps.begin()}; it != comps.end(); ++it)
     {
-        if(comp.valid && comp.filePath.size())
+        if(it->valid && it->filePath.size())
         {
-            updateCPPComponent(comp);
+            updateCPPComponent(*it);
         }
     }
 }

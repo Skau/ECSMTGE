@@ -92,7 +92,8 @@ private:
         for(auto& comp : getAllComponents(entity))
         {
             comp->valid = false;
-            comp->reset();
+            // comp->reset();
+
         }
         for(unsigned i = 0; i < mEntityInfos.size(); ++i)
         {
@@ -540,10 +541,11 @@ public:
     template <typename iterator>
     static typename iterator::value_type* find(const iterator& begin, const iterator& end, unsigned int eID)
     {
-        auto result = std::lower_bound(begin, end, eID, [](const typename iterator::value_type& a, const unsigned int& b){
-            return a.entityId < b || !a.valid;
+        auto result = std::lower_bound(begin, end, eID, [](const typename iterator::value_type& a, const unsigned int& b)
+        {
+            return a.entityId < b;
         });
-        return (result != end && result->entityId == eID) ? &(*result) : nullptr;
+        return (result != end && result->valid && result->entityId == eID) ? &(*result) : nullptr;
     }
 
     /** Implementation of binary search to use in other functions.

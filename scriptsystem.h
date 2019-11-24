@@ -21,6 +21,7 @@ class HitInfo;
 class ScriptSystem : public QObject
 {
     Q_OBJECT
+    friend class QScriptSystemPointer;
 public:
     static ScriptSystem* get()
     {
@@ -182,6 +183,74 @@ private:
 
     float mDeltaTime{0};
     std::map<unsigned int, std::vector<QString>> globalVariables{};
+};
+
+
+
+
+/** Pointer referencing class to the global ScriptSystem instance object.
+ * A pointer class designed to prevent that the "this" object doesn't own the
+ * scriptsystem. Because Qt requires objects to be placed on the heap but also
+ * want's to manage the objects lifetime.
+ * @brief ScriptSystem instance pointer.
+ */
+class QScriptSystemPointer : public QObject
+{
+    Q_OBJECT
+private:
+    ScriptSystem* mPtr = nullptr;
+
+public:
+    QScriptSystemPointer()
+    {
+        auto ptr = ScriptSystem::get();
+        assert(ptr != nullptr);
+        mPtr = ptr;
+    }
+    QScriptSystemPointer(const QScriptSystemPointer& rhs) { mPtr = rhs.mPtr; }
+    QScriptSystemPointer& operator= (const QScriptSystemPointer& rhs) { mPtr = rhs.mPtr; return *this; }
+
+    ScriptSystem* get() { return mPtr; }
+
+    float getDeltaTime() const { return mPtr->mDeltaTime; }
+    void setDeltaTime(float time) { mPtr->mDeltaTime = time; }
+    Q_PROPERTY(float deltaTime READ getDeltaTime WRITE setDeltaTime)
+
+public slots:
+    /**
+     * @brief Spawns and returns a cube at (0,0,0). This includes a transform- and mesh component. Mesh is set to a cube. Defaults to visible.
+     * Example: let cube = engine.spawnCube();
+     */
+    QObject* spawnCube(){ return mPtr->spawnCube(); }
+    /**
+     * @brief Spawns and returns an entity with no components.
+     * Example: let spawnedEntity = engine.spawnEntity();
+     */
+    QObject* spawnEntity(){ return mPtr->spawnEntity(); }
+
+    /**
+     * @brief Returns an array of all entity IDs that has the given component.
+     * Example: let entityIDs = engine.getAllEntityIDsByComponent("mesh");
+     */
+    QJSValue getAllEntityIDsByComponent(const QString& name){ return mPtr->getAllEntityIDsByComponent(name); }
+
+    /**
+     * @brief Returns an array of all entityIDs.
+     * Example: let entityIDs = engine.getAllEntityIDs();
+     */
+    QJSValue getAllEntityIDs(){ return mPtr->getAllEntityIDs(); }
+
+    /**
+     * @brief Returns an entity with the given ID.
+     * Example: let entity = engine.getEntity(2);
+     */
+    QObject* getEntity(unsigned int id){ return mPtr->getEntity(id); }
+
+    /**
+     * @brief Destroys the passed in entity.
+     */
+    void destroyEntity(unsigned entity){ return mPtr->destroyEntity(entity); }
+
 };
 
 #endif // SCRIPTSYSTEM_H

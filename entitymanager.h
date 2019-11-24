@@ -86,7 +86,7 @@ bool removeComponent(unsigned int entity) \
                 } \
             } \
         } \
-        CONCATENATE(m, K, s).emplace_back(K{entity, true}); \
+        CONCATENATE(m, K, s).emplace_back(entity, true); \
         auto &comp = CONCATENATE(m, K, s).back(); \
         std::sort(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(),[](const K& t1, const K& t2) \
         { \
@@ -585,7 +585,7 @@ public:
     static typename iterator::value_type* find(const iterator& begin, const iterator& end, unsigned int eID)
     {
         auto result = std::lower_bound(begin, end, eID, [](const typename iterator::value_type& a, const unsigned int& b){
-            return a.entityId < b;
+            return a.entityId < b || !a.valid;
         });
         return (result != end && result->entityId == eID) ? &(*result) : nullptr;
     }

@@ -51,6 +51,9 @@ struct Component
 
     virtual QJsonObject toJSON();
     virtual void fromJSON(QJsonObject object);
+
+
+    virtual ~Component(){}
 };
 
 struct EntityInfo : public Component
@@ -144,7 +147,7 @@ struct MeshComponent : public Component
     bool isVisible : 1;
     MeshData meshData{};
     Material mMaterial{};
-    bool renderWireframe{};
+    bool renderWireframe : 1;
 
     /* World Space Bounds of meshComponent
      * If transform component is missing,
@@ -154,8 +157,8 @@ struct MeshComponent : public Component
     MeshData::Bounds bounds{};
 
     MeshComponent(unsigned int _eID = 0, bool _valid = false,
-                  const MeshData& _meshData = MeshData{}, const Material& _material = Material{}, bool _visible = false)
-        : Component (_eID, _valid, ComponentType::Mesh), isVisible{_visible}, meshData{_meshData}, mMaterial{_material}
+                  const MeshData& _meshData = MeshData{}, const Material& _material = Material{}, bool _visible = false, bool _renderWireframe = false)
+        : Component (_eID, _valid, ComponentType::Mesh), isVisible{_visible}, meshData{_meshData}, mMaterial{_material}, renderWireframe{_renderWireframe}
     {}
 
     virtual void reset() override
@@ -172,7 +175,7 @@ struct MeshComponent : public Component
 
 struct CameraComponent : public Component
 {
-    bool isEditorCamera;
+    bool isEditorCamera : 1;
     float pitch{0.f}, yaw{0.f};
     gsl::Matrix4x4 viewMatrix;
     gsl::Matrix4x4 projectionMatrix;
@@ -195,10 +198,10 @@ struct CameraComponent : public Component
 
 struct InputComponent : public Component
 {
-    bool controlledWhilePlaying{true};
+    bool controlledWhilePlaying : 1;
 
-    InputComponent(unsigned int _eID = 0, bool _valid = false)
-        : Component(_eID, _valid, ComponentType::Input)
+    InputComponent(unsigned int _eID = 0, bool _valid = false, bool _controlledWhilePlaying = true)
+        : Component(_eID, _valid, ComponentType::Input), controlledWhilePlaying{_controlledWhilePlaying}
     {}
 
     virtual void reset() override
@@ -211,15 +214,15 @@ struct InputComponent : public Component
 
 struct SoundComponent : public Component
 {
-    bool isLooping = false;
-    bool isMuted = false;
+    bool isLooping : 1;
+    bool isMuted : 1;
     int mSource;
     float pitch = 1.f;
     float gain = .7f; //JT was here, Savner deg Ole, 3D er bra men vi mangler deg. *Smask*
     std::string name;
 
-    SoundComponent(unsigned int _eID = 0, bool _valid = false)
-        : Component(_eID, _valid, ComponentType::Sound), mSource{-1}
+    SoundComponent(unsigned int _eID = 0, bool _valid = false, bool _isLooping = false, bool _isMuted = false)
+        : Component(_eID, _valid, ComponentType::Sound), isLooping{_isLooping}, isMuted{_isMuted}, mSource{-1}
     {}
 
     virtual void reset() override
@@ -338,10 +341,10 @@ struct DirectionalLightComponent : public Component
 
 struct ScriptComponent : public Component
 {
-    QJSEngine* engine;
+    QJSEngine* engine{nullptr};
     std::string filePath;
     QEntity* JSEntity{};
-    bool beginplayRun{false};
+    bool beginplayRun : 1;
 
     ScriptComponent(unsigned int _eID = 0, bool _valid = false)
         : Component(_eID, _valid, ComponentType::Script),
@@ -349,7 +352,7 @@ struct ScriptComponent : public Component
     {
         engine = new QJSEngine();
         engine->installExtensions(QJSEngine::ConsoleExtension);
-        engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
+        engine->globalObject().setProperty("engine", engine->newQObject(new QScriptSystemPointer{}));
     }
 
     virtual void reset() override
@@ -360,11 +363,17 @@ struct ScriptComponent : public Component
         beginplayRun = false;
         engine = new QJSEngine();
         engine->installExtensions(QJSEngine::ConsoleExtension);
-        engine->globalObject().setProperty("engine", engine->newQObject(ScriptSystem::get()));
+        engine->globalObject().setProperty("engine", engine->newQObject(new QScriptSystemPointer{}));
     }
 
     virtual QJsonObject toJSON() override;
     virtual void fromJSON(QJsonObject object) override;
+
+    virtual ~ScriptComponent() override
+    {
+        delete JSEntity;
+        delete engine;
+    }
 };
 
 struct ColliderComponent : public Component

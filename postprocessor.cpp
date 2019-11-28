@@ -14,6 +14,10 @@ void Postprocessor::init()
     {
         initializeOpenGLFunctions();
 
+        // Get retinascale. Only need to get this once as it
+        // cannot change during the runtime of the program (hopefully)
+        mRetinaScale = mRenderer->devicePixelRatio();
+
         // This also creates buffers, btw.
         updateRatio();
 
@@ -307,13 +311,13 @@ void Postprocessor::renderQuad()
 
 bool Postprocessor::outdatedRatio() const
 {
-    return mRenderer->width() != mScrWidth || mRenderer->height() != mScrHeight;
+    return static_cast<int>(mRenderer->width() * mRetinaScale) != mScrWidth || static_cast<int>(mRenderer->height() * mRetinaScale) != mScrHeight;
 }
 
 void Postprocessor::updateRatio()
 {
-    mScrWidth = mRenderer->width();
-    mScrHeight = mRenderer->height();
+    mScrWidth = static_cast<int>(mRenderer->width() * mRetinaScale);
+    mScrHeight = static_cast<int>(mRenderer->height() * mRetinaScale);
 
     recreateBuffers();
 

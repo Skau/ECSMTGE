@@ -51,6 +51,7 @@ private:
     GLuint mDepthStencilBuffer[2];
     bool depthStencilUsingRenderbuffer = true;
     int mScrWidth{0}, mScrHeight{0};
+    double mRetinaScale{1.0};
     unsigned char mLastUsedBuffer{0};
 
     GLuint mScreenSpacedQuadVAO;

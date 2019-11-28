@@ -831,20 +831,22 @@ unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std:
     return 0;
 }
 
-void Renderer::resizeGBuffer()
+void Renderer::resizeGBuffer(double retinaScale)
 {
     PROFILE_FUNCTION();
+    gsl::ivec2 scrSize{static_cast<int>(width() * retinaScale), static_cast<int>(height() * retinaScale)};
+
     glBindTexture(GL_TEXTURE_2D, mGPosition);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width(), height(), 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, scrSize.x, scrSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
 
     glBindTexture(GL_TEXTURE_2D, mGNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width(), height(), 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, scrSize.x, scrSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
 
     glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width(),  height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, scrSize.x, scrSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     glBindRenderbuffer(GL_RENDERBUFFER, mRboDepth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width(), height());
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, scrSize.x, scrSize.y);
 
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
@@ -982,7 +984,7 @@ void Renderer::exposeEvent(QExposeEvent *)
 
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, static_cast<GLint>(width() * retinaScale), static_cast<GLint>(height() * retinaScale));
-    resizeGBuffer();
+    resizeGBuffer(retinaScale);
     windowUpdated();
 }
 

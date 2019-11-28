@@ -111,7 +111,7 @@ private:
     class QOpenGLDebugLogger *mOpenGLDebugLogger{nullptr};
 
     float distanceFromCamera(const CameraComponent& camera, const TransformComponent& transform);
-    void resizeGBuffer();
+    void resizeGBuffer(double retinaScale = 1.f);
     void renderQuad();
     void renderSkybox(const CameraComponent& camera);
     void renderAxis(const CameraComponent& camera);

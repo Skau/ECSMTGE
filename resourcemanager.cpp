@@ -83,32 +83,34 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string &name)
 
 std::shared_ptr<MeshData> ResourceManager::addMesh(const std::string& name, const std::string& path, GLenum renderType)
 {
-    if(mMeshes.find(name) == mMeshes.end())
+    if(mMeshes.find(name) != mMeshes.end())
     {
-        if(!mIsInitialized)
-        {
-            initializeOpenGLFunctions();
-            mIsInitialized = true;
-        }
+        return mMeshes[name];
+    }
 
-        if(QString::fromStdString(path).contains(".obj"))
-        {
-            auto verticesIndicesPair = readObjFile(path);
-            if(!verticesIndicesPair.first.size()) return nullptr;
-            auto mesh = initializeMeshData(name, renderType, verticesIndicesPair);
-            auto [LOD1, LOD2] = initializeLODs(name, path, renderType);
-            setupLODs(mesh, LOD1, LOD2);
-            return mesh;
-        }
-        else
-        {
-            auto verticesIndicesPair = readTxtFile(path);
-            if(!verticesIndicesPair.first.size()) return nullptr;
-            auto mesh = initializeMeshData(name, renderType, verticesIndicesPair);
-            setupLODs(mesh);
-            return mesh;
+    if(!mIsInitialized)
+    {
+        initializeOpenGLFunctions();
+        mIsInitialized = true;
+    }
 
-        }
+    if(QString::fromStdString(path).contains(".obj"))
+    {
+        auto verticesIndicesPair = readObjFile(path);
+        if(!verticesIndicesPair.first.size()) return nullptr;
+        auto mesh = initializeMeshData(name, renderType, verticesIndicesPair);
+        auto [LOD1, LOD2] = initializeLODs(name, path, renderType);
+        setupLODs(mesh, LOD1, LOD2);
+        return mesh;
+    }
+    else
+    {
+        auto verticesIndicesPair = readTxtFile(path);
+        if(!verticesIndicesPair.first.size()) return nullptr;
+        auto mesh = initializeMeshData(name, renderType, verticesIndicesPair);
+        setupLODs(mesh);
+        return mesh;
+
     }
 
     return nullptr;

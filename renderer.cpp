@@ -262,6 +262,8 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
                               const std::vector<SpotLightComponent>& spotLights, const std::vector<PointLightComponent>& pointLights)
 {
     PROFILE_FUNCTION();
+    gsl::ivec2 scrSize{static_cast<int>(width() * devicePixelRatio()), static_cast<int>(height() * devicePixelRatio())};
+
     glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
     mNumberOfVerticesDrawn = geometryPass(renders, transforms, camera, ShaderType::Deferred);
     glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
@@ -288,7 +290,7 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
 
     // blit to postprocessor framebuffer
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mPostprocessor->input());
-    glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, scrSize.x, scrSize.y, 0, 0, scrSize.x, scrSize.y, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
@@ -818,9 +820,10 @@ unsigned int Renderer::getMouseHoverObject(gsl::ivec2 mouseScreenPos, const std:
         checkForGLerrors();
 
 
+        auto retinaScale = devicePixelRatio();
         // Read color value from framebuffer
         unsigned char data[4];
-        glReadPixels(mouseScreenPos.x, height() - mouseScreenPos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glReadPixels(static_cast<int>(mouseScreenPos.x * retinaScale), static_cast<int>((height() - mouseScreenPos.y) * retinaScale), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
         unsigned int returnedId = data[0] + data[1] * 256 + data[2] * 256 * 256;
 

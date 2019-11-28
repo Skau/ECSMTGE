@@ -515,7 +515,7 @@ void MainWindow::on_actionSave_triggered()
     }
 
 
-    auto filepath = QFileDialog::getSaveFileName(this, "Save scene to disk", QString::fromStdString(gsl::assetFilePath + "/Scenes"),
+    auto filepath = QFileDialog::getSaveFileName(this, "Save scene to disk", QString::fromStdString(gsl::scenesFilePath),
                                                 "Scene files (*.json)",
                                                 new QString("Scene files (*.json)"));
 

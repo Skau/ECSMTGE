@@ -8,15 +8,15 @@
                     "ColliderBoundsOutdated": true,
                     "ComponentType": 0,
                     "Position": [
-                        0.7551259398460388,
-                        -0.08702477067708969,
-                        1.6514081954956055
+                        6.683707237243652,
+                        1.5934958457946777,
+                        9.71153450012207
                     ],
                     "Rotation": [
-                        -0.9999732375144958,
-                        0.002181704854592681,
-                        0.006981211714446545,
-                        -1.5231350516842213e-05
+                        -0.9591663479804993,
+                        -0.056060854345560074,
+                        0.2767588496208191,
+                        0.016175854951143265
                     ],
                     "Scale": [
                         1,
@@ -27,8 +27,8 @@
                 {
                     "ComponentType": 3,
                     "EditorCam": true,
-                    "Pitch": -0.25001123547554016,
-                    "Yaw": 359.20001220703125
+                    "Pitch": 6.689976692199707,
+                    "Yaw": 327.8099670410156
                 },
                 {
                     "ComponentType": 4,
@@ -69,9 +69,9 @@
                         "Parameters": [
                             {
                                 "p_color": [
-                                    0,
-                                    0,
-                                    0
+                                    0.5,
+                                    0.5,
+                                    0.5
                                 ]
                             }
                         ],
@@ -225,29 +225,6 @@
                     ]
                 },
                 {
-                    "ComponentType": 2,
-                    "IsVisible": true,
-                    "MaterialData": {
-                        "Parameters": [
-                            {
-                                "p_color": [
-                                    1,
-                                    0.8999999761581421,
-                                    0.10000000149011612
-                                ]
-                            }
-                        ],
-                        "Shader": "singleColor",
-                        "Textures": [
-                        ]
-                    },
-                    "MeshData": {
-                        "Name": "ball",
-                        "RenderType": 4
-                    },
-                    "RenderWireframe": false
-                },
-                {
                     "Color": [
                         1,
                         1,
@@ -265,52 +242,11 @@
         {
             "Components": [
                 {
-                    "Children": [
-                    ],
-                    "ColliderBoundsOutdated": true,
-                    "ComponentType": 0,
-                    "Position": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "Rotation": [
-                        1,
-                        0,
-                        0,
-                        0
-                    ],
-                    "Scale": [
-                        1,
-                        1,
-                        1
-                    ]
-                },
-                {
-                    "ComponentType": 2,
-                    "IsVisible": true,
-                    "MaterialData": {
-                        "Parameters": [
-                            {
-                                "p_color": [
-                                    0,
-                                    0,
-                                    0
-                                ]
-                            }
-                        ],
-                        "Shader": "phong",
-                        "Textures": [
-                        ]
-                    },
-                    "MeshData": {
-                        "Name": "box2",
-                        "RenderType": 4
-                    },
-                    "RenderWireframe": false
+                    "ComponentType": 9,
+                    "FilePath": "meteoroidSpawner.js"
                 }
             ],
-            "Name": "Entity6",
+            "Name": "MeteorSpawner",
             "ShowInEditor": true
         }
     ]

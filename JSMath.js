@@ -28,6 +28,7 @@ class Vec3
 
         // aliases
         this.norm = this.normalized;
+        this.data = this.arr;
     }
 
     add(b)
@@ -82,6 +83,10 @@ class Vec3
     {
         let l = this.length();
         return (l > 0.0) ? new Vec3(this.x / l, this.y / l, this.z / l) : new Vec3();
+    }
+    arr()
+    {
+        return [this.x, this.y, this.z];
     }
 }
 
@@ -196,4 +201,9 @@ class Quat
             1.0 - 2.0 * this.i * this.i - 2.0 * this.j * this.j
         ).normalized();
     }
+}
+
+function clamp(n, min, max)
+{
+    return Math.min(Math.max(n, min), max);
 }

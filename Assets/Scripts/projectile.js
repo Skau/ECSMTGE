@@ -60,4 +60,5 @@ function mouseMoved(offset)
 function onHit(hitInfo)
 {
 	engine.destroyEntity(hitInfo.ID);
+	engine.destroyEntity(me.ID);
 }

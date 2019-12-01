@@ -6,6 +6,7 @@ var moveSpeed = 5;
 
 var fireRate = 0.25;
 var fireTime = 0;
+const projectileSpeed = 8.0;
 var canFire = true;
 
 function clamp(x, min, max)
@@ -99,6 +100,14 @@ function inputPressed(inputs)
 				let meshComp = entity.addComponent("mesh");
 				meshComp.IsVisible = true;
 				meshComp.MeshData.Name = "box2";
+				meshComp.MaterialData = {
+					Shader: "singleColor",
+					Parameters: [
+						{
+							"p_color": [0.0, 1.0, 0.65]
+						}
+					]
+				};
 
  				let scriptComp = entity.addComponent("script");
 				scriptComp.FilePath = "projectile.js";
@@ -107,19 +116,23 @@ function inputPressed(inputs)
 
 				let newPos = pos;
 				newPos = newPos.sub(fwd.mult(1.5));
-			
+
 				transformComp.Position[0] = newPos.x;
 				transformComp.Position[1] = newPos.y;
 				transformComp.Position[2] = newPos.z;
 
 				transformComp.Scale = [0.25, 0.25, 0.25];
 
+				// transformComp.Rotation = transform.Rotation;
+
 				let physics = entity.addComponent("physics");
 
-				physics.Velocity[0] = -fwd.x * 2;
-				physics.Velocity[1] = -fwd.y * 2;
-				physics.Velocity[2] = -fwd.z * 2;
-			
+				let vel = fwd.arr();
+				for (i in vel)
+					vel[i] = vel[i] * -projectileSpeed;
+
+				physics.Velocity = vel;
+
 				canFire = false;
 			}
 		}

@@ -335,47 +335,36 @@ void PhysicsSystem::updatePosVel(std::vector<TransformComponent> &transforms, st
     auto transIt = transforms.begin();
     auto physIt = physics.begin();
 
-    bool physEnd{physIt == physics.end()}; // For short circuit evaluation
-    bool _{true};
+    if (physIt == physics.end())
+        return;
 
-    // cause normal while (true) loops are so outdated
-    for ( ;_; )
+    bool notTrue{false};
+
+    for ( ; !notTrue; ++transIt)
     {
         if (transIt == transforms.end())
             break;
 
         if (!transIt->valid)
-        {
-            ++transIt;
             continue;
+
+        while ((transIt->entityId > physIt->entityId || !physIt->valid))
+        {
+            ++physIt;
+            if (physIt == physics.end())
+            {
+                // If at end of physics components, just exit out of the whole function.
+                return;
+            }
         }
 
-        if (!physEnd && transIt->entityId == physIt->entityId) {
-            if (transIt->entityId > physIt->entityId || !physIt->valid)
-            {
-                ++physIt;
-                if (physIt == physics.end())
-                    physEnd = true;
-                continue;
-            }
-
+        if (transIt->entityId == physIt->entityId)
+        {
             // Apply acceleration to velocity and then velocity to position
             physIt->velocity += physIt->acceleration * deltaTime;
             transIt->position += physIt->velocity * deltaTime;
             transIt->updated = true;
-
-            ++physIt;
         }
-        else
-        {
-            // Update transforms without physics
-
-            // Question: Would a transform ever be updated if there
-            // are no velocity, forces og collisions applied?
-            // - and would then this else clause be needed?
-        }
-
-        ++transIt;
     }
 }
 

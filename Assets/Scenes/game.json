@@ -8,34 +8,31 @@
                     "ColliderBoundsOutdated": true,
                     "ComponentType": 0,
                     "Position": [
-                        -0.9231044054031372,
-                        2.6103453636169434,
-                        11.583697319030762
+                        0.7551259398460388,
+                        -0.08702477067708969,
+                        1.6514081954956055
                     ],
                     "Rotation": [
-                        0.9901211857795715,
-                        0.13030774891376495,
-                        0.05132576450705528,
-                        0.006754874251782894
+                        -0.9999732375144958,
+                        0.002181704854592681,
+                        0.006981211714446545,
+                        -1.5231350516842213e-05
                     ],
                     "Scale": [
                         1,
                         1,
                         1
-                    ],
-                    "Valid": true
+                    ]
                 },
                 {
                     "ComponentType": 3,
                     "EditorCam": true,
-                    "Pitch": 14.994973182678223,
-                    "Valid": true,
-                    "Yaw": 5.934868812561035
+                    "Pitch": -0.25001123547554016,
+                    "Yaw": 359.20001220703125
                 },
                 {
                     "ComponentType": 4,
-                    "ControlledWhilePlaying": true,
-                    "Valid": true
+                    "ControlledWhilePlaying": true
                 }
             ],
             "Name": "EditorCam",
@@ -63,8 +60,7 @@
                         1,
                         1,
                         1
-                    ],
-                    "Valid": true
+                    ]
                 },
                 {
                     "ComponentType": 2,
@@ -87,25 +83,21 @@
                         "Name": "camera",
                         "RenderType": 4
                     },
-                    "RenderWireframe": false,
-                    "Valid": true
+                    "RenderWireframe": false
                 },
                 {
                     "ComponentType": 3,
                     "EditorCam": false,
                     "Pitch": 5.835001468658447,
-                    "Valid": true,
                     "Yaw": -1.964986801147461
                 },
                 {
                     "ComponentType": 4,
-                    "ControlledWhilePlaying": true,
-                    "Valid": true
+                    "ControlledWhilePlaying": true
                 },
                 {
                     "ComponentType": 9,
-                    "FilePath": "camera.js",
-                    "Valid": true
+                    "FilePath": "camera.js"
                 }
             ],
             "Name": "GameCam",
@@ -133,8 +125,7 @@
                         1,
                         1,
                         1
-                    ],
-                    "Valid": true
+                    ]
                 },
                 {
                     "Color": [
@@ -143,8 +134,7 @@
                         1
                     ],
                     "ComponentType": 7,
-                    "Intensity": 1,
-                    "Valid": true
+                    "Intensity": 1
                 }
             ],
             "Name": "light",
@@ -172,8 +162,7 @@
                         1,
                         1,
                         1
-                    ],
-                    "Valid": true
+                    ]
                 },
                 {
                     "ComponentType": 2,
@@ -196,8 +185,7 @@
                         "Name": "suzanne",
                         "RenderType": 4
                     },
-                    "RenderWireframe": false,
-                    "Valid": true
+                    "RenderWireframe": false
                 },
                 {
                     "CollisionType": 1,
@@ -206,11 +194,123 @@
                         1,
                         1,
                         1
-                    ],
-                    "Valid": true
+                    ]
                 }
             ],
             "Name": "Suzanne",
+            "ShowInEditor": true
+        },
+        {
+            "Components": [
+                {
+                    "Children": [
+                    ],
+                    "ColliderBoundsOutdated": true,
+                    "ComponentType": 0,
+                    "Position": [
+                        80,
+                        80,
+                        -80
+                    ],
+                    "Rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                    ],
+                    "Scale": [
+                        10,
+                        10,
+                        10
+                    ]
+                },
+                {
+                    "ComponentType": 2,
+                    "IsVisible": true,
+                    "MaterialData": {
+                        "Parameters": [
+                            {
+                                "p_color": [
+                                    1,
+                                    0.8999999761581421,
+                                    0.10000000149011612
+                                ]
+                            }
+                        ],
+                        "Shader": "singleColor",
+                        "Textures": [
+                        ]
+                    },
+                    "MeshData": {
+                        "Name": "ball",
+                        "RenderType": 4
+                    },
+                    "RenderWireframe": false
+                },
+                {
+                    "Color": [
+                        1,
+                        1,
+                        1
+                    ],
+                    "ComponentType": 6,
+                    "Intensity": 100,
+                    "MaxBrightness": 2,
+                    "Radius": 1000
+                }
+            ],
+            "Name": "Sun",
+            "ShowInEditor": true
+        },
+        {
+            "Components": [
+                {
+                    "Children": [
+                    ],
+                    "ColliderBoundsOutdated": true,
+                    "ComponentType": 0,
+                    "Position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "Rotation": [
+                        1,
+                        0,
+                        0,
+                        0
+                    ],
+                    "Scale": [
+                        1,
+                        1,
+                        1
+                    ]
+                },
+                {
+                    "ComponentType": 2,
+                    "IsVisible": true,
+                    "MaterialData": {
+                        "Parameters": [
+                            {
+                                "p_color": [
+                                    0,
+                                    0,
+                                    0
+                                ]
+                            }
+                        ],
+                        "Shader": "phong",
+                        "Textures": [
+                        ]
+                    },
+                    "MeshData": {
+                        "Name": "box2",
+                        "RenderType": 4
+                    },
+                    "RenderWireframe": false
+                }
+            ],
+            "Name": "Entity6",
             "ShowInEditor": true
         }
     ]

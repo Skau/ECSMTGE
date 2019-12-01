@@ -22,6 +22,9 @@ PointLightWidget::PointLightWidget(MainWindow *mainWindow, QWidget *parent) :
                                 static_cast<int>(comp->color.z)*255);
 
             ui->textEdit_Color->setStyleSheet("background-color: " + initialColor.name());
+            ui->radiusSpinBox->setValue(static_cast<double>(comp->radius));
+            ui->intensitySpinBox->setValue(static_cast<double>(comp->intensity));
+
             isUpdating = false;
         }
     }
@@ -50,6 +53,28 @@ void PointLightWidget::on_button_ChangeColor_clicked()
             comp->color = gsl::vec3(static_cast<float>(color.redF()), static_cast<float>(color.greenF()), static_cast<float>(color.blueF()));
             initialColor = color;
             ui->textEdit_Color->setStyleSheet("background-color: " + initialColor.name());
+        }
+    }
+}
+
+void PointLightWidget::on_radiusSpinBox_valueChanged(double arg1)
+{
+    if(auto entity = mMainWindow->currentEntitySelected)
+    {
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<PointLightComponent>(entity->entityId))
+        {
+            comp->radius = static_cast<float>(arg1);
+        }
+    }
+}
+
+void PointLightWidget::on_intensitySpinBox_valueChanged(double arg1)
+{
+    if(auto entity = mMainWindow->currentEntitySelected)
+    {
+        if(auto comp = World::getWorld().getEntityManager()->getComponent<PointLightComponent>(entity->entityId))
+        {
+            comp->intensity = static_cast<float>(arg1);
         }
     }
 }

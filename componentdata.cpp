@@ -464,8 +464,7 @@ QJsonObject PointLightComponent::toJSON()
     parentObj.insert("Color", colorArr);
 
     parentObj.insert("Intensity", static_cast<double>(intensity));
-    parentObj.insert("Linear", static_cast<double>(linear));
-    parentObj.insert("Quadratic", static_cast<double>(quadratic));
+    parentObj.insert("Radius", static_cast<double>(radius));
     parentObj.insert("MaxBrightness", static_cast<double>(maxBrightness));
 
     return parentObj;
@@ -481,8 +480,7 @@ void PointLightComponent::fromJSON(QJsonObject object)
     color.z = static_cast<float>(colorArray[2].toDouble());
 
     intensity = static_cast<float>(object["Intensity"].toDouble());
-    linear = static_cast<float>(object["Linear"].toDouble());
-    quadratic = static_cast<float>(object["Quadratic"].toDouble());
+    radius = static_cast<float>(object["Radius"].toDouble());
     maxBrightness = static_cast<float>(object["MaxBrightness"].toDouble());
 }
 

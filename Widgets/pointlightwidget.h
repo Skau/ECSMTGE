@@ -20,6 +20,10 @@ protected slots:
 private slots:
     void on_button_ChangeColor_clicked();
 
+    void on_radiusSpinBox_valueChanged(double arg1);
+
+    void on_intensitySpinBox_valueChanged(double arg1);
+
 private:
     Ui::PointLightWidget *ui;
 

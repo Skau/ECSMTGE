@@ -242,35 +242,34 @@ struct PointLightComponent : public Component
 {
     gsl::vec3 color;
     float intensity;
-    float linear;
-    float quadratic;
-    float maxBrightness;
+    float radius;
+    float maxBrightness; // Not used, but in theory to clamp attuenation
 
     PointLightComponent(unsigned int _eID = 0, bool _valid = false,
                         gsl::vec3 _color = gsl::vec3(1.f, 1.f, 1.f),
                         float _intensity = 1.f,
-                        float _linear = 0.045f,
-                        float _quadratic = 0.0075f,
+                        float _radius = 1.f,
                         float _maxBrightness = 2.f)
         : Component(_eID, _valid, ComponentType::LightPoint),
           color(_color), intensity(_intensity),
-          linear(_linear), quadratic(_quadratic), maxBrightness(_maxBrightness)
+          radius{_radius}, maxBrightness(_maxBrightness)
     {}
 
     virtual void reset() override
     {
         color = gsl::vec3{1};
         intensity = 1.f;
-        linear = 0.045f;
-        quadratic = 0.0075f;
         maxBrightness = 2.f;
+        radius = 1.f;
     }
 
     float calculateRadius() const
     {
-        float constant = 1.0f;
-        return (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness)))
-                / (2.0f * quadratic);
+        // Note: We don't bother about manualy calculating attuenation falloff anymore and we just pass the radius directly.
+//        float constant = 1.0f;
+//        return (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * brightness)))
+//                / (2.0f * quadratic);
+        return 0.f;
     }
 
     virtual QJsonObject toJSON() override;

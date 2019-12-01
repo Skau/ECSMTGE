@@ -598,9 +598,8 @@ void Renderer::pointLightPass(const std::vector<TransformComponent> &transforms,
         {
             glUniform3fv(glGetUniformLocation(location, "light.Color"), 1, lightIt->color.xP());
             glUniform3fv(glGetUniformLocation(location, "light.Position"), 1, transIt->position.xP());
-            glUniform1f(glGetUniformLocation(location, "light.Linear"), lightIt->linear);
-            glUniform1f(glGetUniformLocation(location, "light.Quadratic"), lightIt->quadratic);
-            glUniform1f(glGetUniformLocation(location, "light.Radius"), lightIt->calculateRadius());
+            glUniform1f(glGetUniformLocation(location, "light.Radius"), lightIt->radius);
+            glUniform1f(glGetUniformLocation(location, "light.Intensity"), lightIt->intensity);
             renderQuad();
 
             // Increment all

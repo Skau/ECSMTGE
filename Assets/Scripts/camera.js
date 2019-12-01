@@ -133,6 +133,11 @@ function inputPressed(inputs)
 
 				physics.Velocity = vel;
 
+				let lightComp = entity.addComponent("pointLight");
+				lightComp.Intensity = 2;
+				lightComp.Radius = 100;
+				lightComp.Color = [0, 1.0, 0.65];
+
 				canFire = false;
 			}
 		}

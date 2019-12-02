@@ -100,14 +100,27 @@ GLuint Postprocessor::outputTex() const
     return mRenderTextures[mLastUsedBuffer];
 }
 
-int Postprocessor::scrWidth() const
+int Postprocessor::width() const
 {
     return static_cast<int>(mScrWidth / mRetinaScale);
 }
 
-int Postprocessor::scrHeight() const
+int Postprocessor::height() const
 {
     return static_cast<int>(mScrHeight / mRetinaScale);
+}
+
+void Postprocessor::setSize(gsl::ivec2 size)
+{
+    mScrWidth = static_cast<int>(size.x * mRetinaScale);
+    mScrHeight = static_cast<int>(size.y * mRetinaScale);
+
+    if (outdatedRatio())
+        recreateBuffers();
+}
+double Postprocessor::pixelSize() const
+{
+    return mRetinaScale;
 }
 
 Postprocessor &Postprocessor::add(Postprocessor &other, Postprocessor::BLENDMODE blendmode)
@@ -151,7 +164,7 @@ void Postprocessor::Render()
     PROFILE_FUNCTION();
     if (!mInitialized)
         init();
-    else if (outdatedRatio())
+    else if (autoUpdateSize && outdatedRatio())
         updateRatio();
 
     // Reset so that we start at the first ping-pong buffer
@@ -222,11 +235,22 @@ void Postprocessor::Render()
                 if (newScale.x < 1 || newScale.y < 1)
                     scaledScreenSize = gsl::ivec2{-1, -1};
 
+                // glViewport(0, 0, (0 <= scaledScreenSize.x) ? scaledScreenSize.x : mScrWidth, (0 <= scaledScreenSize.y) ? scaledScreenSize.y : mScrHeight);
+
                 glBlitFramebuffer(0, 0, (0 <= scaledScreenSize.x) ? scaledScreenSize.x : mScrWidth, (0 <= scaledScreenSize.y) ? scaledScreenSize.y : mScrHeight,
                                   0, 0, newScale.x, newScale.y,
-                                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, setting->nearestScaling ? GL_NEAREST : GL_LINEAR);
+                                  GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
+                glBlitFramebuffer(0, 0, (0 <= scaledScreenSize.x) ? scaledScreenSize.x : mScrWidth, (0 <= scaledScreenSize.y) ? scaledScreenSize.y : mScrHeight,
+                                  0, 0, newScale.x, newScale.y,
+                                  GL_COLOR_BUFFER_BIT, setting->nearestScaling ? GL_NEAREST : GL_LINEAR);
+
+
 
                 scaledScreenSize = newScale;
+
+
+                // glViewport(0, 0, mScrWidth, mScrHeight);
             }
         }
     }
@@ -260,7 +284,7 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
     {
         if (!mInitialized)
             init();
-        else if (outdatedRatio())
+        else if (autoUpdateSize && outdatedRatio())
             updateRatio();
 
         // Reset so that we start at the first ping-pong buffer
@@ -389,7 +413,7 @@ void Postprocessor::renderQuad()
 {
     if (!mInitialized)
         init();
-    else if (outdatedRatio())
+    else if (autoUpdateSize && outdatedRatio())
         updateRatio();
 
     glBindVertexArray(mScreenSpacedQuadVAO);

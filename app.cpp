@@ -94,6 +94,7 @@ void App::initTheRest()
     // ---------- Postprocessing setup ---------------------------
 
     mRenderer->mPostprocessor->setTextureFormat(GL_RGBA16F);
+    mRenderer->mPostprocessor->outputToDefault = true;
 
     /** Gamma correction / tone mapping.
      * If game feels too dark / too bright, just tweak the exposure level
@@ -113,6 +114,9 @@ void App::initTheRest()
     // Bloom setup
     mRenderer->mBloomEffect->outputToDefault = false;
     mRenderer->mBloomEffect->setTextureFormat(GL_RGBA16F);
+    mRenderer->mBloomEffect->autoUpdateSize = false;
+    // Basically the sample size, but also indirectly scales the bloom effect
+    mRenderer->mBloomEffect->setSize({512, 256});
     mRenderer->mBloomEffect->steps.emplace_back (
         std::make_shared<Material>(
             ResourceManager::instance().getShader("extractThreshold"),
@@ -134,6 +138,14 @@ void App::initTheRest()
             ResourceManager::instance().getShader("gaussianBlur"),
             std::map<std::string, ShaderParamType>{
                 {"horizontal", true}
+            }
+        )
+    );
+    mRenderer->mBloomEffect->steps.emplace_back(
+        std::make_shared<Material>(
+            ResourceManager::instance().getShader("multiply"),
+            std::map<std::string, ShaderParamType>{
+                {"factor", 3.f}
             }
         )
     );

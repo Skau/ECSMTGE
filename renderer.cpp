@@ -248,6 +248,7 @@ void Renderer::renderReset()
     glStencilMask(0xFF);
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glViewport(0, 0, static_cast<int>(width() * devicePixelRatio()), static_cast<int>(height() * devicePixelRatio()));
 
     // Clear postprocessor from last frame and bind to it
     mPostprocessor->clear();
@@ -678,15 +679,21 @@ void Renderer::renderPostprocessing()
     PROFILE_FUNCTION();
     glBindFramebuffer(GL_READ_FRAMEBUFFER, mPostprocessor->input());
 
+    auto retinaScale = devicePixelRatio();
+
     if (mDepthStencilAttachmentSupported)
     {
         // Outline effect needs stencil buffer
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
-        glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+        glBlitFramebuffer(0, 0, static_cast<int>(width() * retinaScale), static_cast<int>(height() * retinaScale),
+                          0, 0, static_cast<int>(width() * retinaScale), static_cast<int>(height() * retinaScale), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
     }
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mBloomEffect->input());
-    glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    glViewport(0, 0, static_cast<int>(mBloomEffect->width() * retinaScale), static_cast<int>(mBloomEffect->height() * retinaScale));
+    glBlitFramebuffer(0, 0, static_cast<int>(width() * retinaScale), static_cast<int>(height() * retinaScale),
+                      0, 0, static_cast<int>(mBloomEffect->width() * retinaScale), static_cast<int>(mBloomEffect->height() * retinaScale),
+                      GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
     glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
@@ -694,6 +701,7 @@ void Renderer::renderPostprocessing()
     glDisable(GL_DEPTH_TEST);
 
     mBloomEffect->Render();
+    glViewport(0, 0, static_cast<int>(width() * retinaScale), static_cast<int>(height() * retinaScale));
     *mPostprocessor += *mBloomEffect;
     if (mDepthStencilAttachmentSupported)
         drawEditorOutline();

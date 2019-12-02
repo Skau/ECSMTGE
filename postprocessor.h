@@ -86,6 +86,8 @@ public:
      */
     bool depthSampling = false;
 
+    bool autoUpdateSize = true;
+
 
 private:
     bool mInitialized{false};
@@ -149,8 +151,12 @@ public:
      */
     GLuint outputTex() const;
 
-    int scrWidth() const;
-    int scrHeight() const;
+    int width() const;
+    int height() const;
+    void setSize(gsl::ivec2 size);
+    // For retina screens which uses higher resolutions textures
+    // and then downsamples on GPU.
+    double pixelSize() const;
 
     enum BLENDMODE : int {
         ADDITIVE = 0,

@@ -7,7 +7,7 @@
 
 #include "texture.h"
 
-#include "Renderables/vertex.h"
+#include "vertex.h"
 
 #include "meshdata.h"
 

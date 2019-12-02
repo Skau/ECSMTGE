@@ -60,7 +60,6 @@ bool Scene::LoadFromFile(const std::string& path)
         return false;
     }
 
-
    QFileInfo info(QString::fromStdString(path));
    auto baseName = info.baseName();
    if(baseName.contains("temp"))

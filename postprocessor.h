@@ -7,7 +7,6 @@
 #include "innpch.h"
 #include "componentdata.h"
 #include <variant>
-#include <optional>
 
 // Forward declarations
 class Renderer;
@@ -36,36 +35,24 @@ public:
      * - to work. fbt is the last framebuffer texture, sampling from
      * this will get you the last step.
      *
-     * Action can instead of holding a material, hold a ivec2 describing a screen size.
-     * If holding a screen size the setting will then perform a scaling operation instead
-     * of a drawing operation. This will blip the texture to a new size with nearest neighbour
-     * scaling (default) or bilinear scaling depening on what nearestScaling is set to.
-     *
      * @brief Postprocessor step instruction.
      */
     struct Setting {
-        std::variant<std::shared_ptr<Material>, gsl::ivec2> action;
+        std::shared_ptr<Material> material;
 
-        // Optional texture scale to pass in.
-        // When used will perform scaling instead of normal shader pass.
-        std::optional<gsl::ivec2> textureScale{std::nullopt};
+        // Other probs useful data
 
         // bool useStencil = false;
-        // Note: stencilValue is currently not used.
         unsigned char stencilValue{0};
-        bool nearestScaling{true};
 
         Setting(const std::shared_ptr<Material>& _mat = nullptr, unsigned char _stencilValue = 0)
-            : action{_mat}, stencilValue{_stencilValue}
-        {}
-        explicit Setting(const gsl::ivec2& _newSize, bool useNearestNeighbourScaling = true, unsigned char _stencilValue = 0)
-            : action{_newSize}, stencilValue{_stencilValue}, nearestScaling{useNearestNeighbourScaling}
+            : material{_mat}, stencilValue{_stencilValue}
         {}
         Setting(const Setting& setting)
-            : action{setting.action}, stencilValue{setting.stencilValue}
+            : material{setting.material}, stencilValue{setting.stencilValue}
         {}
         Setting(Setting&& setting)
-            : action{std::move(setting.action)}, stencilValue{setting.stencilValue}
+            : material{std::move(setting.material)}, stencilValue{setting.stencilValue}
         {}
 
     };
@@ -104,7 +91,6 @@ private:
     GLuint mDepthStencilBuffer[2];
     bool depthStencilUsingRenderbuffer = true;
     int mScrWidth{0}, mScrHeight{0};
-    gsl::ivec2 scaledScreenSize{-1, -1};
     double mRetinaScale{1.0};
     unsigned char mLastUsedBuffer{0};
 

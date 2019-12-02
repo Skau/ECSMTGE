@@ -159,15 +159,43 @@ void MainWindow::updateUI(const std::vector<EntityInfo> &entityData)
     ui->treeWidget_ObjectList->addTopLevelItem(root);
     ui->treeWidget_ObjectList->expandAll();
 
+    std::vector<unsigned> childrenAdded;
     // Add all the entities
     for(unsigned i = 0; i < entityData.size(); ++i)
     {
+        bool found = false;
+        for(auto& child : childrenAdded)
+        {
+            if(entityData[i].entityId == child)
+            {
+                found = true;
+            }
+        }
+
+        if(found)
+            continue;
+
         if(entityData[i].shouldShowInEditor)
         {
             QTreeWidgetItem* item = new QTreeWidgetItem(ui->treeWidget_ObjectList->topLevelItem(0));
             item->setText(0, QString::fromStdString(entityData[i].name));
             item->setFlags(item->flags() | Qt::ItemIsEditable);
             mTreeDataCache[item] = entityData[i];
+
+            if(auto comp = World::getWorld().getEntityManager()->getComponent<TransformComponent>(entityData[i].entityId))
+            {
+                for(auto& child : comp->children)
+                {
+                    if(auto info = World::getWorld().getEntityManager()->getComponent<EntityInfo>(child))
+                    {
+                        QTreeWidgetItem* childItem = new QTreeWidgetItem(item);
+                        childItem->setText(0, QString::fromStdString(info->name));
+                        item->setFlags(item->flags() | Qt::ItemIsEditable);
+                        mTreeDataCache[childItem] = *info;
+                        childrenAdded.push_back(child);
+                    }
+                }
+            }
         }
     }
 }

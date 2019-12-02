@@ -90,6 +90,7 @@ HEADERS += \
     GSL/math_constants.h \
     GSL/mathfwd.h \
     Shaders/shader.h \
+    postprocesseswindow.h \
     vertex.h \
     objecttreewidget.h \
     octree.h \
@@ -138,6 +139,7 @@ SOURCES += \
     GSL/vector3d.cpp \
     GSL/vector4d.cpp \
     Shaders/shader.cpp \
+    postprocesseswindow.cpp \
     vertex.cpp \
     objecttreewidget.cpp \
     particlesystem.cpp \
@@ -163,6 +165,7 @@ FORMS += \
     mesh.ui \
     physics.ui \
     pointlight.ui \
+    postprocesseswindow.ui \
     script.ui \
     sound.ui \
     spotlight.ui \

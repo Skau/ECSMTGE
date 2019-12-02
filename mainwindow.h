@@ -9,6 +9,8 @@ class QWidget;
 class Renderer;
 class EntityInfo;
 class Component;
+class Postprocessor;
+class PostProcessesWindow;
 
 namespace Ui {
 class MainWindow;
@@ -37,6 +39,8 @@ public:
     EntityInfo* currentEntitySelected{nullptr};
 
     EntityInfo* getEntityAt(QTreeWidgetItem* item);
+
+    void addGlobalPostProcessing(const std::vector<std::pair<std::string, Postprocessor*>>& postprocessors);
 
 signals:
     void play();
@@ -82,6 +86,8 @@ private slots:
 
     void on_actionNew_triggered();
 
+    void on_actionPost_Processes_triggered();
+
 private:
     void updateComponentArea(unsigned int entityID);
 
@@ -103,6 +109,8 @@ private:
     void updateSelectedInTreeWidget(EntityInfo* entityInfo);
 
     void updateEntityName(unsigned entity, const std::string &name);
+
+    PostProcessesWindow* mPostProcessesWindow;
 
 protected:
     void closeEvent(QCloseEvent* event) override;

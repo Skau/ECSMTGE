@@ -163,6 +163,12 @@ void App::initTheRest()
     PROFILE_END_SESSION();
     mUpdateTimer.start(16); // Simulates 60ish fps
     PROFILE_BEGIN_SESSION("Editor", "Profile-Editor");
+
+    std::vector<std::pair<std::string, Postprocessor*>> pairs;
+    pairs.emplace_back(std::make_pair<std::string, Postprocessor*>("Main Post Processor", mRenderer->mPostprocessor.get()));
+    pairs.emplace_back(std::make_pair<std::string, Postprocessor*>("Bloom effect", mRenderer->mBloomEffect.get()));
+    pairs.emplace_back(std::make_pair<std::string, Postprocessor*>("Outline effect", mRenderer->mOutlineeffect.get()));
+    mMainWindow->addGlobalPostProcessing(pairs);
 }
 
 void App::toggleMute(bool mode)

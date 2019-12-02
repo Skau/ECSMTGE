@@ -28,6 +28,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include "postprocesseswindow.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -59,6 +61,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->button_AddComponent->setEnabled(false);
     ui->comboBox_Components->setEnabled(false);
 
+    mPostProcessesWindow = new PostProcessesWindow(this);
+
     show();
 }
 
@@ -85,6 +89,11 @@ EntityInfo* MainWindow::getEntityAt(QTreeWidgetItem* item)
     }
 
     return nullptr;
+}
+
+void MainWindow::addGlobalPostProcessing(const std::vector<std::pair<std::string, Postprocessor*>> &postprocessors)
+{
+    mPostProcessesWindow->addPostProcessors(postprocessors);
 }
 
 // If a widget is removed we need to recreate the components
@@ -599,4 +608,9 @@ void MainWindow::on_actionNew_triggered()
       case QMessageBox::Cancel:
           return;
     }
+}
+
+void MainWindow::on_actionPost_Processes_triggered()
+{
+    mPostProcessesWindow->show();
 }

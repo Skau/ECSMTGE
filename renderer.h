@@ -7,14 +7,12 @@
 #include <chrono>
 #include "texture.h"
 #include "camerasystem.h"
-#include "Renderables/visualobject.h"
 #include "componentdata.h"
 #include "postprocessor.h"
 #include <optional>
 
 class QOpenGLContext;
 class Shader;
-class Light;
 class QTime;
 class ParticleSystem;
 

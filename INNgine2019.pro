@@ -90,18 +90,8 @@ HEADERS += \
     GSL/math_constants.h \
     GSL/mathfwd.h \
     Shaders/shader.h \
-    Renderables/triangle.h \
-    Renderables/billboard.h \
-    Renderables/vertex.h \
-    Renderables/xyz.h \
-    Renderables/visualobject.h \
-    Renderables/octahedronball.h \
-    Renderables/billboard.h \
-    Renderables/light.h \
-    Renderables/objmesh.h \
-    Renderables/skybox.h \
-    Renderables/octahedronball.h \
-    Renderables/trianglesurface.h \
+    postprocesseswindow.h \
+    vertex.h \
     objecttreewidget.h \
     octree.h \
     particlesystem.h \
@@ -149,16 +139,8 @@ SOURCES += \
     GSL/vector3d.cpp \
     GSL/vector4d.cpp \
     Shaders/shader.cpp \
-    Renderables/billboard.cpp \
-    Renderables/vertex.cpp \
-    Renderables/visualobject.cpp \
-    Renderables/octahedronball.cpp \
-    Renderables/xyz.cpp \
-    Renderables/trianglesurface.cpp \
-    Renderables/light.cpp \
-    Renderables/objmesh.cpp \
-    Renderables/skybox.cpp \
-    Renderables/triangle.cpp \
+    postprocesseswindow.cpp \
+    vertex.cpp \
     objecttreewidget.cpp \
     particlesystem.cpp \
     physicssystem.cpp \
@@ -183,6 +165,7 @@ FORMS += \
     mesh.ui \
     physics.ui \
     pointlight.ui \
+    postprocesseswindow.ui \
     script.ui \
     sound.ui \
     spotlight.ui \

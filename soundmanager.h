@@ -36,7 +36,7 @@ public:
 
    void createSource(SoundComponent* comp, const std::string& wav);
    void play(unsigned source);
-   void play(std::vector<SoundComponent> comps);
+   void playOnStartup(const std::vector<SoundComponent> &comps);
    void pause(unsigned source);
    void stop(unsigned source);
    void stop(std::vector<SoundComponent> comps);

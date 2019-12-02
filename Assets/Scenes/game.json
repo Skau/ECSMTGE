@@ -13,10 +13,10 @@
                         8.12449836730957
                     ],
                     "Rotation": [
-                        -0.9014822244644165,
-                        0.24907132983207703,
-                        -0.34118494391441345,
-                        0.09426628798246384
+                        -0.873902440071106,
+                        0.2634305953979492,
+                        -0.39114776253700256,
+                        0.11790821701288223
                     ],
                     "Scale": [
                         1,
@@ -27,8 +27,8 @@
                 {
                     "ComponentType": 3,
                     "EditorCam": true,
-                    "Pitch": -30.88998031616211,
-                    "Yaw": 401.4604187011719
+                    "Pitch": -33.549983978271484,
+                    "Yaw": 408.2253723144531
                 },
                 {
                     "ComponentType": 4,
@@ -94,6 +94,15 @@
                 {
                     "ComponentType": 4,
                     "ControlledWhilePlaying": true
+                },
+                {
+                    "Autoplay": false,
+                    "ComponentType": 5,
+                    "Gain": 0.699999988079071,
+                    "Looping": false,
+                    "Muted": false,
+                    "Name": "laser",
+                    "Pitch": 1
                 },
                 {
                     "ComponentType": 9,

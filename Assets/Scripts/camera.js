@@ -96,6 +96,8 @@ function inputPressed(inputs)
 		{
 			if(canFire)
 			{
+				playSound();
+
 				let entity = engine.spawnEntity();
 				let meshComp = entity.addComponent("mesh");
 				meshComp.IsVisible = true;

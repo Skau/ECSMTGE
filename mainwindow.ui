@@ -86,6 +86,7 @@
     </property>
     <addaction name="actionToggle_wireframe"/>
     <addaction name="actionToggle_shutup"/>
+    <addaction name="actionPost_Processes"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -327,8 +328,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>347</width>
-                <height>112</height>
+                <width>254</width>
+                <height>108</height>
                </rect>
               </property>
               <property name="sizePolicy">
@@ -527,6 +528,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionPost_Processes">
+   <property name="text">
+    <string>Post Processes</string>
    </property>
   </action>
  </widget>

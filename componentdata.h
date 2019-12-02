@@ -218,6 +218,7 @@ struct SoundComponent : public Component
     int mSource;
     float pitch = 1.f;
     float gain = .7f; //JT was here, Savner deg Ole, 3D er bra men vi mangler deg. *Smask*
+    bool autoplay{false};
     std::string name;
 
     SoundComponent(unsigned int _eID = 0, bool _valid = false, bool _isLooping = false, bool _isMuted = false)

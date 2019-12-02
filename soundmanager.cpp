@@ -159,11 +159,11 @@ void SoundManager::play(unsigned source)
     SoundManager::checkOpenALError();
 }
 
-void SoundManager::play(std::vector<SoundComponent> comps)
+void SoundManager::playOnStartup(const std::vector<SoundComponent>& comps)
 {
     for(auto comp : comps)
     {
-        if(comp.mSource > -1)
+        if(comp.mSource > -1 && comp.autoplay)
         {
             play(static_cast<unsigned>(comp.mSource));
         }

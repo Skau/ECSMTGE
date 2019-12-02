@@ -21,6 +21,11 @@ function getComponent(name)
     return me.getComponent(name);
 }
 
+function playSound()
+{
+    return me.playSound();
+}
+
 function destringify(obj)
 {
     return Function('"use strict"; return (' + obj + ')')();

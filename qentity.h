@@ -22,8 +22,18 @@ public:
     Q_PROPERTY(unsigned int ID MEMBER mID)
 
 public slots:
+    /**
+     * @brief Get the component with the given name. If it doesn't exist the return value is undefined.
+     */
     QJSValue getComponent(const QString& name);
+    /**
+     * @brief Adds a component with the given name. Returns the component. If it already is added the current one will be returned instead.
+     */
     QJSValue addComponent(const QString& name);
+    /**
+     * @brief Requires a sound component with a sound setup through the editor.
+     */
+    void playSound();
 
 private:
     unsigned int mID;

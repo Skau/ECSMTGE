@@ -148,6 +148,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="checkBox_Autoplay">
+          <property name="text">
+           <string>Autoplay</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="label_PitchTitle">
           <property name="text">
            <string>Pitch:</string>

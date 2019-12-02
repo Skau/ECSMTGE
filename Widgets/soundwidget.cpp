@@ -34,6 +34,7 @@ SoundWidget::SoundWidget(MainWindow* mainWindow, QWidget* parent)
 
         ui->checkBox_Loop->setCheckState(sound->isLooping ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
         ui->checkBox_Mute->setCheckState(sound->isMuted ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+        ui->checkBox_Autoplay->setCheckState(sound->autoplay ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     }
 }
 
@@ -247,5 +248,16 @@ void SoundWidget::on_pushButton_soundFromFile_clicked()
                 SoundManager::get().play(static_cast<unsigned>(sound->mSource));
             }
         }
+    }
+}
+
+void SoundWidget::on_checkBox_Autoplay_toggled(bool checked)
+{
+    if(isUpdating)
+        return;
+
+    if(auto sound = getSoundComponent())
+    {
+        sound->autoplay = checked;
     }
 }

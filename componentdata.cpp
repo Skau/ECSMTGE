@@ -432,6 +432,7 @@ QJsonObject SoundComponent::toJSON()
 
     parentObj.insert("Looping", QJsonValue(isLooping));
     parentObj.insert("Muted", QJsonValue(isMuted));
+    parentObj.insert("Autoplay", QJsonValue(autoplay));
     parentObj.insert("Name", QJsonValue(name.c_str()));
     parentObj.insert("Pitch", QJsonValue(static_cast<double>(pitch)));
     parentObj.insert("Gain", QJsonValue(static_cast<double>(gain)));
@@ -445,6 +446,7 @@ void SoundComponent::fromJSON(QJsonObject object)
 
     isLooping = object["Looping"].toBool();
     isMuted = object["Muted"].toBool();
+    autoplay = object["Autoplay"].toBool();
     name = object["Name"].toString().toStdString();
     pitch = static_cast<float>(object["Pitch"].toDouble());
     gain = static_cast<float>(object["Gain"].toDouble());

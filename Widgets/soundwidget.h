@@ -38,6 +38,8 @@ private slots:
 
     void on_pushButton_soundFromFile_clicked();
 
+    void on_checkBox_Autoplay_toggled(bool checked);
+
 private:
     Ui::Sound* ui;
     bool isPlaying = false;

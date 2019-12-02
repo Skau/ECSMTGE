@@ -3,6 +3,7 @@
 #include "componentdata.h"
 #include <QJsonDocument>
 #include "scriptsystem.h"
+#include "soundmanager.h"
 
 QEntity::QEntity(unsigned int _ID, QObject* parent)
     :  QObject(parent), mID(_ID)
@@ -67,4 +68,16 @@ QJSValue QEntity::addComponent(const QString &name)
         value = ScriptSystem::get()->addComponent<ColliderComponent>(mID);
 
     return value;
+}
+
+void QEntity::playSound()
+{
+    if(auto soundComp = World::getWorld().getEntityManager()->getComponent<SoundComponent>(mID))
+    {
+        auto source = soundComp->mSource;
+        if(source > -1)
+        {
+            SoundManager::get().play(static_cast<unsigned>(source));
+        }
+    }
 }

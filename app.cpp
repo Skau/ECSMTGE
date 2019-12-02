@@ -349,7 +349,7 @@ void App::onPlay()
     mMainWindow->setSelected(nullptr);
 
     auto sounds = mWorld->getEntityManager()->getSoundComponents();
-    mSoundManager->play(sounds);
+    mSoundManager->playOnStartup(sounds);
 }
 
 // Called when play action is pressed while playing in UI

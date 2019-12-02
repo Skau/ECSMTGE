@@ -45,7 +45,6 @@ MainWindow::MainWindow(QWidget *parent) :
     resize(QDesktopWidget().availableGeometry(this).size() * 0.7);
 
     ui->treeWidget_ObjectList->setEditTriggers(QAbstractItemView::DoubleClicked);
-
     ui->treeWidget_ObjectList->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeWidget_ObjectList->setDragEnabled(true);
     ui->treeWidget_ObjectList->viewport()->setAcceptDrops(true);
@@ -152,7 +151,6 @@ void MainWindow::updateUI(const std::vector<EntityInfo> &entityData)
     mTreeDataCache.clear();
     ui->treeWidget_ObjectList->clear();
 
-
     // Create the new tree root
     QTreeWidgetItem* root = new QTreeWidgetItem(ui->treeWidget_ObjectList);
     root->setText(0, "SceneName");
@@ -177,7 +175,7 @@ void MainWindow::updateUI(const std::vector<EntityInfo> &entityData)
 
         if(entityData[i].shouldShowInEditor)
         {
-            QTreeWidgetItem* item = new QTreeWidgetItem(ui->treeWidget_ObjectList->topLevelItem(0));
+            QTreeWidgetItem* item = new QTreeWidgetItem(root);
             item->setText(0, QString::fromStdString(entityData[i].name));
             item->setFlags(item->flags() | Qt::ItemIsEditable);
             mTreeDataCache[item] = entityData[i];

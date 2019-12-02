@@ -37,6 +37,7 @@ Renderer::Renderer()
 
     mPostprocessor = std::make_unique<Postprocessor>(this);
     mOutlineeffect = std::make_unique<Postprocessor>(this);
+    mBloomEffect = std::make_unique<Postprocessor>(this);
 }
 
 Renderer::~Renderer()
@@ -96,6 +97,7 @@ void Renderer::init()
     mPostprocessor->init();
     if (mDepthStencilAttachmentSupported)
         mOutlineeffect->init();
+    mBloomEffect->init();
 
     // Init particlesystem
     mParticleSystem = std::make_unique<ParticleSystem>();
@@ -674,19 +676,25 @@ void Renderer::spotLightPass(const std::vector<TransformComponent> &transforms, 
 void Renderer::renderPostprocessing()
 {
     PROFILE_FUNCTION();
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, mPostprocessor->input());
+
     if (mDepthStencilAttachmentSupported)
     {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, mPostprocessor->input());
-
         // Outline effect needs stencil buffer
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mOutlineeffect->input());
         glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
     }
 
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mBloomEffect->input());
+    glBlitFramebuffer(0, 0, width(), height(), 0, 0, width(), height(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
     glBindFramebuffer(GL_FRAMEBUFFER, mPostprocessor->input());
 
     // Postprocessing
     glDisable(GL_DEPTH_TEST);
+
+    mBloomEffect->Render();
+    *mPostprocessor += *mBloomEffect;
     if (mDepthStencilAttachmentSupported)
         drawEditorOutline();
     mPostprocessor->Render();

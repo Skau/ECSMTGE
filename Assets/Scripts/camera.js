@@ -104,7 +104,7 @@ function inputPressed(inputs)
 					Shader: "singleColor",
 					Parameters: [
 						{
-							"p_color": [0.0, 1.0, 0.65]
+							"p_color": [0.0, 2.0, 0.65]
 						}
 					]
 				};

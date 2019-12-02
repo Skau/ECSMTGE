@@ -137,7 +137,7 @@ void Postprocessor::Render()
     // Reset so that we start at the first ping-pong buffer
     mLastUsedBuffer = 0;
 
-    if (!steps.empty() && !passThroughMaterial)
+    if (!steps.empty() && passThroughMaterial)
     {
         for (auto setting = steps.begin(); setting != steps.end(); ++setting, mLastUsedBuffer = !mLastUsedBuffer)
         {
@@ -225,7 +225,7 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
         mLastUsedBuffer = 0;
     }
 
-    if (!steps.empty() && !passThroughMaterial)
+    if (!steps.empty() && passThroughMaterial)
     {
         auto setting = steps.begin() + index;
         if (setting != steps.end())

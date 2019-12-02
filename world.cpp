@@ -12,27 +12,29 @@ World::World()
     mWorldInstance = this;
 
     // Forward
-    ResourceManager::instance().addShader("singleColor",       std::make_shared<Shader>("white.vert", "singleColor.frag", ShaderType::Forward));
+    ResourceManager::instance().addShader("singleColor",        std::make_shared<Shader>("white.vert", "singleColor.frag", ShaderType::Forward));
 
     // Deferred
-    ResourceManager::instance().addShader("phong",             std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag", ShaderType::Deferred));
+    ResourceManager::instance().addShader("phong",              std::make_shared<Shader>("/Deferred/gBuffer.vert", "/Deferred/gBuffer.frag", ShaderType::Deferred));
 
     // Lights for deferred
-    ResourceManager::instance().addShader("directionalLight",  std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/directionallight.frag", ShaderType::Light));
-    ResourceManager::instance().addShader("pointLight",        std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/pointlight.frag", ShaderType::Light));
-    ResourceManager::instance().addShader("spotLight",         std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/spotlight.frag", ShaderType::Light));
+    ResourceManager::instance().addShader("directionalLight",   std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/directionallight.frag", ShaderType::Light));
+    ResourceManager::instance().addShader("pointLight",         std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/pointlight.frag", ShaderType::Light));
+    ResourceManager::instance().addShader("spotLight",          std::make_shared<Shader>("/Deferred/light.vert", "/Deferred/spotlight.frag", ShaderType::Light));
 
     // Post prosessing
-    ResourceManager::instance().addShader("passthrough",       std::make_shared<Shader>("pass.vert", "pass.frag", ShaderType::PostProcessing));
-    ResourceManager::instance().addShader("blur",              std::make_shared<Shader>("pass.vert", "blur.frag", ShaderType::PostProcessing));
-    ResourceManager::instance().addShader("ui_singleColor",    std::make_shared<Shader>("pass.vert", "singleColor.frag", ShaderType::PostProcessing));
-    ResourceManager::instance().addShader("blend",             std::make_shared<Shader>("pass.vert", "blend.frag", ShaderType::PostProcessing));
+    ResourceManager::instance().addShader("passthrough",        std::make_shared<Shader>("pass.vert", "pass.frag", ShaderType::PostProcessing));
+    ResourceManager::instance().addShader("blur",               std::make_shared<Shader>("pass.vert", "blur.frag", ShaderType::PostProcessing));
+    ResourceManager::instance().addShader("ui_singleColor",     std::make_shared<Shader>("pass.vert", "singleColor.frag", ShaderType::PostProcessing));
+    ResourceManager::instance().addShader("blend",              std::make_shared<Shader>("pass.vert", "blend.frag", ShaderType::PostProcessing));
+    ResourceManager::instance().addShader("extractThreshold",   std::make_shared<Shader>("pass.vert", "extractThreshold.frag", ShaderType::PostProcessing));
+    ResourceManager::instance().addShader("gaussianBlur",       std::make_shared<Shader>("pass.vert", "gaussian.frag", ShaderType::PostProcessing));
 
     // Other..
-    ResourceManager::instance().addShader("mousepicking",      std::make_shared<Shader>("mousepicking.vert", "mousepicking.frag", ShaderType::WeirdStuff));
-    ResourceManager::instance().addShader("particle",          std::make_shared<Shader>("particle.vert", "particle.frag", ShaderType::WeirdStuff));
-    ResourceManager::instance().addShader("axis",              std::make_shared<Shader>("axisshader.vert", "colorshader.frag", ShaderType::WeirdStuff));
-    ResourceManager::instance().addShader("skybox",            std::make_shared<Shader>("skybox", ShaderType::WeirdStuff));
+    ResourceManager::instance().addShader("mousepicking",       std::make_shared<Shader>("mousepicking.vert", "mousepicking.frag", ShaderType::WeirdStuff));
+    ResourceManager::instance().addShader("particle",           std::make_shared<Shader>("particle.vert", "particle.frag", ShaderType::WeirdStuff));
+    ResourceManager::instance().addShader("axis",               std::make_shared<Shader>("axisshader.vert", "colorshader.frag", ShaderType::WeirdStuff));
+    ResourceManager::instance().addShader("skybox",             std::make_shared<Shader>("skybox", ShaderType::WeirdStuff));
 
     // This function is troublesome...
     // ResourceManager::instance().LoadAssetFiles();

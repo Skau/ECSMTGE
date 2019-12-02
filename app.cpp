@@ -90,7 +90,37 @@ void App::initTheRest()
     mRenderer->mAxisMesh = axisMesh;
     mRenderer->mAxisMaterial = axisMaterial;
 
-    // mRenderer->mPostprocessor->steps.push_back({ResourceManager::instance().getShader("passthrough")});
+
+    mRenderer->mPostprocessor->setTextureFormat(GL_RGBA16F);
+    // Bloom setup
+    mRenderer->mBloomEffect->outputToDefault = false;
+    mRenderer->mBloomEffect->setTextureFormat(GL_RGBA16F);
+    mRenderer->mBloomEffect->steps.emplace_back (
+        std::make_shared<Material>(
+            ResourceManager::instance().getShader("extractThreshold"),
+            std::map<std::string, ShaderParamType>{
+                {"threshold", 1.f}
+            }
+        )
+    );
+    mRenderer->mBloomEffect->steps.emplace_back(
+        std::make_shared<Material>(
+            ResourceManager::instance().getShader("gaussianBlur"),
+            std::map<std::string, ShaderParamType>{
+                {"horizontal", false}
+            }
+        )
+    );
+    mRenderer->mBloomEffect->steps.emplace_back(
+        std::make_shared<Material>(
+            ResourceManager::instance().getShader("gaussianBlur"),
+            std::map<std::string, ShaderParamType>{
+                {"horizontal", true}
+            }
+        )
+    );
+
+    // Outline effect setup
     mRenderer->mOutlineeffect->outputToDefault = false;
 
     auto material = std::make_shared<Material>(ResourceManager::instance().getShader("ui_singleColor"));

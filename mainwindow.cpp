@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->treeWidget_ObjectList->setEditTriggers(QAbstractItemView::DoubleClicked);
     ui->treeWidget_ObjectList->setSelectionMode(QAbstractItemView::SingleSelection);
+
     ui->treeWidget_ObjectList->setDragEnabled(true);
     ui->treeWidget_ObjectList->viewport()->setAcceptDrops(true);
     ui->treeWidget_ObjectList->setDropIndicatorShown(true);
@@ -406,24 +407,28 @@ void MainWindow::on_button_AddComponent_clicked()
 void MainWindow::on_lineEdit_SelectedObject_editingFinished()
 {
     auto text = ui->lineEdit_SelectedObject->text();
-    if(text.length())
+
+    if(currentEntitySelected)
     {
-        if(currentEntitySelected)
+        if(!text.length())
         {
-            currentEntitySelected->name = text.toStdString();
-
-            // Loop through all QTreeWidgetItems and find the correct one
-            for(auto data : mTreeDataCache)
-            {
-                // If found, set the text in the QTreeWidgetItem to the new name
-                if(data.second.entityId == currentEntitySelected->entityId)
-                {
-                    data.first->setText(0, text);
-                }
-            }
-
-            updateEntityName(currentEntitySelected->entityId, text.toStdString());
+            ui->lineEdit_SelectedObject->setText(QString::fromStdString(currentEntitySelected->name));
+            return;
         }
+
+        currentEntitySelected->name = text.toStdString();
+
+        // Loop through all QTreeWidgetItems and find the correct one
+        for(auto data : mTreeDataCache)
+        {
+            // If found, set the text in the QTreeWidgetItem to the new name
+            if(data.second.entityId == currentEntitySelected->entityId)
+            {
+                data.first->setText(0, text);
+            }
+        }
+
+        updateEntityName(currentEntitySelected->entityId, text.toStdString());
     }
 }
 
@@ -435,15 +440,22 @@ void MainWindow::on_treeWidget_ObjectList_itemChanged(QTreeWidgetItem *item, int
         // Get the entity data
         auto entity = mTreeDataCache[item];
 
-        // If this is the selected object get the name and then set it in line edit under Selected Object text
-        entity.name = item->text(0).toStdString();
-        if(currentEntitySelected && entity.entityId == currentEntitySelected->entityId)
+        auto text = item->text(0);
+        if(!text.size())
         {
-            ui->lineEdit_SelectedObject->setText(item->text(0));
-            currentEntitySelected->name = item->text(0).toStdString();
+            item->setText(0, QString::fromStdString(entity.name));
+            return;
         }
 
-        updateEntityName(entity.entityId, item->text(0).toStdString());
+        // If this is the selected object get the name and then set it in line edit under Selected Object text
+        entity.name = text.toStdString();
+        if(currentEntitySelected && entity.entityId == currentEntitySelected->entityId)
+        {
+            ui->lineEdit_SelectedObject->setText(text);
+            currentEntitySelected->name = text.toStdString();
+        }
+
+        updateEntityName(entity.entityId, text.toStdString());
     }
 }
 

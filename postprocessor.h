@@ -22,19 +22,29 @@ public:
         // bool useStencil = false;
         unsigned char stencilValue{0};
 
+        Setting(const std::shared_ptr<Material>& _mat = nullptr, unsigned char _stencilValue = 0)
+            : material{_mat}, stencilValue{_stencilValue}
+        {}
+        Setting(const Setting& setting)
+            : material{setting.material}, stencilValue{setting.stencilValue}
+        {}
+        Setting(Setting&& setting)
+            : material{std::move(setting.material)}, stencilValue{setting.stencilValue}
+        {}
+
     };
 
 
     // Postprocessor settings
     std::shared_ptr<Material> passThroughMaterial;
     std::vector<Setting> steps;
-    /* Whether or not to output to default framebuffer after renderprocess
+    /** Whether or not to output to default framebuffer after renderprocess
      * or to output to "output" framebuffer.
      * Can be turned off if there's a need to render more after postprocessing.
      */
     bool outputToDefault = true;
 
-    /* When depth sampling is disabled a renderbuffer is used
+    /** When depth sampling is disabled a renderbuffer is used
      * for depth storage, which is faster but cannot be sampled
      * from. Otherwise uses a texture.
      */
@@ -44,6 +54,11 @@ public:
 private:
     bool mInitialized{false};
     Renderer *mRenderer{nullptr};
+
+    /** What textureformat to use internally for framebuffers.
+     * Defaults to RGBA which will clamp colors between 0 and 1.
+     */
+    int mTextureFormat = GL_RGBA;
 
     // Ping pong framebuffers.
     GLuint mPingpong[2];
@@ -66,6 +81,8 @@ private:
 public:
     Postprocessor(Renderer* renderer);
     void init();
+
+    void setTextureFormat(int format);
 
     GLuint input() const;
     GLuint output() const;

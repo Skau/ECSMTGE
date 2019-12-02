@@ -845,7 +845,7 @@ void Renderer::resizeGBuffer(double retinaScale)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, scrSize.x, scrSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
 
     glBindTexture(GL_TEXTURE_2D, mGAlbedoSpec);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, scrSize.x, scrSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, scrSize.x, scrSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     glBindRenderbuffer(GL_RENDERBUFFER, mRboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, scrSize.x, scrSize.y);

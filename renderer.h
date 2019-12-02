@@ -90,6 +90,7 @@ private:
 
     std::unique_ptr<Postprocessor> mPostprocessor;
     std::unique_ptr<Postprocessor> mOutlineeffect;
+    std::unique_ptr<Postprocessor> mBloomEffect;
 
     std::shared_ptr<MeshData> mSkyboxMesh;
     std::shared_ptr<Material> mSkyboxMaterial;
@@ -111,7 +112,7 @@ private:
     class QOpenGLDebugLogger *mOpenGLDebugLogger{nullptr};
 
     float distanceFromCamera(const CameraComponent& camera, const TransformComponent& transform);
-    void resizeGBuffer(double retinaScale = 1.f);
+    void resizeGBuffer(double retinaScale = 1.0);
     void renderQuad();
     void renderSkybox(const CameraComponent& camera);
     void renderAxis(const CameraComponent& camera);

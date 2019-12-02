@@ -54,6 +54,32 @@ void Postprocessor::init()
     }
 }
 
+void Postprocessor::setTextureFormat(int format)
+{
+    switch (format)
+    {
+    case GL_R:
+    case GL_RG:
+    case GL_RGB:
+    case GL_RGBA:
+    case GL_RGB16F:
+    case GL_RGBA16F:
+    case GL_RGB32F:
+    case GL_RGBA32F:
+        // We good, just break.
+        break;
+    default:
+        std::cout << "The postprocessor currently doesn't support that texture format. Sorry!" << std::endl;
+        return;
+    }
+
+    mTextureFormat = format;
+    if (mInitialized)
+    {
+        recreateBuffers();
+    }
+}
+
 GLuint Postprocessor::input() const
 {
     return mPingpong[0];
@@ -360,7 +386,7 @@ void Postprocessor::recreateBuffers()
     {
         glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[i]);
         glBindTexture(GL_TEXTURE_2D, mRenderTextures[i]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mScrWidth, mScrHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, mTextureFormat, mScrWidth, mScrHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

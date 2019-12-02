@@ -697,6 +697,8 @@ void Renderer::renderPostprocessing()
     *mPostprocessor += *mBloomEffect;
     if (mDepthStencilAttachmentSupported)
         drawEditorOutline();
+
+    // Note: Remember to do main postprocessor last because this also deals with tone mapping
     mPostprocessor->Render();
 
     glEnable(GL_DEPTH_TEST);

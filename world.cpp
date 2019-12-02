@@ -29,6 +29,7 @@ World::World()
     ResourceManager::instance().addShader("blend",              std::make_shared<Shader>("pass.vert", "blend.frag", ShaderType::PostProcessing));
     ResourceManager::instance().addShader("extractThreshold",   std::make_shared<Shader>("pass.vert", "extractThreshold.frag", ShaderType::PostProcessing));
     ResourceManager::instance().addShader("gaussianBlur",       std::make_shared<Shader>("pass.vert", "gaussian.frag", ShaderType::PostProcessing));
+    ResourceManager::instance().addShader("gammaCorrection",    std::make_shared<Shader>("pass.vert", "gammaCorrection.frag", ShaderType::PostProcessing));
 
     // Other..
     ResourceManager::instance().addShader("mousepicking",       std::make_shared<Shader>("mousepicking.vert", "mousepicking.frag", ShaderType::WeirdStuff));

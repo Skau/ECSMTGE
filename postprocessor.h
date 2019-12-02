@@ -11,6 +11,17 @@
 // Forward declarations
 class Renderer;
 
+/** Postprocessing helper class.
+ * An instantiated class that constructs a pair of ping pong framebuffers
+ * and has a fairly straightforward way of iterating between the framebuffers.
+ *
+ * Steps is an array of shaders and other settings that the postprocessor will use
+ * each draw call between the ping pong buffers.
+ * Render(void) iterates through steps, drawing a screen sized quad for each one and
+ * switches back and forth between the ping pong shaders.
+ *
+ * @brief Postprocessing helper class.
+ */
 class Postprocessor : protected QOpenGLFunctions_4_1_Core
 {
 public:
@@ -84,8 +95,33 @@ public:
 
     void setTextureFormat(int format);
 
+    /** Input framebuffer of postprocessor.
+     * Use this when sending/blit-ing to the postprocessor.
+     * @brief Input framebuffer of postprocessor.
+     * @return Index of input postprocessor framebuffer.
+     */
     GLuint input() const;
+    /** Output framebuffer of postprocessor.
+     * The last framebuffer that was rendered to.
+     * Use this when receiving/blit-ing from the postprocessor.
+     * @brief Output framebuffer of postprocessor.
+     * @return Index of output framebuffer.
+     */
     GLuint output() const;
+    /** Input texture of postprocessor framebuffer.
+     * Textures are bound to each framebuffer and this
+     * is the texture bound to the input() framebuffer.
+     * @brief Input texture of postprocessor framebuffer.
+     * @return Index of texture bound to input framebuffer.
+     */
+    GLuint inputTex() const;
+    /** Output texture of postprocessor framebuffer.
+     * Textures are bound to each framebuffer and this
+     * is the texture bound to the output() framebuffer.
+     * @brief Output texture of postprocessor framebuffer.
+     * @return Index of texture bound to output framebuffer.
+     */
+    GLuint outputTex() const;
 
     enum BLENDMODE : int {
         ADDITIVE = 0,
@@ -97,11 +133,23 @@ public:
     Postprocessor& operator+=(Postprocessor& other);
 
 
-    // Renders every post process effect over the screen
+    /** Renders each step in the "steps" array and iterates between the ping pong buffers.
+     * If outputToDefault to is set to true, the last step will be rendered directly to the
+     * screen (framebuffer 0), otherwise the last step will be rendered to the framebuffer
+     * in output().
+     * @brief Execute steps.
+     */
     void Render();
 
-    // For custom handling of renderloop
-    // Send in the loopindex and returns the new loopindex if it looped or the same if it didn't.
+    // TODO: Should change this to use iterators instead of indexes.
+    /** Functions the same as Render(), but allows for custom handling of the loop.
+     * Does the same operations as Render() but only performs a single step in "steps" array
+     * based on the index sent in.
+     * @brief Same as Render() but with custom loop handling.
+     * @param index - the current index in the step array to perform.
+     * @return Returns the next step index if step was performed or the
+     * same index otherwise.
+     */
     unsigned int RenderStep(unsigned int index);
 
     // Resets ping pong buffers and binds to postprocessor framebuffer

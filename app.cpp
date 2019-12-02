@@ -92,6 +92,22 @@ void App::initTheRest()
 
 
     mRenderer->mPostprocessor->setTextureFormat(GL_RGBA16F);
+
+    /** Gamma correction / tone mapping.
+     * If game feels to dark / too bright, just tweak the exposure level
+     * to a desired brightness / darkness.
+     * Note: Settings currently tuned to own computer.
+     */
+    mRenderer->mPostprocessor->steps.emplace_back(
+        std::make_shared<Material>(
+            ResourceManager::instance().getShader("gammaCorrection"),
+            std::map<std::string, ShaderParamType>{
+                {"gamma", 1.4f},
+                {"exposure", 0.8f}
+            }
+        )
+    );
+
     // Bloom setup
     mRenderer->mBloomEffect->outputToDefault = false;
     mRenderer->mBloomEffect->setTextureFormat(GL_RGBA16F);

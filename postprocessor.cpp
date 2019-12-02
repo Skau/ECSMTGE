@@ -90,9 +90,19 @@ GLuint Postprocessor::output() const
     return mPingpong[mLastUsedBuffer];
 }
 
+GLuint Postprocessor::inputTex() const
+{
+    return mRenderTextures[0];
+}
+
+GLuint Postprocessor::outputTex() const
+{
+    return mRenderTextures[mLastUsedBuffer];
+}
+
 Postprocessor &Postprocessor::add(Postprocessor &other, Postprocessor::BLENDMODE blendmode)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, mPingpong[mLastUsedBuffer]);
+    glBindFramebuffer(GL_FRAMEBUFFER, output());
 
     auto shader = ResourceManager::instance().getShader("blend");
     if (!shader)
@@ -107,11 +117,11 @@ Postprocessor &Postprocessor::add(Postprocessor &other, Postprocessor::BLENDMODE
     // Bind to framebuffer texture
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt"), 0);
-    glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
+    glBindTexture(GL_TEXTURE_2D, outputTex());
 
     glActiveTexture(GL_TEXTURE1);
     glUniform1i(glGetUniformLocation(shader->getProgram(), "fbt2"), 1);
-    glBindTexture(GL_TEXTURE_2D, other.mRenderTextures[other.mLastUsedBuffer]);
+    glBindTexture(GL_TEXTURE_2D, other.outputTex());
 
     glUniform1i(glGetUniformLocation(shader->getProgram(), "blendmode"), blendmode);
 

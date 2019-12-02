@@ -151,6 +151,7 @@ void MainWindow::on_actionPlay_triggered(bool value)
         stop();
         ui->lineEdit_SelectedObject->setText("");
         ui->actionPlay->setText("Play");
+        ui->OpenGLLayout->setFocus(Qt::OtherFocusReason);
     }
 }
 

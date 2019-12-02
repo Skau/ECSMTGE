@@ -91,10 +91,12 @@ void App::initTheRest()
     mRenderer->mAxisMaterial = axisMaterial;
 
 
+    // ---------- Postprocessing setup ---------------------------
+
     mRenderer->mPostprocessor->setTextureFormat(GL_RGBA16F);
 
     /** Gamma correction / tone mapping.
-     * If game feels to dark / too bright, just tweak the exposure level
+     * If game feels too dark / too bright, just tweak the exposure level
      * to a desired brightness / darkness.
      * Note: Settings currently tuned to own computer.
      */

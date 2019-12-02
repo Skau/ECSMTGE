@@ -68,7 +68,10 @@ class IVector2D
 public:
     IVector2D(int _x, int _y);
     bool operator== (const gsl::ivec2& rhs) const;
-
+    IVector2D operator+ (int rhs) const;
+    IVector2D operator- (int rhs) const;
+    IVector2D operator* (int rhs) const;
+    IVector2D operator/ (int rhs) const;
 
     int x;
     int y;

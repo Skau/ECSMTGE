@@ -155,4 +155,24 @@ namespace gsl
         return x == rhs.x && y == rhs.y;
     }
 
+    IVector2D IVector2D::operator+(int rhs) const
+    {
+        return {x + rhs, y + rhs};
+    }
+
+    IVector2D IVector2D::operator-(int rhs) const
+    {
+        return {x - rhs, y - rhs};
+    }
+
+    IVector2D IVector2D::operator*(int rhs) const
+    {
+        return {x * rhs, y * rhs};
+    }
+
+    IVector2D IVector2D::operator/(int rhs) const
+    {
+        return {x / rhs, y / rhs};
+    }
+
 } //namespace

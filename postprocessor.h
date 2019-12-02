@@ -7,6 +7,7 @@
 #include "innpch.h"
 #include "componentdata.h"
 #include <variant>
+#include <optional>
 
 // Forward declarations
 class Renderer;
@@ -25,22 +26,46 @@ class Renderer;
 class Postprocessor : protected QOpenGLFunctions_4_1_Core
 {
 public:
+    /** Postprocessor step instruction.
+     * Each step includes a material (with a shader) that will be used
+     * to render the whole screen onto a screen sized
+     * quad. Vertex shader can be pass.vert or a custom
+     * shader and fragment shader can be any custom shader
+     * but requires:
+     * uniform sampler2D fbt;
+     * - to work. fbt is the last framebuffer texture, sampling from
+     * this will get you the last step.
+     *
+     * Action can instead of holding a material, hold a ivec2 describing a screen size.
+     * If holding a screen size the setting will then perform a scaling operation instead
+     * of a drawing operation. This will blip the texture to a new size with nearest neighbour
+     * scaling (default) or bilinear scaling depening on what nearestScaling is set to.
+     *
+     * @brief Postprocessor step instruction.
+     */
     struct Setting {
-        std::shared_ptr<Material> material;
+        std::variant<std::shared_ptr<Material>, gsl::ivec2> action;
 
-        // Other probs useful data
+        // Optional texture scale to pass in.
+        // When used will perform scaling instead of normal shader pass.
+        std::optional<gsl::ivec2> textureScale{std::nullopt};
 
         // bool useStencil = false;
+        // Note: stencilValue is currently not used.
         unsigned char stencilValue{0};
+        bool nearestScaling{true};
 
         Setting(const std::shared_ptr<Material>& _mat = nullptr, unsigned char _stencilValue = 0)
-            : material{_mat}, stencilValue{_stencilValue}
+            : action{_mat}, stencilValue{_stencilValue}
+        {}
+        explicit Setting(const gsl::ivec2& _newSize, bool useNearestNeighbourScaling = true, unsigned char _stencilValue = 0)
+            : action{_newSize}, stencilValue{_stencilValue}, nearestScaling{useNearestNeighbourScaling}
         {}
         Setting(const Setting& setting)
-            : material{setting.material}, stencilValue{setting.stencilValue}
+            : action{setting.action}, stencilValue{setting.stencilValue}
         {}
         Setting(Setting&& setting)
-            : material{std::move(setting.material)}, stencilValue{setting.stencilValue}
+            : action{std::move(setting.action)}, stencilValue{setting.stencilValue}
         {}
 
     };
@@ -77,6 +102,7 @@ private:
     GLuint mDepthStencilBuffer[2];
     bool depthStencilUsingRenderbuffer = true;
     int mScrWidth{0}, mScrHeight{0};
+    gsl::ivec2 scaledScreenSize{-1, -1};
     double mRetinaScale{1.0};
     unsigned char mLastUsedBuffer{0};
 
@@ -122,6 +148,9 @@ public:
      * @return Index of texture bound to output framebuffer.
      */
     GLuint outputTex() const;
+
+    int scrWidth() const;
+    int scrHeight() const;
 
     enum BLENDMODE : int {
         ADDITIVE = 0,

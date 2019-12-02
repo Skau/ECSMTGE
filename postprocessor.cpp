@@ -100,6 +100,16 @@ GLuint Postprocessor::outputTex() const
     return mRenderTextures[mLastUsedBuffer];
 }
 
+int Postprocessor::scrWidth() const
+{
+    return static_cast<int>(mScrWidth / mRetinaScale);
+}
+
+int Postprocessor::scrHeight() const
+{
+    return static_cast<int>(mScrHeight / mRetinaScale);
+}
+
 Postprocessor &Postprocessor::add(Postprocessor &other, Postprocessor::BLENDMODE blendmode)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, output());
@@ -156,47 +166,68 @@ void Postprocessor::Render()
             glBindFramebuffer(GL_READ_FRAMEBUFFER, mPingpong[mLastUsedBuffer]);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, nextFramebuffer);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-            glBlitFramebuffer(0, 0, mScrWidth, mScrHeight, 0, 0, mScrWidth, mScrHeight, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 
-            // If last render, use default framebuffer; else use the one we didn't use last.
-            glBindFramebuffer(GL_FRAMEBUFFER, nextFramebuffer);
-
-            auto material = setting->material;
-            if (!material || !material->mShader)
+            if (std::holds_alternative<std::shared_ptr<Material>>(setting->action))
             {
-                qDebug() << "using pass through shader";
-                material = passThroughMaterial;
+                glBlitFramebuffer(0, 0, (0 <= scaledScreenSize.x) ? scaledScreenSize.x : mScrWidth, (0 <= scaledScreenSize.y) ? scaledScreenSize.y : mScrHeight,
+                                  0, 0, (0 <= scaledScreenSize.x) ? scaledScreenSize.x : mScrWidth, (0 <= scaledScreenSize.y) ? scaledScreenSize.y : mScrHeight,
+                                  GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
+                // If last render, use default framebuffer; else use the one we didn't use last.
+                glBindFramebuffer(GL_FRAMEBUFFER, nextFramebuffer);
+
+                auto material = std::get<std::shared_ptr<Material>>(setting->action);
+                if (!material || !material->mShader)
+                {
+                    qDebug() << "using pass through shader";
+                    material = passThroughMaterial;
+                }
+
+                material->mShader->use();
+
+                // Bind to framebuffer texture
+                glActiveTexture(GL_TEXTURE0);
+                // qDebug() << "uniform: " << glGetUniformLocation(shader->getProgram(), "fbt");
+                glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "fbt"), 0);
+                glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
+
+                /** NB: Depth sampling in shadercode won't work unless in OpenGL 4.4 because of how they're stored.
+                 * Should be possible to implement a depth/stencil sampling if they are implemented as
+                 * separate buffers.
+                 */
+                if (depthSampling)
+                {
+                    glActiveTexture(GL_TEXTURE1);
+                    glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "depthBuffer"), 1);
+                    glBindTexture(GL_TEXTURE_2D, mDepthStencilBuffer[mLastUsedBuffer]);
+                }
+
+                int uniform = glGetUniformLocation(material->mShader->getProgram(), "sResolution");
+                if (0 <= uniform)
+                    glUniform2i(uniform, mScrWidth, mScrHeight);
+
+                uniform = glGetUniformLocation(material->mShader->getProgram(), "sTime");
+                if (0 <= uniform)
+                    glUniform1f(uniform, mRenderer->mTimeSinceStart);
+
+                mRenderer->evaluateParams(*material);
+                renderQuad();
             }
-
-            material->mShader->use();
-
-            // Bind to framebuffer texture
-            glActiveTexture(GL_TEXTURE0);
-            // qDebug() << "uniform: " << glGetUniformLocation(shader->getProgram(), "fbt");
-            glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "fbt"), 0);
-            glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
-
-            /** NB: Depth sampling in shadercode won't work unless in OpenGL 4.4 because of how they're stored.
-             * Should be possible to implement a depth/stencil sampling if they are implemented as
-             * separate buffers.
-             */
-            if (depthSampling)
+            else
             {
-                glActiveTexture(GL_TEXTURE1);
-                glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "depthBuffer"), 1);
-                glBindTexture(GL_TEXTURE_2D, mDepthStencilBuffer[mLastUsedBuffer]);
+                // Scaling mode
+
+                auto newScale = std::get<gsl::ivec2>(setting->action) * static_cast<int>(mRetinaScale);
+                // if the settings are invalid, just default back to whatever it was.
+                if (newScale.x < 1 || newScale.y < 1)
+                    scaledScreenSize = gsl::ivec2{-1, -1};
+
+                glBlitFramebuffer(0, 0, (0 <= scaledScreenSize.x) ? scaledScreenSize.x : mScrWidth, (0 <= scaledScreenSize.y) ? scaledScreenSize.y : mScrHeight,
+                                  0, 0, newScale.x, newScale.y,
+                                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, setting->nearestScaling ? GL_NEAREST : GL_LINEAR);
+
+                scaledScreenSize = newScale;
             }
-
-            int uniform = glGetUniformLocation(material->mShader->getProgram(), "sResolution");
-            if (0 <= uniform)
-                glUniform2i(uniform, mScrWidth, mScrHeight);
-
-            uniform = glGetUniformLocation(material->mShader->getProgram(), "sTime");
-            if (0 <= uniform)
-                glUniform1f(uniform, mRenderer->mTimeSinceStart);
-
-            mRenderer->evaluateParams(*material);
-            renderQuad();
         }
     }
     else
@@ -213,7 +244,8 @@ void Postprocessor::Render()
             // If no postprocess steps, just blit framebuffer onto default framebuffer.
             glBindFramebuffer(GL_READ_FRAMEBUFFER, mPingpong[0]);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-            glBlitFramebuffer(0, 0, mScrWidth, mScrHeight, 0, 0, mScrWidth, mScrHeight,
+            glBlitFramebuffer(0, 0, (0 <= scaledScreenSize.x) ? scaledScreenSize.x : mScrWidth, (0 <= scaledScreenSize.y) ? scaledScreenSize.y : mScrHeight,
+                              0, 0, (0 <= scaledScreenSize.x) ? scaledScreenSize.x : mScrWidth, (0 <= scaledScreenSize.y) ? scaledScreenSize.y : mScrHeight,
                               GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
         }
     }
@@ -245,48 +277,68 @@ unsigned int Postprocessor::RenderStep(unsigned int index)
             glBindFramebuffer(GL_READ_FRAMEBUFFER, mPingpong[mLastUsedBuffer]);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, nextFramebuffer);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-            glBlitFramebuffer(0, 0, mScrWidth, mScrHeight, 0, 0, mScrWidth, mScrHeight, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 
-            // If last render, use default framebuffer; else use the one we didn't use last.
-            glBindFramebuffer(GL_FRAMEBUFFER, nextFramebuffer);
-
-
-            auto material = setting->material;
-            if (!material || !material->mShader) {
-                qDebug() << "using pass through shader";
-                material = passThroughMaterial;
-            }
-
-            material->mShader->use();
-
-
-            // Bind to framebuffer texture
-            glActiveTexture(GL_TEXTURE0);
-            glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "fbt"), 0);
-            glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
-
-            /** NB: Depth sampling in shadercode won't work unless in OpenGL 4.4 because of how they're stored.
-             * Should be possible to implement a depth/stencil sampling if they are implemented as
-             * separate buffers.
-             */
-            if (depthSampling)
+            if (std::holds_alternative<std::shared_ptr<Material>>(setting->action))
             {
-                glActiveTexture(GL_TEXTURE1);
-                glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "depthBuffer"), 1);
-                glBindTexture(GL_TEXTURE_2D, mDepthStencilBuffer[mLastUsedBuffer]);
+                glBlitFramebuffer(0, 0, (0 <= scaledScreenSize.x) ? scaledScreenSize.x : mScrWidth, (0 <= scaledScreenSize.y) ? scaledScreenSize.y : mScrHeight,
+                                  0, 0, (0 <= scaledScreenSize.x) ? scaledScreenSize.x : mScrWidth, (0 <= scaledScreenSize.y) ? scaledScreenSize.y : mScrHeight,
+                                  GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
+                // If last render, use default framebuffer; else use the one we didn't use last.
+                glBindFramebuffer(GL_FRAMEBUFFER, nextFramebuffer);
+
+                auto material = std::get<std::shared_ptr<Material>>(setting->action);
+                if (!material || !material->mShader)
+                {
+                    qDebug() << "using pass through shader";
+                    material = passThroughMaterial;
+                }
+
+                material->mShader->use();
+
+                // Bind to framebuffer texture
+                glActiveTexture(GL_TEXTURE0);
+                // qDebug() << "uniform: " << glGetUniformLocation(shader->getProgram(), "fbt");
+                glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "fbt"), 0);
+                glBindTexture(GL_TEXTURE_2D, mRenderTextures[mLastUsedBuffer]);
+
+                /** NB: Depth sampling in shadercode won't work unless in OpenGL 4.4 because of how they're stored.
+                 * Should be possible to implement a depth/stencil sampling if they are implemented as
+                 * separate buffers.
+                 */
+                if (depthSampling)
+                {
+                    glActiveTexture(GL_TEXTURE1);
+                    glUniform1i(glGetUniformLocation(material->mShader->getProgram(), "depthBuffer"), 1);
+                    glBindTexture(GL_TEXTURE_2D, mDepthStencilBuffer[mLastUsedBuffer]);
+                }
+
+                int uniform = glGetUniformLocation(material->mShader->getProgram(), "sResolution");
+                if (0 <= uniform)
+                    glUniform2i(uniform, mScrWidth, mScrHeight);
+
+                uniform = glGetUniformLocation(material->mShader->getProgram(), "sTime");
+                if (0 <= uniform)
+                    glUniform1f(uniform, mRenderer->mTimeSinceStart);
+
+                mRenderer->evaluateParams(*material);
+                renderQuad();
             }
+            else
+            {
+                // Scaling mode
 
-            int uniform = glGetUniformLocation(material->mShader->getProgram(), "sResolution");
-            if (0 <= uniform)
-                glUniform2i(uniform, mScrWidth, mScrHeight);
+                auto newScale = std::get<gsl::ivec2>(setting->action) * static_cast<int>(mRetinaScale);
+                // if the settings are invalid, just default back to whatever it was.
+                if (newScale.x < 1 || newScale.y < 1)
+                    scaledScreenSize = gsl::ivec2{-1, -1};
 
-            uniform = glGetUniformLocation(material->mShader->getProgram(), "sTime");
-            if (0 <= uniform)
-                glUniform1f(uniform, mRenderer->mTimeSinceStart);
+                glBlitFramebuffer(0, 0, (0 <= scaledScreenSize.x) ? scaledScreenSize.x : mScrWidth, (0 <= scaledScreenSize.y) ? scaledScreenSize.y : mScrHeight,
+                                  0, 0, newScale.x, newScale.y,
+                                  GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, setting->nearestScaling ? GL_NEAREST : GL_LINEAR);
 
-            mRenderer->evaluateParams(*material);
-
-            renderQuad();
+                scaledScreenSize = newScale;
+            }
 
             ++index;
             mLastUsedBuffer = !mLastUsedBuffer;

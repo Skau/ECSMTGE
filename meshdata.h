@@ -10,8 +10,6 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-typedef std::variant<int, float, gsl::vec2, gsl::vec3, gsl::vec4> ShaderParamType;
-
 struct Material
 {
     std::shared_ptr<Shader> mShader{nullptr};

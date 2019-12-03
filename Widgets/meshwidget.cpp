@@ -9,6 +9,7 @@
 #include "texture.h"
 #include <QLabel>
 #include <QSpinBox>
+#include <QCheckBox>
 
 MeshWidget::MeshWidget(MainWindow *mainWindow, QWidget* parent)
     : ComponentWidget(mainWindow, parent), ui(new Ui::Mesh)
@@ -166,7 +167,28 @@ void MeshWidget::updateShaderParameters(Material& material)
             name = name.replace("p_", "");
             QLabel* label = new QLabel(name, widget);
             hLayout->addWidget(label);
-            if (std::holds_alternative<int>(param.second))
+
+            if(std::holds_alternative<bool>(param.second))
+            {
+                QCheckBox* checkBox = new QCheckBox(widget);
+                checkBox->setCheckState(std::get<bool>(param.second) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+                connect(checkBox, &QCheckBox::stateChanged, [=](int state)
+                {
+                    if(auto render = getRenderComponent())
+                    {
+                        if(render->mMaterial.mParameters.size())
+                        {
+                            if(render->mMaterial.mParameters.find(param.first) != render->mMaterial.mParameters.end())
+                            {
+                                render->mMaterial.mParameters[param.first] = state;
+                            }
+                        }
+                    }
+                });
+                hLayout->addWidget(checkBox);
+                minimumHeight += 25.33f;
+            }
+            else if (std::holds_alternative<int>(param.second))
             {
                 QSpinBox* spinBox = new QSpinBox(widget);
                 spinBox->setValue(std::get<int>(param.second));

@@ -21,7 +21,7 @@ enum class ShaderType
     Light
 };
 
-typedef std::variant<int, float, gsl::vec2, gsl::vec3, gsl::vec4> ShaderParamType;
+typedef std::variant<bool, int, float, gsl::vec2, gsl::vec3, gsl::vec4> ShaderParamType;
 
 class Shader : protected QOpenGLFunctions_4_1_Core
 {

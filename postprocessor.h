@@ -75,6 +75,10 @@ public:
 
     bool autoUpdateSize = true;
 
+    /**
+     * So the save feature in UI can tell them apart.
+     */
+    std::string mName;
 
 private:
     bool mInitialized{false};
@@ -104,7 +108,7 @@ private:
     void recreateBuffers();
 
 public:
-    Postprocessor(Renderer* renderer);
+    Postprocessor(Renderer* renderer, const std::string& name);
     void init();
 
     void setTextureFormat(int format);

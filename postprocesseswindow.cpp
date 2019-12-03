@@ -48,7 +48,7 @@ void PostProcessesWindow::addPostProcessors(const std::vector<std::pair<std::str
         addPostprocessor(pair);
     }
 
-    QPushButton* saveButton = new QPushButton("WIP", ui->mainWidget);
+    QPushButton* saveButton = new QPushButton("Save", ui->mainWidget);
     layout->addWidget(saveButton);
     saveButton->setMinimumHeight(25);
     connect(saveButton, &QPushButton::clicked, this, &PostProcessesWindow::on_button_Save_clicked);
@@ -61,7 +61,8 @@ void PostProcessesWindow::addPostProcessors(const std::vector<std::pair<std::str
 
 void PostProcessesWindow::on_button_Save_clicked()
 {
-    qDebug() << "WIP";
+    onSaveClicked(cachedSteps);
+    hide();
 }
 
 void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*> postprocess)

@@ -27,6 +27,7 @@
 #include "constants.h"
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QJsonDocument>
 
 #include "postprocesseswindow.h"
 
@@ -62,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboBox_Components->setEnabled(false);
 
     mPostProcessesWindow = new PostProcessesWindow(this);
+    connect(mPostProcessesWindow, &PostProcessesWindow::onSaveClicked, this, &MainWindow::onPostprocessorSaved);
 
     show();
 }
@@ -615,4 +617,42 @@ void MainWindow::on_actionNew_triggered()
 void MainWindow::on_actionPost_Processes_triggered()
 {
     mPostProcessesWindow->show();
+}
+
+void MainWindow::onPostprocessorSaved(const std::map<Postprocessor*, std::vector<Postprocessor::Setting>>& steps)
+{
+    QFile file("../Inngine2019/Settings/postprocessorsettings.json");
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qDebug() << "ERROR MainWindow PP save: Failed to open '../Inngine2019/Settings/postprocessorsettings.json'!";
+        return;
+    }
+
+    QJsonArray mainArray;
+    for(auto& setting : steps)
+    {
+        for(auto& step : setting.second)
+        {
+            QJsonObject object;
+            object.insert("postprocessor", setting.first->mName.c_str());
+            object.insert("shader", step.material->mShader->mName.c_str());
+            auto materialJSON = step.material->toJSON();
+            QJsonObject paramObject;
+            for(auto ref : materialJSON["Parameters"].toArray())
+            {
+                auto obj = ref.toObject();
+                foreach(const QString& key, obj.keys())
+                {
+                    paramObject.insert(key, obj.value(key));
+                }
+            }
+            object.insert("parameters", paramObject);
+            mainArray.push_back(object);
+        }
+    }
+
+
+    QJsonDocument document(mainArray);
+    file.write(document.toJson());
+    file.close();
 }

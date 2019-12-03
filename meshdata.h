@@ -50,7 +50,11 @@ struct Material
         for(auto& value : mParameters)
         {
             QJsonObject obj;
-            if (std::holds_alternative<int>(value.second))
+            if(std::holds_alternative<bool>(value.second))
+            {
+                obj.insert(value.first.c_str(), QJsonValue(std::get<bool>(value.second)));
+            }
+            else if (std::holds_alternative<int>(value.second))
             {
                 obj.insert(value.first.c_str(), QJsonValue(std::get<int>(value.second)));
             }

@@ -35,9 +35,9 @@ Renderer::Renderer()
         qDebug() << "Context could not be made - quitting this application";
     }
 
-    mPostprocessor = std::make_unique<Postprocessor>(this);
-    mOutlineeffect = std::make_unique<Postprocessor>(this);
-    mBloomEffect = std::make_unique<Postprocessor>(this);
+    mPostprocessor = std::make_unique<Postprocessor>(this, "main");
+    mOutlineeffect = std::make_unique<Postprocessor>(this, "outlineeffect");
+    mBloomEffect = std::make_unique<Postprocessor>(this, "bloom");
 }
 
 Renderer::~Renderer()

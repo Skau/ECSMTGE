@@ -4,12 +4,13 @@
 #include <QMainWindow>
 #include <memory>
 #include <map>
+#include "postprocessor.h"
 
 class QWidget;
 class Renderer;
 class EntityInfo;
 class Component;
-class Postprocessor;
+
 class PostProcessesWindow;
 
 namespace Ui {
@@ -90,6 +91,8 @@ private slots:
     void on_actionNew_triggered();
 
     void on_actionPost_Processes_triggered();
+
+    void onPostprocessorSaved(const std::map<Postprocessor*, std::vector<Postprocessor::Setting>>& steps);
 
 private:
     void updateComponentArea(unsigned int entityID);

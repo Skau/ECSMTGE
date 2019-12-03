@@ -7,7 +7,6 @@
 #include <map>
 #include "postprocessor.h"
 
-class Postprocessor;
 class Material;
 
 namespace Ui {
@@ -26,6 +25,9 @@ public:
     ~PostProcessesWindow();
 
     void addPostProcessors(const std::vector<std::pair<std::string, Postprocessor *>> &postprocessors);
+
+signals:
+    void onSaveClicked(const std::map<Postprocessor*, std::vector<Postprocessor::Setting>>& steps);
 
 private slots:
     void on_button_Save_clicked();

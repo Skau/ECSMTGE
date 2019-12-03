@@ -93,9 +93,9 @@ void App::initTheRest()
 
 
     // Used by the post processor only atm.
-    if(!QDir("settings").exists())
+    if(!QDir("../Inngine2019/Settings").exists())
     {
-        QDir().mkdir("settings");
+        QDir().mkdir("../Inngine2019/Settings");
     }
 
     // ---------- Postprocessing setup ---------------------------
@@ -417,13 +417,15 @@ void App::saveScene(const std::string& path)
 
 void App::initPostprocessorSettings()
 {
-   // Uncomment this to write new settings from code
-   //writeDefaultPostprocessorSettings();
-
     QFile file("../Inngine2019/Settings/postprocessorsettings.json");
+    if(!file.exists())
+    {
+        writeDefaultPostprocessorSettings();
+    }
+
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "ERROR Postprocessor init: Failed to open 'settings/postprocessorsettings.json'!";
+        qDebug() << "ERROR Postprocessor init: Failed to open '../Inngine2019/Settings/postprocessorsettings.json'!";
         return;
     }
 
@@ -485,11 +487,6 @@ void App::writeDefaultPostprocessorSettings()
     // 1. The postprocessor the step should be added to
     // 2. The shader that should be used.
     // 3. An object containing all parameters that should be editable on runtime.
-    // TODO: Make this even more dynamic by having a map of post processors in renderer.
-    // Then iterate through this map and append to the main post processor.
-    // All that's needed to be done when creating a new post processor is to add it here with its steps ,then call this function once to update the file.
-    // This will remove the need for the if/elseif going on in initPostProcessorSettings(), as it will all be dynamic.
-    // Default settings like textureFormat, outputToDefault and size should probably also be added here.
 
     QJsonObject gamma
     {
@@ -568,7 +565,7 @@ void App::writeDefaultPostprocessorSettings()
     QFile file("../Inngine2019/Settings/postprocessorsettings.json");
     if(!file.open(QIODevice::WriteOnly))
     {
-        qDebug() << "ERROR Postprocessor init: Failed to open 'Settings/postprocessorsettings.json'!";
+        qDebug() << "ERROR Postprocessor init: Failed to open '../Inngine2019/Settings/postprocessorsettings.json'!";
         return;
     }
 

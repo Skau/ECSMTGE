@@ -126,7 +126,7 @@
         <item>
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>For easy testing/debugging</string>
+           <string>For easy testing/debugging (DEPRECATED, does no longer work!)</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>

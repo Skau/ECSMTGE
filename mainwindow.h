@@ -21,6 +21,9 @@ enum class ComponentType;
 class QTreeWidgetItem;
 class ComponentWidget;
 
+/**
+ * @brief Holds all UI widgets and the renderer, helps control the lifetime of the app. When this window is closed the application quits.
+ */
 class MainWindow : public QMainWindow
 {
     friend class App;

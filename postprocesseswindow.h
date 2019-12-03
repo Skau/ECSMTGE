@@ -14,6 +14,9 @@ namespace Ui {
 class PostProcessesWindow;
 }
 
+/**
+ * @brief Hooks into the global post processing steps, enabling editing them at runtime.
+ */
 class PostProcessesWindow : public QDialog
 {
     Q_OBJECT

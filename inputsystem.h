@@ -6,6 +6,9 @@
 #include "inputhandler.h"
 #include "componentdata.h"
 
+/**
+ * @brief Handles Editor Camera input.
+ */
 class InputSystem : public QObject
 {
     Q_OBJECT
@@ -13,7 +16,6 @@ class InputSystem : public QObject
 public:
     InputSystem();
 
-    //static void HandleInput(float deltaTime, std::vector<InputComponent> &inputComponents, std::vector<TransformComponent>& transformComponents);
     static void HandleEditorCameraInput(float deltaTime, TransformComponent &transformComponent, CameraComponent &cameraComponent);
 };
 

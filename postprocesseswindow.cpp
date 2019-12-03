@@ -76,7 +76,6 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                     checkBox->setCheckState(std::get<bool>(param.second) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
                     connect(checkBox, &QCheckBox::stateChanged, [=](bool state)
                     {
-                        qDebug() << state;
                         cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first] = state;
                     });
                     hLayout->addWidget(checkBox);

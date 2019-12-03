@@ -23,6 +23,9 @@
 
 class SoundSource;
 
+/**
+ * @brief The resource manager is responsible for handling all resources, making only a single copy whenever possible to keep memory usage low.
+ */
 class ResourceManager : protected QOpenGLFunctions_4_1_Core
 {
 

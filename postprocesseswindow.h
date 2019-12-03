@@ -27,13 +27,15 @@ public:
 
     void addPostProcessors(const std::vector<std::pair<std::string, Postprocessor *>> &postprocessors);
 
+private slots:
+    void on_button_Save_clicked();
+
 private:
     Ui::PostProcessesWindow *ui;
 
     void addPostprocessor(std::pair<std::string, Postprocessor*> postprocess);
 
-    std::map<std::string, Postprocessor*> cachedPostprocesses;
-    std::map<Postprocessor*, std::vector<Postprocessor::Setting>> cachedSettings;
+    std::map<Postprocessor*, std::vector<Postprocessor::Setting>> cachedSteps;
 };
 
 #endif // POSTPROCESSESWINDOW_H

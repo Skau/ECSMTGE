@@ -85,6 +85,14 @@ private slots:
     void saveScene(const std::string& path);
 
 private:
+
+    void initPostprocessorSettings();
+    std::map<std::string, ShaderParamType> retreiveParameters(QJsonObject object);
+
+    /**
+     * @brief Used to update the default settings file. Only call this when changes to the file should be made.
+     */
+    void writeDefaultPostprocessorSettings();
     /**
      * @brief Calculates the current FPS and time between frames using delta time and frame counting.
      */

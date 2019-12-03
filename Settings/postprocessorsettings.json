@@ -1,0 +1,50 @@
+[
+    {
+        "parameters": {
+            "exposure": 0.8,
+            "gamma": 1.4
+        },
+        "postprocessor": "main",
+        "shader": "gammaCorrection"
+    },
+    {
+        "parameters": {
+            "multFactor": 3,
+            "threshold": 1
+        },
+        "postprocessor": "bloom",
+        "shader": "extractThreshold"
+    },
+    {
+        "parameters": {
+            "horizontal": false
+        },
+        "postprocessor": "bloom",
+        "shader": "gaussianBlur"
+    },
+    {
+        "parameters": {
+            "horizontal": true
+        },
+        "postprocessor": "bloom",
+        "shader": "gaussianBlur"
+    },
+    {
+        "parameters": {
+            "p_color": [
+                1,
+                1,
+                0
+            ]
+        },
+        "postprocessor": "outlineeffect",
+        "shader": "ui_singleColor"
+    },
+    {
+        "parameters": {
+            "radius": 2
+        },
+        "postprocessor": "outlineeffect",
+        "shader": "blur"
+    }
+]

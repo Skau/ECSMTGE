@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QJsonDocument>
+#include <QDir>
 
 #include "inputhandler.h"
 #include "scene.h"
@@ -91,91 +92,21 @@ void App::initTheRest()
     mRenderer->mAxisMaterial = axisMaterial;
 
 
+    // Used by the post processor only atm.
+    if(!QDir("settings").exists())
+    {
+        QDir().mkdir("settings");
+    }
+
     // ---------- Postprocessing setup ---------------------------
 
-    mRenderer->mPostprocessor->setTextureFormat(GL_RGBA16F);
-    mRenderer->mPostprocessor->outputToDefault = true;
+    initPostprocessorSettings();
 
-    /** Gamma correction / tone mapping.
-     * If game feels too dark / too bright, just tweak the exposure level
-     * to a desired brightness / darkness.
-     * Note: Settings currently tuned to own computer.
-     */
-    mRenderer->mPostprocessor->steps.emplace_back(
-        std::make_shared<Material>(
-            ResourceManager::instance().getShader("gammaCorrection"),
-            std::map<std::string, ShaderParamType>{
-                {"gamma", 1.4f},
-                {"exposure", 0.8f}
-            }
-        )
-    );
-
-    // Bloom setup
-    mRenderer->mBloomEffect->outputToDefault = false;
-    mRenderer->mBloomEffect->setTextureFormat(GL_RGBA16F);
-    mRenderer->mBloomEffect->autoUpdateSize = false;
-    // Basically the sample size, but also indirectly scales the bloom effect
-    mRenderer->mBloomEffect->setSize({512, 256});
-    mRenderer->mBloomEffect->steps.emplace_back (
-        std::make_shared<Material>(
-            ResourceManager::instance().getShader("extractThreshold"),
-            std::map<std::string, ShaderParamType>{
-                {"threshold", 1.f},
-                {"multFactor", 3.f}
-            }
-        )
-    );
-    mRenderer->mBloomEffect->steps.emplace_back(
-        std::make_shared<Material>(
-            ResourceManager::instance().getShader("gaussianBlur"),
-            std::map<std::string, ShaderParamType>{
-                {"horizontal", false}
-            }
-        )
-    );
-    mRenderer->mBloomEffect->steps.emplace_back(
-        std::make_shared<Material>(
-            ResourceManager::instance().getShader("gaussianBlur"),
-            std::map<std::string, ShaderParamType>{
-                {"horizontal", true}
-            }
-        )
-    );
-
-    // Outline effect setup
-    mRenderer->mOutlineeffect->outputToDefault = false;
-
-    auto material = std::make_shared<Material>(ResourceManager::instance().getShader("ui_singleColor"));
-    material->mParameters =
-    {
-        {"p_color", gsl::vec3{1.f, 1.f, 0.f}}
-    };
-    mRenderer->mOutlineeffect->steps.push_back(
-    {
-        material,
-        0
-    });
-
-    material = std::make_shared<Material>(ResourceManager::instance().getShader("blur"));
-    material->mParameters =
-    {
-        {"radius", 2}
-    };
-    mRenderer->mOutlineeffect->steps.push_back(
-    {
-        material,
-        0
-    });
     PROFILE_END_SESSION();
     mUpdateTimer.start(16); // Simulates 60ish fps
     PROFILE_BEGIN_SESSION("Editor", "Profile-Editor");
 
-    std::vector<std::pair<std::string, Postprocessor*>> pairs;
-    pairs.emplace_back(std::make_pair<std::string, Postprocessor*>("Main Post Processor", mRenderer->mPostprocessor.get()));
-    pairs.emplace_back(std::make_pair<std::string, Postprocessor*>("Bloom effect", mRenderer->mBloomEffect.get()));
-    pairs.emplace_back(std::make_pair<std::string, Postprocessor*>("Outline effect", mRenderer->mOutlineeffect.get()));
-    mMainWindow->addGlobalPostProcessing(pairs);
+
 }
 
 void App::toggleMute(bool mode)
@@ -482,4 +413,208 @@ void App::saveScene(const std::string& path)
     mWorld->saveScene(path);
     saveSession();
     updatePerspective();
+}
+
+void App::initPostprocessorSettings()
+{
+   // Uncomment this to write new settings from code
+   //writeDefaultPostprocessorSettings();
+
+    QFile file("../Inngine2019/Settings/postprocessorsettings.json");
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "ERROR Postprocessor init: Failed to open 'settings/postprocessorsettings.json'!";
+        return;
+    }
+
+    mRenderer->mPostprocessor->setTextureFormat(GL_RGBA16F);
+    mRenderer->mPostprocessor->outputToDefault = true;
+
+    // Bloom setup
+    mRenderer->mBloomEffect->outputToDefault = false;
+    mRenderer->mBloomEffect->setTextureFormat(GL_RGBA16F);
+    mRenderer->mBloomEffect->autoUpdateSize = false;
+    // Basically the sample size, but also indirectly scales the bloom effect
+    mRenderer->mBloomEffect->setSize({512, 256});
+
+    // Outline effect setup
+    mRenderer->mOutlineeffect->outputToDefault = false;
+
+    QJsonDocument document = QJsonDocument::fromJson(file.readAll());
+    QJsonArray mainObject = document.array();
+    for(auto ref : mainObject)
+    {
+        auto obj = ref.toObject();
+
+        auto postprocessor = obj["postprocessor"];
+        auto shader = obj["shader"].toString().toStdString();
+        auto params = retreiveParameters(obj["parameters"].toObject());
+
+        if(postprocessor == "main")
+        {
+            mRenderer->mPostprocessor->steps.emplace_back(
+                std::make_shared<Material>(ResourceManager::instance().getShader(shader), params)
+            );
+        }
+        else if(postprocessor == "bloom")
+        {
+            mRenderer->mBloomEffect->steps.emplace_back(
+                std::make_shared<Material>(ResourceManager::instance().getShader(shader), params)
+            );
+        }
+        else if(postprocessor == "outlineeffect")
+        {
+            mRenderer->mOutlineeffect->steps.emplace_back(
+                std::make_shared<Material>(ResourceManager::instance().getShader(shader), params)
+            );
+        }
+    }
+    file.close();
+
+    std::vector<std::pair<std::string, Postprocessor*>> pairs;
+    pairs.emplace_back(std::make_pair<std::string, Postprocessor*>("Main Post Processor", mRenderer->mPostprocessor.get()));
+    pairs.emplace_back(std::make_pair<std::string, Postprocessor*>("Bloom effect", mRenderer->mBloomEffect.get()));
+    pairs.emplace_back(std::make_pair<std::string, Postprocessor*>("Outline effect", mRenderer->mOutlineeffect.get()));
+    mMainWindow->addGlobalPostProcessing(pairs);
+}
+
+void App::writeDefaultPostprocessorSettings()
+{
+    // Each one of these objects represents a step in a global postprocessor.
+    // Only three objects should be in each step.
+    // 1. The postprocessor the step should be added to
+    // 2. The shader that should be used.
+    // 3. An object containing all parameters that should be editable on runtime.
+    // TODO: Make this even more dynamic by having a map of post processors in renderer.
+    // Then iterate through this map and append to the main post processor.
+    // All that's needed to be done when creating a new post processor is to add it here with its steps ,then call this function once to update the file.
+    // This will remove the need for the if/elseif going on in initPostProcessorSettings(), as it will all be dynamic.
+    // Default settings like textureFormat, outputToDefault and size should probably also be added here.
+
+    QJsonObject gamma
+    {
+        {"postprocessor", "main"},
+        {"shader", "gammaCorrection"},
+        {"parameters",
+            QJsonObject
+            {
+                {"gamma", 1.4},
+                {"exposure", 0.8}
+            }
+        }
+    };
+
+    QJsonObject extract
+    {
+        {"postprocessor", "bloom"},
+        {"shader", "extractThreshold"},
+        {"parameters",
+            QJsonObject
+            {
+                {"threshold", 1.0},
+                {"multFactor", 3.0}
+            }
+        }
+    };
+
+    QJsonObject gaussainBlur1
+    {
+        {"postprocessor", "bloom"},
+        {"shader", "gaussianBlur"},
+        {"parameters",
+            QJsonObject
+            {
+                {"horizontal", false}
+            }
+        }
+    };
+
+    QJsonObject gaussainBlur2
+    {
+        {"postprocessor", "bloom"},
+        {"shader", "gaussianBlur"},
+        {"parameters",
+            QJsonObject
+            {
+                {"horizontal", true}
+            }
+        }
+    };
+
+    QJsonObject outline
+    {
+        {"postprocessor", "outlineeffect"},
+        {"shader", "ui_singleColor"},
+        {"parameters",
+            QJsonObject
+            {
+                {"p_color", QJsonArray{1.0, 1.0, 0.0}}
+            }
+        }
+    };
+
+    QJsonObject blur
+    {
+        {"postprocessor", "outlineeffect"},
+        {"shader", "blur"},
+        {"parameters",
+            QJsonObject
+            {
+                {"radius", 2.0}
+            }
+        }
+    };
+
+    QFile file("../Inngine2019/Settings/postprocessorsettings.json");
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qDebug() << "ERROR Postprocessor init: Failed to open 'Settings/postprocessorsettings.json'!";
+        return;
+    }
+
+    QJsonArray mainArray{gamma, extract, gaussainBlur1, gaussainBlur2, outline, blur};
+    QJsonDocument document(mainArray);
+    file.write(document.toJson());
+    file.close();
+}
+
+std::map<std::string, ShaderParamType> App::retreiveParameters(QJsonObject object)
+{
+    std::map<std::string, ShaderParamType> params;
+
+    foreach(const QString& key, object.keys())
+    {
+        auto value = object.value(key);
+        switch (value.type())
+        {
+        case QJsonValue::Type::Bool:
+            params[key.toStdString()] = value.toBool();
+            break;
+        case QJsonValue::Type::Array:
+        {
+            auto array = value.toArray();
+            switch (array.size())
+            {
+            case 2:
+                params[key.toStdString()] = gsl::vec2(static_cast<float>(array[0].toDouble()), static_cast<float>(array[1].toDouble()));
+                break;
+            case 3:
+                params[key.toStdString()] = gsl::vec3(static_cast<float>(array[0].toDouble()), static_cast<float>(array[1].toDouble()), static_cast<float>(array[2].toDouble()));
+                break;
+            case 4:
+                params[key.toStdString()] = gsl::vec4(static_cast<float>(array[0].toDouble()), static_cast<float>(array[1].toDouble()), static_cast<float>(array[2].toDouble()), static_cast<float>(array[3].toDouble()));
+                break;
+            }
+            break;
+        }
+        case QJsonValue::Type::Double:
+            params[key.toStdString()] = static_cast<float>(value.toDouble());
+            break;
+        default:
+            qDebug() << "Value is something else!";
+            break;
+        }
+    }
+
+    return params;
 }

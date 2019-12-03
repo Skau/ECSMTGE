@@ -172,7 +172,7 @@ void MeshWidget::updateShaderParameters(Material& material)
             {
                 QCheckBox* checkBox = new QCheckBox(widget);
                 checkBox->setCheckState(std::get<bool>(param.second) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-                connect(checkBox, &QCheckBox::stateChanged, [=](int state)
+                connect(checkBox, &QCheckBox::stateChanged, [=](bool state)
                 {
                     if(auto render = getRenderComponent())
                     {

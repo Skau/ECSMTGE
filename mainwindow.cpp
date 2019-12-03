@@ -68,6 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete mPostProcessesWindow;
     delete ui;
 }
 

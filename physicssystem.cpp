@@ -35,22 +35,19 @@ std::vector<HitInfo> PhysicsSystem::UpdatePhysics(std::vector<TransformComponent
             {
                 auto ieID{bounds.at(i).eID}, jeID{bounds.at(j).eID};
 
-                gsl::vec3 iVel{}, jVel{};
-                if (auto iPhys = EntityManager::find(physics.begin(), physics.end(), ieID))
-                    iVel = iPhys->velocity;
-                if (auto jPhys = EntityManager::find(physics.begin(), physics.end(), jeID))
-                    jVel = jPhys->velocity;
+                auto iPhys = EntityManager::find(physics.begin(), physics.end(), ieID);
+                auto jPhys = EntityManager::find(physics.begin(), physics.end(), jeID);
 
                 auto collisions = collisionCheck(
                 {
                     *EntityManager::find(transforms.begin(), transforms.end(), ieID),
                     *EntityManager::find(colliders.begin(), colliders.end(), ieID),
-                    iVel
+                    (iPhys != physics.end()) ? iPhys->velocity : gsl::vec3{}
                 },
                 {
                     *EntityManager::find(transforms.begin(), transforms.end(), jeID),
                     *EntityManager::find(colliders.begin(), colliders.end(), jeID),
-                    jVel
+                    (jPhys != physics.end()) ? jPhys->velocity : gsl::vec3{}
                 });
 
                 if (collisions)
@@ -65,9 +62,11 @@ std::vector<HitInfo> PhysicsSystem::UpdatePhysics(std::vector<TransformComponent
     // 4. Handle collisions
     for (const auto &item : hitInfos)
     {
+        auto trans = EntityManager::find(transforms.begin(), transforms.end(), item.eID);
+        auto phys = EntityManager::find(physics.begin(), physics.end(), item.eID);
         handleHitInfo(item,
-                      EntityManager::find(transforms.begin(), transforms.end(), item.eID),
-                      EntityManager::find(physics.begin(), physics.end(), item.eID));
+                      (trans != transforms.end()) ? &(*trans) : nullptr,
+                      (phys != physics.end()) ? &(*phys) : nullptr);
     }
 
     // 5. Recursive update (probably not going to do this step)

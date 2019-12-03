@@ -1,10 +1,15 @@
 // Global script variables
-const spawnRatio = 3.0;
+const spawnRatio = 2.0;
 var timer = 0.0;
 
 function beginPlay()
 {
     timer = 0.0;
+
+    for (k = 0; k < 10; ++k)
+    {
+        spawnMeteoroid();
+    }
 }
 
 function tick()

@@ -41,7 +41,11 @@
 #define GETCOMPONENT(K) \
 template<class T, \
     typename std::enable_if<(std::is_same<K, T>::value)>::type* = nullptr> \
-T* getComponent(unsigned int entity) { return find(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(), entity); } \
+T* getComponent(unsigned int entity) \
+{ \
+    auto result = find(CONCATENATE(m, K, s).begin(), CONCATENATE(m, K, s).end(), entity); \
+    return result == CONCATENATE(m, K, s).end() ? nullptr : &(*result); \
+} \
 
 #define REMOVECOMPONENT(K) \
 template<class T, \
@@ -531,21 +535,21 @@ public:
 
     /** Finds a component for a given entity.
      * Searches from begin to end in a certain component array to find
-     * a component with the specified entityID and returns it if found
-     * and nullptr otherwise.
+     * a component with the specified entityID and returns a iterator
+     * to it if found and end iterator otherwise.
      * @param begin - startpos to search from. Inclusive.
      * @param end - endpos to search to. Exclusive.
      * @param eID - entityID for component to find.
-     * @return ptr to component if found or nullptr otherwise
+     * @return iterator to object or iterator to end otherwise
      */
     template <typename iterator>
-    static typename iterator::value_type* find(const iterator& begin, const iterator& end, unsigned int eID)
+    static iterator find(const iterator& begin, const iterator& end, unsigned int eID)
     {
         auto result = std::lower_bound(begin, end, eID, [](const typename iterator::value_type& a, const unsigned int& b)
         {
             return a.entityId < b;
         });
-        return (result != end && result->valid && result->entityId == eID) ? &(*result) : nullptr;
+        return (result != end && result->valid && result->entityId == eID) ? result : end;
     }
 
     /** Implementation of binary search to use in other functions.
@@ -577,7 +581,8 @@ public:
         typedef typename T::value_type VT;
 
         // Check if object already exist and if so just return that one instead.
-        if (auto obj = find(list.begin(), list.end(), entity))
+        auto obj = find(list.begin(), list.end(), entity);
+        if (obj != list.end())
             return *obj;
 
         for (auto it{list.begin()}; it != list.end(); ++it)

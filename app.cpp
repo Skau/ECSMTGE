@@ -121,7 +121,8 @@ void App::initTheRest()
         std::make_shared<Material>(
             ResourceManager::instance().getShader("extractThreshold"),
             std::map<std::string, ShaderParamType>{
-                {"threshold", 1.f}
+                {"threshold", 1.f},
+                {"multFactor", 3.f}
             }
         )
     );
@@ -138,14 +139,6 @@ void App::initTheRest()
             ResourceManager::instance().getShader("gaussianBlur"),
             std::map<std::string, ShaderParamType>{
                 {"horizontal", true}
-            }
-        )
-    );
-    mRenderer->mBloomEffect->steps.emplace_back(
-        std::make_shared<Material>(
-            ResourceManager::instance().getShader("multiply"),
-            std::map<std::string, ShaderParamType>{
-                {"factor", 3.f}
             }
         )
     );

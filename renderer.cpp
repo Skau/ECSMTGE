@@ -312,12 +312,18 @@ void Renderer::renderDeferred(std::vector<MeshComponent>& renders, const std::ve
     renderAxis(camera);
 }
 
-int Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
+int Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
                             ShaderType renderMode, std::optional<Material> overrideMaterial)
 {
     PROFILE_FUNCTION();
     auto transIt = transforms.begin();
     auto renderIt = renders.begin();
+    gsl::vec3 camPos{};
+    auto camTransPos = EntityManager::find(transforms.begin(), transforms.end(), camera.entityId);
+    if (camTransPos != transforms.end())
+        camPos = camTransPos->position;
+    else
+        return 0;
 
     bool transformShortest = transforms.size() < renders.size();
 
@@ -390,14 +396,14 @@ int Renderer::geometryPass(std::vector<MeshComponent>& renders, const std::vecto
                 material = overrideMaterial.value();
             }
 
-            float distance = distanceFromCamera(camera, *transIt);
+            float distance = (camPos - transIt->position).length();
 
             unsigned index = 0;
-            if(distance > 20.f)
+            if(distance > 70.f)
             {
                 index = 2;
             }
-            else if(distance > 10.f)
+            else if(distance > 20.f)
             {
                 index = 1;
             }

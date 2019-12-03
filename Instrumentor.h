@@ -139,7 +139,7 @@ private:
     bool m_Stopped;
 };
 
-#define PROFILING 1
+#define PROFILING 0
 #if PROFILING
     #define PROFILE_BEGIN_SESSION(name, filepath) Instrumentor::Get().BeginSession(name, filepath)
     #define PROFILE_END_SESSION() Instrumentor::Get().EndSession()

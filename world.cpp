@@ -30,7 +30,6 @@ World::World()
     ResourceManager::instance().addShader("extractThreshold",   std::make_shared<Shader>("pass.vert", "extractThreshold.frag", ShaderType::PostProcessing));
     ResourceManager::instance().addShader("gaussianBlur",       std::make_shared<Shader>("pass.vert", "gaussian.frag", ShaderType::PostProcessing));
     ResourceManager::instance().addShader("gammaCorrection",    std::make_shared<Shader>("pass.vert", "gammaCorrection.frag", ShaderType::PostProcessing));
-    ResourceManager::instance().addShader("multiply",           std::make_shared<Shader>("pass.vert", "multiply.frag", ShaderType::PostProcessing));
 
     // Other..
     ResourceManager::instance().addShader("mousepicking",       std::make_shared<Shader>("mousepicking.vert", "mousepicking.frag", ShaderType::WeirdStuff));
@@ -45,9 +44,9 @@ World::World()
     ResourceManager::instance().addMesh("box2", "box2.txt");
     ResourceManager::instance().addMesh("axis", "axis.txt");
     ResourceManager::instance().addMesh("suzanne", "monkey.obj");
-    auto ball = ResourceManager::instance().addMesh("ball", "octoball.txt");
-    ResourceManager::instance().setupLOD(ball, ResourceManager::instance().addMesh("ball_l2", "octoball_L02.txt"), 2);
-    ResourceManager::instance().setupLOD(ball, ResourceManager::instance().addMesh("ball_l1", "octoball_L01.txt"), 1);
+    auto ball = ResourceManager::instance().addMesh("ball", "octoball_L-1.txt");
+    ResourceManager::instance().setupLOD(ball, ResourceManager::instance().addMesh("ball_l2", "octoball_L01.txt"), 2);
+    ResourceManager::instance().setupLOD(ball, ResourceManager::instance().addMesh("ball_l1", "octoball.txt"), 1);
     ResourceManager::instance().addMesh("camera", "camera.obj");
 
 

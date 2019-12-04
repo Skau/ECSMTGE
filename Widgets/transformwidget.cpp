@@ -35,9 +35,9 @@ void TransformWidget::setPosition(const gsl::vec3 &pos)
 
 void TransformWidget::setRotation(const gsl::vec3 &rot)
 {
-    ui->spinBox_Rotation_X->setValue(static_cast<double>(rot.x));
-    ui->spinBox_Rotation_Y->setValue(static_cast<double>(rot.y));
-    ui->spinBox_Rotation_Z->setValue(static_cast<double>(rot.z));
+    ui->spinBox_Rotation_X->setValue(static_cast<double>(radiansToDegrees(rot.x)));
+    ui->spinBox_Rotation_Y->setValue(static_cast<double>(radiansToDegrees(rot.y)));
+    ui->spinBox_Rotation_Z->setValue(static_cast<double>(radiansToDegrees(rot.z)));
 }
 
 void TransformWidget::setScale(const gsl::vec3 &scale)
@@ -45,6 +45,16 @@ void TransformWidget::setScale(const gsl::vec3 &scale)
     ui->spinBox_Scale_X->setValue(static_cast<double>(scale.x));
     ui->spinBox_Scale_Y->setValue(static_cast<double>(scale.y));
     ui->spinBox_Scale_Z->setValue(static_cast<double>(scale.z));
+}
+
+float TransformWidget::radiansToDegrees(float radians)
+{
+    return (180/gsl::PI) * radians;
+}
+
+float TransformWidget::degreesToRadians(float degrees)
+{
+    return (gsl::PI/180) * degrees;
 }
 
 void TransformWidget::on_spinBox_Position_X_valueChanged(double arg1)
@@ -97,12 +107,7 @@ void TransformWidget::on_spinBox_Rotation_X_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = World::getWorld().getEntityManager();
-        editorRot.x = static_cast<float>(arg1);
-        if (editorRot.x < -gsl::PI * 2.f)
-            editorRot.x += gsl::PI * 2.f;
-        else if (editorRot.x > gsl::PI * 2.f)
-            editorRot.x -= gsl::PI * 2.f;
-
+        editorRot.x = static_cast<float>(degreesToRadians(static_cast<float>(arg1)));
         entityManager->setTransformRot(entityData->entityId,
             editorRot.toQuat());
     }
@@ -116,12 +121,7 @@ void TransformWidget::on_spinBox_Rotation_Y_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = World::getWorld().getEntityManager();
-        editorRot.y = static_cast<float>(arg1);
-        if (editorRot.y < -gsl::PI * 2.f)
-            editorRot.y += gsl::PI * 2.f;
-        else if (editorRot.y > gsl::PI * 2.f)
-            editorRot.y -= gsl::PI * 2.f;
-
+        editorRot.y = static_cast<float>(degreesToRadians(static_cast<float>(arg1)));
         entityManager->setTransformRot(entityData->entityId,
             editorRot.toQuat());
     }
@@ -135,12 +135,7 @@ void TransformWidget::on_spinBox_Rotation_Z_valueChanged(double arg1)
     if(entityData)
     {
         auto entityManager = World::getWorld().getEntityManager();
-        editorRot.z = static_cast<float>(arg1);
-        if (editorRot.z < -gsl::PI * 2.f)
-            editorRot.z += gsl::PI * 2.f;
-        else if (editorRot.z > gsl::PI * 2.f)
-            editorRot.z -= gsl::PI * 2.f;
-
+        editorRot.z = static_cast<float>(degreesToRadians(static_cast<float>(arg1)));
         entityManager->setTransformRot(entityData->entityId,
             editorRot.toQuat());
     }

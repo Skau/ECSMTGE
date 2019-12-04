@@ -7,6 +7,9 @@
 
 class World;
 
+/**
+ * @brief A helper class for maintaing what scene we're in. Note that this class actually doesn't hold onto any data, it just helps loading/saving/clearing the current entities in the scene.
+ */
 class Scene : public QObject
 {
     Q_OBJECT

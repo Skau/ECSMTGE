@@ -46,5 +46,7 @@ private:
     void setPosition(const gsl::vec3& pos);
     void setRotation(const gsl::vec3 &rot);
     void setScale(const gsl::vec3& scale);
+    float radiansToDegrees(float radians);
+    float degreesToRadians(float degrees);
 };
 #endif // TRANSFORMWIDGET_H

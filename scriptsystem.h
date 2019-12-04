@@ -13,8 +13,9 @@
 class HitInfo;
 
 /**
- * The instance of this class is given to all engines (all script components have one each)
- * as a global object under the name engine.
+ * @brief The singleton class responsible of handling all script functionality.
+ * Note that this class does not have a QJSEngine, all script components have one each instead to help keep global spaces separated.
+ * The instance of this class is given to all QJSEngines as a global object under the name 'engine'.
  * This means that any public slots or Q_INVOKABLE public functions in this class are callable from JS.
  * Example JS code: let entity = engine.spawnCube();
  */
@@ -115,6 +116,10 @@ public:
      */
     QJSValue call(const std::string& function, QJSValueList params);
 
+    /**
+     * @brief Called from QEntity when a component is added through JS. Only adds one if it's not already added already.
+     * If a new component is added, it is deferred until the end of the update loop.
+     */
     template<class Comp, typename std::enable_if<std::is_base_of<Component, Comp>::value>::type* = nullptr>
     QJSValue addComponent(unsigned entity)
     {
@@ -146,6 +151,9 @@ public:
         return value;
     }
 
+    /**
+     * @brief Called from QEntity when a component is retrieved through JS.
+     */
     template<class Comp, typename std::enable_if<std::is_base_of<Component, Comp>::value>::type* = nullptr>
     QJSValue getComponent(unsigned entity)
     {
@@ -181,7 +189,7 @@ public:
 
     /**
      * @brief Executes one off raw js code from the mini editor. Returns true if successfull.
-     * @deprecated No longer working :( Will be missed. RIP. F.
+     * @deprecated No longer supported :( Will be missed. RIP. F.
      */
     bool execute(ScriptComponent& comp, QString function, QString contents, QString fileName);
 

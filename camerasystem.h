@@ -4,6 +4,9 @@
 #include "innpch.h"
 #include "entitymanager.h"
 
+/**
+ * @brief Holds static functions for updating the camera.
+ */
 class CameraSystem
 {
 public:

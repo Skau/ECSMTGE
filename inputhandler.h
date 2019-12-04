@@ -9,6 +9,9 @@ class QMouseEvent;
 class QWheelEvent;
 class Renderer;
 
+/**
+ * @brief This class leverages the renderer for all input. It filters out all events and provides the inputsystem and Javascript with what it needs.
+ */
 class InputHandler : public QObject
 {
     Q_OBJECT

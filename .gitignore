@@ -60,3 +60,5 @@ CMakeLists.txt.user*
 /Assets/*
 /docs/*
 !Assets/Scripts/meteoroidSpawner.js
+
+Settings/*

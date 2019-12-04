@@ -4,12 +4,13 @@
 #include <QMainWindow>
 #include <memory>
 #include <map>
+#include "postprocessor.h"
 
 class QWidget;
 class Renderer;
 class EntityInfo;
 class Component;
-class Postprocessor;
+
 class PostProcessesWindow;
 
 namespace Ui {
@@ -21,6 +22,9 @@ enum class ComponentType;
 class QTreeWidgetItem;
 class ComponentWidget;
 
+/**
+ * @brief Holds all UI widgets and the renderer, helps control the lifetime of the app. When this window is closed the application quits.
+ */
 class MainWindow : public QMainWindow
 {
     friend class App;
@@ -87,6 +91,8 @@ private slots:
     void on_actionNew_triggered();
 
     void on_actionPost_Processes_triggered();
+
+    void onPostprocessorSaved(const std::map<Postprocessor*, std::vector<Postprocessor::Setting>>& steps);
 
 private:
     void updateComponentArea(unsigned int entityID);

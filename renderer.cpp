@@ -35,9 +35,9 @@ Renderer::Renderer()
         qDebug() << "Context could not be made - quitting this application";
     }
 
-    mPostprocessor = std::make_unique<Postprocessor>(this);
-    mOutlineeffect = std::make_unique<Postprocessor>(this);
-    mBloomEffect = std::make_unique<Postprocessor>(this);
+    mPostprocessor = std::make_unique<Postprocessor>(this, "main");
+    mOutlineeffect = std::make_unique<Postprocessor>(this, "outlineeffect");
+    mBloomEffect = std::make_unique<Postprocessor>(this, "bloom");
 }
 
 Renderer::~Renderer()
@@ -910,7 +910,9 @@ void Renderer::evaluateParams(Material& material)
                     continue;
 
                 try {
-                    if (std::holds_alternative<int>(it->second))
+                    if(std::holds_alternative<bool>(it->second))
+                        glUniform1i(uniform, std::get<bool>(it->second));
+                    else if (std::holds_alternative<int>(it->second))
                         glUniform1i(uniform, std::get<int>(it->second));
                     else if (std::holds_alternative<float>(it->second))
                         glUniform1f(uniform, std::get<float>(it->second));

@@ -3,7 +3,9 @@
 #include "gsl_math.h"
 #include "GSL/vector2d.h"
 #include <QSpinBox>
+#include <QCheckBox>
 #include <QLabel>
+#include <QPushButton>
 
 PostProcessesWindow::PostProcessesWindow(QWidget *parent) :
     QDialog(parent),
@@ -37,12 +39,30 @@ void PostProcessesWindow::addPostProcessors(const std::vector<std::pair<std::str
 
     for(auto& pair : postprocessors)
     {
-        cachedPostprocesses[pair.first] = pair.second;
         QLabel* label = new QLabel(QString::fromStdString(pair.first), ui->mainWidget);
         label->setAlignment(Qt::AlignHCenter);
+        QFont font;
+        font.setPointSize(16);
+        label->setFont(font);
         layout->addWidget(label);
         addPostprocessor(pair);
     }
+
+    QPushButton* saveButton = new QPushButton("Save", ui->mainWidget);
+    layout->addWidget(saveButton);
+    saveButton->setMinimumHeight(25);
+    connect(saveButton, &QPushButton::clicked, this, &PostProcessesWindow::on_button_Save_clicked);
+    ui->mainWidget->setMinimumHeight(ui->mainWidget->minimumHeight() + 25);
+
+    ui->mainWidget->setFixedSize(ui->mainWidget->sizeHint());
+    layout->setSizeConstraint(QLayout::SetFixedSize);
+    layout->setAlignment(Qt::AlignCenter);
+}
+
+void PostProcessesWindow::on_button_Save_clicked()
+{
+    onSaveClicked(cachedSteps);
+    hide();
 }
 
 void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*> postprocess)
@@ -51,7 +71,7 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
     unsigned currentIndex = 0;
     for(auto& step : postprocess.second->steps)
     {
-        cachedSettings[postprocess.second].push_back(step);
+        cachedSteps[postprocess.second].push_back(step);
 
         auto material = step.material;
 
@@ -59,6 +79,14 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
         {
             QWidget* widget = new QWidget();
             ui->mainWidget->layout()->addWidget(widget);
+
+            QLabel* label = new QLabel("Step: " + QString::number(currentIndex+1), ui->mainWidget);
+            label->setAlignment(Qt::AlignHCenter);
+            layout->addWidget(label);
+
+            label = new QLabel("Shader: " + QString::fromStdString(material->mShader->mName), ui->mainWidget);
+            label->setAlignment(Qt::AlignHCenter);
+            layout->addWidget(label);
 
             float minimumHeight = 0.f;
             for(auto& param : material->mParameters)
@@ -68,14 +96,26 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                 name = name.replace("p_", "");
                 QLabel* label = new QLabel(name, widget);
                 hLayout->addWidget(label);
-                if (std::holds_alternative<int>(param.second))
+
+                if(std::holds_alternative<bool>(param.second))
+                {
+                    QCheckBox* checkBox = new QCheckBox(widget);
+                    checkBox->setCheckState(std::get<bool>(param.second) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+                    connect(checkBox, &QCheckBox::stateChanged, [=](bool state)
+                    {
+                        cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first] = state;
+                    });
+                    hLayout->addWidget(checkBox);
+                    minimumHeight += 25.33f;
+                }
+                else if (std::holds_alternative<int>(param.second))
                 {
                     QSpinBox* spinBox = new QSpinBox(widget);
                     spinBox->setValue(std::get<int>(param.second));
                     connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged),
                             [=](int i)
                     {
-                        cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first] = i;
+                        cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first] = i;
                     });
                     hLayout->addWidget(spinBox);
                     minimumHeight += 25.33f;
@@ -88,7 +128,7 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                     connect(doubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                             [=](double d)
                     {
-                        cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first] = static_cast<float>(d);
+                        cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first] = static_cast<float>(d);
                     });
                     hLayout->addWidget(doubleSpinBox);
                     minimumHeight += 25.33f;
@@ -107,7 +147,7 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                             connect(doubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                                     [=](double d)
                             {
-                                std::get<gsl::vec2>(cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first]).setX(static_cast<float>(d));
+                                std::get<gsl::vec2>(cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first]).setX(static_cast<float>(d));
                             });
                             break;
                         case 1:
@@ -115,7 +155,7 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                             connect(doubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                                     [=](double d)
                             {
-                                std::get<gsl::vec2>(cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first]).setY(static_cast<float>(d));
+                                std::get<gsl::vec2>(cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first]).setY(static_cast<float>(d));
                             });
                             break;
                         }
@@ -138,7 +178,7 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                             connect(doubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                                     [=](double d)
                             {
-                                std::get<gsl::vec3>(cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first]).setX(static_cast<float>(d));
+                                std::get<gsl::vec3>(cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first]).setX(static_cast<float>(d));
                             });
                             break;
                         case 1:
@@ -146,7 +186,7 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                             connect(doubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                                     [=](double d)
                             {
-                                std::get<gsl::vec3>(cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first]).setY(static_cast<float>(d));
+                                std::get<gsl::vec3>(cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first]).setY(static_cast<float>(d));
                             });
                             break;
                         case 2:
@@ -154,7 +194,7 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                             connect(doubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                                     [=](double d)
                             {
-                                std::get<gsl::vec3>(cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first]).setZ(static_cast<float>(d));
+                                std::get<gsl::vec3>(cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first]).setZ(static_cast<float>(d));
                             });
                             break;
                         }
@@ -177,7 +217,7 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                             connect(doubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                                     [=](double d)
                             {
-                                std::get<gsl::vec4>(cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first]).setX(static_cast<float>(d));
+                                std::get<gsl::vec4>(cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first]).setX(static_cast<float>(d));
                             });
                             break;
                         case 1:
@@ -185,7 +225,7 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                             connect(doubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                                     [=](double d)
                             {
-                                std::get<gsl::vec4>(cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first]).setY(static_cast<float>(d));
+                                std::get<gsl::vec4>(cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first]).setY(static_cast<float>(d));
                             });
                             break;
                         case 2:
@@ -193,7 +233,7 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                             connect(doubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                                     [=](double d)
                             {
-                                std::get<gsl::vec4>(cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first]).setZ(static_cast<float>(d));
+                                std::get<gsl::vec4>(cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first]).setZ(static_cast<float>(d));
                             });
                             break;
                         case 3:
@@ -201,7 +241,7 @@ void PostProcessesWindow::addPostprocessor(std::pair<std::string, Postprocessor*
                             connect(doubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                                     [=](double d)
                             {
-                                std::get<gsl::vec4>(cachedSettings[postprocess.second][currentIndex].material->mParameters[param.first]).setW(static_cast<float>(d));
+                                std::get<gsl::vec4>(cachedSteps[postprocess.second][currentIndex].material->mParameters[param.first]).setW(static_cast<float>(d));
                             });
                             break;
                         }

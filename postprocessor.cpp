@@ -1,7 +1,8 @@
 #include "postprocessor.h"
 #include "renderer.h"
 #include "Instrumentor.h"
-Postprocessor::Postprocessor(Renderer *renderer)
+Postprocessor::Postprocessor(Renderer *renderer, const std::string& name)
+    : mName(name)
 {
     mRenderer = renderer;
     // init();

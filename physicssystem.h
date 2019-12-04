@@ -31,7 +31,7 @@ struct HitInfo
  * own pace. This means that rendering will be updated 2-3
  * times more often than physics.
  *
- * @brief Physic System
+ * @brief Handles all physics / collisions that are needed.
  * @authors Skau, andesyv
  */
 class PhysicsSystem

@@ -10,8 +10,6 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-typedef std::variant<int, float, gsl::vec2, gsl::vec3, gsl::vec4> ShaderParamType;
-
 struct Material
 {
     std::shared_ptr<Shader> mShader{nullptr};
@@ -52,7 +50,11 @@ struct Material
         for(auto& value : mParameters)
         {
             QJsonObject obj;
-            if (std::holds_alternative<int>(value.second))
+            if(std::holds_alternative<bool>(value.second))
+            {
+                obj.insert(value.first.c_str(), QJsonValue(std::get<bool>(value.second)));
+            }
+            else if (std::holds_alternative<int>(value.second))
             {
                 obj.insert(value.first.c_str(), QJsonValue(std::get<int>(value.second)));
             }

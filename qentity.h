@@ -11,6 +11,7 @@ class QJSEngine;
  * @brief The wrapper used to reference itself in scripts.
  * To access this wrapper use 'me'.
  * Example: me.setMesh("suzanne");
+ * Note: Some functions are overloaded so using 'me' is not required. See JSHelperFunctions.js.
  */
 class QEntity : public QObject
 {

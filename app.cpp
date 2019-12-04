@@ -338,8 +338,8 @@ void App::quit()
 void App::updatePerspective()
 {
     PROFILE_FUNCTION();
-    auto& cameras = mWorld->getEntityManager()->getCameraComponents();
-    CameraSystem::updateCameraViewMatrices(cameras, gsl::mat4::persp(FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 0.1f, 100.f));
+    CameraSystem::updateCameraProjMatrices(mWorld->getEntityManager()->getCameraComponents(),
+                                           FOV, static_cast<float>(mRenderer->width()) / mRenderer->height(), 0.1f, 100.f);
 }
 
 // Called when play action is pressed while not playing in UI

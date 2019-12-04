@@ -11,8 +11,11 @@ public:
 
     static void updateLookAtRotation(TransformComponent &transform, CameraComponent &camera);
     static void updateCameraViewMatrices(std::vector<TransformComponent>& transforms, std::vector<CameraComponent> &cameras);
-    static void updateCameraViewMatrices(std::vector<CameraComponent> &cameras, const gsl::mat4& projectionMatrix = gsl::mat4::persp(45.f, 3.f / 4.f, 1.f, 100.f));
+    static void updateCameraProjMatrices(std::vector<CameraComponent> &cameras,
+                                         float FOV = 45.f, float aspectRatio = 4.f/3.f, float nearplane = 1.f, float farplane = 100.f);
     static void updateCamera(CameraComponent* camera, const gsl::mat4& projectionMatrix);
+
+    static gsl::mat4 calcViewFrustum(const CameraComponent& camera, const TransformComponent& trans);
 
 
 };

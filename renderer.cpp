@@ -718,6 +718,23 @@ void Renderer::renderPostprocessing()
     glEnable(GL_DEPTH_TEST);
 }
 
+std::vector<gsl::vec4> Renderer::calcViewFrustum(const CameraComponent &camera, const TransformComponent &trans)
+{
+    auto invViewMat = gsl::mat4::viewMatrixInv(gsl::quat::lookAt(gsl::deg2radf(camera.pitch), gsl::deg2radf(camera.yaw)), trans.position) *
+            camera.invProjectionMatrix;
+    return {
+        invViewMat * gsl::vec4{-1.f, -1.f, 1.f, 1.f},
+        invViewMat * gsl::vec4{1.f, -1.f, 1.f, 1.f},
+        invViewMat * gsl::vec4{-1.f, -1.f, -1.f, 1.f},
+        invViewMat * gsl::vec4{1.f, -1.f, -1.f, 1.f}
+    };
+}
+
+bool Renderer::insideViewingArea(const MeshComponent &render, const TransformComponent &trans, const CameraComponent &camera)
+{
+
+}
+
 float Renderer::distanceFromCamera(const CameraComponent& camera, const TransformComponent& transform)
 {
     PROFILE_FUNCTION();

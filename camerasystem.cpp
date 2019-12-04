@@ -50,7 +50,7 @@ void CameraSystem::updateCameraViewMatrices(std::vector<TransformComponent>& tra
                 continue;
             }
 
-            camIt->viewMatrix = transIt->rotation.toMat() * gsl::mat4::translation(-transIt->position);
+            camIt->viewMatrix = gsl::mat4::viewMatrix(transIt->rotation, transIt->position);
             transIt->updated = false;
 
             // Increment all
@@ -60,10 +60,13 @@ void CameraSystem::updateCameraViewMatrices(std::vector<TransformComponent>& tra
     }
 }
 
-void CameraSystem::updateCameraViewMatrices(std::vector<CameraComponent>& cameras, const gsl::mat4 &projectionMatrix)
+void CameraSystem::updateCameraProjMatrices(std::vector<CameraComponent> &cameras, float FOV, float aspectRatio, float nearplane, float farplane)
 {
-    for (auto& comp : cameras)
-        comp.projectionMatrix = projectionMatrix;
+    for (auto it{cameras.begin()}; it != cameras.end(); ++it)
+    {
+        it->projectionMatrix = gsl::mat4::persp(FOV, aspectRatio, nearplane, farplane);
+        it->invProjectionMatrix = gsl::mat4::perspInv(FOV, aspectRatio, nearplane, farplane);
+    }
 }
 
 void CameraSystem::updateCamera(CameraComponent *camera, const gsl::mat4 &projectionMatrix)

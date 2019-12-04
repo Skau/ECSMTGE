@@ -75,6 +75,9 @@ private:
     void pointLightPass(const std::vector<TransformComponent>& transforms,const CameraComponent &camera, const std::vector<PointLightComponent>& pointLights);
     void spotLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<SpotLightComponent>& spotLights);
     void renderPostprocessing();
+
+    std::vector<gsl::vec4> calcViewFrustum(const CameraComponent &camera, const TransformComponent &trans);
+    bool insideViewingArea(const MeshComponent& render, const TransformComponent& trans, const CameraComponent& camera);
 signals:
     void initDone();
     void windowUpdated();

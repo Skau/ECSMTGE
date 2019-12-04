@@ -568,6 +568,30 @@ Matrix4x4 Matrix4x4::persp(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nea
     };
 }
 
+Matrix4x4 Matrix4x4::perspInv(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane)
+{
+    if (fieldOfView <= 0.f)
+        fieldOfView = 30.f;
+    if (aspectRatio <= 0.f)
+        aspectRatio = 1.3f;
+    if (farPlane - nearPlane <= 0.f)
+    {
+        nearPlane = 1.f;
+        farPlane = 100.f;
+    }
+
+    GLfloat uh = static_cast<float>(std::tan(gsl::deg2rad(static_cast<double>(fieldOfView)/2)));
+    GLfloat uw = aspectRatio * uh;
+
+    return
+    {
+        uw,         0.f,        0.f,        0.f,
+        0.f,        uh,         0.f,        0.f,
+        0.f,        0.f,        0.f,        -1.f,
+        0.f,        0.f,        (farPlane - nearPlane)/(-2.f * farPlane * nearPlane), 0.5f / nearPlane
+    };
+}
+
 void Matrix4x4::setLookAt(const Vector3D &eye, const Vector3D &center, const Vector3D &up_axis)
 {
     Vector3D f = center-eye;    //forward
@@ -608,6 +632,21 @@ Matrix4x4 Matrix4x4::viewMatrix(const Vector3D &from, const Vector3D &to, const 
 Matrix4x4 Matrix4x4::modelMatrix(const vec3 &pos, const quat &rot, const vec3 &scale)
 {
     return gsl::mat4::translation(pos) * rot.toMat() * gsl::mat4::scaling(scale);
+}
+
+Matrix4x4 Matrix4x4::modelMatrixInv(const vec3 &pos, const quat &rot, const vec3& scale)
+{
+    return gsl::mat4::scaling(1.f / scale) * rot.inverse().toMat() * gsl::mat4::translation(-pos);
+}
+
+Matrix4x4 Matrix4x4::viewMatrix(const quat &rot, const vec3 &pos)
+{
+    return rot.toMat() * translation(-pos);
+}
+
+Matrix4x4 Matrix4x4::viewMatrixInv(const quat &rot, const vec3 &pos)
+{
+    return translation(pos) * rot.inverse().toMat();
 }
 
 std::vector<mat4> Matrix4x4::extractModelMatrix(mat4 model)

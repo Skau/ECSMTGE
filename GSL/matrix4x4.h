@@ -149,6 +149,7 @@ public:
     static Matrix4x4 ortho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat nearPlane, GLfloat farPlane);
     static Matrix4x4 frustum(float left, float right, float bottom, float top, float nearPlane, float farPlane);
     static Matrix4x4 persp(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane);
+    static Matrix4x4 perspInv(GLfloat fieldOfView, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane);
 
     void setLookAt(const Vector3D &eye, const Vector3D &center, const Vector3D &up_axis);
     static Matrix4x4 lookAtRotation(const Vector3D &from, const Vector3D &to, const Vector3D &up_axis = gsl::Vector3D{0.f, 1.f, 0.f});
@@ -164,6 +165,9 @@ public:
 
     // Constructs a modelmatrix from the given pos, rot and scale
     static Matrix4x4 modelMatrix(const gsl::vec3& pos, const gsl::quat& rot, const gsl::vec3& scale);
+    static Matrix4x4 modelMatrixInv(const gsl::vec3& pos, const gsl::quat& rot, const gsl::vec3& scale);
+    static Matrix4x4 viewMatrix(const gsl::quat& rot, const gsl::vec3& pos);
+    static Matrix4x4 viewMatrixInv(const gsl::quat& rot, const gsl::vec3& pos);
     // Attempts to exctract the translation, rotation and scale matrix from the combined model matrix.
     static std::vector<gsl::mat4> extractModelMatrix(gsl::mat4 model);
 

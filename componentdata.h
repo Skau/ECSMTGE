@@ -178,10 +178,13 @@ struct CameraComponent : public Component
     float pitch{0.f}, yaw{0.f};
     gsl::Matrix4x4 viewMatrix;
     gsl::Matrix4x4 projectionMatrix;
+    gsl::Matrix4x4 invProjectionMatrix;
 
-    CameraComponent(unsigned int _eID = 0, bool _valid = false, bool editorCamera = false, const gsl::mat4& vMat = gsl::mat4{}, const gsl::mat4& pMat = gsl::mat4{})
+    CameraComponent(unsigned int _eID = 0, bool _valid = false, bool editorCamera = false,
+                    const gsl::mat4& vMat = gsl::mat4{}, const gsl::mat4& pMat = gsl::mat4{},
+                    const gsl::mat4& invPMat = gsl::mat4{})
         : Component (_eID, _valid, ComponentType::Camera), isEditorCamera{editorCamera},
-          viewMatrix{vMat}, projectionMatrix{pMat}
+          viewMatrix{vMat}, projectionMatrix{pMat}, invProjectionMatrix{invPMat}
     {}
 
     virtual void reset() override

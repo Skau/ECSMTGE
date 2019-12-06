@@ -10,6 +10,9 @@
 namespace gsl
 {
 
+/** A mathematical 2 dimensional vector.
+ * @brief A mathematical 2 dimensional vector.
+ */
 class Vector2D
 {
 public:
@@ -62,7 +65,9 @@ public:
 
 
 
-// Integer version of vec2
+/** Integer vector2.
+ * @brief Integer vector2.
+ */
 class IVector2D
 {
 public:

@@ -35,7 +35,11 @@ const std::vector<ComponentType> ComponentTypes = {ComponentType::Mesh, Componen
                                                    ComponentType::LightDirectional, ComponentType::LightSpot, ComponentType::Script,
                                                    ComponentType::Collider};
 
-
+/** Base component class in the ECS system.
+ * Every component that would like to be included
+ * in the ECS system must inherit from this struct.
+ * @brief Base component class in the ECS system.
+ */
 struct Component
 {
     unsigned int entityId;
@@ -55,6 +59,10 @@ struct Component
     virtual ~Component(){}
 };
 
+/** Extra info regarding entities that is mainly used by the editor.
+ * The ECS also use it to make sure if entities exist or not.
+ * @brief Extra info regarding entities that is mainly used by the editor.
+ */
 struct EntityInfo : public Component
 {
     std::string name{};
@@ -74,6 +82,10 @@ struct EntityInfo : public Component
     virtual void fromJSON(QJsonObject object) override;
 };
 
+/** Component describing position, rotation, scale and children for entity.
+ * Every entity needs a transform to be able to be visible or interact with the physics system.
+ * @brief Component describing position, rotation, scale and children for entity.
+ */
 struct TransformComponent : public Component
 {
     bool updated : 1;
@@ -115,7 +127,10 @@ struct TransformComponent : public Component
     virtual void fromJSON(QJsonObject object) override;
 };
 
-
+/** Component describing velocity, acceleration, mass and other physics stuff for entity.
+ * Entities with a collision component without a physics component is static.
+ * @brief Component describing velocity, acceleration, mass and other physics stuff for entity.
+ */
 struct PhysicsComponent : public Component
 {
     gsl::vec3 velocity{};
@@ -141,6 +156,10 @@ struct PhysicsComponent : public Component
     virtual void fromJSON(QJsonObject object) override;
 };
 
+/** Component describing how the entity looks.
+ * To be visible entities need to have a transform component as well.
+ * @brief Component describing how the entity looks.
+ */
 struct MeshComponent : public Component
 {
     bool isVisible : 1;
@@ -172,6 +191,11 @@ struct MeshComponent : public Component
     virtual void fromJSON(QJsonObject object) override;
 };
 
+/** Component defining a camera entity.
+ * Pitch and yaw are used by the camerasystem to set the rotation,
+ * which is the one used for the viewmatrix (the camera viewport).
+ * @brief Component defining a camera entity.
+ */
 struct CameraComponent : public Component
 {
     bool isEditorCamera : 1;
@@ -198,6 +222,12 @@ struct CameraComponent : public Component
     virtual void fromJSON(QJsonObject object) override;
 };
 
+/** Component that enables input being sent to a entity.
+ * Entities with this component will receive input to
+ * the script functions or in the editor viewport
+ * depending on if conrolledWhilePlaying is true or false.
+ * @brief Component that enables input being sent to a entity.
+ */
 struct InputComponent : public Component
 {
     bool controlledWhilePlaying : 1;
@@ -214,6 +244,12 @@ struct InputComponent : public Component
     virtual void fromJSON(QJsonObject object) override;
 };
 
+/** Component that describes sound of entity.
+ * Entities with this component can play sounds that can be heard
+ * by the camera entity. The listener is always placed at the
+ * camera entity's position.
+ * @brief Component that describes sound of entity.
+ */
 struct SoundComponent : public Component
 {
     bool isLooping : 1;
@@ -242,6 +278,11 @@ struct SoundComponent : public Component
     virtual void fromJSON(QJsonObject object) override;
 };
 
+/** Component describing a point light.
+ * Entities with a point light component will emit light
+ * in all directions from their centre.
+ * @brief Component describing a point light.
+ */
 struct PointLightComponent : public Component
 {
     gsl::vec3 color;
@@ -280,6 +321,11 @@ struct PointLightComponent : public Component
     virtual void fromJSON(QJsonObject object) override;
 };
 
+/** Component describing a spot light.
+ * Entities with a spot light component will emit light
+ * in a directional cone.
+ * @brief Component describing a spot light.
+ */
 struct SpotLightComponent : public Component
 {
     gsl::vec3 color;
@@ -319,6 +365,11 @@ struct SpotLightComponent : public Component
     virtual void fromJSON(QJsonObject object) override;
 };
 
+/** Component describing a directional light.
+ * Entities with a directional light will emit light in
+ * direction. Directional lights are global across the scene.
+ * @brief Component describing a directional light.
+ */
 struct DirectionalLightComponent : public Component
 {
     gsl::vec3 color;
@@ -341,6 +392,14 @@ struct DirectionalLightComponent : public Component
     virtual void fromJSON(QJsonObject object) override;
 };
 
+/** Component describing a entity that can be scripted.
+ * All components with a script component can have a custom
+ * script file be run each frame with callback functions
+ * that will be run according the events they're associated with.
+ * Each scriptcomponent can run 1 scriptfile, but multiple
+ * scriptcomponents can run the same file.
+ * @brief Component describing a entity that can be scripted.
+ */
 struct ScriptComponent : public Component
 {
     QJSEngine* engine{nullptr};
@@ -363,6 +422,14 @@ struct ScriptComponent : public Component
     virtual ~ScriptComponent() override;
 };
 
+/** Component describing collision handling of an entity.
+ * Entities with a collider component will collide with
+ * other entities with a collider component. Does not need
+ * to have a physics component but is static without one.
+ *
+ * Note: Only AABB and Sphere collision types are implemented yet.
+ * @brief Component describing collision handling of an entity.
+ */
 struct ColliderComponent : public Component
 {
     enum Type : char
@@ -379,7 +446,7 @@ struct ColliderComponent : public Component
         AABB,
         /** Box collision.
          * Box collision works the same
-         * as AABB collision, but is no axis
+         * as AABB collision, but is not axis
          * aligned meaning it can rotate in all directions.
          */
         BOX,
@@ -423,6 +490,12 @@ struct ColliderComponent : public Component
     virtual void fromJSON(QJsonObject object) override;
 };
 
+/** Component describing a particle emitter.
+ * An entity with a particle component will emit particles
+ * from it's centre.
+ * Note: Not implemented yet.
+ * @brief Component describing a particle emitter.
+ */
 struct ParticleComponent : public Component
 {
     ParticleComponent(unsigned int _eID = 0, bool _valid = false)

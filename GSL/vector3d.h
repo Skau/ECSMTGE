@@ -15,6 +15,9 @@ class QVector3D;
 namespace gsl
 {
 
+/** A mathematical 3 dimensional vector.
+ * @brief A mathematical 3 dimensional vector.
+ */
 class Vector3D
 {
 public:
@@ -102,7 +105,9 @@ public:
 
 
 
-// Integer version of vec3
+/** Integer vector3.
+ * @brief Integer vector3.
+ */
 class IVector3D
 {
 public:

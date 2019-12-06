@@ -6,6 +6,11 @@
 #include "vector3d.h"
 #include <QJsonArray>
 
+class QDebug;
+
+namespace gsl
+{
+
 /** Quaternions
 A mathematical structure that uses a complex numnber
  * in a higher body that can be used to efficiently and
@@ -26,16 +31,10 @@ A mathematical structure that uses a complex numnber
  * @see https://en.wikipedia.org/wiki/Quaternion
  * @author andesyv (Quaternion concept described by Sir William Rowan Hamilton)
  */
-
-class QDebug;
-
-namespace gsl
-{
-
 class Quaternion
 {
 public:
-    // Another way to visualize quaternions
+    /// Another way to visualize quaternions
     struct Pair
     {
         Pair(GLfloat scalar = 1.f, const gsl::vec3& vector = gsl::vec3{0.f, 0.f, 0.f});

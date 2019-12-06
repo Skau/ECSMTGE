@@ -10,6 +10,10 @@
 namespace gsl
 {
 
+/** Matrix 3x3.
+ * 2 dimensional floating point matrix. 3 * 3 version.
+ * @brief Matrix 3x3.
+ */
 class Matrix3x3
 {
 public:

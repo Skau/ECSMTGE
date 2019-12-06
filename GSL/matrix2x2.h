@@ -11,6 +11,10 @@
 namespace gsl
 {
 
+/** Matrix 2x2.
+ * 2 dimensional floating point matrix. 2 * 2 version.
+ * @brief Matrix 2x2.
+ */
 class Matrix2x2
 {
 public:

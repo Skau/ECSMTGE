@@ -11,6 +11,9 @@ namespace gsl
 
 class Vector3D;
 
+/** A mathematical 4 dimensional vector.
+ * @brief A mathematical 4 dimensional vector.
+ */
 class Vector4D
 {
 public:
@@ -70,7 +73,7 @@ public:
 
     GLfloat* data() { return &x; }
 
-    // Iterator class
+    /// Iterator class for Vector4D.
     class Vector4DIterator {
     private:
         Vector4D& mRef;

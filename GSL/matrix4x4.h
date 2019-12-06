@@ -12,6 +12,10 @@
 namespace gsl
 {
 
+/** Matrix 4x4.
+ * 2 dimensional floating point matrix. 4 * 4 version.
+ * @brief Matrix 4x4.
+ */
 class Matrix4x4
 {
 private:

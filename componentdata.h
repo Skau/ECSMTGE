@@ -473,6 +473,11 @@ struct ColliderComponent : public Component
     }
 
     std::variant<gsl::vec3, float, std::pair<float, float>> extents;
+    /** Collision box describing maximum extent of collider.
+     * A simple AABB collision box that is used for early collision testing
+     * before more accurate collision testing occours.
+     * @brief Collision box describing maximum extent of collider.
+     */
     struct Bounds
     {
         gsl::vec3 centre{0.f, 0.f, 0.f};

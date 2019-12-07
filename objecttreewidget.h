@@ -5,6 +5,9 @@
 
 class MainWindow;
 
+/** Widget showing contents of the scene and parent-child coherence.
+ * @brief Widget showing contents of the scene and parent-child coherence.
+ */
 class ObjectTreeWidget : public QTreeWidget
 {
 public:

@@ -8,6 +8,11 @@
 class EntityManager;
 class CameraComponent;
 
+/** The world class is a singleton class managing objects in the game instance.
+ * This includes the EntityManager and all scenes.
+ * @brief The world class is a singleton class managing objects in the game instance.
+ * This includes the EntityManager and all scenes.
+ */
 class World : public QObject
 {
     Q_OBJECT

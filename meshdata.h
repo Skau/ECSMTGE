@@ -10,6 +10,11 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+/** Information struct about how a mesh should look.
+ * Defined by a shader, optional textures, and all parameters
+ * that should be sent to the shader.
+ * @brief Information struct about how a mesh should look.
+ */
 struct Material
 {
     std::shared_ptr<Shader> mShader{nullptr};
@@ -119,6 +124,11 @@ struct Material
     }
 };
 
+/** Information struct that describes information about a mesh.
+ * Includes a index to the buffer describing the mesh and the 2 next LODs,
+ * vertex counts, triangle index counts and mesh bounds.
+ * @brief Information struct that describes information about a mesh.
+ */
 struct MeshData
 {
     GLenum mRenderType{};
@@ -126,7 +136,9 @@ struct MeshData
     std::array<unsigned, 3> mVerticesCounts{};
     std::array<unsigned, 3> mIndicesCounts{};
     std::string mName{};
-    // The bounds for the mesh in local space
+    /** AABB describing the extents of the mesh in local space.
+     * @brief AABB describing the extents of the mesh in local space.
+     */
     struct Bounds
     {
         gsl::vec3 centre;

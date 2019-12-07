@@ -7,6 +7,9 @@ namespace Ui {
 class DirectionalLightWidget;
 }
 
+/** Widget for directionallightcomponents for the editor.
+ * @brief Widget for directionallightcomponents for the editor.
+ */
 class DirectionalLightWidget : public ComponentWidget
 {
     Q_OBJECT

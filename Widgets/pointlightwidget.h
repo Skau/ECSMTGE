@@ -7,6 +7,9 @@ namespace Ui {
 class PointLightWidget;
 }
 
+/** Widget for pointlightcomponents in the editor.
+ * @brief Widget for pointlightcomponents in the editor.
+ */
 class PointLightWidget : public ComponentWidget
 {
     Q_OBJECT

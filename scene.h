@@ -40,6 +40,9 @@ protected:
     World* mWorld;
 };
 
+/** Temp class to demonstrate how a scene with custom logic could be implemented.
+ * @brief Temp class to demonstrate how a scene with custom logic could be implemented.
+ */
 class TestScene : public Scene
 {
 public:

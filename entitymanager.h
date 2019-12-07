@@ -62,9 +62,11 @@ T& addComponents(unsigned int entity) \
 #define CONCATENATE( x, y, z) x##y##z
 
 
-/** A component data manager class
- * Constructs entities and manages
+/** Manages all entities and their components.
+ * Constructs and destructs entities and manages
  * component data for each entity.
+ *
+ * @brief Manages all entities and their components.
  *
  * @author andesyv, Skau
  */

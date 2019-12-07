@@ -5,6 +5,11 @@
 #include <memory>
 
 namespace gsl {
+/** Template class for a custom oct-tree implementation
+ * designed to be used by a scenegraph.
+ * @brief Template class for a custom oct-tree implementation
+ * designed to be used by a scenegraph.
+ */
 template <typename T>
 class Octree
 {

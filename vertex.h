@@ -4,6 +4,9 @@
 #include "vector2d.h"
 #include "vector3d.h"
 
+/** Information class descibing a vertex (position, normal and uv of a point in a mesh).
+ * @brief Information class descibing a vertex (position, normal and uv of a point in a mesh).
+ */
 class Vertex {
 public:
     Vertex();

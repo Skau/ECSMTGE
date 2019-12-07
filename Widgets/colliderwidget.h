@@ -10,6 +10,9 @@ namespace Ui{
     class Collider;
 }
 
+/** Widget for collidercomponents for the editor.
+ * @brief Widget for collidercomponents for the editor.
+ */
 class ColliderWidget : public ComponentWidget
 {
     Q_OBJECT

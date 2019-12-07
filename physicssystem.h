@@ -6,6 +6,9 @@
 #include <utility>
 #include <optional>
 
+/** Data struct for holding information about a collision.
+ * @brief Data struct for holding information about a collision.
+ */
 struct HitInfo
 {
     unsigned int eID;
@@ -18,7 +21,7 @@ struct HitInfo
     bool operator< (const HitInfo& rhs) const { return eID < rhs.eID; }
 };
 
-/** Physics system
+/** Handles all physics / collisions that are needed.
  * The idea is to later move this system to
  * another thread while leaving rendering and inputs
  * on the main thread. This allowing physics calculations,
@@ -38,6 +41,9 @@ class PhysicsSystem
 {
 public:
 
+    /** Internal helper struct for bounds updating.
+     * @brief Internal helper struct for bounds updating.
+     */
     struct CollisionEntity
     {
         unsigned int eID;
@@ -45,6 +51,9 @@ public:
 
         CollisionEntity(unsigned int id, const ColliderComponent::Bounds& b);
     };
+    /** Internal helper struct for scenetree.
+     * @brief Internal helper struct for scenetree.
+     */
     struct CubeNode
     {
         std::vector<CollisionEntity> entities;

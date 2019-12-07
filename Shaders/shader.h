@@ -23,6 +23,11 @@ enum class ShaderType
 
 typedef std::variant<bool, int, float, gsl::vec2, gsl::vec3, gsl::vec4> ShaderParamType;
 
+/** OpenGL shaderprogram. Describes the renderpipeline of a drawcall.
+ * A OpenGL shader is a vertex + (geometry +) fragment shader linked into a shaderprogram.
+ * @brief OpenGL shaderprogram. Describes the renderpipeline of a drawcall.
+ * @see https://www.khronos.org/opengl/wiki/GLSL_Object#Program_objects
+ */
 class Shader : protected QOpenGLFunctions_4_1_Core
 {
 public:

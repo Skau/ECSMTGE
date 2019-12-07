@@ -7,6 +7,9 @@ namespace Ui {
 class SpotLightWidget;
 }
 
+/** Widget for spotlightcomponents in the editor.
+ * @brief Widget for spotlightcomponents in the editor.
+ */
 class SpotLightWidget : public ComponentWidget
 {
     Q_OBJECT

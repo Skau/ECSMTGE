@@ -9,6 +9,9 @@ namespace Ui{
 
 class SoundComponent;
 
+/** Widget for soundcomponents in the editor.
+ * @brief Widget for soundcomponents in the editor.
+ */
 class SoundWidget : public ComponentWidget
 {
     Q_OBJECT

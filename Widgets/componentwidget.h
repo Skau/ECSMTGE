@@ -5,6 +5,11 @@
 
 class MainWindow;
 
+/** Base component widget for widgets in the editor.
+ * Never used directly, only as a base for all other
+ * component widgets.
+ * @brief Base component widget for widgets in the editor.
+ */
 class ComponentWidget : public QWidget
 {
     Q_OBJECT

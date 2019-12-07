@@ -7,6 +7,9 @@ namespace Ui {
 class ScriptWidget;
 }
 
+/** Widget for scriptcomponents in the editor.
+ * @brief Widget for scriptcomponents in the editor.
+ */
 class ScriptWidget : public ComponentWidget
 {
     Q_OBJECT

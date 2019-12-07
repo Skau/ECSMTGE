@@ -11,6 +11,9 @@ namespace Ui{
     class Transform;
 }
 
+/** Widget for transformcomponents in the editor.
+ * @brief Widget for transformcomponents in the editor.
+ */
 class TransformWidget : public ComponentWidget
 {
     Q_OBJECT

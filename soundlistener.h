@@ -4,6 +4,10 @@
 #include "innpch.h"
 #include "componentdata.h"
 
+/** The ears of the player / camera.
+ * Global listener and also sound mixer for all sounds.
+ * @brief The ears of the player / camera.
+ */
 class SoundListener
 {
 public:

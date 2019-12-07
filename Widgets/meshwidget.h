@@ -12,6 +12,9 @@ namespace Ui{
 class MeshComponent;
 class Shader;
 
+/** Widget for meshcomponents in the editor.
+ * @brief Widget for meshcomponents in the editor.
+ */
 class MeshWidget : public ComponentWidget
 {
     Q_OBJECT

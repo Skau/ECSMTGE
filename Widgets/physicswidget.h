@@ -10,6 +10,9 @@ namespace Ui{
     class Physics;
 }
 
+/** Widget for physiccomponents in the editor.
+ * @brief Widget for physiccomponents in the editor.
+ */
 class PhysicsWidget : public ComponentWidget
 {
     Q_OBJECT

@@ -24,6 +24,10 @@
 
 #include <thread>
 
+/** Helper struct for profiling tool.
+ * @brief Helper struct for profiling tool.
+ * @author Cherno
+ */
 struct ProfileResult
 {
     std::string Name;
@@ -31,11 +35,19 @@ struct ProfileResult
     uint32_t ThreadID;
 };
 
+/** Helper struct for profiling tool.
+ * @brief Helper struct for profiling tool.
+ * @author Cherno
+ */
 struct InstrumentationSession
 {
     std::string Name;
 };
 
+/** Profiling tool.
+ * @brief Profiling tool.
+ * @author Cherno
+ */
 class Instrumentor
 {
 private:
@@ -105,6 +117,10 @@ public:
     }
 };
 
+/** Helper class for profiling tool.
+ * @brief Helper class for profiling tool.
+ * @author Cherno
+ */
 class InstrumentationTimer
 {
 public:

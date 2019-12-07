@@ -4,6 +4,10 @@
 #include "componentdata.h"
 #include <QOpenGLFunctions_4_1_Core>
 
+/** Particle effect system.
+ * Note: Not implemented yet.
+ * @brief Particle effect system.
+ */
 class ParticleSystem : QOpenGLFunctions_4_1_Core
 {
 public:

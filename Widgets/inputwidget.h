@@ -7,6 +7,9 @@ namespace Ui{
     class Input;
 }
 
+/** Widget for inputcomponents for the editor.
+ * @brief Widget for directionallightcomponents for the editor.
+ */
 class InputWidget : public ComponentWidget
 {
     Q_OBJECT

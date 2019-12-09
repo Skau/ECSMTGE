@@ -20,11 +20,14 @@ ScriptWidget::ScriptWidget(MainWindow* mainWindow, QWidget *parent) :
             auto filePath = comp->filePath;
             if(filePath.size())
             {
-                ui->lineEdit->setText(QString::fromStdString(comp->filePath));
+                QString temp = filePath.c_str();
+                temp.replace(".js", "");
+                ui->lineEdit->setText(temp);
                 ui->button_NewFile->setText("Open file");
             }
             else
             {
+                ui->lineEdit->setText("None");
                 ui->button_NewFile->setText("Create file");
             }
         }
@@ -123,9 +126,9 @@ void ScriptWidget::on_button_NewFile_clicked()
         {
             // If a .js file already exists, open it instead in the default text editor
             auto filePath = ui->lineEdit->text();
-            if(filePath.length())
+            if(filePath.length() && filePath != "None")
             {
-                QFileInfo info(QString::fromStdString(gsl::scriptsFilePath) + filePath);
+                QFileInfo info(QString::fromStdString(gsl::scriptsFilePath) + filePath + ".js");
                 QDesktopServices::openUrl(QUrl::fromLocalFile(info.absoluteFilePath()));
                 return;
             }

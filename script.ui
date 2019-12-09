@@ -70,7 +70,7 @@
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Current file:</string>
+           <string>Current script:</string>
           </property>
          </widget>
         </item>

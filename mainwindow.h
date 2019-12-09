@@ -34,8 +34,14 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
+    /**
+     * @brief Updates the window status bar based on vertices renderer, FPS and time in ms between frames.
+     */
     void updateStatusBar(int vertices, float deltaTime, float frameCounter);
 
+    /**
+     * @brief Returns the render window.
+     */
     Renderer* getRenderer() { return mRenderer; }
 
     Ui::MainWindow *ui;
@@ -44,6 +50,9 @@ public:
 
     EntityInfo* getEntityAt(QTreeWidgetItem* item);
 
+    /**
+     * @brief Sends the postprocessor info to the post processes window for setup.
+     */
     void addGlobalPostProcessing(const std::vector<std::pair<std::string, Postprocessor*>>& postprocessors);
 
 signals:
@@ -56,6 +65,9 @@ signals:
     void newScene();
     void quitting();
 public slots:
+    /**
+     * @brief Recreates the world outliner based on the entity info given.
+     */
     void updateUI(const std::vector<EntityInfo>& entityData);
     void onWidgetRemoved(ComponentWidget* widget);
     void refreshWidgets();
@@ -92,9 +104,15 @@ private slots:
 
     void on_actionPost_Processes_triggered();
 
+    /**
+     * @brief Connected to the onSaveClicked signal in PostprocessorWindow. Updates the postprocessorsettings.json.
+     */
     void onPostprocessorSaved(const std::map<Postprocessor*, std::vector<Postprocessor::Setting>>& steps);
 
 private:
+    /**
+     * @brief Recreates the component widgets given the entity.
+     */
     void updateComponentArea(unsigned int entityID);
 
     /**

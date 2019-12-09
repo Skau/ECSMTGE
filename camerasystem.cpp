@@ -69,7 +69,7 @@ void CameraSystem::updateCameraProjMatrices(std::vector<CameraComponent> &camera
     }
 }
 
-void CameraSystem::updateCamera(CameraComponent *camera, const gsl::mat4 &projectionMatrix)
+void CameraSystem::updateCameraProjMatrix(CameraComponent *camera, const gsl::mat4 &projectionMatrix)
 {
     if (camera != nullptr)
         camera->projectionMatrix = projectionMatrix;

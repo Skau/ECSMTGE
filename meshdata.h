@@ -28,6 +28,9 @@ struct Material
     {}
     Material(const Material& material) = default;
 
+    /**
+     * @brief Sets up the current shader for the material and adds the shader parameters to the mesh widget UI.
+     */
     void loadShaderWithParameters(std::shared_ptr<Shader> shader)
     {
         mParameters.clear();
@@ -46,7 +49,6 @@ struct Material
     QJsonObject toJSON()
     {
         QJsonObject returnObject;
-
 
         returnObject.insert("Shader", QJsonValue(mShader ? mShader->mName.c_str() : "None"));
 

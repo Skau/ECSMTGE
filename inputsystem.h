@@ -16,6 +16,9 @@ class InputSystem : public QObject
 public:
     InputSystem();
 
+    /**
+     * @brief Updates editor camera movement based on input.
+     */
     static void HandleEditorCameraInput(float deltaTime, TransformComponent &transformComponent, CameraComponent &cameraComponent);
 };
 

@@ -42,11 +42,20 @@ public slots:
      * @brief Called after the renderer has created its context.
      */
     void initTheRest();
+
     /**
      * @brief Global mute.
      */
     void toggleMute(bool mode);
+
+    /**
+     * @brief Called when left clicking anywhere in the renderwindow.
+     */
     void mousePicking();
+
+    /**
+     * @brief Automatic temp save feature. Called when quitting or playing in editor.
+     */
     void saveSession();
 
 private slots:
@@ -86,13 +95,17 @@ private slots:
 
 private:
 
+    /**
+     * @brief Initialize postprocessor based on settings in postprocessorsettings.json
+     */
     void initPostprocessorSettings();
     std::map<std::string, ShaderParamType> retreiveParameters(QJsonObject object);
 
     /**
-     * @brief Used to update the default settings file. Only call this when changes to the file should be made.
+     * @brief Used to update the default settings file. Only called when changes to the file should be made.
      */
     void writeDefaultPostprocessorSettings();
+
     /**
      * @brief Calculates the current FPS and time between frames using delta time and frame counting.
      */

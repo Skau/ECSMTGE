@@ -122,7 +122,7 @@ public:
     }
 
     /** Resets all components to be "empty" while keeping memory allocation.
-     * @brief clear the entitymanager
+     * @brief Clears the entitymanager.
      */
     void clear()
     {
@@ -140,6 +140,10 @@ public:
         updateUI({});
     }
 
+    /**
+     * @brief Creates an object based on the index.
+     * @param Index 0: Empty entity, index 1: Cube, index 2: Monkey.
+     */
     void createObject(int index)
     {
         switch (index)
@@ -163,6 +167,9 @@ public:
     }
 
 
+    /**
+     * @brief Sets up and returns a new entity with an optional name.
+     */
     unsigned int createEntity(std::string name = "")
     {
         auto id = ++idCounter;
@@ -179,6 +186,9 @@ public:
         return id;
     }
 
+    /**
+     * @brief Sets up a new cube. Automatically sets all needed components and meshdata.
+     */
     unsigned createCube()
     {
         auto id = createEntity();
@@ -192,6 +202,9 @@ public:
         return id;
     }
 
+    /**
+     * @brief Sets up a new monkey. Automatically sets all needed components and meshdata.
+     */
     unsigned createMonkey()
     {
         auto id = createEntity();
@@ -205,11 +218,17 @@ public:
         return id;
     }
 
+    /**
+     * @brief Marks an entity for deletion at the end of the frame (deferred destruction).
+     */
     void removeEntityLater(unsigned entity)
     {
         entitiesToDestroy.push_back(entity);
     }
 
+    /**
+     * @brief Removes all entities marked for destruction. Called at the end of the update loop.
+     */
     void removeEntitiesMarked()
     {
         if(entitiesToDestroy.empty())

@@ -16,11 +16,29 @@ public:
                   const gsl::vec3& dir = gsl::vec3(0.f, 0.f, -1.f),
                   const gsl::vec3& up = gsl::vec3(0.f, 1.f, 0.f));
 
+    /**
+     * @brief Updates the position of the sound listener with the given position.
+     */
     void setPosition(const gsl::vec3& pos);
+
+    /**
+     * @brief Updates the velocity of the sound listener with the given velocity.
+     */
     void setVelocity(const gsl::vec3& vel);
+
+    /**
+     * @brief Updates the direction of the sound listener with the given direction.
+     */
     void setDirection(const gsl::vec3& dir, const gsl::vec3& up);
+
+    /**
+     * @brief Sets mute to be the given value.
+     */
     void setMute(bool mute);
 
+    /**
+     * @brief Updates the listener based on the given camera and transform component.
+     */
     void update(const CameraComponent& camera, const TransformComponent& transform);
 
 private:

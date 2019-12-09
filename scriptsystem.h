@@ -36,14 +36,15 @@ public:
      */
     unsigned int garbageCollectionFrequency = 15;
 
+    /**
+     * @brief Update function for all scripts. Runs all functions necessary every frame.
+     */
     void update(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const std::vector<QString>& pressed, const std::vector<QString> &released, const QPoint& point, std::vector<HitInfo> hitInfos, float deltaTime);
-    void beginPlay(std::vector<ScriptComponent>& comps);
-    void tick(float deltaTime, std::vector<ScriptComponent>& comps);
+
+    /**
+     * @brief Calls the end play function on all scripts. Called when the stop button is pressed.
+     */
     void endPlay(std::vector<ScriptComponent>& comps);
-    void runKeyPressedEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const std::vector<QString>& keys);
-    void runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const std::vector<QString>& keys);
-    void runMouseOffsetEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const QPoint& point);
-    void runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos);
 
     /**
      * @brief Propagate changes done in C++ back to JS
@@ -232,27 +233,61 @@ public slots:
 
 private:
     ScriptSystem(){}
+
     /**
-     * @brief Updates all JS Components for a given JS engine from the respective CPP components. Called once at the end of JS scripts.
+     * @brief Called on play or when a new script component is added to an entity on runtime.
+     */
+    void beginPlay(std::vector<ScriptComponent>& comps);
+    /**
+     * @brief Called every frame.
+     */
+    void tick(float deltaTime, std::vector<ScriptComponent>& comps);
+
+    /**
+     * @brief Called on all script components with an input pressed function and if any input is registered as pressed.
+     */
+    void runKeyPressedEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const std::vector<QString>& keys);
+
+    /**
+     * @brief Called on all script components with an input released function and if any input is registered as released this frame.
+     */
+    void runKeyReleasedEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const std::vector<QString>& keys);
+
+    /**
+     * @brief Called on all script components with a mouse moved function and if the offset is greater than zero.
+     */
+    void runMouseOffsetEvent(std::vector<ScriptComponent>& scripts, std::vector<InputComponent>& inputs, const QPoint& point);
+
+    /**
+     * @brief Called on all script components with a hit event function and if there is any collisions associated with the respective component.
+     */
+    void runHitEvents(std::vector<ScriptComponent>& comps, std::vector<HitInfo> hitInfos);
+
+    /**
+     * @brief Updates all JS Components for a given JS engine from the respective CPP components. Called after ticking scripts.
      * @param Script component to update
      */
     void updateJSComponent(ScriptComponent& comp);
 
     /**
-     * @brief Updates all CPP components based on the ones used in JS. Called once at the start of JS scripts.
+     * @brief Updates all CPP components based on the ones used in JS. Called at the before ticking scripts.
      */
     void updateCPPComponent(ScriptComponent& comp, std::vector<QJsonObject>& deferredSpawning);
-    void updateCPPComponent(ScriptComponent& comp, QJSValue compList);
 
+    /**
+     * @brief Sets up the global variables for a given script component.
+     */
     void initializeJSEntity(ScriptComponent &comp);
+
+    /**
+     * @brief Cache the code in JSHelperFuncs.js and JSMath.js in mHelperFuncs. This string is added to the top of all script files.
+     */
+    void initializeHelperFuncs();
+    QString mHelperFuncs;
 
     // Cached
     ScriptComponent* currentComp;
     QString currentFileName{};
-
-    void initializeHelperFuncs();
-    QString mHelperFuncs;
-
     float mDeltaTime{0};
     std::map<unsigned int, std::vector<QString>> globalVariables{};
 };

@@ -970,58 +970,6 @@ void ScriptSystem::updateCPPComponent(ScriptComponent &comp, std::vector<QJsonOb
     }
 }
 
-void ScriptSystem::updateCPPComponent(ScriptComponent &comp, QJSValue compList)
-{
-    if(!comp.valid || !comp.filePath.size() || !comp.beginplayRun)
-        return;
-    PROFILE_FUNCTION();
-    if(!compList.isUndefined() && !compList.isNull())
-    {
-        auto length = compList.property("length").toInt();
-        if(length > 0)
-        {
-            for(unsigned i = 0; i < static_cast<unsigned>(length); ++i)
-            {
-                auto property = compList.property(i);
-                auto object = property.toVariant().toJsonObject();
-
-                if(object.isEmpty())
-                    continue;
-
-                auto entityManager = World::getWorld().getEntityManager();
-
-                // Get component that matches the type
-                auto ID = static_cast<unsigned>(object["ID"].toInt());
-                auto componentType = static_cast<ComponentType>(object["ComponentType"].toInt());
-                auto component = entityManager->getComponent(ID, componentType);
-
-                object.remove("ID");
-
-                if(component)
-                {
-                    // If they are different this component was modified in JS
-                    // and we need to update the C++ version
-                    auto oldJson = component->toJSON();
-                    if(object != oldJson)
-                    {
-                        component->fromJSON(object);
-                    }
-                }
-                else
-                {
-                    // If the component does not exist it needs to be added. Deferred spawning.
-                    if(auto info = entityManager->getComponent<EntityInfo>(ID))
-                    {
-                        auto comp = entityManager->addComponent(ID, componentType);
-                        comp->fromJSON(object);
-                        comp->valid = true;
-                    }
-                }
-            }
-        }
-    }
-}
-
 void ScriptSystem::initializeJSEntity(ScriptComponent& comp)
 {
     comp.JSEntity = ScriptSystem::get()->getEntityWrapper(comp.entityId);

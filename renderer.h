@@ -33,6 +33,9 @@ public:
 
     QOpenGLContext* getContext() { return mContext; }
 
+    /**
+     * @brief Initializes context, gbuffer and other required items.
+     */
     void init();
 
     void exposeEvent(QExposeEvent *) override;
@@ -40,7 +43,6 @@ public:
 
     void checkForGLerrors();
 
-    // Should only need renders, materials and transforms
     void render(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
                         const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                         const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
@@ -59,20 +61,44 @@ public:
 
 private:
     void renderReset();
+    /**
+     * @brief Renders the scene with wireframe enabled.
+     */
     void renderGlobalWireframe(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera);
+    /**
+     * @brief Render the scene as normal.
+     */
     void renderDeferred(std::vector<MeshComponent>& renders, const std::vector<TransformComponent> &transforms, const CameraComponent &camera,
                         const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                         const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
                         const std::vector<PointLightComponent>& pointLights = std::vector<PointLightComponent>());
+    /**
+     * @brief First pass of the deferred pipeline.
+     */
     int geometryPass(std::vector<MeshComponent>& renders, const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
                       ShaderType renderMode = ShaderType::Deferred, std::optional<Material> overrideMaterial = std::nullopt);
+    /**
+     * @brief Part of the lighting pass of the deferred pipeline.
+     */
     void deferredLightningPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera,
                                const std::vector<DirectionalLightComponent>& dirLights = std::vector<DirectionalLightComponent>(),
                                const std::vector<SpotLightComponent>& spotLights = std::vector<SpotLightComponent>(),
                                const std::vector<PointLightComponent>& pointLights = std::vector<PointLightComponent>());
+    /**
+     * @brief Part of the lighting pass of the deferred pipeline.
+     */
     void directionalLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<DirectionalLightComponent>& dirLights);
+    /**
+     * @brief Part of the lighting pass of the deferred pipeline.
+     */
     void pointLightPass(const std::vector<TransformComponent>& transforms,const CameraComponent &camera, const std::vector<PointLightComponent>& pointLights);
+    /**
+     * @brief Part of the lighting pass of the deferred pipeline.
+     */
     void spotLightPass(const std::vector<TransformComponent>& transforms, const CameraComponent &camera, const std::vector<SpotLightComponent>& spotLights);
+    /**
+     * @brief Last part of the deferred pipeline. Renders a quad on top based on the post processors.
+     */
     void renderPostprocessing();
 
     std::vector<gsl::vec4> calcViewFrustum(const CameraComponent &camera, const TransformComponent &trans);
